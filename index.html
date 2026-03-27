@@ -1884,6 +1884,136 @@ h1, h2, h3, h4, h5, h6,
   .is-logo-rect { width: 90px; height: 34px; }
 }
 
+
+/* ── IS LANGUAGE BUTTONS ─────────────────────── */
+.is-lang-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255,255,255,0.82);
+  font-size: 11.5px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  transition: color 0.15s;
+}
+.is-lang-btn:hover { color: #fff; }
+.is-lang-btn.is-lang-active {
+  color: #C9A66B;
+  font-weight: 700;
+  text-decoration: underline;
+}
+.is-lang-sep {
+  color: rgba(255,255,255,0.35);
+  font-size: 11px;
+  user-select: none;
+}
+
+/* RTL support when Arabic is active */
+html[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+html[dir="rtl"] .navbar { flex-direction: row-reverse; }
+html[dir="rtl"] .navbar-links { flex-direction: row-reverse; }
+html[dir="rtl"] .nav-actions { flex-direction: row-reverse; }
+html[dir="rtl"] .is-top-bar { flex-direction: row-reverse; }
+html[dir="rtl"] .is-top-bar-left { flex-direction: row-reverse; }
+html[dir="rtl"] .is-top-bar-right { flex-direction: row-reverse; }
+html[dir="rtl"] .hero-grid { direction: rtl; }
+html[dir="rtl"] .hero-text { text-align: right; }
+html[dir="rtl"] .hero-ctas { justify-content: flex-end; }
+html[dir="rtl"] .filter-bar { direction: rtl; }
+html[dir="rtl"] .filter-row { flex-direction: row-reverse; flex-wrap: wrap; }
+html[dir="rtl"] .filter-label { flex-direction: row-reverse; }
+html[dir="rtl"] .results-bar { flex-direction: row-reverse; }
+html[dir="rtl"] .is-stats-strip { flex-direction: row-reverse; }
+html[dir="rtl"] .is-logo-block { flex-direction: row-reverse; }
+html[dir="rtl"] .section-label,
+html[dir="rtl"] .section-heading,
+html[dir="rtl"] .section-sub { text-align: right; }
+html[dir="rtl"] .profile-chips { flex-direction: row-reverse; }
+html[dir="rtl"] .kpi-card { flex-direction: row-reverse; text-align: right; }
+html[dir="rtl"] .filter-profile-row { flex-direction: row-reverse; }
+html[dir="rtl"] .reset-btn { margin-left: 0; margin-right: auto; }
+html[dir="rtl"] .is-pilot-banner { flex-direction: row-reverse; }
+html[dir="rtl"] thead th { text-align: right; }
+html[dir="rtl"] tbody td { text-align: right; }
+html[dir="rtl"] .title-wrap { flex-direction: row-reverse; text-align: right; }
+html[dir="rtl"] .panel-header { flex-direction: row-reverse; }
+html[dir="rtl"] .panel-badges { flex-direction: row-reverse; }
+html[dir="rtl"] .footer-inner { flex-direction: row-reverse; }
+html[dir="rtl"] .footer-links { flex-direction: row-reverse; }
+html[dir="rtl"] .who-strip { direction: rtl; }
+html[dir="rtl"] .about-grid { direction: rtl; }
+html[dir="rtl"] .about-prose { text-align: right; }
+html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
+
+/* ── IS DARK THEME OVERRIDES ─────────────────── */
+[data-theme="dark"] {
+  --green:           #00a651;
+  --green-hover:     #00c460;
+  --green-dim:       #00361a;
+  --green-glow:      rgba(0,166,81,0.15);
+  --green-highlight: rgba(0,166,81,0.10);
+}
+
+/* IS Navbar in dark mode */
+[data-theme="dark"] .navbar {
+  background: rgba(6,8,16,0.95) !important;
+  border-bottom-color: #006C35 !important;
+}
+[data-theme="dark"] .is-logo-hub-text { color: #e8eaf2; }
+[data-theme="dark"] .is-logo-hub-text span { color: #00a651; }
+[data-theme="dark"] .is-logo-divider { background: #1e2840; }
+[data-theme="dark"] .navbar-links a { color: #7c89ab; }
+[data-theme="dark"] .navbar-links a:hover { color: #e8eaf2; background: rgba(255,255,255,0.06); }
+[data-theme="dark"] .navbar-links a.active { color: #00a651; background: rgba(0,166,81,0.10); }
+
+/* IS Top bar in dark mode */
+[data-theme="dark"] .is-top-bar {
+  background: #021a0a;
+  border-bottom: 1px solid #00361a;
+}
+[data-theme="dark"] .is-pilot-banner {
+  background: #1a1200;
+  border-bottom-color: #3d2800;
+}
+[data-theme="dark"] .is-pilot-badge { background: #9a7d4c; }
+[data-theme="dark"] .is-pilot-banner-text { color: #c9a66b; }
+
+/* IS Stats strip in dark mode */
+[data-theme="dark"] .is-stats-strip {
+  background: #0d1f16;
+  border-color: #00361a;
+}
+[data-theme="dark"] .is-stat-item { color: #a3c9b1; }
+[data-theme="dark"] .is-stat-item::before { background: #00a651; }
+[data-theme="dark"] .is-stat-divider { background: #1a3d28; }
+
+/* IS Filter bar in dark mode */
+[data-theme="dark"] .filter-bar { background: #0f1420; border-color: #1e2840; }
+[data-theme="dark"] .filter-input, [data-theme="dark"] .filter-select {
+  background: #141928; border-color: #1e2840; color: #e8eaf2;
+}
+
+/* IS Table in dark mode */
+[data-theme="dark"] thead th {
+  background: #0d1f16;
+  color: #34d97b;
+  border-bottom-color: #00361a;
+}
+
+/* IS Footer in dark mode (already dark) */
+[data-theme="dark"] footer { background: #060810; border-top-color: #006C35; }
+[data-theme="dark"] .footer-logo-text { color: rgba(255,255,255,0.45); }
+[data-theme="dark"] .footer-logo-text span { color: #C9A66B; }
+
+/* IS Lang buttons in dark mode */
+[data-theme="dark"] .is-lang-btn { color: rgba(255,255,255,0.7); }
+[data-theme="dark"] .is-lang-btn.is-lang-active { color: #C9A66B; }
+[data-theme="dark"] .is-lang-sep { color: rgba(255,255,255,0.3); }
+
 </style>
 </head>
 <body>
@@ -1895,8 +2025,9 @@ h1, h2, h3, h4, h5, h6,
     <span>Vision 2030 Investment Platform</span>
   </div>
   <div class="is-top-bar-right">
-    <a href="#">العربية</a>
-    <a href="#">English</a>
+    <button id="langAr" class="is-lang-btn is-lang-active" onclick="setLang('ar')" aria-label="Switch to Arabic" title="العربية">العربية</button>
+    <span class="is-lang-sep" aria-hidden="true">|</span>
+    <button id="langEn" class="is-lang-btn" onclick="setLang('en')" aria-label="Switch to English" title="English">English</button>
   </div>
 </div>
 <!-- IS PILOT DEMO BANNER -->
@@ -2397,6 +2528,358 @@ h1, h2, h3, h4, h5, h6,
 </aside>
 
 <script src="script.js"></script>
+<script>
+/* ============================================================
+   INVEST SAUDI DEMO — Inline JS
+   1) Theme toggle (light / dark)
+   2) Arabic / English language switcher (RTL + translated UI)
+   ============================================================ */
+
+/* ── 1. THEME TOGGLE ──────────────────────────────────────── */
+(function () {
+  const html = document.documentElement;
+  const btn  = document.querySelector('[data-theme-toggle]');
+  const icon = document.getElementById('themeIcon');
+
+  // Moon path (shown in light → click to go dark)
+  const MOON = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  // Sun path (shown in dark → click to go light)
+  const SUN  = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+
+  function applyTheme(theme) {
+    html.setAttribute('data-theme', theme);
+    localStorage.setItem('is-demo-theme', theme);
+    if (icon) {
+      icon.innerHTML = theme === 'dark' ? SUN : MOON;
+    }
+    if (btn) {
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+      btn.setAttribute('title', theme === 'dark' ? 'Light mode' : 'Dark mode');
+    }
+  }
+
+  // Load saved preference (default: light for IS skin)
+  const saved = localStorage.getItem('is-demo-theme') || 'light';
+  applyTheme(saved);
+
+  if (btn) {
+    btn.addEventListener('click', function () {
+      const current = html.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    });
+  }
+})();
+
+
+/* ── 2. LANGUAGE SWITCHER ─────────────────────────────────── */
+
+// All translatable strings keyed by element selector or ID
+const TRANSLATIONS = {
+  en: {
+    // Page title
+    pageTitle: 'Invest Saudi – Opportunity Hub (Pilot Demo)',
+    // Top bar
+    topBarCountry: 'Kingdom of Saudi Arabia',
+    topBarVision:  'Vision 2030 Investment Platform',
+    // Pilot banner
+    pilotBannerText: 'This is a white-label demo view of the Invest Saudi Opportunity Hub — <strong>not for public use</strong>. For evaluation purposes only.',
+    // Nav links
+    navOverview:      'Overview',
+    navOpportunities: 'Opportunities',
+    navInsights:      'Insights',
+    navAbout:         'About',
+    navContribute:    'Contribute',
+    // Hero
+    heroBadge:    'Pilot Demo · Invest Saudi Platform',
+    heroTitle:    'Invest Saudi –<br><span class="accent">Opportunity Hub</span>',
+    heroDesc:     'Demo view: <strong>funding opportunities relevant to Saudi investors and partners</strong> — grants, tenders, accelerators, fellowships and investment programs across <strong>15 sectors</strong> spanning Energy, ICT, Healthcare, Agriculture and more, covering <strong>Saudi Arabia, the GCC, and global programs</strong> open to Saudi entities.',
+    heroCta1:     'Browse opportunities',
+    heroCta2:     'Suggest an entry',
+    // KPI cards
+    kpiSaudiLabel:  'Saudi opportunities',
+    kpiSaudiNote:   'Programs issued in or led by Saudi institutions',
+    kpiGccLabel:    'GCC regional',
+    kpiGccNote:     'Led by UAE, Oman, Qatar and regional partners',
+    kpiGlobalLabel: 'Global (Saudi-eligible)',
+    kpiGlobalNote:  'International programs open to Saudi actors',
+    kpiTotalLabel:  'Total opportunities',
+    kpiTotalNote:   'Across all regions and program types',
+    // Who strip
+    who1Role: 'Startups & SMEs',
+    who1Desc: 'Find grants, accelerators, and investors aligned to your stage and sector — from Agriculture to ICT.',
+    who2Role: 'Researchers & Universities',
+    who2Desc: 'Discover fellowships, research calls, and international collaboration tracks across all key sectors.',
+    who3Role: 'Government & Public Sector',
+    who3Desc: 'Scan tenders, ecosystem initiatives, and capacity-building programs relevant to public-sector priorities.',
+    who4Role: 'Investors & Ecosystem',
+    who4Desc: 'Map active programs in Saudi, GCC, and globally to identify deal-flow and co-investment opportunities.',
+    // Stats strip
+    stat1: '1,000+ active funding opportunities',
+    stat2: '15 sectors relevant to Saudi entities',
+    stat3: 'Weekly data updates and insight reports',
+    stat4: 'API integration available for Invest Saudi platforms',
+    // Section labels & headings
+    sectionLabelOpps:     'Database',
+    sectionHeadingOpps:   'Invest Saudi – Opportunities',
+    sectionSubOpps:       'Search and filter structured records of grants, tenders, accelerators, investment programs, fellowships, and ecosystem initiatives — curated for Saudi investors and partners across 15 key sectors in Saudi Arabia, the GCC, and globally.',
+    sectionLabelInsights: 'Analytics',
+    sectionHeadingInsights: 'Insights',
+    sectionSubInsights:   'A high-level view of the landscape — program types, regional distribution, and status breakdown across all sectors and regions.',
+    sectionLabelAbout:    'About',
+    sectionHeadingAbout:  'About the Hub',
+    sectionLabelContrib:  'Contribute',
+    sectionHeadingContrib:'Help keep this hub current',
+    // Filter labels
+    filterSearch:   'Search by title or sponsor',
+    filterSector:   'Sector',
+    filterCountry:  'Country group',
+    filterType:     'Type',
+    filterStatus:   'Status',
+    filterProfile:  'Profile',
+    resetBtn:       'Reset filters',
+    // Table headers
+    thTitle:       'Title & Sponsor',
+    thType:        'Type',
+    thRegion:      'Region',
+    thEligibility: 'Eligibility',
+    thFunding:     'Funding',
+    thStatus:      'Status',
+    thDeadline:    'Deadline',
+    // Theme toggle
+    themeToggleTip: 'Toggle theme',
+    // Footer
+    footerDisclaimer: 'Not an official government source. This is an independent research aggregator covering opportunities across Agriculture, Energy, Healthcare, ICT, Financial Services, and other sectors. All program information is provided for awareness and research purposes only. Verify all details directly with sponsoring organizations. Last updated: March 2026.',
+    // IS logo hub text
+    logoHubText: 'Opportunity <span>Hub</span>',
+    dir: 'ltr',
+    lang: 'en',
+  },
+  ar: {
+    pageTitle: 'استثمر في السعودية – مركز الفرص (نسخة تجريبية)',
+    topBarCountry: 'المملكة العربية السعودية',
+    topBarVision:  'منصة استثمار رؤية 2030',
+    pilotBannerText: 'هذا عرض تجريبي لمنصة فرص "استثمر في السعودية" — <strong>غير مخصص للاستخدام العام</strong>. لأغراض التقييم فقط.',
+    navOverview:      'نظرة عامة',
+    navOpportunities: 'الفرص',
+    navInsights:      'التحليلات',
+    navAbout:         'عن المنصة',
+    navContribute:    'المساهمة',
+    heroBadge:    'نسخة تجريبية · منصة استثمر في السعودية',
+    heroTitle:    'استثمر في السعودية –<br><span class="accent">مركز الفرص</span>',
+    heroDesc:     'عرض تجريبي: <strong>فرص التمويل المتاحة للمستثمرين والشركاء السعوديين</strong> — منح وعطاءات ومسرّعات وزمالات وبرامج استثمارية عبر <strong>15 قطاعاً</strong> تشمل الطاقة وتقنية المعلومات والرعاية الصحية والزراعة وغيرها، في <strong>المملكة العربية السعودية ودول الخليج والبرامج الدولية</strong> المفتوحة للكيانات السعودية.',
+    heroCta1:     'استعرض الفرص',
+    heroCta2:     'اقترح إدخالاً',
+    kpiSaudiLabel:  'الفرص السعودية',
+    kpiSaudiNote:   'برامج صادرة عن أو تقودها مؤسسات سعودية',
+    kpiGccLabel:    'دول مجلس التعاون الخليجي',
+    kpiGccNote:     'تقودها الإمارات وعُمان وقطر وشركاء إقليميون',
+    kpiGlobalLabel: 'عالمي (مؤهل سعودي)',
+    kpiGlobalNote:  'برامج دولية مفتوحة للكيانات السعودية',
+    kpiTotalLabel:  'إجمالي الفرص',
+    kpiTotalNote:   'عبر جميع المناطق وأنواع البرامج',
+    who1Role: 'الشركات الناشئة والمتوسطة',
+    who1Desc: 'ابحث عن المنح ومسرّعات الأعمال والمستثمرين المناسبين لقطاعك ومرحلتك من الزراعة إلى تقنية المعلومات.',
+    who2Role: 'الباحثون والجامعات',
+    who2Desc: 'اكتشف الزمالات والنداءات البحثية ومسارات التعاون الدولي عبر جميع القطاعات الرئيسية.',
+    who3Role: 'الحكومة والقطاع العام',
+    who3Desc: 'تابع العطاءات ومبادرات النظام البيئي وبرامج بناء القدرات ذات الصلة بأولويات القطاع العام.',
+    who4Role: 'المستثمرون والنظام البيئي',
+    who4Desc: 'رسم خريطة البرامج الاستثمارية النشطة في السعودية ودول الخليج وعالمياً لتحديد فرص الاستثمار المشترك.',
+    stat1: 'أكثر من 1,000 فرصة تمويل نشطة',
+    stat2: '15 قطاعاً ذا صلة بالكيانات السعودية',
+    stat3: 'تحديثات أسبوعية للبيانات وتقارير التحليل',
+    stat4: 'تكامل API متاح لمنصات استثمر في السعودية',
+    sectionLabelOpps:     'قاعدة البيانات',
+    sectionHeadingOpps:   'استثمر في السعودية – الفرص',
+    sectionSubOpps:       'ابحث وصفّ السجلات المنظمة للمنح والعطاءات ومسرّعات الأعمال وبرامج الاستثمار والزمالات ومبادرات النظام البيئي — مُعدّة خصيصاً للمستثمرين والشركاء السعوديين عبر 15 قطاعاً رئيسياً في المملكة ودول الخليج والعالم.',
+    sectionLabelInsights: 'التحليلات',
+    sectionHeadingInsights: 'رؤى وتحليلات',
+    sectionSubInsights:   'نظرة شاملة على المشهد — أنواع البرامج والتوزيع الإقليمي وحالة البرامج عبر جميع القطاعات والمناطق.',
+    sectionLabelAbout:    'عن المنصة',
+    sectionHeadingAbout:  'عن مركز الفرص',
+    sectionLabelContrib:  'المساهمة',
+    sectionHeadingContrib:'ساعدنا في الحفاظ على تحديث المنصة',
+    filterSearch:   'ابحث بالعنوان أو الجهة الراعية',
+    filterSector:   'القطاع',
+    filterCountry:  'المجموعة الجغرافية',
+    filterType:     'النوع',
+    filterStatus:   'الحالة',
+    filterProfile:  'الملف الشخصي',
+    resetBtn:       'إعادة تعيين',
+    thTitle:        'العنوان والجهة الراعية',
+    thType:         'النوع',
+    thRegion:       'المنطقة',
+    thEligibility:  'الأهلية',
+    thFunding:      'التمويل',
+    thStatus:       'الحالة',
+    thDeadline:     'الموعد النهائي',
+    themeToggleTip: 'تبديل المظهر',
+    footerDisclaimer: 'ليس مصدراً حكومياً رسمياً. هذا مجمِّع بحثي مستقل يغطي الفرص عبر قطاعات متعددة. جميع المعلومات المقدمة لأغراض التوعية والبحث فقط. يُرجى التحقق من جميع التفاصيل مباشرة مع المنظمات الراعية. آخر تحديث: مارس 2026.',
+    logoHubText: 'مركز <span>الفرص</span>',
+    dir: 'rtl',
+    lang: 'ar',
+  }
+};
+
+// Elements we can translate by selector
+function translatePage(lang) {
+  const t = TRANSLATIONS[lang];
+  if (!t) return;
+  const html = document.documentElement;
+
+  // Direction & lang attribute
+  html.setAttribute('dir', t.dir);
+  html.setAttribute('lang', t.lang);
+  document.title = t.pageTitle;
+
+  // Helper: set innerHTML safely
+  function set(sel, val) {
+    const el = document.querySelector(sel);
+    if (el) el.innerHTML = val;
+  }
+  function setText(sel, val) {
+    const el = document.querySelector(sel);
+    if (el) el.textContent = val;
+  }
+
+  // Top bar
+  const tbLeft = document.querySelector('.is-top-bar-left');
+  if (tbLeft) {
+    const spans = tbLeft.querySelectorAll('span');
+    if (spans[0]) spans[0].textContent = t.topBarCountry;
+    if (spans[1]) spans[1].textContent = t.topBarVision;
+  }
+
+  // Pilot banner text
+  set('.is-pilot-banner-text', t.pilotBannerText);
+
+  // Nav links
+  const navLinks = document.querySelectorAll('#navLinks a');
+  const navTexts = [t.navOverview, t.navOpportunities, t.navInsights, t.navAbout, t.navContribute];
+  navLinks.forEach((a, i) => { if (navTexts[i]) a.textContent = navTexts[i]; });
+
+  // IS logo hub text
+  const logoHub = document.querySelector('.is-logo-hub-text');
+  if (logoHub) logoHub.innerHTML = t.logoHubText;
+
+  // Hero badge
+  set('.hero-badge', t.heroBadge);
+
+  // Hero title
+  set('.hero-title', t.heroTitle);
+
+  // Hero description
+  set('.hero-desc', t.heroDesc);
+
+  // Hero CTAs
+  const ctas = document.querySelectorAll('.hero-ctas a');
+  if (ctas[0]) {
+    const svg = ctas[0].querySelector('svg');
+    ctas[0].innerHTML = (svg ? svg.outerHTML : '') + ' ' + t.heroCta1;
+  }
+  if (ctas[1]) {
+    const svg = ctas[1].querySelector('svg');
+    ctas[1].innerHTML = (svg ? svg.outerHTML : '') + ' ' + t.heroCta2;
+  }
+
+  // KPI cards
+  const kpiLabels = document.querySelectorAll('.kpi-label');
+  const kpiNotes  = document.querySelectorAll('.kpi-note');
+  const kpiLabelTexts = [t.kpiSaudiLabel, t.kpiGccLabel, t.kpiGlobalLabel, t.kpiTotalLabel];
+  const kpiNoteTexts  = [t.kpiSaudiNote,  t.kpiGccNote,  t.kpiGlobalNote,  t.kpiTotalNote];
+  kpiLabels.forEach((el, i) => { if (kpiLabelTexts[i]) el.textContent = kpiLabelTexts[i]; });
+  kpiNotes.forEach((el, i)  => { if (kpiNoteTexts[i])  el.textContent = kpiNoteTexts[i]; });
+
+  // Who strip
+  const whoRoles = document.querySelectorAll('.who-role');
+  const whoDescs = document.querySelectorAll('.who-desc');
+  const whoRoleTexts = [t.who1Role, t.who2Role, t.who3Role, t.who4Role];
+  const whoDescTexts = [t.who1Desc, t.who2Desc, t.who3Desc, t.who4Desc];
+  whoRoles.forEach((el, i) => { if (whoRoleTexts[i]) el.textContent = whoRoleTexts[i]; });
+  whoDescs.forEach((el, i)  => { if (whoDescTexts[i])  el.textContent = whoDescTexts[i]; });
+
+  // Stats strip
+  const statItems = document.querySelectorAll('.is-stat-item');
+  const statTexts = [t.stat1, t.stat2, t.stat3, t.stat4];
+  statItems.forEach((el, i) => { if (statTexts[i]) el.textContent = statTexts[i]; });
+
+  // Section labels & headings
+  const sectionLabels   = document.querySelectorAll('.section-label');
+  const sectionHeadings = document.querySelectorAll('.section-heading');
+  const sectionSubs     = document.querySelectorAll('.section-sub');
+
+  const labelTexts   = [t.sectionLabelOpps, t.sectionLabelInsights, t.sectionLabelAbout, t.sectionLabelContrib];
+  const headingTexts = [t.sectionHeadingOpps, t.sectionHeadingInsights, t.sectionHeadingAbout, t.sectionHeadingContrib];
+  sectionLabels.forEach((el, i)   => { if (labelTexts[i])   el.textContent = labelTexts[i]; });
+  sectionHeadings.forEach((el, i) => { if (headingTexts[i]) el.textContent = headingTexts[i]; });
+  if (sectionSubs[0]) sectionSubs[0].textContent = t.sectionSubOpps;
+  if (sectionSubs[1]) sectionSubs[1].textContent = t.sectionSubInsights;
+
+  // Filter labels
+  const filterLabels = document.querySelectorAll('.filter-label');
+  // They contain SVG + text — update only the text node
+  function setLabelText(el, text) {
+    if (!el) return;
+    // Get child nodes, find the text node and update it
+    el.childNodes.forEach(node => {
+      if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+        node.textContent = ' ' + text + ' ';
+      }
+    });
+    // Fallback: if no text node found, check for last text content
+    const allText = [...el.childNodes].filter(n => n.nodeType === Node.TEXT_NODE);
+    if (allText.length === 0) {
+      // Label has only SVG, append text
+      el.appendChild(document.createTextNode(' ' + text));
+    }
+  }
+  if (filterLabels[0]) setLabelText(filterLabels[0], t.filterSearch);
+  if (filterLabels[1]) setLabelText(filterLabels[1], t.filterSector);
+  if (filterLabels[2]) setLabelText(filterLabels[2], t.filterCountry);
+  if (filterLabels[3]) setLabelText(filterLabels[3], t.filterType);
+  if (filterLabels[4]) setLabelText(filterLabels[4], t.filterStatus);
+  if (filterLabels[5]) setLabelText(filterLabels[5], t.filterProfile);
+
+  // Search input placeholder
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) searchInput.placeholder = lang === 'ar' ? 'مثال: KAUST، طاقة، رعاية صحية…' : 'e.g. KAUST, Energy, Healthcare, Agriculture…';
+
+  // Reset button
+  const resetBtn = document.getElementById('resetFilters');
+  if (resetBtn) resetBtn.textContent = t.resetBtn;
+
+  // Table headers
+  const ths = document.querySelectorAll('thead th');
+  const thTexts = [t.thTitle, t.thType, t.thRegion, t.thEligibility, t.thFunding, t.thStatus, t.thDeadline];
+  ths.forEach((th, i) => { if (thTexts[i]) th.textContent = thTexts[i]; });
+
+  // Theme toggle title
+  const themeBtn = document.querySelector('[data-theme-toggle]');
+  if (themeBtn) themeBtn.setAttribute('title', t.themeToggleTip);
+
+  // Footer disclaimer
+  set('.footer-disclaimer', t.footerDisclaimer);
+
+  // Update active language button states
+  document.getElementById('langAr').classList.toggle('is-lang-active', lang === 'ar');
+  document.getElementById('langEn').classList.toggle('is-lang-active', lang === 'en');
+
+  // Persist
+  localStorage.setItem('is-demo-lang', lang);
+}
+
+// Public function called by onclick
+function setLang(lang) {
+  translatePage(lang);
+}
+
+// Apply saved language on load
+document.addEventListener('DOMContentLoaded', function () {
+  const saved = localStorage.getItem('is-demo-lang') || 'en';
+  translatePage(saved);
+});
+</script>
+
 </body>
 </html>
 </body>
