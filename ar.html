@@ -25844,7 +25844,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (languageLabel >= 0 && values[languageLabel]) {
         const en = values[languageLabel].dataset.enText || values[languageLabel].textContent.trim();
         values[languageLabel].dataset.enText = en;
-        values[languageLabel].textContent = en === 'English' ? 'الإنجليزية' : en === 'Arabic' ? 'العربية' : en;
+        values[languageLabel].textContent = en === 'English' ? 'English' : en === 'Arabic' ? 'العربية' : en;
       }
       const sectorLabel = Array.from(labels).findIndex(el => /Sector\(s\)/.test(el.dataset.enText || ''));
       if (sectorLabel >= 0 && values[sectorLabel]) {
