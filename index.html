@@ -1898,6 +1898,12 @@ h1, h2, h3, h4, h5, h6,
   transition: color 0.15s;
 }
 .is-lang-btn:hover { color: #fff; }
+.is-lang-btn {
+  display: inline-block;
+  text-decoration: none;
+}
+.is-lang-btn:visited { color: inherit; }
+
 .is-lang-btn.is-lang-active {
   color: #C9A66B;
   font-weight: 700;
@@ -2025,11 +2031,11 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
     <span>Vision 2030 Investment Platform</span>
   </div>
   <div class="is-top-bar-right">
-    <button id="langAr" class="is-lang-btn is-lang-active" onclick="setLang('ar')" aria-label="Switch to Arabic" title="العربية">العربية</button>
-    <span class="is-lang-sep" aria-hidden="true">|</span>
-    <button id="langEn" class="is-lang-btn" onclick="setLang('en')" aria-label="Switch to English" title="English">English</button>
-  </div>
-</div>
+        <a id="langAr" class="is-lang-btn" href="ar.html" lang="ar" dir="rtl">العربية</a>
+        <span class="is-lang-sep">|</span>
+        <a id="langEn" class="is-lang-btn is-lang-active" href="index.html" lang="en">English</a>
+      </div>
+    </div>
 <!-- IS PILOT DEMO BANNER -->
 <div class="is-pilot-banner" role="note" aria-label="Demo notice">
   <span class="is-pilot-badge">&#9679; Pilot Demo</span>
@@ -2870,13 +2876,19 @@ function translatePage(lang) {
 
 // Public function called by onclick
 function setLang(lang) {
-  translatePage(lang);
+  if (lang === 'ar') {
+    localStorage.setItem('is-demo-lang', 'ar');
+    window.location.href = 'ar.html';
+    return;
+  }
+  localStorage.setItem('is-demo-lang', 'en');
+  window.location.href = 'index.html';
 }
 
 // Apply saved language on load
 document.addEventListener('DOMContentLoaded', function () {
-  const saved = localStorage.getItem('is-demo-lang') || 'en';
-  translatePage(saved);
+  localStorage.setItem('is-demo-lang', 'en');
+  translatePage('en');
 });
 </script>
 
