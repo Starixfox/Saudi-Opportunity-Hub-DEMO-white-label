@@ -2533,7 +2533,49 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
   </div>
 </aside>
 
-<script src="script.js"></script>
+<script>
+(async function () {
+  const resultsEl = document.getElementById('resultsCount');
+  const tbody = document.getElementById('oppsTableBody');
+
+  try {
+    const response = await fetch('./opportunitiesData.json', { cache: 'no-store' });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    window.opportunitiesData = await response.json();
+
+    const appScript = document.createElement('script');
+    appScript.src = 'script.js';
+
+    appScript.onload = function () {
+      document.dispatchEvent(new Event('DOMContentLoaded'));
+    };
+
+    document.body.appendChild(appScript);
+  } catch (error) {
+    console.error('Failed to load opportunitiesData.json:', error);
+
+    if (resultsEl) {
+      resultsEl.textContent = 'Failed to load opportunities.';
+    }
+
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="empty-state">
+            <div class="empty-icon">&#9888;</div>
+            <div class="empty-title">Failed to load opportunitiesData.json</div>
+            <div class="empty-sub">Make sure the JSON file is in the same folder as this HTML file.</div>
+          </td>
+        </tr>
+      `;
+    }
+  }
+})();
+</script>
 <script>
 /* ============================================================
    INVEST SAUDI DEMO — Inline JS
