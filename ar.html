@@ -1428,7 +1428,6 @@ body.panel-open { overflow: hidden; }
   .filter-profile-row { flex-direction: column; align-items: flex-start; }
 }
 
-
 /* ── PAGINATION ───────────────────────────────── */
 #pagination {
   display: flex;
@@ -1480,8 +1479,6 @@ body.panel-open { overflow: hidden; }
   font-size: var(--text-xs);
   margin-left: var(--space-3);
 }
-
-
 
 /* =============================================
    INVEST SAUDI – White-Label Skin (Pilot Demo)
@@ -1883,7 +1880,6 @@ h1, h2, h3, h4, h5, h6,
   .navbar { padding: 0 16px; height: 60px; }
   .is-logo-rect { width: 90px; height: 34px; }
 }
-
 
 /* ── IS LANGUAGE BUTTONS ─────────────────────── */
 .is-lang-btn {
@@ -2605,7 +2601,6 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
   }
 })();
 
-
 /* ── 2. LANGUAGE SWITCHER ─────────────────────────────────── */
 
 // All translatable strings keyed by element selector or ID
@@ -2918,7 +2913,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-
 <script>
 (function(){
   window.currentLang = 'ar';
@@ -3137,90 +3131,336 @@ document.addEventListener('DOMContentLoaded', function () {
 })();
 </script>
 
+<script id="hard-arabic-translation-fix">
+(() => {
+  const FIX_ID = '__hardArabicDatasetFixV3__';
+  if (window[FIX_ID]) return;
+  window[FIX_ID] = true;
 
+  window.currentLang = 'ar';
+  try { localStorage.setItem('lang', 'ar'); } catch (e) {}
+  try { localStorage.setItem('language', 'ar'); } catch (e) {}
+  try { localStorage.setItem('preferredLang', 'ar'); } catch (e) {}
 
-<script>
-(function(){
-  const CACHE_KEY = 'full_ar_static_cache_v1';
+  const CACHE_KEY = 'hardArabicTranslateCacheV3';
+  const SKIP_TAGS = new Set(['SCRIPT','STYLE','NOSCRIPT','IFRAME','SVG','PATH','CODE','PRE']);
+  const ATTRS = ['placeholder', 'title', 'aria-label'];
+  const AR_RE = /[\u0600-\u06FF]/;
+  const EN_RE = /[A-Za-z]/;
+
   let CACHE = {};
-  try { CACHE = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch(e) { CACHE = {}; }
-  const SEP = '[[ARSEP94721]]';
-  const SKIP_TAGS = new Set(['SCRIPT','STYLE','NOSCRIPT','IFRAME','SVG','PATH']);
-  const ATTRS = ['placeholder','title','aria-label'];
-  function needsTranslation(s){ return s && /[A-Za-z]/.test(s) && !/[\u0600-\u06FF]/.test(s); }
-  function save(){ try { localStorage.setItem(CACHE_KEY, JSON.stringify(CACHE)); } catch(e){} }
-  async function translateBatch(list){
-    const pending = list.filter(t => needsTranslation(t) && !CACHE[t]);
-    if (!pending.length) return;
-    for (let i=0;i<pending.length;i+=30){
-      const chunk = pending.slice(i, i+30);
-      const joined = chunk.join('\n'+SEP+'\n');
-      try {
-        const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ar&dt=t&q=' + encodeURIComponent(joined);
-        const res = await fetch(url);
-        const data = await res.json();
-        const translated = data[0].map(x => x[0]).join('');
-        const parts = translated.split(SEP).map(s => s.trim());
-        if (parts.length === chunk.length) chunk.forEach((src, idx) => CACHE[src] = parts[idx]);
-        else chunk.forEach(src => CACHE[src] = src);
-      } catch(e){ chunk.forEach(src => CACHE[src] = src); }
-      save();
+  try { CACHE = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}') || {}; } catch (e) { CACHE = {}; }
+
+  function saveCache() {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(CACHE)); } catch (e) {}
+  }
+
+  function normalizeText(s) {
+    return (s || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function needsTranslation(s) {
+    s = normalizeText(s);
+    if (!s) return false;
+    if (!EN_RE.test(s)) return false;
+    if (AR_RE.test(s)) return false;
+    return true;
+  }
+
+  async function translateOne(text) {
+    const original = normalizeText(text);
+    if (!needsTranslation(original)) return text;
+    if (CACHE[original]) return CACHE[original];
+
+    try {
+      const url =
+        'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=ar&dt=t&q=' +
+        encodeURIComponent(original);
+
+      const res = await fetch(url);
+      const data = await res.json();
+      const translated = Array.isArray(data?.[0])
+        ? data[0].map(x => x[0]).join('').trim()
+        : original;
+
+      CACHE[original] = translated || original;
+      saveCache();
+      return CACHE[original];
+    } catch (e) {
+      CACHE[original] = original;
+      saveCache();
+      return original;
     }
   }
-  function collectTextNodes(root){
-    const walker = document.createTreeWalker(root || document.body, NodeFilter.SHOW_TEXT, {
-      acceptNode(node){
-        if (!node.parentElement) return NodeFilter.FILTER_REJECT;
-        if (SKIP_TAGS.has(node.parentElement.tagName)) return NodeFilter.FILTER_REJECT;
-        const text = node.textContent.replace(/\s+/g,' ').trim();
+
+  async function translateMany(items) {
+    const list = Array.from(new Set(items.map(normalizeText).filter(needsTranslation)));
+    for (let i = 0; i < list.length; i += 8) {
+      const chunk = list.slice(i, i + 8);
+      await Promise.all(chunk.map(translateOne));
+    }
+    return items.map(s => {
+      const key = normalizeText(s);
+      return CACHE[key] || s;
+    });
+  }
+
+  function collectTextNodes(root) {
+    const out = [];
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        if (!node || !node.nodeValue) return NodeFilter.FILTER_REJECT;
+        const parent = node.parentElement;
+        if (!parent) return NodeFilter.FILTER_REJECT;
+        if (SKIP_TAGS.has(parent.tagName)) return NodeFilter.FILTER_REJECT;
+        if (parent.closest('script, style, noscript, svg, code, pre')) return NodeFilter.FILTER_REJECT;
+
+        const text = normalizeText(node.nodeValue);
         if (!needsTranslation(text)) return NodeFilter.FILTER_REJECT;
         return NodeFilter.FILTER_ACCEPT;
       }
     });
-    const out=[]; let n;
-    while((n = walker.nextNode())) out.push(n);
+
+    let node;
+    while ((node = walker.nextNode())) out.push(node);
     return out;
   }
-  async function translateDOM(){
-    document.documentElement.lang = 'ar';
-    document.documentElement.dir = 'rtl';
-    const nodes = collectTextNodes(document.body);
-    const attrNodes = [];
-    document.querySelectorAll('*').forEach(el => {
+
+  async function translateTextNodes(root) {
+    const nodes = collectTextNodes(root);
+    if (!nodes.length) return;
+
+    const originals = nodes.map(n => normalizeText(n.nodeValue));
+    const translated = await translateMany(originals);
+
+    nodes.forEach((node, i) => {
+      const src = normalizeText(node.nodeValue);
+      const dst = translated[i];
+      if (src && dst && src !== dst) {
+        node.nodeValue = node.nodeValue.replace(src, dst);
+      }
+    });
+  }
+
+  async function translateAttributes(root) {
+    const elements = [root, ...root.querySelectorAll('*')];
+    const work = [];
+
+    elements.forEach(el => {
       ATTRS.forEach(attr => {
-        const v = el.getAttribute && el.getAttribute(attr);
-        if (needsTranslation(v)) attrNodes.push([el, attr, v]);
+        const val = el.getAttribute && el.getAttribute(attr);
+        if (needsTranslation(val)) {
+          work.push({ el, attr, val: normalizeText(val) });
+        }
       });
     });
-    const texts = [...new Set(nodes.map(n => n.textContent.replace(/\s+/g,' ').trim()).concat(attrNodes.map(x => x[2].trim())))];
-    await translateBatch(texts);
-    nodes.forEach(n => {
-      const src = n.textContent.replace(/\s+/g,' ').trim();
-      if (CACHE[src]) n.textContent = n.textContent.replace(src, CACHE[src]);
-    });
-    attrNodes.forEach(([el, attr, v]) => { const src = v.trim(); if (CACHE[src]) el.setAttribute(attr, CACHE[src]); });
 
-    const enBtn = document.getElementById('langEn');
-    const arBtn = document.getElementById('langAr');
-    if (enBtn) { enBtn.href = 'index.html'; enBtn.classList.remove('is-lang-active'); }
-    if (arBtn) { arBtn.href = 'ar.html'; arBtn.classList.add('is-lang-active'); }
+    if (!work.length) return;
+
+    const translated = await translateMany(work.map(x => x.val));
+    work.forEach((item, i) => {
+      const dst = translated[i];
+      if (dst && dst !== item.val) item.el.setAttribute(item.attr, dst);
+    });
   }
-  window.addEventListener('load', () => {
-    setTimeout(async () => {
-      try { localStorage.setItem('is-demo-lang', 'ar'); } catch(e){}
-      try { if (typeof translatePage === 'function') translatePage('ar'); } catch(e){}
-      try { if (typeof renderTable === 'function') renderTable(); } catch(e){}
-      try { if (typeof renderRecentlyAdded === 'function') renderRecentlyAdded(); } catch(e){}
-      try { if (typeof updateKPIs === 'function') updateKPIs(); } catch(e){}
-      try { if (typeof initCharts === 'function') initCharts(); } catch(e){}
-      await translateDOM();
-      setTimeout(translateDOM, 800);
-      setTimeout(translateDOM, 1800);
-    }, 120);
+
+  async function translateOptions(root) {
+    const options = root.matches?.('option')
+      ? [root]
+      : Array.from(root.querySelectorAll?.('option') || []);
+
+    if (!options.length) return;
+
+    const originals = options.map(o => normalizeText(o.textContent));
+    const translated = await translateMany(originals);
+
+    options.forEach((opt, i) => {
+      const src = originals[i];
+      const dst = translated[i];
+      if (src && dst && src !== dst) opt.textContent = dst;
+    });
+  }
+
+  async function translateRoot(root) {
+    if (!root || window.currentLang !== 'ar') return;
+    if (root.__arFixBusy) return;
+
+    root.__arFixBusy = true;
+    try {
+      await translateTextNodes(root);
+      await translateAttributes(root);
+      await translateOptions(root);
+    } finally {
+      root.__arFixBusy = false;
+    }
+  }
+
+  const scheduled = new WeakSet();
+
+  function scheduleTranslate(root) {
+    if (!root || window.currentLang !== 'ar') return;
+    if (root.nodeType === 3) root = root.parentElement || document.body;
+    if (!root || scheduled.has(root)) return;
+
+    scheduled.add(root);
+    requestAnimationFrame(() => {
+      scheduled.delete(root);
+      translateRoot(root);
+    });
+  }
+
+  function normalizeArabicUI() {
+    document.documentElement.lang = 'ar';
+    document.documentElement.dir = 'rtl';
+    document.body.dir = 'rtl';
+
+    const ar = document.getElementById('langAr');
+    const en = document.getElementById('langEn');
+
+    if (ar) {
+      ar.classList.add('is-lang-active');
+      ar.setAttribute('aria-current', 'page');
+    }
+    if (en) {
+      en.classList.remove('is-lang-active');
+      en.removeAttribute('aria-current');
+    }
+  }
+
+  function wrapFunction(name, delay = 80) {
+    const tryWrap = () => {
+      const fn = window[name];
+      if (typeof fn !== 'function' || fn.__hardArWrapped) return false;
+
+      const wrapped = function (...args) {
+        const out = fn.apply(this, args);
+
+        setTimeout(() => scheduleTranslate(document.body), delay);
+        setTimeout(() => {
+          [
+            'oppsTableBody',
+            'recentlyAddedList',
+            'pagination',
+            'resultsCount',
+            'searchInput',
+            'sectorFilter',
+            'countryFilter',
+            'typeFilter',
+            'statusFilter',
+            'panelTitle',
+            'panelDesc'
+          ].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) scheduleTranslate(el);
+          });
+
+          const panel = document.querySelector('.detail-panel');
+          if (panel) scheduleTranslate(panel);
+        }, delay + 150);
+
+        return out;
+      };
+
+      wrapped.__hardArWrapped = true;
+      window[name] = wrapped;
+      return true;
+    };
+
+    tryWrap();
+
+    let tries = 0;
+    const iv = setInterval(() => {
+      tries += 1;
+      tryWrap();
+      if (tries > 80) clearInterval(iv);
+    }, 250);
+  }
+
+  function observeMutations() {
+    const obs = new MutationObserver(mutations => {
+      if (window.currentLang !== 'ar') return;
+
+      const roots = new Set();
+
+      for (const m of mutations) {
+        if (m.type === 'characterData' && m.target.parentElement) {
+          roots.add(m.target.parentElement);
+        }
+
+        for (const node of m.addedNodes || []) {
+          if (node.nodeType === 1) roots.add(node);
+          else if (node.nodeType === 3 && node.parentElement) roots.add(node.parentElement);
+        }
+      }
+
+      roots.forEach(scheduleTranslate);
+    });
+
+    obs.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+  }
+
+  function fullPass() {
+    normalizeArabicUI();
+    scheduleTranslate(document.body);
+
+    [
+      'oppsTableBody',
+      'recentlyAddedList',
+      'pagination',
+      'resultsCount',
+      'searchInput',
+      'sectorFilter',
+      'countryFilter',
+      'typeFilter',
+      'statusFilter'
+    ].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) scheduleTranslate(el);
+    });
+
+    const panel = document.querySelector('.detail-panel');
+    if (panel) scheduleTranslate(panel);
+  }
+
+  [
+    'renderTable',
+    'openPanel',
+    'renderRecentlyAdded',
+    'updateKPIs',
+    'initCharts',
+    'applyFilters',
+    'renderPagination',
+    'goToPage',
+    'setPage',
+    'setLang'
+  ].forEach(name => wrapFunction(name));
+
+  document.addEventListener('DOMContentLoaded', () => {
+    fullPass();
+    setTimeout(fullPass, 250);
+    setTimeout(fullPass, 900);
+    setTimeout(fullPass, 1800);
   });
+
+  window.addEventListener('load', () => {
+    fullPass();
+    setTimeout(fullPass, 300);
+    setTimeout(fullPass, 1200);
+    setTimeout(fullPass, 2400);
+  });
+
+  if (document.readyState !== 'loading') {
+    fullPass();
+    setTimeout(fullPass, 120);
+  }
+
+  observeMutations();
 })();
 </script>
 
 </body>
 </html>
-</body>
