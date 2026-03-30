@@ -42,10 +42,15 @@ Server starts at **http://localhost:3001**
 ## Example URLs
 
 ```
-http://localhost:3001/api/opportunities
-http://localhost:3001/api/opportunities?sector=ict
-http://localhost:3001/api/opportunities?status=open&limit=5
-http://localhost:3001/api/opportunities/SA-001
-http://localhost:3001/api/stats
-http://localhost:3001/api/meta
+All opportunities: https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/opportunities
+
+Single item: https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/opportunities/SA-001
+
+Filter by sector: https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/opportunities?sector=ict
+
+Filter by status: https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/opportunities?status=open
+
+Stats: https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/stats
+
+Filter values: https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/meta
 ```
