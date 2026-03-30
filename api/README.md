@@ -39,9 +39,11 @@ Server starts at **http://localhost:3001**
 | `page` | Page number (default: 1) | `?page=2` |
 | `limit` | Results per page (default: 20, max: 100) | `?limit=10` |
 
-## Example URLs
+##  URLs
 
 ```
+Base URL: https://saudi-opportunity-hub-demo-white-label-production.up.railway.app
+
 All opportunities: https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/opportunities
 
 Single item: https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/opportunities/SA-001
