@@ -10,21 +10,33 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 
 // Load dataset
-// Try local copy first, then fall back to parent directory
+// Try local copy first, then parent directory, then fetch from GitHub
 let opportunities = [];
-const localPath = path.join(__dirname, 'opportunitiesData.json');
-const parentPath = path.join(__dirname, '..', 'opportunitiesData.json');
 
-if (fs.existsSync(localPath)) {
-  opportunities = JSON.parse(fs.readFileSync(localPath, 'utf-8'));
-} else if (fs.existsSync(parentPath)) {
-  opportunities = JSON.parse(fs.readFileSync(parentPath, 'utf-8'));
-} else {
-  console.error('ERROR: opportunitiesData.json not found!');
-  process.exit(1);
+async function loadData() {
+  const localPath = path.join(__dirname, 'opportunitiesData.json');
+  const parentPath = path.join(__dirname, '..', 'opportunitiesData.json');
+
+  if (fs.existsSync(localPath)) {
+    opportunities = JSON.parse(fs.readFileSync(localPath, 'utf-8'));
+    console.log(`Loaded ${opportunities.length} opportunities from local file`);
+  } else if (fs.existsSync(parentPath)) {
+    opportunities = JSON.parse(fs.readFileSync(parentPath, 'utf-8'));
+    console.log(`Loaded ${opportunities.length} opportunities from parent directory`);
+  } else {
+    // Fallback: fetch from raw GitHub
+    console.log('Local file not found, fetching from GitHub...');
+    try {
+      const res = await fetch('https://raw.githubusercontent.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/main/opportunitiesData.json');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      opportunities = await res.json();
+      console.log(`Loaded ${opportunities.length} opportunities from GitHub`);
+    } catch (err) {
+      console.error('ERROR: Could not load opportunitiesData.json from any source!', err.message);
+      process.exit(1);
+    }
+  }
 }
-
-console.log(`Loaded ${opportunities.length} opportunities`);
 
 // ─── GET /api/opportunities ───
 app.get('/api/opportunities', (req, res) => {
@@ -108,21 +120,18 @@ app.get('/api/opportunities/:id', (req, res) => {
 app.get('/api/stats', (req, res) => {
   const total = opportunities.length;
 
-  // Count by status
   const statusCounts = {};
   opportunities.forEach(o => {
     const s = o.status || 'unknown';
     statusCounts[s] = (statusCounts[s] || 0) + 1;
   });
 
-  // Count by type
   const typeCounts = {};
   opportunities.forEach(o => {
     const t = o.type || 'unknown';
     typeCounts[t] = (typeCounts[t] || 0) + 1;
   });
 
-  // Count by region
   const regionCounts = {};
   opportunities.forEach(o => {
     const r = o.eligibility_region || 'unknown';
@@ -163,12 +172,14 @@ app.get('/api/meta', (req, res) => {
 });
 
 // ─── Start server ───
-app.listen(PORT, () => {
-  console.log(`\n  Saudi Opportunity Hub API running at:`);
-  console.log(`  Local:  http://localhost:${PORT}`);
-  console.log(`\n  Endpoints:`);
-  console.log(`  GET /api/opportunities`);
-  console.log(`  GET /api/opportunities/:id`);
-  console.log(`  GET /api/stats`);
-  console.log(`  GET /api/meta\n`);
+loadData().then(() => {
+  app.listen(PORT, () => {
+    console.log(`\n  Saudi Opportunity Hub API running at:`);
+    console.log(`  Local:  http://localhost:${PORT}`);
+    console.log(`\n  Endpoints:`);
+    console.log(`  GET /api/opportunities`);
+    console.log(`  GET /api/opportunities/:id`);
+    console.log(`  GET /api/stats`);
+    console.log(`  GET /api/meta\n`);
+  });
 });
