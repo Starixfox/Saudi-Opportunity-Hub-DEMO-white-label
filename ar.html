@@ -2145,19 +2145,19 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
 
     <div class="who-strip" role="list">
       <div class="who-item" role="listitem">
-        <div class="who-role">Startups &amp; SMEs</div>
+        <div class="who-role">Startups & SMEs</div>
         <div class="who-desc">Find grants, accelerators, and investors aligned to your stage and sector — from Agriculture to ICT.</div>
       </div>
       <div class="who-item" role="listitem">
-        <div class="who-role">Researchers &amp; Universities</div>
+        <div class="who-role">Researchers & Universities</div>
         <div class="who-desc">Discover fellowships, research calls, and international collaboration tracks across all key sectors.</div>
       </div>
       <div class="who-item" role="listitem">
-        <div class="who-role">Government &amp; Public Sector</div>
+        <div class="who-role">Government & Public Sector</div>
         <div class="who-desc">Scan tenders, ecosystem initiatives, and capacity-building programs relevant to public-sector priorities.</div>
       </div>
       <div class="who-item" role="listitem">
-        <div class="who-role">Investors &amp; Ecosystem</div>
+        <div class="who-role">Investors & Ecosystem</div>
         <div class="who-desc">Map active programs in Saudi, GCC, and globally to identify deal-flow and co-investment opportunities across sectors.</div>
       </div>
     </div>
@@ -2198,21 +2198,21 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
           </label>
           <select id="sectorFilter" class="filter-select" aria-label="Filter by sector">
             <option value="all">All sectors</option>
-            <option value="agriculture">Agriculture &amp; Food Processing</option>
+            <option value="agriculture">Agriculture & Food Processing</option>
             <option value="energy">Energy</option>
-            <option value="healthcare">Healthcare &amp; Life Sciences</option>
+            <option value="healthcare">Healthcare & Life Sciences</option>
             <option value="environment">Environment Services</option>
-            <option value="industrial">Industrial &amp; Manufacturing</option>
-            <option value="pharma">Pharma &amp; Biotech</option>
+            <option value="industrial">Industrial & Manufacturing</option>
+            <option value="pharma">Pharma & Biotech</option>
             <option value="chemicals">Chemicals</option>
             <option value="realestate">Real Estate</option>
             <option value="financial">Financial Services</option>
-            <option value="transport">Transport &amp; Logistics</option>
-            <option value="mining">Mining &amp; Metals</option>
-            <option value="tourism">Tourism &amp; Quality of Life</option>
+            <option value="transport">Transport & Logistics</option>
+            <option value="mining">Mining & Metals</option>
+            <option value="tourism">Tourism & Quality of Life</option>
             <option value="education">Education</option>
             <option value="ict">ICT</option>
-            <option value="innovation">Innovation &amp; Entrepreneurship</option>
+            <option value="innovation">Innovation & Entrepreneurship</option>
           </select>
         </div>
 
@@ -2300,7 +2300,7 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
       <table aria-label="Space opportunities database">
         <thead>
           <tr>
-            <th scope="col">Title &amp; Sponsor</th>
+            <th scope="col">Title & Sponsor</th>
             <th scope="col">Type</th>
             <th scope="col">Region</th>
             <th scope="col" class="col-eligibility">Eligibility</th>
@@ -2383,11 +2383,11 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
         <p>This is an independent, community-maintained project. It is <strong>not affiliated with, endorsed by, or representative of</strong> the Saudi government, any Saudi authority, or any program listed. Always verify details directly with the sponsoring organization before applying.</p>
         <div class="audience-grid">
           <div class="audience-card">
-            <div class="audience-role">Startups &amp; SMEs</div>
+            <div class="audience-role">Startups & SMEs</div>
             <div class="audience-desc">Filter by sector, grant, accelerator, or investment type. Use profile chips to see programs targeting your entity type.</div>
           </div>
           <div class="audience-card">
-            <div class="audience-role">Researchers &amp; Universities</div>
+            <div class="audience-role">Researchers & Universities</div>
             <div class="audience-desc">Filter to fellowships, grants, and joint-research calls across any sector relevant to academic institutions.</div>
           </div>
           <div class="audience-card">
@@ -2407,7 +2407,7 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
         </div>
         <div class="about-meta-item">
           <div class="about-meta-label">Program types tracked</div>
-          <div class="about-meta-value">Grants &middot; Tenders &amp; Competitions &middot; Accelerators &middot; Investment Programs &middot; Fellowships &middot; Regulatory &amp; Ecosystem Programs &mdash; spanning Agriculture, Energy, Healthcare, ICT, Financial Services, Tourism, and 9 more sectors</div>
+          <div class="about-meta-value">Grants &middot; Tenders & Competitions &middot; Accelerators &middot; Investment Programs &middot; Fellowships &middot; Regulatory & Ecosystem Programs &mdash; spanning Agriculture, Energy, Healthcare, ICT, Financial Services, Tourism, and 9 more sectors</div>
         </div>
         <div class="about-meta-item">
           <div class="about-meta-label">Data sources</div>
@@ -2931,7 +2931,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function persistCache(){ window.__oppArCache = AR_CACHE; }
   function needsArabic(s){ return /[A-Za-z]/.test(s || '') && !/[\u0600-\u06FF]/.test(s || ''); }
-  function escHtml(s){ return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function escHtml(s){ return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
   async function translateBatch(texts){
     const pending = texts.filter(t => t && needsArabic(t) && !AR_CACHE[t]);
     if (!pending.length) return;
