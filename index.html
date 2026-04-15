@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -2934,3 +2935,317 @@ document.addEventListener('DOMContentLoaded', function () {
 </body>
 </html>
 </body>
+<script>
+(function () {
+  const PER_PAGE = 10;
+  let currentPage = 1;
+  let filteredData = [];
+  let selectedProfile = 'all';
+  let booted = false;
+
+  function dataSource() {
+    if (Array.isArray(window.opportunitiesData)) return window.opportunitiesData;
+    if (Array.isArray(window.allOpportunities)) return window.allOpportunities;
+    return [];
+  }
+
+  function norm(v) { return (v || '').toString().trim().toLowerCase(); }
+  function pretty(v) { return (v || '').toString().replace(/_/g, ' ').replace(/\w/g, c => c.toUpperCase()); }
+
+  function regionGroup(item) {
+    const country = norm(item.country);
+    const region = norm(item.eligibility_region);
+    if (country.includes('saudi') || region.includes('saudi')) return 'saudi';
+    if (country.includes('uae') || country.includes('qatar') || country.includes('oman') || country.includes('bahrain') || country.includes('kuwait') || region === 'gcc') return 'gcc';
+    return 'global';
+  }
+
+  function typeClass(type) {
+    const t = norm(type);
+    if (t.includes('grant')) return 'type-grant';
+    if (t.includes('tender')) return 'type-tender';
+    if (t.includes('accelerator')) return 'type-accel';
+    if (t.includes('investment')) return 'type-invest';
+    if (t.includes('fellow')) return 'type-fellow';
+    return 'type-other';
+  }
+
+  function statusClass(status) {
+    const s = norm(status);
+    if (s.includes('open')) return 'status-open';
+    if (s.includes('recurring')) return 'status-recurring';
+    return 'status-closed';
+  }
+
+  function profileMatch(item) {
+    if (selectedProfile === 'all') return true;
+    if (selectedProfile === 'new') return !!item.isNew;
+    const profiles = Array.isArray(item.profiles) ? item.profiles.map(norm) : [];
+    if (selectedProfile === 'startup') return profiles.some(p => p.includes('startup') || p.includes('sme'));
+    if (selectedProfile === 'researcher') return profiles.some(p => p.includes('research') || p.includes('university') || p.includes('academic'));
+    if (selectedProfile === 'government') return profiles.some(p => p.includes('government') || p.includes('public'));
+    if (selectedProfile === 'investor') return profiles.some(p => p.includes('investor') || p.includes('vc') || p.includes('fund'));
+    if (selectedProfile === 'student') return profiles.some(p => p.includes('student'));
+    return profiles.includes(selectedProfile);
+  }
+
+  function matchesFilters(item) {
+    const q = norm(document.getElementById('searchInput')?.value);
+    const sector = norm(document.getElementById('sectorFilter')?.value || 'all');
+    const country = norm(document.getElementById('countryFilter')?.value || 'all');
+    const type = norm(document.getElementById('typeFilter')?.value || 'all');
+    const status = norm(document.getElementById('statusFilter')?.value || 'all');
+
+    const haystack = [
+      item.id, item.title, item.description_short, item.sponsor_institution,
+      item.country, item.eligibility_region, item.eligibility_entities,
+      item.funding_amount, item.funding_type, item.deadline_date,
+      item.status, item.language, item.notes, item.last_verified,
+      ...(item.profiles || []), ...(item.sectors || [])
+    ].filter(Boolean).join(' ').toLowerCase();
+
+    if (q && !haystack.includes(q)) return false;
+    if (sector !== 'all' && !(Array.isArray(item.sectors) && item.sectors.map(norm).includes(sector))) return false;
+    if (country !== 'all' && regionGroup(item) !== country) return false;
+    if (type !== 'all' && norm(item.type) !== type) return false;
+    if (status !== 'all') {
+      const s = norm(item.status);
+      if (status === 'open' && !s.includes('open')) return false;
+      if (status === 'closedbutrecurring' && !(s.includes('recurring') || s.includes('closed_but_recurring'))) return false;
+      if (status === 'closed' && (s.includes('open') || s.includes('recurring'))) return false;
+    }
+    if (!profileMatch(item)) return false;
+    return true;
+  }
+
+  function updateCounts(allData) {
+    const saudi = allData.filter(d => regionGroup(d) === 'saudi').length;
+    const gcc = allData.filter(d => regionGroup(d) === 'gcc').length;
+    const global = allData.filter(d => regionGroup(d) === 'global').length;
+    const total = allData.length;
+    const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+    setText('resultsCount', `${filteredData.length} opportunities found`);
+    setText('kpiSaudi', saudi);
+    setText('kpiGcc', gcc);
+    setText('kpiGlobal', global);
+    setText('kpiTotal', total);
+  }
+
+  function renderRecentlyAdded() {
+    const el = document.getElementById('recentlyAddedList');
+    if (!el) return;
+    const recent = dataSource().filter(item => item.isNew).slice(0, 5);
+    if (!recent.length) {
+      el.innerHTML = '<div class="no-recent">No newly flagged opportunities.</div>';
+      return;
+    }
+    el.innerHTML = recent.map(item => `
+      <div class="changelog-item">
+        <div class="changelog-item-title"><a class="changelog-link" href="${item.application_link || '#'}" ${item.application_link ? 'target="_blank" rel="noopener noreferrer"' : ''}>${item.title || 'Untitled opportunity'}</a></div>
+        <div class="changelog-item-meta"><span class="pill ${typeClass(item.type)} pill-xs">${pretty(item.type || 'Other')}</span><span class="changelog-date">${item.last_verified || 'Recently added'}</span></div>
+      </div>
+    `).join('');
+  }
+
+  function renderPagination() {
+    const pagination = document.getElementById('pagination');
+    if (!pagination) return;
+    const totalPages = Math.max(1, Math.ceil(filteredData.length / PER_PAGE));
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (totalPages <= 1) { pagination.innerHTML = ''; return; }
+    let html = `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} data-page="prev">‹</button>`;
+    for (let i = 1; i <= totalPages; i++) html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+    html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} data-page="next">›</button>`;
+    html += `<span class="page-info">Page ${currentPage} of ${totalPages}</span>`;
+    pagination.innerHTML = html;
+    pagination.querySelectorAll('.page-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const value = btn.dataset.page;
+        if (value === 'prev' && currentPage > 1) currentPage--;
+        else if (value === 'next' && currentPage < totalPages) currentPage++;
+        else if (!isNaN(Number(value))) currentPage = Number(value);
+        renderCards();
+      });
+    });
+  }
+
+  function renderCards() {
+    const tbody = document.getElementById('oppsTableBody');
+    if (!tbody) return;
+    const start = (currentPage - 1) * PER_PAGE;
+    const pageItems = filteredData.slice(start, start + PER_PAGE);
+    if (!pageItems.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon">⌕</div><div class="empty-title">No opportunities found</div><div class="empty-sub">Try adjusting the filters or search term.</div></td></tr>';
+      renderPagination();
+      updateCounts(dataSource());
+      return;
+    }
+    tbody.innerHTML = pageItems.map(item => {
+      const region = regionGroup(item);
+      const chips = [pretty(item.funding_type), ...(item.profiles || []).slice(0,2).map(pretty), ...(item.sectors || []).slice(0,2).map(pretty)].filter(Boolean).slice(0,5);
+      return `
+        <tr class="opp-card-row" data-id="${item.id || ''}">
+          <td colspan="7" class="opp-card-cell">
+            <article class="opp-card-noimg">
+              <div class="opp-card-content">
+                <h3 class="opp-card-title">${item.title || 'Untitled opportunity'}</h3>
+                <div class="opp-card-meta">
+                  <span class="opp-meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="10" width="18" height="11" rx="2"/><path d="M7 10V6a1 1 0 0 1 1-1h2v5M15 10V4h1a1 1 0 0 1 1 1v5"/></svg>
+                    <span>${pretty(item.type || 'Opportunity')}</span>
+                  </span>
+                  <span class="opp-meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 21s7-4.35 7-10a7 7 0 1 0-14 0c0 5.65 7 10 7 10Z"/><circle cx="12" cy="11" r="2.5"/></svg>
+                    <span>${item.country || pretty(item.eligibility_region) || 'Global'}</span>
+                  </span>
+                </div>
+                <p class="opp-card-desc">${item.description_short || 'No description available.'}</p>
+                <div class="opp-card-chips">${chips.map(c => `<span class="opp-card-chip">${c}</span>`).join('')}</div>
+                <div class="opp-card-stats">
+                  <div class="opp-card-stat">
+                    <div class="opp-card-value">${item.funding_amount || 'See details'}</div>
+                    <div class="opp-card-label">Funding / Size</div>
+                  </div>
+                  <div class="opp-card-stat">
+                    <div class="opp-card-value">${pretty(item.status || 'Unknown')}</div>
+                    <div class="opp-card-label">Status</div>
+                  </div>
+                  <div class="opp-card-stat">
+                    <div class="opp-card-value">${item.deadline_date || item.last_verified || 'TBA'}</div>
+                    <div class="opp-card-label">Deadline / Verified</div>
+                  </div>
+                </div>
+                <div class="opp-card-actions">
+                  <div class="opp-card-badges">
+                    <span class="pill ${typeClass(item.type)}">${pretty(item.type || 'Other')}</span>
+                    <span class="region-tag region-${region}">${region}</span>
+                    <span class="status-badge ${statusClass(item.status)}">${pretty(item.status || 'Unknown')}</span>
+                    ${item.isNew ? '<span class="badge-new">New</span>' : ''}
+                  </div>
+                  <a class="panel-link-btn opp-card-link" href="${item.application_link || '#'}" ${item.application_link ? 'target="_blank" rel="noopener noreferrer"' : ''}>I'm Interested</a>
+                </div>
+                <div class="opp-card-sponsor">${item.sponsor_institution ? `<strong>Sponsor:</strong> ${item.sponsor_institution}` : ''}</div>
+              </div>
+            </article>
+          </td>
+        </tr>
+      `;
+    }).join('');
+    renderPagination();
+    updateCounts(dataSource());
+  }
+
+  function applyFilters() {
+    filteredData = dataSource().filter(matchesFilters);
+    currentPage = 1;
+    renderCards();
+  }
+
+  function wireFilters() {
+    ['searchInput','sectorFilter','countryFilter','typeFilter','statusFilter'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('input', applyFilters);
+      el.addEventListener('change', applyFilters);
+    });
+    document.querySelectorAll('.profile-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.profile-chip').forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+        selectedProfile = btn.dataset.profile || 'all';
+        applyFilters();
+      });
+    });
+    const reset = document.getElementById('resetFilters');
+    if (reset) reset.addEventListener('click', () => {
+      const resetValue = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+      resetValue('searchInput', '');
+      resetValue('sectorFilter', 'all');
+      resetValue('countryFilter', 'all');
+      resetValue('typeFilter', 'all');
+      resetValue('statusFilter', 'all');
+      document.querySelectorAll('.profile-chip').forEach(b => {
+        const active = b.dataset.profile === 'all';
+        b.classList.toggle('active', active);
+        b.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+      selectedProfile = 'all';
+      applyFilters();
+    });
+  }
+
+  function installStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+      .table-scroll { max-height: none; overflow: visible !important; }
+      .table-scroll table { min-width: 100%; }
+      .table-scroll thead { display: none; }
+      .table-scroll tbody { display: grid; gap: var(--space-6); }
+      .table-scroll tbody tr { display: block; border-bottom: none; cursor: default; background: transparent !important; }
+      .opp-card-cell { padding: 0 !important; }
+      .opp-card-noimg {
+        position: relative; display: block; min-height: 320px;
+        background: linear-gradient(180deg, #0c2030 0%, #0a1b29 100%);
+        border-radius: 26px; overflow: hidden; box-shadow: var(--shadow-md);
+      }
+      .opp-card-noimg::after {
+        content: ''; position: absolute; inset: auto 0 0 0; height: 140px;
+        background: radial-gradient(circle at 18% 100%, rgba(53,213,197,.20), transparent 28%), radial-gradient(circle at 48% 100%, rgba(126,78,182,.18), transparent 26%);
+        pointer-events: none;
+      }
+      .opp-card-content { padding: 38px 42px 24px; display: flex; flex-direction: column; position: relative; z-index: 1; }
+      .opp-card-title { font-size: clamp(30px, 4vw, 54px); line-height: 1.02; letter-spacing: -.04em; color: #fff; margin: 0 0 var(--space-5); max-width: 14ch; }
+      .opp-card-meta { display: flex; gap: 18px; flex-wrap: wrap; color: rgba(255,255,255,.80); font-size: 14px; font-weight: 500; margin-bottom: var(--space-5); }
+      .opp-meta-item { display: inline-flex; align-items: center; gap: 10px; }
+      .opp-meta-item svg { color: #35d5c5; }
+      .opp-card-desc { color: rgba(255,255,255,.92); font-size: clamp(17px, 1.5vw, 21px); line-height: 1.6; margin: 0 0 var(--space-5); max-width: 52ch; font-weight: 300; }
+      .opp-card-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: var(--space-6); }
+      .opp-card-chip { padding: 8px 12px; border-radius: var(--radius-full); border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.07); color: rgba(255,255,255,.74); font-size: 12px; font-weight: 600; }
+      .opp-card-stats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); margin-top: auto; margin-bottom: var(--space-6); }
+      .opp-card-stat { padding-right: 22px; border-right: 1px solid rgba(255,255,255,.16); }
+      .opp-card-stat:nth-child(2) { padding-left: 22px; }
+      .opp-card-stat:last-child { border-right: 0; padding-left: 22px; padding-right: 0; }
+      .opp-card-value { color: #fff; font-size: clamp(23px,1.8vw,34px); line-height: 1.05; font-weight: 700; margin-bottom: 10px; letter-spacing: -.03em; }
+      .opp-card-label { color: rgba(255,255,255,.72); font-size: 15px; }
+      .opp-card-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+      .opp-card-badges { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      .opp-card-link { width: auto; white-space: nowrap; background: #35d5c5; border-radius: 999px; box-shadow: 0 10px 24px rgba(47,213,199,.2); }
+      .opp-card-sponsor { margin-top: var(--space-4); color: rgba(255,255,255,.66); font-size: 13px; }
+      .opp-card-sponsor strong { color: rgba(255,255,255,.88); }
+      @media (max-width: 900px) {
+        .opp-card-content { padding: 24px; }
+        .opp-card-stats { grid-template-columns: 1fr; gap: 18px; }
+        .opp-card-stat, .opp-card-stat:nth-child(2), .opp-card-stat:last-child { padding: 0 0 18px; border-right: 0; border-bottom: 1px solid rgba(255,255,255,.14); }
+        .opp-card-stat:last-child { border-bottom: 0; padding-bottom: 0; }
+        .opp-card-actions { flex-direction: column; align-items: flex-start; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function boot() {
+    if (booted) return;
+    booted = true;
+    installStyles();
+    wireFilters();
+    renderRecentlyAdded();
+    filteredData = dataSource().slice();
+    applyFilters();
+  }
+
+  const wait = setInterval(() => {
+    if (Array.isArray(window.opportunitiesData) || Array.isArray(window.allOpportunities)) {
+      clearInterval(wait);
+      boot();
+    }
+  }, 200);
+  setTimeout(() => {
+    clearInterval(wait);
+    boot();
+  }, 5000);
+})();
+</script>
