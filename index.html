@@ -3054,7 +3054,22 @@ document.addEventListener('DOMContentLoaded', function () {
     if (currentPage > totalPages) currentPage = totalPages;
     if (totalPages <= 1) { pagination.innerHTML = ''; return; }
     let html = `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} data-page="prev">‹</button>`;
-    for (let i = 1; i <= totalPages; i++) html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+    const pages = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      if (start > 2) pages.push('...');
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (end < totalPages - 1) pages.push('...');
+      pages.push(totalPages);
+    }
+    pages.forEach(p => {
+      if (p === '...') html += `<span class="page-ellipsis">…</span>`;
+      else html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" data-page="${p}">${p}</button>`;
+    });
     html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} data-page="next">›</button>`;
     html += `<span class="page-info">Page ${currentPage} of ${totalPages}</span>`;
     pagination.innerHTML = html;
@@ -3065,6 +3080,8 @@ document.addEventListener('DOMContentLoaded', function () {
         else if (value === 'next' && currentPage < totalPages) currentPage++;
         else if (!isNaN(Number(value))) currentPage = Number(value);
         renderCards();
+        const oppSection = document.getElementById('opportunities');
+        if (oppSection) oppSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
   }
@@ -3184,11 +3201,11 @@ document.addEventListener('DOMContentLoaded', function () {
       .table-scroll { max-height: none; overflow: visible !important; }
       .table-scroll table { min-width: 100%; }
       .table-scroll thead { display: none; }
-      .table-scroll tbody { display: grid; gap: var(--space-6); }
+      .table-scroll tbody { display: grid; gap: 18px; }
       .table-scroll tbody tr { display: block; border-bottom: none; cursor: default; background: transparent !important; }
       .opp-card-cell { padding: 0 !important; }
       .opp-card-noimg {
-        position: relative; display: block; min-height: 320px;
+        position: relative; display: block; min-height: 0;
         background: linear-gradient(180deg, #0c2030 0%, #0a1b29 100%);
         border-radius: 26px; overflow: hidden; box-shadow: var(--shadow-md);
       }
@@ -3197,27 +3214,27 @@ document.addEventListener('DOMContentLoaded', function () {
         background: radial-gradient(circle at 18% 100%, rgba(53,213,197,.20), transparent 28%), radial-gradient(circle at 48% 100%, rgba(126,78,182,.18), transparent 26%);
         pointer-events: none;
       }
-      .opp-card-content { padding: 38px 42px 24px; display: flex; flex-direction: column; position: relative; z-index: 1; }
-      .opp-card-title { font-size: clamp(30px, 4vw, 54px); line-height: 1.02; letter-spacing: -.04em; color: #fff; margin: 0 0 var(--space-5); max-width: 14ch; }
-      .opp-card-meta { display: flex; gap: 18px; flex-wrap: wrap; color: rgba(255,255,255,.80); font-size: 14px; font-weight: 500; margin-bottom: var(--space-5); }
+      .opp-card-content { padding: 26px 30px 18px; display: flex; flex-direction: column; position: relative; z-index: 1; }
+      .opp-card-title { font-size: clamp(24px, 2.3vw, 36px); line-height: 1.06; letter-spacing: -.03em; color: #fff; margin: 0 0 14px; max-width: 18ch; }
+      .opp-card-meta { display: flex; gap: 14px; flex-wrap: wrap; color: rgba(255,255,255,.80); font-size: 13px; font-weight: 500; margin-bottom: 14px; }
       .opp-meta-item { display: inline-flex; align-items: center; gap: 10px; }
       .opp-meta-item svg { color: #35d5c5; }
-      .opp-card-desc { color: rgba(255,255,255,.92); font-size: clamp(17px, 1.5vw, 21px); line-height: 1.6; margin: 0 0 var(--space-5); max-width: 52ch; font-weight: 300; }
-      .opp-card-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: var(--space-6); }
-      .opp-card-chip { padding: 8px 12px; border-radius: var(--radius-full); border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.07); color: rgba(255,255,255,.74); font-size: 12px; font-weight: 600; }
-      .opp-card-stats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); margin-top: auto; margin-bottom: var(--space-6); }
-      .opp-card-stat { padding-right: 22px; border-right: 1px solid rgba(255,255,255,.16); }
-      .opp-card-stat:nth-child(2) { padding-left: 22px; }
-      .opp-card-stat:last-child { border-right: 0; padding-left: 22px; padding-right: 0; }
-      .opp-card-value { color: #fff; font-size: clamp(23px,1.8vw,34px); line-height: 1.05; font-weight: 700; margin-bottom: 10px; letter-spacing: -.03em; }
-      .opp-card-label { color: rgba(255,255,255,.72); font-size: 15px; }
-      .opp-card-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-      .opp-card-badges { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-      .opp-card-link { width: auto; white-space: nowrap; background: #35d5c5; border-radius: 999px; box-shadow: 0 10px 24px rgba(47,213,199,.2); }
-      .opp-card-sponsor { margin-top: var(--space-4); color: rgba(255,255,255,.66); font-size: 13px; }
+      .opp-card-desc { color: rgba(255,255,255,.90); font-size: clamp(14px, 1.05vw, 17px); line-height: 1.6; margin: 0 0 14px; max-width: 72ch; font-weight: 400; }
+      .opp-card-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+      .opp-card-chip { padding: 6px 10px; border-radius: var(--radius-full); border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.07); color: rgba(255,255,255,.74); font-size: 11px; font-weight: 600; }
+      .opp-card-stats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); margin-top: 2px; margin-bottom: 16px; }
+      .opp-card-stat { padding-right: 16px; border-right: 1px solid rgba(255,255,255,.16); }
+      .opp-card-stat:nth-child(2) { padding-left: 16px; }
+      .opp-card-stat:last-child { border-right: 0; padding-left: 16px; padding-right: 0; }
+      .opp-card-value { color: #fff; font-size: clamp(16px,1.25vw,22px); line-height: 1.15; font-weight: 700; margin-bottom: 6px; letter-spacing: -.02em; }
+      .opp-card-label { color: rgba(255,255,255,.72); font-size: 12px; }
+      .opp-card-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+      .opp-card-badges { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+      .opp-card-link { width: auto; white-space: nowrap; background: #35d5c5; border-radius: 999px; box-shadow: 0 8px 20px rgba(47,213,199,.18); padding: 10px 16px; font-size: 13px; }
+      .opp-card-sponsor { margin-top: 10px; color: rgba(255,255,255,.66); font-size: 12px; }
       .opp-card-sponsor strong { color: rgba(255,255,255,.88); }
       @media (max-width: 900px) {
-        .opp-card-content { padding: 24px; }
+        .opp-card-content { padding: 18px; }
         .opp-card-stats { grid-template-columns: 1fr; gap: 18px; }
         .opp-card-stat, .opp-card-stat:nth-child(2), .opp-card-stat:last-child { padding: 0 0 18px; border-right: 0; border-bottom: 1px solid rgba(255,255,255,.14); }
         .opp-card-stat:last-child { border-bottom: 0; padding-bottom: 0; }
