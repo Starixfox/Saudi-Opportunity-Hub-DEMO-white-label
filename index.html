@@ -3205,7 +3205,7 @@ document.addEventListener('DOMContentLoaded', function () {
       .table-scroll tbody tr { display: block; border-bottom: none; cursor: default; background: transparent !important; }
       .opp-card-cell { padding: 0 !important; }
       .opp-card-noimg {
-        position: relative; display: block; min-height: 0;
+        position: relative; display: block; min-height: 520px;
         background: linear-gradient(180deg, #0c2030 0%, #0a1b29 100%);
         border-radius: 26px; overflow: hidden; box-shadow: var(--shadow-md);
       }
@@ -3214,12 +3214,12 @@ document.addEventListener('DOMContentLoaded', function () {
         background: radial-gradient(circle at 18% 100%, rgba(53,213,197,.20), transparent 28%), radial-gradient(circle at 48% 100%, rgba(126,78,182,.18), transparent 26%);
         pointer-events: none;
       }
-      .opp-card-content { padding: 26px 30px 18px; display: flex; flex-direction: column; position: relative; z-index: 1; }
-      .opp-card-title { font-size: clamp(24px, 2.3vw, 36px); line-height: 1.06; letter-spacing: -.03em; color: #fff; margin: 0 0 14px; max-width: 18ch; }
+      .opp-card-content { padding: 26px 30px 18px; height: 100%; justify-content: space-between; display: flex; flex-direction: column; position: relative; z-index: 1; }
+      .opp-card-title { font-size: clamp(24px, 2.3vw, 36px); line-height: 1.06; letter-spacing: -.03em; color: #fff; margin: 0 0 14px; max-width: 100%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
       .opp-card-meta { display: flex; gap: 14px; flex-wrap: wrap; color: rgba(255,255,255,.80); font-size: 13px; font-weight: 500; margin-bottom: 14px; }
       .opp-meta-item { display: inline-flex; align-items: center; gap: 10px; }
       .opp-meta-item svg { color: #35d5c5; }
-      .opp-card-desc { color: rgba(255,255,255,.90); font-size: clamp(14px, 1.05vw, 17px); line-height: 1.6; margin: 0 0 14px; max-width: 72ch; font-weight: 400; }
+      .opp-card-desc { color: rgba(255,255,255,.90); font-size: clamp(14px, 1.05vw, 17px); line-height: 1.6; margin: 0 0 14px; max-width: 72ch; font-weight: 400; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
       .opp-card-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
       .opp-card-chip { padding: 6px 10px; border-radius: var(--radius-full); border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.07); color: rgba(255,255,255,.74); font-size: 11px; font-weight: 600; }
       .opp-card-stats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); margin-top: 2px; margin-bottom: 16px; }
@@ -3232,7 +3232,7 @@ document.addEventListener('DOMContentLoaded', function () {
       .opp-card-badges { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
       .opp-card-link { width: auto; white-space: nowrap; background: #35d5c5; border-radius: 999px; box-shadow: 0 8px 20px rgba(47,213,199,.18); padding: 10px 16px; font-size: 13px; }
       .opp-card-sponsor { margin-top: 10px; color: rgba(255,255,255,.66); font-size: 12px; }
-      .opp-card-sponsor strong { color: rgba(255,255,255,.88); }
+      .opp-card-sponsor strong { color: rgba(255,255,255,.88); }           .opp-card-noimg { display: flex; flex-direction: column; }           .opp-card-content { height: 100%; box-sizing: border-box; }           .opp-card-title { max-width: 100%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }           .opp-card-desc { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }           .opp-card-noimg { display: flex; flex-direction: column; }           .opp-card-content { height: 100%; box-sizing: border-box; }           .opp-card-title { max-width: 100%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }           .opp-card-desc { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
       @media (max-width: 900px) {
         .opp-card-content { padding: 18px; }
         .opp-card-stats { grid-template-columns: 1fr; gap: 18px; }
@@ -6473,7 +6473,7 @@ document.addEventListener('DOMContentLoaded', function () {
       .table-scroll tbody tr { display: block; border-bottom: none; cursor: default; background: transparent !important; }
       .opp-card-cell { padding: 0 !important; }
       .opp-card-noimg {
-        position: relative; display: block; min-height: 0;
+        position: relative; display: block; min-height: 520px;
         background: linear-gradient(180deg, #0c2030 0%, #0a1b29 100%);
         border-radius: 26px; overflow: hidden; box-shadow: var(--shadow-md);
       }
@@ -6482,12 +6482,12 @@ document.addEventListener('DOMContentLoaded', function () {
         background: radial-gradient(circle at 18% 100%, rgba(53,213,197,.20), transparent 28%), radial-gradient(circle at 48% 100%, rgba(126,78,182,.18), transparent 26%);
         pointer-events: none;
       }
-      .opp-card-content { padding: 26px 30px 18px; display: flex; flex-direction: column; position: relative; z-index: 1; }
-      .opp-card-title { font-size: clamp(24px, 2.3vw, 36px); line-height: 1.06; letter-spacing: -.03em; color: #fff; margin: 0 0 14px; max-width: 18ch; }
+      .opp-card-content { padding: 26px 30px 18px; height: 100%; justify-content: space-between; display: flex; flex-direction: column; position: relative; z-index: 1; }
+      .opp-card-title { font-size: clamp(24px, 2.3vw, 36px); line-height: 1.06; letter-spacing: -.03em; color: #fff; margin: 0 0 14px; max-width: 100%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
       .opp-card-meta { display: flex; gap: 14px; flex-wrap: wrap; color: rgba(255,255,255,.80); font-size: 13px; font-weight: 500; margin-bottom: 14px; }
       .opp-meta-item { display: inline-flex; align-items: center; gap: 10px; }
       .opp-meta-item svg { color: #35d5c5; }
-      .opp-card-desc { color: rgba(255,255,255,.90); font-size: clamp(14px, 1.05vw, 17px); line-height: 1.6; margin: 0 0 14px; max-width: 72ch; font-weight: 400; }
+      .opp-card-desc { color: rgba(255,255,255,.90); font-size: clamp(14px, 1.05vw, 17px); line-height: 1.6; margin: 0 0 14px; max-width: 72ch; font-weight: 400; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
       .opp-card-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
       .opp-card-chip { padding: 6px 10px; border-radius: var(--radius-full); border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.07); color: rgba(255,255,255,.74); font-size: 11px; font-weight: 600; }
       .opp-card-stats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); margin-top: 2px; margin-bottom: 16px; }
@@ -6500,7 +6500,7 @@ document.addEventListener('DOMContentLoaded', function () {
       .opp-card-badges { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
       .opp-card-link { width: auto; white-space: nowrap; background: #35d5c5; border-radius: 999px; box-shadow: 0 8px 20px rgba(47,213,199,.18); padding: 10px 16px; font-size: 13px; }
       .opp-card-sponsor { margin-top: 10px; color: rgba(255,255,255,.66); font-size: 12px; }
-      .opp-card-sponsor strong { color: rgba(255,255,255,.88); }
+      .opp-card-sponsor strong { color: rgba(255,255,255,.88); }           .opp-card-noimg { display: flex; flex-direction: column; }           .opp-card-content { height: 100%; box-sizing: border-box; }           .opp-card-title { max-width: 100%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }           .opp-card-desc { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }           .opp-card-noimg { display: flex; flex-direction: column; }           .opp-card-content { height: 100%; box-sizing: border-box; }           .opp-card-title { max-width: 100%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }           .opp-card-desc { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
       @media (max-width: 900px) {
         .opp-card-content { padding: 18px; }
         .opp-card-stats { grid-template-columns: 1fr; gap: 18px; }
