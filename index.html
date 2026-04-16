@@ -3232,6 +3232,11 @@ document.addEventListener('DOMContentLoaded', function () {
       .opp-card-badges { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
       .opp-card-link { width: auto; white-space: nowrap; background: #35d5c5; border-radius: 999px; box-shadow: 0 6px 16px rgba(47,213,199,.16); padding: 8px 14px; font-size: 12px; }
       .opp-card-sponsor { margin-top: 8px; color: rgba(255,255,255,.66); font-size: 11px; }
+      .pagination { gap: 4px; margin-top: 14px; }
+      .page-btn { min-width: 30px; height: 30px; padding: 0 8px; font-size: 12px; border-radius: 8px; }
+      .page-ellipsis { color: var(--text-faint); font-size: 12px; padding: 0 2px; line-height: 30px; }
+      .page-info { font-size: 11px; margin-left: 8px; }
+      @media (max-width: 900px) { .pagination { gap: 3px; } .page-btn { min-width: 28px; height: 28px; font-size: 11px; border-radius: 7px; } .page-info { width: 100%; margin-left: 0; text-align: center; margin-top: 4px; } }
       .opp-card-sponsor strong { color: rgba(255,255,255,.88); }
       @media (max-width: 900px) {
         .opp-card-content { padding: 16px; }
