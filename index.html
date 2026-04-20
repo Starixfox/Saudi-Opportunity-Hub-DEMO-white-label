@@ -3271,3 +3271,118 @@ document.addEventListener('DOMContentLoaded', function () {
   }, 5000);
 })();
 </script>
+<script>
+/* In-page Arabic toggle for index.html — translates UI + sets RTL on demand. */
+(function(){
+  const HTML = document.documentElement;
+  const CACHE_KEY = 'isDemoArCacheV1';
+  const SKIP_TAGS = new Set(['SCRIPT','STYLE','NOSCRIPT','IFRAME','SVG','PATH','CODE','PRE','CANVAS']);
+  const ATTRS = ['placeholder','title','aria-label'];
+  const AR_RE = /[\u0600-\u06FF]/;
+  const EN_RE = /[A-Za-z]/;
+  let CACHE = {};
+  try { CACHE = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}') || {}; } catch(e) { CACHE = {}; }
+  function saveCache(){ try { localStorage.setItem(CACHE_KEY, JSON.stringify(CACHE)); } catch(e){} }
+  function norm(s){ return (s||'').replace(/\s+/g,' ').trim(); }
+  function needs(s){ s = norm(s); if (!s) return false; if (!EN_RE.test(s)) return false; if (AR_RE.test(s)) return false; return true; }
+  async function translateOne(text){
+    const k = norm(text); if (!needs(k)) return text;
+    if (CACHE[k]) return CACHE[k];
+    try {
+      const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ar&dt=t&q=' + encodeURIComponent(k);
+      const r = await fetch(url); const d = await r.json();
+      const t = Array.isArray(d?.[0]) ? d[0].map(x=>x[0]).join('').trim() : k;
+      CACHE[k] = t || k; saveCache(); return CACHE[k];
+    } catch(e){ CACHE[k] = k; return k; }
+  }
+  async function translateMany(items){
+    const list = Array.from(new Set(items.map(norm).filter(needs)));
+    for (let i=0;i<list.length;i+=8){ const chunk = list.slice(i,i+8); await Promise.all(chunk.map(translateOne)); }
+    return items.map(s => CACHE[norm(s)] || s);
+  }
+  function getTextNodes(root){
+    const out = [];
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode(n){
+      if (!n || !n.nodeValue) return NodeFilter.FILTER_REJECT;
+      const p = n.parentElement; if (!p) return NodeFilter.FILTER_REJECT;
+      if (SKIP_TAGS.has(p.tagName)) return NodeFilter.FILTER_REJECT;
+      if (p.closest('script,style,noscript,svg,code,pre,canvas')) return NodeFilter.FILTER_REJECT;
+      if (p.closest('#langAr,#langEn,.is-lang-btn')) return NodeFilter.FILTER_REJECT;
+      if (!needs(norm(n.nodeValue))) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }});
+    let n; while ((n = w.nextNode())) out.push(n);
+    return out;
+  }
+  async function translateNodes(root){
+    const nodes = getTextNodes(root); if (!nodes.length) return;
+    const orig = nodes.map(n => norm(n.nodeValue));
+    const tr = await translateMany(orig);
+    nodes.forEach((n,i) => { if (!n.__originalEn) n.__originalEn = n.nodeValue; const s = norm(n.nodeValue); if (tr[i] && tr[i] !== s) n.nodeValue = n.nodeValue.replace(s, tr[i]); });
+  }
+  async function translateAttrs(root){
+    const els = [root, ...root.querySelectorAll('*')];
+    const work = [];
+    els.forEach(el => ATTRS.forEach(a => { const v = el.getAttribute && el.getAttribute(a); if (needs(v)) work.push({el,a,v:norm(v)}); }));
+    if (!work.length) return;
+    const tr = await translateMany(work.map(x => x.v));
+    work.forEach((it,i) => { if (!it.el.dataset['en'+it.a]) it.el.dataset['en'+it.a] = it.v; if (tr[i] && tr[i] !== it.v) it.el.setAttribute(it.a, tr[i]); });
+  }
+  async function translateOptions(root){
+    const opts = Array.from(root.querySelectorAll('option'));
+    if (!opts.length) return;
+    const orig = opts.map(o => norm(o.textContent));
+    const tr = await translateMany(orig);
+    opts.forEach((o,i) => { if (!o.dataset.en) o.dataset.en = orig[i]; if (tr[i] && tr[i] !== orig[i]) o.textContent = tr[i]; });
+  }
+  async function translateAll(root){ root = root || document.body; await translateNodes(root); await translateAttrs(root); await translateOptions(root); }
+  function restoreEnglish(){
+    function walk(node){
+      if (node.nodeType === 3 && node.__originalEn) { node.nodeValue = node.__originalEn; return; }
+      if (node.nodeType === 1) { for (const a of ATTRS) { const k = 'en'+a; if (node.dataset && node.dataset[k]) node.setAttribute(a, node.dataset[k]); } if (node.tagName === 'OPTION' && node.dataset.en) node.textContent = node.dataset.en; }
+      node.childNodes && node.childNodes.forEach(walk);
+    }
+    walk(document.body);
+  }
+  let scheduled = false;
+  function schedule(){ if (scheduled) return; scheduled = true; requestAnimationFrame(async () => { scheduled = false; if (window.__lang === 'ar') await translateAll(document.body); }); }
+  let observer = null;
+  function startObserver(){
+    if (observer) return;
+    observer = new MutationObserver(muts => { if (window.__lang !== 'ar') return; schedule(); });
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+  function stopObserver(){ if (observer) { observer.disconnect(); observer = null; } }
+  async function activateArabic(){
+    window.__lang = 'ar';
+    HTML.setAttribute('lang','ar'); HTML.setAttribute('dir','rtl');
+    document.body.dir = 'rtl';
+    const ar = document.getElementById('langAr'); const en = document.getElementById('langEn');
+    if (ar) { ar.classList.add('is-lang-active'); ar.setAttribute('aria-current','page'); }
+    if (en) { en.classList.remove('is-lang-active'); en.removeAttribute('aria-current'); }
+    try { localStorage.setItem('is-demo-lang','ar'); } catch(e){}
+    await translateAll(document.body);
+    startObserver();
+  }
+  function activateEnglish(){
+    window.__lang = 'en';
+    HTML.setAttribute('lang','en'); HTML.setAttribute('dir','ltr');
+    document.body.dir = 'ltr';
+    const ar = document.getElementById('langAr'); const en = document.getElementById('langEn');
+    if (en) { en.classList.add('is-lang-active'); en.setAttribute('aria-current','page'); }
+    if (ar) { ar.classList.remove('is-lang-active'); ar.removeAttribute('aria-current'); }
+    try { localStorage.setItem('is-demo-lang','en'); } catch(e){}
+    stopObserver();
+    restoreEnglish();
+  }
+  function wire(){
+    const ar = document.getElementById('langAr'); const en = document.getElementById('langEn');
+    if (ar && !ar.__wired) { ar.__wired = true; ar.removeAttribute('href'); ar.style.cursor='pointer'; ar.addEventListener('click', e => { e.preventDefault(); activateArabic(); }); }
+    if (en && !en.__wired) { en.__wired = true; en.removeAttribute('href'); en.style.cursor='pointer'; en.addEventListener('click', e => { e.preventDefault(); activateEnglish(); }); }
+  }
+  function init(){ wire(); if (localStorage.getItem('is-demo-lang') === 'ar') { setTimeout(activateArabic, 400); } }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  window.addEventListener('load', wire);
+  setTimeout(wire, 600); setTimeout(wire, 2000);
+})();
+</script>
