@@ -3429,6 +3429,62 @@ document.addEventListener('DOMContentLoaded', function () {
   [].forEach(name => wrapFunction(name)); var _arDone=false; function runOnceWhenReady(){ if(_arDone) return; var d=window.opportunitiesData||window.filteredData; if(Array.isArray(d)&&d.length){ _arDone=true; fullPass(); setTimeout(fullPass,600); setTimeout(fullPass,1800); return; } setTimeout(runOnceWhenReady,400); } document.addEventListener('DOMContentLoaded',runOnceWhenReady); window.addEventListener('load',runOnceWhenReady); if(document.readyState!=='loading'){ runOnceWhenReady(); } /* observeMutations disabled to stop continuous re-translation */
 })();
 </script>
+   <style id="opp-card-image-panel-styles">
+.opp-card-noimg { display: flex !important; flex-direction: row !important; align-items: stretch; height: 100%; min-height: 480px; width: 1280px !important; max-width: 1280px !important; flex: 0 0 1280px; position: relative; overflow: hidden; }
+.opp-card-image { flex: 0 0 320px; width: 320px; align-self: stretch; order: 2; background-size: cover; background-position: center; background-repeat: no-repeat; border-top-right-radius: 26px; border-bottom-right-radius: 26px; z-index: 2; overflow: hidden; background: linear-gradient(135deg, #1e3a4f 0%, #0e1a26 100%); }
+.opp-card-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.opp-card-image-fallback { background: linear-gradient(135deg, #35d5c5 0%, #006C35 100%) !important; }
+.opp-card-content { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; order: 1; }
+html[dir="rtl"] .opp-card-image { order: 1; border-top-right-radius: 0; border-bottom-right-radius: 0; border-top-left-radius: 26px; border-bottom-left-radius: 26px; }
+html[dir="rtl"] .opp-card-content { order: 2; }
+</style>
+<script>
+(function(){
+  const SECTOR_IMAGES = { agriculture: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=640&q=80', energy: 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=640&q=80', healthcare: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=640&q=80', environment: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=640&q=80', industrial: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=640&q=80', pharma: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=640&q=80', chemicals: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=640&q=80', realestate: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=640&q=80', financial: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=640&q=80', transport: 'https://images.unsplash.com/photo-1494412651409-8963ce7935a7?w=640&q=80', mining: 'https://images.unsplash.com/photo-1582901867919-4a4d1a3e7b4a?w=640&q=80', tourism: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=640&q=80', education: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=640&q=80', ict: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=640&q=80', innovation: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=640&q=80' };
+  function norm(s){ return String(s||'').toLowerCase().replace(/[^a-z]/g,''); }
+  function sectorImgFor(item){
+    const sectors = ((item && item.sectors) || []).map(norm);
+    for (const s of sectors) { for (const key of Object.keys(SECTOR_IMAGES)) { if (s.includes(key)) return SECTOR_IMAGES[key]; } }
+    return SECTOR_IMAGES.innovation;
+  }
+  function findItemForCard(card){
+    const id = card.getAttribute('data-id') || card.id || (card.querySelector('[data-id]') && card.querySelector('[data-id]').getAttribute('data-id'));
+    const data = window.opportunitiesData || [];
+    if (id) { const hit = data.find(o => o.id === id); if (hit) return hit; }
+    const titleEl = card.querySelector('.opp-card-title, .opp-title-link');
+    if (titleEl) { const t = titleEl.textContent.trim(); const hit = data.find(o => (o.title||'').trim() === t); if (hit) return hit; }
+    return null;
+  }
+  function injectImages(){
+    document.querySelectorAll('.opp-card-noimg').forEach(card => {
+      if (card.querySelector(':scope > .opp-card-image')) return;
+      const item = findItemForCard(card) || {};
+      const src = sectorImgFor(item);
+      const wrap = document.createElement('div');
+      wrap.className = 'opp-card-image';
+      const img = document.createElement('img');
+      img.src = src; img.alt = ''; img.loading = 'lazy';
+      img.onerror = function(){ this.style.display='none'; this.parentNode.classList.add('opp-card-image-fallback'); };
+      wrap.appendChild(img);
+      if (!card.querySelector(':scope > .opp-card-content')) {
+        const content = document.createElement('div');
+        content.className = 'opp-card-content';
+        const kids = Array.from(card.childNodes);
+        kids.forEach(k => content.appendChild(k));
+        card.appendChild(content);
+      }
+      card.appendChild(wrap);
+    });
+  }
+  let scheduled = false;
+  function schedule(){ if (scheduled) return; scheduled = true; requestAnimationFrame(() => { scheduled = false; injectImages(); }); }
+  const tbody = document.getElementById('oppsTableBody');
+  if (tbody) { new MutationObserver(schedule).observe(tbody, { childList: true, subtree: true }); }
+  document.addEventListener('DOMContentLoaded', schedule);
+  window.addEventListener('load', schedule);
+  setTimeout(schedule, 300); setTimeout(schedule, 1200); setTimeout(schedule, 3000);
+})();
+</script>
    
 </body>
 </html>
