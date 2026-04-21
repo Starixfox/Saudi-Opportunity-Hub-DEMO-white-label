@@ -2537,7 +2537,7 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
   const tbody = document.getElementById('oppsTableBody');
 
   try {
-    const response = await fetch('./opportunitiesData.json', { cache: 'no-store' });
+    const response = await fetch('./opportunitiesData.json', { cache: 'default' });
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
@@ -3265,10 +3265,6 @@ document.addEventListener('DOMContentLoaded', function () {
       boot();
     }
   }, 200);
-  setTimeout(() => {
-    clearInterval(wait);
-    boot();
-  }, 5000);
 })();
 </script>
 <script>
