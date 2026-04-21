@@ -22758,18 +22758,15 @@ document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initMobileMenu();
   updateKPIs();
-  renderTable(); // initial render
+  renderTable(); // PATCH: initial render happens before reveal
 
-// PATCH: reveal table only after render + 2 paint frames to prevent raw flash
-requestAnimationFrame(() => {
+  // PATCH: reveal the real table wrapper only after render + 2 paint frames
   requestAnimationFrame(() => {
-    const wrapper = document.getElementById('oppsTableWrapper');
-    if (wrapper) {
-      wrapper.style.visibility = 'visible';
-      wrapper.style.opacity = '1';
-    }
+    requestAnimationFrame(() => {
+      document.getElementById('oppsTableWrapper')?.classList.add('ready');
+    });
   });
-});
+
   renderRecentlyAdded();
   initNavHighlight();
   initTooltips();
