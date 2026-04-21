@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -2856,10 +2857,22 @@ document.addEventListener('DOMContentLoaded', function () {
   function pretty(v) { return (v || '').toString().replace(/_/g, ' ').replace(/\w/g, c => c.toUpperCase()); }
 
   function regionGroup(item) {
-    const country = norm(item.country);
-    const region = norm(item.eligibility_region);
-    if (country.includes('saudi') || region.includes('saudi')) return 'saudi';
-    if (country.includes('uae') || country.includes('qatar') || country.includes('oman') || country.includes('bahrain') || country.includes('kuwait') || region === 'gcc') return 'gcc';
+    // Priority 1: ID prefix — most authoritative signal (SA-, GCC-, GL-)
+    const id = norm(item.id || '');
+    if (id.startsWith('sa-'))  return 'saudi';
+    if (id.startsWith('gcc-')) return 'gcc';
+    if (id.startsWith('gl-'))  return 'global';
+
+    // Priority 2: country field reflects origin, not eligibility
+    const country = norm(item.country || '');
+    if (country.includes('saudi')) return 'saudi';
+    if (country.includes('uae') || country.includes('qatar') || country.includes('oman') ||
+        country.includes('bahrain') || country.includes('kuwait') ||
+        country === 'gcc') return 'gcc';
+
+    // Priority 3: everything else is global
+    // NOTE: eligibility_region is intentionally NOT used here —
+    //       it describes who can apply, not where the opportunity originates.
     return 'global';
   }
 
