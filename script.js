@@ -22765,8 +22765,8 @@ requestAnimationFrame(() => {
   requestAnimationFrame(() => {
     const wrapper = document.getElementById('oppsTableWrapper');
     if (wrapper) {
-      wrapper.style.visibility = '';
-      wrapper.style.opacity = '';
+      wrapper.style.visibility = 'visible';
+      wrapper.style.opacity = '1';
     }
   });
 });
