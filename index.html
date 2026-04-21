@@ -2823,6 +2823,22 @@ document.addEventListener('DOMContentLoaded', function () {
 </html>
 </body>
 <script>
+(async function () {
+  try {
+    const res = await fetch('./opportunitiesData.json', { cache: 'default' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    window.opportunitiesData = await res.json();
+  } catch (e) {
+    console.error('Failed to load opportunitiesData.json:', e);
+    const el = document.getElementById('resultsCount');
+    if (el) el.textContent = 'Failed to load opportunities.';
+    const body = document.getElementById('oppsTableBody');
+    if (body) body.innerHTML = '<p style="color:red;padding:2rem">Could not load opportunitiesData.json — make sure the file is in the same folder.</p>';
+  }
+})();
+</script>
+
+<script>
 (function () {
   const PER_PAGE = 10;
   let currentPage = 1;
