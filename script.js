@@ -22279,9 +22279,8 @@ function renderTable() {
     });
   });
 
-  renderPagination(totalPages, total, start, end);
-}
-
+  renderPagination(totalPages, total, start, end);} 
+ 
 // ============================================================
 // PAGINATION RENDERER
 // ============================================================
@@ -22759,7 +22758,18 @@ document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initMobileMenu();
   updateKPIs();
-  renderTable();
+  renderTable(); // initial render
+
+// PATCH: reveal table only after render + 2 paint frames to prevent raw flash
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    const wrapper = document.getElementById('oppsTableWrapper');
+    if (wrapper) {
+      wrapper.style.visibility = '';
+      wrapper.style.opacity = '';
+    }
+  });
+});
   renderRecentlyAdded();
   initNavHighlight();
   initTooltips();
