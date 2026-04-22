@@ -3272,6 +3272,112 @@ document.addEventListener('DOMContentLoaded', function () {
 })();
 </script>
 <script>
+/* ============================================================
+   Insights Section — Bar Charts
+   Reads window.opportunitiesData once loaded, renders bar
+   charts into the #insights-* containers.
+   ============================================================ */
+(function () {
+
+  /* --- label helpers --- */
+  function labelType(v) {
+    var map = { accelerator:'Accelerator', fellowship:'Fellowship', grant:'Grant',
+      investment_program:'Investment', loan_program:'Loan', other:'Other',
+      partnership_program:'Partnership', tender:'Tender', tender_rfp:'Tender / RFP' };
+    return map[v] || v || 'Other';
+  }
+  function labelRegion(v) {
+    var map = { GCC:'GCC', Global:'Global', Global_including_Saudi:'Global (incl. Saudi)',
+      Saudi:'Saudi Arabia', Saudi_GCC:'Saudi + GCC', Saudi_only:'Saudi Arabia' };
+    return map[v] || v || 'Other';
+  }
+  function labelStatus(v) {
+    var map = { open:'Open', closed_but_recurring:'Recurring', recurring:'Recurring' };
+    return map[v] || v || 'Other';
+  }
+  function countBy(data, field, labelFn) {
+    var counts = {};
+    data.forEach(function(r) {
+      var key = labelFn(r[field]);
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    return counts;
+  }
+  function sortedEntries(counts) {
+    return Object.entries(counts).sort(function(a,b){ return b[1]-a[1]; });
+  }
+  function esc(str) {
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /* --- renderers --- */
+  function renderBars(id, counts) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var entries = sortedEntries(counts);
+    var max = entries[0] ? entries[0][1] : 1;
+    el.innerHTML = '<div class="bar-list">' +
+      entries.map(function(e) {
+        var pct = Math.round((e[1]/max)*100);
+        return '<div class="bar-row">' +
+          '<div class="bar-row__label"><span>' + esc(e[0]) + '</span><strong>' + e[1] + '</strong></div>' +
+          '<div class="bar-row__track"><div class="bar-row__fill" style="width:' + pct + '%"></div></div>' +
+          '</div>';
+      }).join('') +
+    '</div>';
+  }
+
+  function renderTopInstitutions(data) {
+    var el = document.getElementById('insights-top-institutions');
+    if (!el) return;
+    var counts = countBy(data, 'sponsor_institution', function(v){ return v || 'Unknown'; });
+    var entries = sortedEntries(counts).slice(0, 10);
+    el.innerHTML = '<ol class="institution-list">' +
+      entries.map(function(e) {
+        return '<li><span>' + esc(e[0]) + '</span><strong>' + e[1] + '</strong></li>';
+      }).join('') +
+    '</ol>';
+  }
+
+  function renderSnapshot(data) {
+    var el = document.getElementById('insights-snapshot');
+    if (!el) return;
+    var open = data.filter(function(r){ return r.status === 'open'; }).length;
+    var recurring = data.filter(function(r){ return r.status === 'closed_but_recurring' || r.status === 'recurring'; }).length;
+    var saudi = data.filter(function(r){ return r.eligibility_region === 'Saudi_only' || r.eligibility_region === 'Saudi'; }).length;
+    var global_ = data.filter(function(r){ return r.eligibility_region === 'Global' || r.eligibility_region === 'Global_including_Saudi'; }).length;
+    el.innerHTML =
+      '<div class="insight-block">' +
+        '<div class="insight-block__title">Landscape snapshot</div>' +
+        '<p>Tracking <strong>' + data.length + '</strong> opportunities across 15 sectors. ' +
+        '<strong>' + open + '</strong> are currently open and <strong>' + recurring + '</strong> are recurring programs. ' +
+        '<strong>' + saudi + '</strong> are Saudi-only while <strong>' + global_ + '</strong> are open globally.</p>' +
+      '</div>';
+  }
+
+  function renderAll(data) {
+    renderBars('insights-type-chart',   countBy(data, 'type',   labelType));
+    renderBars('insights-region-chart', countBy(data, 'eligibility_region', labelRegion));
+    renderBars('insights-status-chart', countBy(data, 'status', labelStatus));
+    renderTopInstitutions(data);
+    renderSnapshot(data);
+  }
+
+  /* --- wait for opportunitiesData to be set by the fetch script --- */
+  var attempts = 0;
+  var interval = setInterval(function() {
+    attempts++;
+    if (Array.isArray(window.opportunitiesData) && window.opportunitiesData.length > 0) {
+      clearInterval(interval);
+      renderAll(window.opportunitiesData);
+    } else if (attempts > 150) {
+      clearInterval(interval);
+    }
+  }, 100);
+
+})();
+</script>
+<script>
 /* In-page Arabic toggle for index.html — translates UI + sets RTL on demand. */
 (function(){
   const HTML = document.documentElement;
