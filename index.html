@@ -2799,7 +2799,7 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
 
 <div class="panel-overlay" id="panelOverlay" role="presentation" aria-hidden="true"></div>
 
-<aside class="detail-panel" id="detailPanel" aria-label="Opportunity details" aria-hidden="true" role="dialog">
+<aside class="detail-panel" id="detailPanel" aria-label="Opportunity details" aria-hidden="true" role="dialog" tabindex="-1">
   <div class="panel-header">
     <h3 class="panel-title" id="panelTitle">Opportunity Details</h3>
     <button class="panel-close" id="panelClose" aria-label="Close details panel">&#x2715;</button>
@@ -3470,12 +3470,17 @@ document.addEventListener('DOMContentLoaded', function () {
       .table-scroll table { min-width: 100%; }
       .table-scroll thead { display: none; }
       .table-scroll tbody { display: grid; gap: 50px; }
-      .table-scroll tbody tr { display: block; border-bottom: none; cursor: default; background: transparent !important; }
+      .table-scroll tbody tr { display: block; border-bottom: none; cursor: pointer; background: transparent !important; }
       .opp-card-cell { padding: 0 !important; }
       .opp-card-noimg {
         position: relative; display: block; min-height: 0; max-width: 100%;
         background: linear-gradient(180deg, #0c2030 0%, #0a1b29 100%);
         border-radius: 26px; overflow: hidden; box-shadow: var(--shadow-md);
+        transition: box-shadow 0.2s, transform 0.2s;
+      }
+      .opp-card-row:hover .opp-card-noimg {
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        transform: translateY(-2px);
       }
       .opp-card-noimg::after {
         content: ''; position: absolute; inset: auto 0 0 0; height: 140px;
@@ -3663,7 +3668,8 @@ document.addEventListener('DOMContentLoaded', function () {
     panel.setAttribute('aria-hidden', 'false');
     if (overlay) { overlay.classList.add('visible'); overlay.setAttribute('aria-hidden', 'false'); }
     document.body.classList.add('panel-open');
-    panel.focus();
+    panel.setAttribute('tabindex', '-1');
+    try { panel.focus(); } catch(e) {}
   }
 
   function closePanel() {
@@ -3679,15 +3685,25 @@ document.addEventListener('DOMContentLoaded', function () {
   if (overlay)    overlay.addEventListener('click', closePanel);
   document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePanel(); });
 
-  // Wire card row clicks — using event delegation on the table body
+  // Wire card row clicks — using event delegation
   document.addEventListener('click', function(e) {
     var row = e.target.closest('.opp-card-row');
     if (!row) return;
-    // Don\'t open panel if user clicked the "Go to Website" link
-    if (e.target.closest('.opp-card-link')) return;
+    // Don't open panel if user clicked the "Go to Website" link
+    if (e.target.closest('.opp-card-link, a, button')) return;
     var id = row.dataset.id;
-    var data = window.opportunitiesData || [];
-    var item = data.find(function(r){ return r.id === id; });
+    var allData = window.opportunitiesData || window.allOpportunities || [];
+    var item = null;
+    // Try by ID first
+    if (id) item = allData.find(function(r){ return String(r.id) === String(id); });
+    // Fallback: match by title from the card heading
+    if (!item) {
+      var titleEl = row.querySelector('.opp-card-title');
+      if (titleEl) {
+        var titleText = titleEl.textContent.trim();
+        item = allData.find(function(r){ return (r.title||'').trim() === titleText; });
+      }
+    }
     if (item) openPanel(item);
   });
 
