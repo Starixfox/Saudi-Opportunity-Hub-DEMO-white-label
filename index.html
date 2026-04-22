@@ -2582,6 +2582,18 @@ html[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
       <div class="is-stat-item" role="listitem">Available for API integration</div>
     </div>
 
+    <div class="preset-chips-row" id="presetChipsRow" aria-label="Quick filter presets">
+      <span class="preset-label">Quick filters:</span>
+      <button class="preset-chip" data-preset="open-grants">Open Grants</button>
+      <button class="preset-chip" data-preset="saudi-only">Saudi Only</button>
+      <button class="preset-chip" data-preset="ict-tech">ICT &amp; Tech</button>
+      <button class="preset-chip" data-preset="startup-friendly">Startup-Friendly</button>
+      <button class="preset-chip" data-preset="energy-green">Energy &amp; Green</button>
+      <button class="preset-chip" data-preset="healthcare">Healthcare</button>
+      <button class="preset-chip" data-preset="global-programs">Global Programs</button>
+      <button class="preset-chip" data-preset="investment-ready">Investment Ready</button>
+    </div>
+
     <div class="filter-bar" role="search" aria-label="Filter opportunities">
       <div class="filter-row">
         <div class="filter-group search">
@@ -2696,8 +2708,18 @@ html[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
     <!-- ACTIVE FILTER CHIPS -->
     <div id="activeFilterChips" class="active-chips-row" role="status" aria-live="polite" aria-label="Active filters" hidden></div>
 
-    <div class="results-bar" aria-live="polite" aria-atomic="true">
+    <div class="results-bar" id="resultsBar" aria-live="polite" aria-atomic="true">
       <span id="resultsCount">Loading&hellip;</span>
+      <div class="view-toggle" role="group" aria-label="Card view">
+        <button class="view-btn view-btn--detailed active" id="viewBtnDetailed" title="Detailed view" aria-pressed="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="5" rx="1"/><rect x="3" y="10" width="18" height="5" rx="1"/><rect x="3" y="17" width="18" height="5" rx="1"/></svg>
+          <span>Detailed</span>
+        </button>
+        <button class="view-btn view-btn--compact" id="viewBtnCompact" title="Compact view" aria-pressed="false">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <span>Compact</span>
+        </button>
+      </div>
       <div class="sort-control">
         <label for="sortSelect" class="sort-label">Sort</label>
         <select id="sortSelect" class="sort-select" aria-label="Sort opportunities">
@@ -3416,6 +3438,29 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
+<div id="compareTray" class="compare-tray compare-tray--hidden" role="complementary" aria-label="Comparison tray">
+  <div class="compare-tray__header">
+    <span class="compare-tray__count"><span id="compareCount">0</span> selected for comparison</span>
+    <div class="compare-tray__actions">
+      <button class="compare-tray__compare-btn" id="compareOpenBtn" disabled>Compare</button>
+      <button class="compare-tray__clear" id="compareClearBtn">Clear all</button>
+    </div>
+  </div>
+  <div class="compare-tray__slots" id="compareTraySlots"></div>
+</div>
+
+<!-- Compare modal -->
+<div id="compareModal" class="compare-modal compare-modal--hidden" role="dialog" aria-modal="true" aria-label="Compare opportunities">
+  <div class="compare-modal__inner">
+    <div class="compare-modal__header">
+      <h2>Compare Opportunities</h2>
+      <button class="compare-modal__close" id="compareModalClose" aria-label="Close">✕</button>
+    </div>
+    <div class="compare-modal__body" id="compareModalBody"></div>
+  </div>
+</div>
+<div id="compareOverlay" class="compare-overlay compare-overlay--hidden"></div>
+
 </body>
 </html>
 </body>
@@ -3584,7 +3629,9 @@ document.addEventListener('DOMContentLoaded', function () {
       else html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" data-page="${p}">${p}</button>`;
     });
     html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} data-page="next">›</button>`;
-    html += `<span class="page-info">Page ${currentPage} of ${totalPages}</span>`;
+    var showStart = (currentPage - 1) * PER_PAGE + 1;
+    var showEnd = Math.min(currentPage * PER_PAGE, filteredData.length);
+    html += `<span class="page-info">${showStart}\u2013${showEnd} of ${filteredData.length}</span>`;
     pagination.innerHTML = html;
     pagination.querySelectorAll('.page-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -3605,7 +3652,56 @@ document.addEventListener('DOMContentLoaded', function () {
     const start = (currentPage - 1) * PER_PAGE;
     const pageItems = (sortedData.length ? sortedData : filteredData).slice(start, start + PER_PAGE);
     if (!pageItems.length) {
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon">⌕</div><div class="empty-title">No records match your current filters</div><div class="empty-sub">Try broadening your search — adjust the sector, region, or program type. If you believe a relevant opportunity is missing from the database, use the feedback form to flag it.</div></td></tr>';
+      var suggestions = [];
+      var typeEl = document.getElementById('typeFilter');
+      var regionEl = document.getElementById('countryFilter');
+      var sectorEl = document.getElementById('sectorFilter');
+      var statusEl = document.getElementById('statusFilter');
+      var searchEl = document.getElementById('searchInput');
+      if (searchEl && searchEl.value.trim()) suggestions.push('clearing the search term');
+      if (typeEl && typeEl.value && typeEl.value !== 'all') suggestions.push('removing the program type filter');
+      if (regionEl && regionEl.value && regionEl.value !== 'all') suggestions.push('broadening the region');
+      if (sectorEl && sectorEl.value && sectorEl.value !== 'all') suggestions.push('changing the sector');
+      if (statusEl && statusEl.value && statusEl.value !== 'all') suggestions.push('including closed or recurring programs');
+      var sugText = suggestions.length ? 'Try ' + suggestions.slice(0,2).join(' or ') + '.' : 'Try broadening your search criteria.';
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon">&#x2315;</div><div class="empty-title">No matching opportunities found</div><div class="empty-sub">' + sugText + '</div><div style="margin-top:16px"><button class="empty-reset-btn" onclick="document.getElementById(\'resetBtn\')?.click()">Reset all filters</button></div></td></tr>';
+      renderPagination();
+      updateCounts(dataSource());
+      return;
+    }
+    var searchTerm = (document.getElementById('searchInput') ? document.getElementById('searchInput').value : '').trim();
+    if (currentView === 'compact') {
+      tbody.innerHTML = pageItems.map(function(item) {
+        const region = regionGroup(item);
+        return `
+          <tr class="opp-card-row opp-card-row--compact" data-id="${item.id || ''}">
+            <td colspan="7" class="opp-card-cell">
+              <div class="opp-card-compact">
+                <div class="occ-left">
+                  <span class="pill ${typeClass(item.type)}">${pretty(item.type || 'Other')}</span>
+                  <span class="status-badge ${statusClass(item.status)}">${pretty(item.status || 'Unknown')}</span>
+                  ${item.isNew ? '<span class="badge-new">New</span>' : ''}
+                </div>
+                <div class="occ-title">${highlightTerm(item.title || 'Untitled', searchTerm)}</div>
+                <div class="occ-meta">
+                  <span>${item.funding_amount || '\u2014'}</span>
+                  <span class="occ-sep">\u00b7</span>
+                  <span>${item.deadline_date || 'No deadline'}</span>
+                  <span class="occ-sep">\u00b7</span>
+                  <span>${item.country || pretty(item.eligibility_region) || 'Global'}</span>
+                </div>
+                <div class="occ-actions">
+                  <button class="opp-insights-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" type="button">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    Insights
+                  </button>
+                  <a class="panel-link-btn opp-card-link" href="${item.application_link || '#'}" ${item.application_link ? 'target="_blank" rel="noopener noreferrer"' : ''} style="padding:6px 10px;font-size:11px;">Apply</a>
+                </div>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
       renderPagination();
       updateCounts(dataSource());
       return;
@@ -3617,8 +3713,9 @@ document.addEventListener('DOMContentLoaded', function () {
         <tr class="opp-card-row" data-id="${item.id || ''}">
           <td colspan="7" class="opp-card-cell">
             <article class="opp-card-noimg">
+              <button class="opp-select-btn" data-id="${item.id || ''}" title="Add to comparison" aria-label="Select for comparison"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></button>
               <div class="opp-card-content">
-                <h3 class="opp-card-title">${item.title || 'Untitled opportunity'}</h3>
+                <h3 class="opp-card-title">${highlightTerm(item.title || 'Untitled opportunity', searchTerm)}</h3>
                 <div class="opp-card-meta">
                   <span class="opp-meta-item">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="10" width="18" height="11" rx="2"/><path d="M7 10V6a1 1 0 0 1 1-1h2v5M15 10V4h1a1 1 0 0 1 1 1v5"/></svg>
@@ -3629,7 +3726,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <span>${item.country || pretty(item.eligibility_region) || 'Global'}</span>
                   </span>
                 </div>
-                <p class="opp-card-desc">${item.description_short || 'No description available.'}</p>
+                <p class="opp-card-desc">${highlightTerm(item.description_short || 'No description available.', searchTerm)}</p>
                 <div class="opp-card-chips">${chips.map(c => `<span class="opp-card-chip">${c}</span>`).join('')}</div>
                 <div class="opp-card-stats">
                   <div class="opp-card-stat">
@@ -3637,17 +3734,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="opp-card-label">Funding / Size</div>
                   </div>
                   <div class="opp-card-stat">
-                    <div class="opp-card-value">${pretty(item.status || 'Unknown')}</div>
+                    <div class="opp-card-value">${withTooltip(pretty(item.status || 'Unknown'))}</div>
                     <div class="opp-card-label">Status</div>
                   </div>
                   <div class="opp-card-stat">
-                    <div class="opp-card-value">${item.deadline_date || item.last_verified || 'TBA'}</div>
-                    <div class="opp-card-label">Deadline / Verified</div>
+                    <div class="opp-card-value">${item.deadline_date || 'TBA'}</div>
+                    <div class="opp-card-label">Deadline${item.last_verified ? ` &middot; <span title="Last verified: ${item.last_verified}" class="gloss-tip" data-tip="Data last verified: ${item.last_verified}">Verified ${item.last_verified}</span>` : ''}</div>
                   </div>
                 </div>
                 <div class="opp-card-actions">
                   <div class="opp-card-badges">
-                    <span class="pill ${typeClass(item.type)}">${pretty(item.type || 'Other')}</span>
+                    <span class="pill ${typeClass(item.type)}">${withTooltip(pretty(item.type || 'Other'))}</span>
                     <span class="region-tag region-${region}">${region}</span>
                     <span class="status-badge ${statusClass(item.status)}">${pretty(item.status || 'Unknown')}</span>
                     ${item.isNew ? '<span class="badge-new">New</span>' : ''}
@@ -3919,8 +4016,16 @@ document.addEventListener('DOMContentLoaded', function () {
     ['searchInput','sectorFilter','countryFilter','typeFilter','statusFilter'].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
-      el.addEventListener('input', applyFilters);
-      el.addEventListener('change', applyFilters);
+      el.addEventListener('input', function() {
+        activePreset = null;
+        document.querySelectorAll('.preset-chip').forEach(function(c) { c.classList.remove('active'); });
+        applyFilters();
+      });
+      el.addEventListener('change', function() {
+        activePreset = null;
+        document.querySelectorAll('.preset-chip').forEach(function(c) { c.classList.remove('active'); });
+        applyFilters();
+      });
     });
     document.querySelectorAll('.profile-chip').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -3931,6 +4036,8 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.classList.add('active');
         btn.setAttribute('aria-pressed', 'true');
         selectedProfile = btn.dataset.profile || 'all';
+        activePreset = null;
+        document.querySelectorAll('.preset-chip').forEach(function(c) { c.classList.remove('active'); });
         applyFilters();
       });
     });
@@ -4010,8 +4117,297 @@ document.addEventListener('DOMContentLoaded', function () {
         .opp-card-stat:last-child { border-bottom: 0; padding-bottom: 0; }
         .opp-card-actions { flex-direction: column; align-items: flex-start; }
       }
+      .results-bar { position: sticky; top: 64px; z-index: 90; background: var(--bg-deep, #060d14); border-bottom: 1px solid rgba(255,255,255,.07); backdrop-filter: blur(8px); padding: 8px 0; margin: 0 -1rem; padding-left: 1rem; padding-right: 1rem; box-shadow: 0 4px 16px rgba(0,0,0,.3); }
+      @media (max-width: 768px) { .results-bar { top: 56px; } }
+      .view-toggle { display: flex; gap: 4px; align-items: center; }
+      .view-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; font-size: 11px; font-weight: 600; border-radius: 8px; border: 1px solid rgba(255,255,255,.15); background: transparent; color: rgba(255,255,255,.55); cursor: pointer; transition: background 0.15s, color 0.15s; }
+      .view-btn.active, .view-btn:hover { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.30); }
+      mark.hl { background: rgba(255,210,0,.28); color: #fff; border-radius: 3px; padding: 0 2px; }
+      .opp-card-compact { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: rgba(255,255,255,.04); border-radius: 12px; border: 1px solid rgba(255,255,255,.08); flex-wrap: wrap; min-height: 0; }
+      .occ-left { display: flex; gap: 5px; align-items: center; flex-shrink: 0; }
+      .occ-title { flex: 1 1 260px; font-size: 13px; font-weight: 600; color: #fff; line-height: 1.3; min-width: 0; }
+      .occ-meta { display: flex; gap: 6px; align-items: center; color: rgba(255,255,255,.55); font-size: 11px; flex-shrink: 0; flex-wrap: wrap; }
+      .occ-sep { color: rgba(255,255,255,.25); }
+      .occ-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+      .view--compact .table-scroll tbody { gap: 6px; }
+      .preset-chips-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 0 4px; }
+      .preset-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,.45); text-transform: uppercase; letter-spacing: .06em; margin-right: 2px; flex-shrink: 0; }
+      .preset-chip { padding: 5px 11px; border-radius: 999px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: rgba(255,255,255,.75); font-size: 11px; font-weight: 600; cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s; white-space: nowrap; }
+      .preset-chip:hover, .preset-chip.active { background: rgba(53,213,197,.18); border-color: rgba(53,213,197,.55); color: #35d5c5; }
+      @media (max-width: 768px) { .preset-chips-row { gap: 5px; } .preset-chip { font-size: 10px; padding: 4px 9px; } }
+      .compare-tray { position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: rgba(10,18,28,.97); border-top: 1px solid rgba(53,213,197,.3); backdrop-filter: blur(12px); padding: 10px 20px; transform: translateY(100%); transition: transform 0.25s cubic-bezier(.4,0,.2,1); box-shadow: 0 -8px 32px rgba(0,0,0,.5); }
+      .compare-tray--visible { transform: translateY(0); }
+      .compare-tray--hidden { transform: translateY(100%); }
+      .compare-tray__header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+      .compare-tray__count { font-size: 12px; color: rgba(255,255,255,.65); }
+      .compare-tray__actions { display: flex; gap: 8px; }
+      .compare-tray__compare-btn { padding: 7px 14px; border-radius: 8px; background: #35d5c5; color: #000; font-size: 12px; font-weight: 700; border: none; cursor: pointer; transition: opacity .15s; }
+      .compare-tray__compare-btn:disabled { opacity: .35; cursor: not-allowed; }
+      .compare-tray__clear { padding: 7px 12px; border-radius: 8px; background: rgba(255,255,255,.07); color: rgba(255,255,255,.7); font-size: 12px; border: 1px solid rgba(255,255,255,.12); cursor: pointer; }
+      .compare-tray__slots { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+      .compare-slot { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: 6px 10px; font-size: 11px; color: rgba(255,255,255,.8); max-width: 260px; }
+      .compare-slot__title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .compare-slot__remove { background: none; border: none; color: rgba(255,255,255,.45); cursor: pointer; font-size: 14px; padding: 0 2px; line-height: 1; flex-shrink: 0; }
+      .compare-modal { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; padding: 20px; }
+      .compare-modal--hidden { display: none; }
+      .compare-overlay { position: fixed; inset: 0; z-index: 299; background: rgba(0,0,0,.7); backdrop-filter: blur(4px); }
+      .compare-overlay--hidden { display: none; }
+      .compare-modal__inner { background: #0c1a24; border: 1px solid rgba(53,213,197,.2); border-radius: 16px; max-width: 900px; width: 100%; max-height: 85vh; overflow-y: auto; position: relative; }
+      .compare-modal__header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,.1); }
+      .compare-modal__header h2 { font-size: 16px; color: #fff; margin: 0; }
+      .compare-modal__close { background: none; border: none; color: rgba(255,255,255,.5); font-size: 18px; cursor: pointer; padding: 4px 8px; }
+      .compare-modal__body { padding: 20px; display: grid; gap: 16px; }
+      .compare-item { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 16px; }
+      .compare-item__title { font-size: 14px; font-weight: 700; color: #fff; margin: 0 0 10px; }
+      .compare-item__row { display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.06); font-size: 12px; }
+      .compare-item__row:last-child { border-bottom: none; }
+      .compare-item__key { color: rgba(255,255,255,.5); flex-shrink: 0; }
+      .compare-item__val { color: rgba(255,255,255,.88); text-align: right; }
+      .opp-select-btn { position: absolute; top: 14px; right: 14px; width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid rgba(255,255,255,.25); background: rgba(0,0,0,.4); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; transition: background .15s, border-color .15s; }
+      .opp-select-btn.selected { background: #35d5c5; border-color: #35d5c5; }
+      .opp-select-btn svg { display: none; }
+      .opp-select-btn.selected svg { display: block; }
+      @media (max-width: 768px) { .compare-tray { padding: 10px 12px; } .compare-modal__body { grid-template-columns: 1fr; } }
+      .gloss-tip { position: relative; cursor: help; display: inline-flex; align-items: center; gap: 3px; }
+      .gloss-icon { color: rgba(255,255,255,.35); flex-shrink: 0; }
+      .gloss-tip::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #0c1a24; border: 1px solid rgba(53,213,197,.3); color: rgba(255,255,255,.9); font-size: 11px; line-height: 1.45; padding: 7px 10px; border-radius: 8px; white-space: normal; max-width: 220px; width: max-content; z-index: 500; opacity: 0; pointer-events: none; transition: opacity .15s; box-shadow: 0 4px 16px rgba(0,0,0,.5); }
+      .gloss-tip:hover::after, .gloss-tip:focus::after { opacity: 1; }
+      #pagination { justify-content: center; padding: 12px 0 4px; }
+      .page-btn { font-weight: 600; letter-spacing: -.01em; }
+      .page-btn.active { box-shadow: 0 0 0 3px rgba(53,213,197,.25); }
+      .page-btn:focus-visible { outline: 2px solid #35d5c5; outline-offset: 2px; }
+      .page-info { background: rgba(255,255,255,.05); border-radius: 8px; padding: 4px 10px; font-size: 11px; color: rgba(255,255,255,.5); }
+      .empty-reset-btn { padding: 8px 18px; border-radius: 999px; background: rgba(53,213,197,.15); border: 1px solid rgba(53,213,197,.35); color: #35d5c5; font-size: 12px; font-weight: 600; cursor: pointer; transition: background .15s; }
+      .empty-reset-btn:hover { background: rgba(53,213,197,.28); }
+      @media (max-width: 768px) {
+        .opp-insights-btn, .opp-card-link, .panel-link-btn { min-height: 44px; padding: 10px 16px; font-size: 13px; }
+        .profile-chip { min-height: 40px; padding: 8px 14px; font-size: 12px; }
+        .page-btn { min-width: 44px; min-height: 44px; font-size: 13px; }
+        .preset-chip { min-height: 36px; }
+        .opp-card-title { font-size: clamp(16px, 4vw, 22px); }
+      }
     `;
     document.head.appendChild(style);
+  }
+
+  function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  function highlightTerm(text, term) {
+    if (!term || !text) return text || '';
+    try {
+      var re = new RegExp('(' + escapeRegex(term) + ')', 'gi');
+      return text.replace(re, '<mark class="hl">$1</mark>');
+    } catch(e) { return text; }
+  }
+
+  var currentView = 'detailed'; // 'detailed' | 'compact'
+
+  function wireViewToggle() {
+    var btnDetailed = document.getElementById('viewBtnDetailed');
+    var btnCompact = document.getElementById('viewBtnCompact');
+    if (!btnDetailed || !btnCompact) return;
+    function setView(v) {
+      currentView = v;
+      btnDetailed.classList.toggle('active', v === 'detailed');
+      btnDetailed.setAttribute('aria-pressed', v === 'detailed');
+      btnCompact.classList.toggle('active', v === 'compact');
+      btnCompact.setAttribute('aria-pressed', v === 'compact');
+      var wrapper = document.getElementById('oppsTableWrapper');
+      if (wrapper) wrapper.classList.toggle('view--compact', v === 'compact');
+      renderCards();
+    }
+    btnDetailed.addEventListener('click', function() { setView('detailed'); });
+    btnCompact.addEventListener('click', function() { setView('compact'); });
+  }
+
+  var activePreset = null;
+
+  function applyPreset(preset) {
+    var searchInput = document.getElementById('searchInput');
+    var typeSelect = document.getElementById('typeFilter');
+    var regionSelect = document.getElementById('countryFilter');
+    var sectorSelect = document.getElementById('sectorFilter');
+    var statusSelect = document.getElementById('statusFilter');
+    if (searchInput) searchInput.value = '';
+    if (typeSelect) typeSelect.value = 'all';
+    if (regionSelect) regionSelect.value = 'all';
+    if (sectorSelect) sectorSelect.value = 'all';
+    if (statusSelect) statusSelect.value = 'all';
+    selectedProfile = 'all';
+    document.querySelectorAll('.profile-chip').forEach(function(c) {
+      c.classList.toggle('active', c.dataset.profile === 'all');
+      c.setAttribute('aria-pressed', c.dataset.profile === 'all' ? 'true' : 'false');
+    });
+    if (preset === 'open-grants') {
+      if (typeSelect) typeSelect.value = 'grant';
+      if (statusSelect) statusSelect.value = 'open';
+    } else if (preset === 'saudi-only') {
+      if (regionSelect) regionSelect.value = 'saudi';
+    } else if (preset === 'ict-tech') {
+      if (sectorSelect) sectorSelect.value = 'ict';
+    } else if (preset === 'startup-friendly') {
+      selectedProfile = 'startup';
+      document.querySelectorAll('.profile-chip').forEach(function(c) {
+        c.classList.toggle('active', c.dataset.profile === 'startup');
+        c.setAttribute('aria-pressed', c.dataset.profile === 'startup' ? 'true' : 'false');
+      });
+    } else if (preset === 'energy-green') {
+      if (sectorSelect) sectorSelect.value = 'energy';
+    } else if (preset === 'healthcare') {
+      if (sectorSelect) sectorSelect.value = 'healthcare';
+    } else if (preset === 'global-programs') {
+      if (regionSelect) regionSelect.value = 'global';
+    } else if (preset === 'investment-ready') {
+      if (typeSelect) typeSelect.value = 'investment_program';
+    }
+    currentPage = 1;
+    applyFilters();
+  }
+
+  function wirePresets() {
+    var row = document.getElementById('presetChipsRow');
+    if (!row) return;
+    row.addEventListener('click', function(e) {
+      var btn = e.target.closest('.preset-chip');
+      if (!btn) return;
+      var preset = btn.dataset.preset;
+      if (activePreset === preset) {
+        activePreset = null;
+        btn.classList.remove('active');
+        var searchInput = document.getElementById('searchInput');
+        var typeSelect = document.getElementById('typeFilter');
+        var regionSelect = document.getElementById('countryFilter');
+        var sectorSelect = document.getElementById('sectorFilter');
+        var statusSelect = document.getElementById('statusFilter');
+        if (searchInput) searchInput.value = '';
+        if (typeSelect) typeSelect.value = 'all';
+        if (regionSelect) regionSelect.value = 'all';
+        if (sectorSelect) sectorSelect.value = 'all';
+        if (statusSelect) statusSelect.value = 'all';
+        selectedProfile = 'all';
+        document.querySelectorAll('.profile-chip').forEach(function(c) {
+          c.classList.toggle('active', c.dataset.profile === 'all');
+          c.setAttribute('aria-pressed', c.dataset.profile === 'all' ? 'true' : 'false');
+        });
+        currentPage = 1;
+        applyFilters();
+      } else {
+        activePreset = preset;
+        document.querySelectorAll('.preset-chip').forEach(function(c) { c.classList.remove('active'); });
+        btn.classList.add('active');
+        applyPreset(preset);
+      }
+    });
+  }
+
+  // ── TASK 2: GLOSSARY ─────────────────────────────────────────────
+  var GLOSSARY = {
+    'Open': 'Applications are currently being accepted.',
+    'Closed But Recurring': 'Not currently open, but opens again on a regular cycle. Check back for the next round.',
+    'Recurring': 'This program runs multiple times per year. Applications may open at any time.',
+    'Grant': 'Non-repayable funds awarded to qualifying organizations or individuals.',
+    'Tender / Rfp': 'A competitive bid process — submit a proposal to win a contract.',
+    'Accelerator': 'A structured program offering mentorship, funding, and resources for early-stage ventures.',
+    'Fellowship': 'A funded research or professional development position, typically time-limited.',
+    'Loan Program': 'Repayable financing at favorable terms, often below-market interest.',
+    'Investment Program': 'Equity or quasi-equity funding in exchange for a stake in your organization.',
+    'Partnership Program': 'A collaboration framework between institutions — not direct cash funding.',
+    'Gcc': 'Gulf Cooperation Council — Saudi Arabia, UAE, Qatar, Kuwait, Bahrain, Oman.',
+    'Saudi Only': 'Open exclusively to organizations or individuals based in Saudi Arabia.',
+    'Global': 'Open to applicants worldwide, including Saudi Arabia.',
+    'Startup': 'Early-stage ventures, typically pre-Series A or equivalent.',
+    'Researcher': 'Academic or R&D professionals at universities or research institutes.',
+    'Government': 'Public-sector entities and government agencies.',
+    'Investor': 'VCs, family offices, angels, and institutional investors.',
+    'Student': 'Undergraduate, graduate, or PhD students.'
+  };
+
+  function withTooltip(text, key) {
+    var tip = GLOSSARY[key || text];
+    if (!tip) return text;
+    return '<span class="gloss-tip" data-tip="' + tip.replace(/"/g, '&quot;') + '" tabindex="0" role="tooltip" aria-label="' + tip.replace(/"/g, '&quot;') + '">' + text + '<svg class="gloss-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>';
+  }
+
+  // ── TASK 1: COMPARE TRAY ─────────────────────────────────────────
+  var compareItems = [];
+  var MAX_COMPARE = 3;
+
+  function updateCompareTray() {
+    var tray = document.getElementById('compareTray');
+    var slotsEl = document.getElementById('compareTraySlots');
+    var countEl = document.getElementById('compareCount');
+    var compareBtn = document.getElementById('compareOpenBtn');
+    if (!tray) return;
+
+    if (compareItems.length === 0) {
+      tray.classList.remove('compare-tray--visible');
+      tray.classList.add('compare-tray--hidden');
+    } else {
+      tray.classList.add('compare-tray--visible');
+      tray.classList.remove('compare-tray--hidden');
+    }
+    if (countEl) countEl.textContent = compareItems.length;
+    if (compareBtn) compareBtn.disabled = compareItems.length < 2;
+
+    if (slotsEl) {
+      slotsEl.innerHTML = compareItems.map(function(item) {
+        return '<div class="compare-slot"><span class="compare-slot__title" title="' + (item.title||'') + '">' + (item.title||'Untitled') + '</span><button class="compare-slot__remove" data-remove-id="' + (item.id||'') + '" aria-label="Remove">✕</button></div>';
+      }).join('');
+      slotsEl.querySelectorAll('.compare-slot__remove').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var rid = btn.dataset.removeId;
+          compareItems = compareItems.filter(function(i) { return (i.id||'') !== rid; });
+          updateCompareTray();
+          document.querySelectorAll('.opp-select-btn[data-id="' + rid + '"]').forEach(function(b) { b.classList.remove('selected'); });
+        });
+      });
+    }
+  }
+
+  function openCompareModal() {
+    var modal = document.getElementById('compareModal');
+    var overlay = document.getElementById('compareOverlay');
+    var body = document.getElementById('compareModalBody');
+    if (!modal || !body) return;
+    body.innerHTML = compareItems.map(function(item) {
+      return '<div class="compare-item">' +
+        '<div class="compare-item__title">' + (item.title||'Untitled') + '</div>' +
+        [
+          ['Type', pretty(item.type||'')],
+          ['Status', pretty(item.status||'')],
+          ['Funding', item.funding_amount||'\u2014'],
+          ['Deadline', item.deadline_date||'\u2014'],
+          ['Region', item.country || pretty(item.eligibility_region)||'Global'],
+          ['Sponsor', item.sponsor_institution||'\u2014'],
+          ['Profiles', (item.profiles||[]).map(pretty).join(', ')||'\u2014'],
+          ['Sectors', (item.sectors||[]).map(pretty).join(', ')||'\u2014']
+        ].map(function(r) {
+          return '<div class="compare-item__row"><span class="compare-item__key">' + r[0] + '</span><span class="compare-item__val">' + r[1] + '</span></div>';
+        }).join('') +
+      '</div>';
+    }).join('');
+    modal.classList.remove('compare-modal--hidden');
+    if (overlay) { overlay.classList.remove('compare-overlay--hidden'); }
+  }
+
+  function wireCompareTray() {
+    var openBtn = document.getElementById('compareOpenBtn');
+    var clearBtn = document.getElementById('compareClearBtn');
+    var closeBtn = document.getElementById('compareModalClose');
+    var overlay = document.getElementById('compareOverlay');
+    if (openBtn) openBtn.addEventListener('click', openCompareModal);
+    if (clearBtn) clearBtn.addEventListener('click', function() {
+      compareItems = [];
+      updateCompareTray();
+      document.querySelectorAll('.opp-select-btn').forEach(function(b) { b.classList.remove('selected'); });
+    });
+    if (closeBtn) closeBtn.addEventListener('click', function() {
+      document.getElementById('compareModal').classList.add('compare-modal--hidden');
+      if (overlay) overlay.classList.add('compare-overlay--hidden');
+    });
+    if (overlay) overlay.addEventListener('click', function() {
+      document.getElementById('compareModal').classList.add('compare-modal--hidden');
+      overlay.classList.add('compare-overlay--hidden');
+    });
   }
 
   function boot() {
@@ -4020,12 +4416,40 @@ document.addEventListener('DOMContentLoaded', function () {
     installStyles();
     wireFilters();
     wireSort();
+    wireViewToggle();
+    wirePresets();
     wireSectorDeepLinks();
+    wireCompareTray();
     renderRecentlyAdded();
     filteredData = dataSource().slice();
     applyFilters();
     renderActiveChips();
     updateProvenanceCount();
+    var tbody2 = document.getElementById('oppsTableBody');
+    if (tbody2) {
+      tbody2.addEventListener('click', function(e) {
+        var btn = e.target.closest('.opp-select-btn');
+        if (!btn) return;
+        e.stopPropagation();
+        var id = btn.dataset.id;
+        var allData = window.opportunitiesData || window.allOpportunities || [];
+        var item = allData.find(function(x) { return (x.id||'') === id; });
+        if (!item) return;
+        var idx = compareItems.findIndex(function(x) { return (x.id||'') === id; });
+        if (idx >= 0) {
+          compareItems.splice(idx, 1);
+          btn.classList.remove('selected');
+        } else {
+          if (compareItems.length >= MAX_COMPARE) {
+            alert('You can compare up to ' + MAX_COMPARE + ' opportunities at a time.');
+            return;
+          }
+          compareItems.push(item);
+          btn.classList.add('selected');
+        }
+        updateCompareTray();
+      });
+    }
   }
 
   const wait = setInterval(() => {
