@@ -3672,31 +3672,57 @@ document.addEventListener('DOMContentLoaded', function () {
     var searchTerm = (document.getElementById('searchInput') ? document.getElementById('searchInput').value : '').trim();
     if (currentView === 'compact') {
       tbody.innerHTML = pageItems.map(function(item) {
-        const region = regionGroup(item);
+        // Compact: derive the 6 highest-value data points only
+        var typeLabel  = pretty(item.type || 'Other');
+        var statusCls  = statusClass(item.status);
+        var statusDot  = item.status === 'open' ? '#16a34a'
+                       : item.status === 'closed_but_recurring' ? '#d97706'
+                       : item.status === 'recurring' ? '#2563eb' : '#94a3b8';
+        var funding    = item.funding_amount || '';
+        var region     = item.country || pretty(item.eligibility_region) || 'Global';
+        var deadline   = item.deadline_date ? item.deadline_date : '';
+        var sponsor    = item.sponsor_institution || '';
+        var titleStr   = highlightTerm(item.title || 'Untitled', searchTerm);
+        var applyHref  = item.application_link || '#';
+        var applyAttrs = item.application_link ? 'target="_blank" rel="noopener noreferrer"' : '';
+
+        // Status label: shorten verbose statuses
+        var statusLabel = item.status === 'open' ? 'Open'
+                        : item.status === 'closed_but_recurring' ? 'Recurring'
+                        : item.status === 'recurring' ? 'Recurring' : 'Closed';
+
         return `
           <tr class="opp-card-row opp-card-row--compact" data-id="${item.id || ''}">
             <td colspan="7" class="opp-card-cell">
-              <div class="opp-card-compact">
-                <div class="occ-left">
-                  <span class="pill ${typeClass(item.type)}">${pretty(item.type || 'Other')}</span>
-                  <span class="status-badge ${statusClass(item.status)}">${pretty(item.status || 'Unknown')}</span>
-                  ${item.isNew ? '<span class="badge-new">New</span>' : ''}
+              <div class="occ-row">
+
+                <!-- LEFT: type pill + title + sponsor -->
+                <div class="occ-primary">
+                  <span class="pill ${typeClass(item.type)} occ-pill">${typeLabel}</span>
+                  <div class="occ-title">${titleStr}</div>
+                  ${sponsor ? `<div class="occ-sponsor">${sponsor}</div>` : ''}
                 </div>
-                <div class="occ-title">${highlightTerm(item.title || 'Untitled', searchTerm)}</div>
-                <div class="occ-meta">
-                  <span>${item.funding_amount || '\u2014'}</span>
-                  <span class="occ-sep">\u00b7</span>
-                  <span>${item.deadline_date || 'No deadline'}</span>
-                  <span class="occ-sep">\u00b7</span>
-                  <span>${item.country || pretty(item.eligibility_region) || 'Global'}</span>
+
+                <!-- RIGHT: 4 data chips + actions -->
+                <div class="occ-secondary">
+                  <div class="occ-chips">
+                    <span class="occ-chip occ-chip--status">
+                      <span class="occ-status-dot" style="background:${statusDot}"></span>
+                      ${statusLabel}
+                    </span>
+                    <span class="occ-chip">${region}</span>
+                    ${funding ? `<span class="occ-chip occ-chip--funding">${funding}</span>` : ''}
+                    ${deadline ? `<span class="occ-chip occ-chip--deadline">${deadline}</span>` : ''}
+                  </div>
+                  <div class="occ-actions">
+                    <button class="opp-insights-btn occ-insights-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" type="button" aria-label="View insights for ${(item.title||'').replace(/"/g,'&quot;')}">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                      Insights
+                    </button>
+                    <a class="occ-apply-btn" href="${applyHref}" ${applyAttrs}>Apply →</a>
+                  </div>
                 </div>
-                <div class="occ-actions">
-                  <button class="opp-insights-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" type="button">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                    Insights
-                  </button>
-                  <a class="panel-link-btn opp-card-link" href="${item.application_link || '#'}" ${item.application_link ? 'target="_blank" rel="noopener noreferrer"' : ''} style="padding:6px 10px;font-size:11px;">Apply</a>
-                </div>
+
               </div>
             </td>
           </tr>
@@ -4122,16 +4148,16 @@ document.addEventListener('DOMContentLoaded', function () {
          ============================================================ */
       .results-bar {
         position: sticky;
-        top: 64px;
+        top: 68px;                      /* flush below 68px navbar — appears immediately on scroll */
         z-index: 90;
-        background: #eef1f6;            /* light: matches --bg-deep light */
+        background: #eef1f6;
         border-bottom: 2px solid #d8dde8;
         backdrop-filter: blur(8px);
         padding: 8px 1rem;
         margin: 0 -1rem;
         box-shadow: 0 2px 8px rgba(0,0,0,.06);
       }
-      @media (max-width: 768px) { .results-bar { top: 56px; } }
+      @media (max-width: 768px) { .results-bar { top: 60px; } } /* 60px mobile navbar */
       [data-theme="dark"] .results-bar {
         background: #060810;
         border-bottom-color: #1e2840;
@@ -4222,73 +4248,225 @@ document.addEventListener('DOMContentLoaded', function () {
       [data-theme="dark"] mark.hl { background: rgba(255,210,0,.22); color: #fff; }
 
       /* ============================================================
-         COMPACT CARD ROWS
+         COMPACT CARD ROWS  —  two-zone layout
          ============================================================ */
-      .opp-card-compact {
+
+      /* The containing row — clean white card, tight height */
+      .occ-row {
         display: flex;
         align-items: center;
-        gap: 14px;
-        padding: 12px 18px;
-        background: #ffffff;            /* solid white card on #f5f7fa page bg */
+        gap: 20px;
+        padding: 11px 18px;
+        background: #ffffff;
         border-radius: 10px;
-        border: 1.5px solid #d0d7e3;    /* clear visible border */
+        border: 1.5px solid #d0d7e3;
         box-shadow: 0 1px 4px rgba(0,0,0,.07);
-        flex-wrap: wrap;
-        min-height: 0;
-        transition: border-color 130ms ease, box-shadow 130ms ease;
+        transition: border-color 120ms ease, box-shadow 120ms ease;
       }
-      .opp-card-compact:hover {
+      .occ-row:hover {
         border-color: #b0bcce;
         box-shadow: 0 3px 10px rgba(0,0,0,.10);
       }
-      .occ-left {
+
+      /* LEFT ZONE: type pill + title + sponsor */
+      .occ-primary {
+        flex: 1 1 0;
+        min-width: 0;
         display: flex;
-        gap: 5px;
-        align-items: center;
-        flex-shrink: 0;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .occ-pill {
+        align-self: flex-start;
+        margin-bottom: 2px;
       }
       .occ-title {
-        flex: 1 1 260px;
-        font-size: 13px;
+        font-size: 13.5px;
         font-weight: 600;
-        color: #1a1f36;                 /* near-black, high contrast */
+        color: #1a1f36;
         line-height: 1.35;
-        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
       }
-      .occ-meta {
-        display: flex;
-        gap: 6px;
-        align-items: center;
-        color: #64748b;                 /* --text-muted equivalent, always readable */
+      .occ-sponsor {
         font-size: 11px;
+        color: #64748b;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* RIGHT ZONE: chips row + actions */
+      .occ-secondary {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
         flex-shrink: 0;
+      }
+      .occ-chips {
+        display: flex;
+        gap: 5px;
         flex-wrap: wrap;
+        justify-content: flex-end;
       }
-      .occ-sep {
-        color: #c2cad8;
+      /* Individual data chip */
+      .occ-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 10.5px;
+        font-weight: 600;
+        background: #f0f4f9;
+        color: #374151;
+        border: 1px solid #d8dde8;
+        white-space: nowrap;
+        letter-spacing: .01em;
       }
+      .occ-chip--status {
+        background: #f0f8f4;
+        border-color: #b8dfc8;
+        color: #15803d;
+      }
+      .occ-chip--funding {
+        background: #fdf9f0;
+        border-color: #e8d9a8;
+        color: #92400e;
+        font-weight: 700;
+      }
+      .occ-chip--deadline {
+        background: #f5f5f5;
+        border-color: #d1d5db;
+        color: #52637a;
+      }
+      /* Status dot inside status chip */
+      .occ-status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      /* Actions row */
       .occ-actions {
         display: flex;
         gap: 6px;
         align-items: center;
         flex-shrink: 0;
       }
-      /* --- DARK THEME compact card --- */
-      [data-theme="dark"] .opp-card-compact {
+      /* Insights button — compact variant */
+      .occ-insights-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 5px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        border-radius: 7px;
+        border: 1.5px solid #c2cad8;
+        background: #ffffff;
+        color: #374151;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background 120ms, border-color 120ms, color 120ms;
+        line-height: 1;
+      }
+      .occ-insights-btn:hover {
+        background: #f0f4f9;
+        border-color: #007a3d;
+        color: #007a3d;
+      }
+      /* Apply CTA button */
+      .occ-apply-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 12px;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 7px;
+        background: #007a3d;
+        color: #ffffff;
+        border: 1.5px solid #006232;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background 120ms, border-color 120ms;
+        line-height: 1;
+      }
+      .occ-apply-btn:hover {
+        background: #006232;
+        border-color: #004d27;
+      }
+
+      /* Compact list gap */
+      .view--compact .table-scroll tbody { gap: 7px; }
+
+      /* DARK THEME */
+      [data-theme="dark"] .occ-row {
         background: #0f1420;
         border-color: #1e2840;
         box-shadow: 0 1px 4px rgba(0,0,0,.30);
       }
-      [data-theme="dark"] .opp-card-compact:hover {
+      [data-theme="dark"] .occ-row:hover {
         border-color: #2d3a58;
         box-shadow: 0 3px 12px rgba(0,0,0,.40);
       }
-      [data-theme="dark"] .occ-title  { color: #e8eaf2; }
-      [data-theme="dark"] .occ-meta   { color: #7c89ab; }
-      [data-theme="dark"] .occ-sep    { color: #252f48; }
+      [data-theme="dark"] .occ-title   { color: #e8eaf2; }
+      [data-theme="dark"] .occ-sponsor { color: #7c89ab; }
+      [data-theme="dark"] .occ-chip {
+        background: #141928;
+        border-color: #252f48;
+        color: #c4cedf;
+      }
+      [data-theme="dark"] .occ-chip--status {
+        background: #0d1f16;
+        border-color: #1a3d28;
+        color: #34d97b;
+      }
+      [data-theme="dark"] .occ-chip--funding {
+        background: #1a1200;
+        border-color: #3d2800;
+        color: #f5c842;
+      }
+      [data-theme="dark"] .occ-chip--deadline {
+        background: #141928;
+        border-color: #252f48;
+        color: #7c89ab;
+      }
+      [data-theme="dark"] .occ-insights-btn {
+        background: #141928;
+        border-color: #252f48;
+        color: #c4cedf;
+      }
+      [data-theme="dark"] .occ-insights-btn:hover {
+        background: #1a2035;
+        border-color: #00a651;
+        color: #34d97b;
+      }
+      [data-theme="dark"] .occ-apply-btn {
+        background: #003d1e;
+        border-color: rgba(0,166,81,.40);
+        color: #34d97b;
+      }
+      [data-theme="dark"] .occ-apply-btn:hover {
+        background: #00291a;
+        border-color: rgba(0,166,81,.60);
+      }
 
-      /* Compact list gap */
-      .view--compact .table-scroll tbody { gap: 8px; }
+      /* MOBILE: stack zones vertically */
+      @media (max-width: 768px) {
+        .occ-row { flex-direction: column; align-items: flex-start; gap: 10px; padding: 12px 14px; }
+        .occ-secondary { align-items: flex-start; width: 100%; }
+        .occ-chips { justify-content: flex-start; }
+        .occ-actions { width: 100%; }
+        .occ-apply-btn, .occ-insights-btn { flex: 1; justify-content: center; min-height: 40px; font-size: 12px; }
+      }
+
       /* ============================================================
          PRESET CHIP ROW  (quick-filter shortcuts)
          ============================================================ */
