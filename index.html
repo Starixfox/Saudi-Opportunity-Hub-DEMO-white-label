@@ -189,7 +189,7 @@ body {
   color: var(--text);
   background-color: var(--bg);
   transition: background-color 0.3s, color 0.3s;
-  overflow-x: hidden;
+  overflow-x: clip; /* changed from 'hidden' — 'clip' prevents horizontal scroll without creating a new scroll container, so position:sticky works correctly on children */
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -4146,22 +4146,35 @@ document.addEventListener('DOMContentLoaded', function () {
       /* ============================================================
          RESULTS BAR  (sticky toolbar above card list)
          ============================================================ */
+      /* Results bar — sticky flush under the navbar */
       .results-bar {
         position: sticky;
-        top: 68px;                      /* flush below 68px navbar — appears immediately on scroll */
+        top: 68px;          /* = exact navbar height on desktop */
         z-index: 90;
         background: #eef1f6;
         border-bottom: 2px solid #d8dde8;
         backdrop-filter: blur(8px);
         padding: 8px 1rem;
-        margin: 0 -1rem;
+        margin: 0 -1rem 0; /* override static margin-bottom */
         box-shadow: 0 2px 8px rgba(0,0,0,.06);
+        transition: box-shadow 200ms ease, border-bottom-color 200ms ease;
       }
-      @media (max-width: 768px) { .results-bar { top: 60px; } } /* 60px mobile navbar */
+      /* Visual 'docked' state — added by JS IntersectionObserver when bar is actively stuck */
+      .results-bar.is-docked {
+        box-shadow: 0 4px 16px rgba(0,0,0,.12);
+        border-bottom-color: #b8c4d4;
+      }
+      @media (max-width: 768px) {
+        .results-bar { top: 60px; } /* 60px mobile navbar */
+      }
       [data-theme="dark"] .results-bar {
         background: #060810;
         border-bottom-color: #1e2840;
         box-shadow: 0 4px 16px rgba(0,0,0,.4);
+      }
+      [data-theme="dark"] .results-bar.is-docked {
+        box-shadow: 0 6px 24px rgba(0,0,0,.55);
+        border-bottom-color: #2d3a58;
       }
 
       /* ============================================================
@@ -4887,6 +4900,20 @@ document.addEventListener('DOMContentLoaded', function () {
         updateCompareTray();
       });
     }
+
+    // Sticky sentinel: adds .is-docked to the results bar when it is actively stuck
+    (function wireStickyBar() {
+      var bar = document.getElementById('resultsBar');
+      if (!bar || !window.IntersectionObserver) return;
+      var sentinel = document.createElement('div');
+      sentinel.setAttribute('aria-hidden', 'true');
+      sentinel.style.cssText = 'position:absolute;top:0;left:0;right:0;height:1px;pointer-events:none;visibility:hidden;';
+      if (bar.parentElement) bar.parentElement.insertBefore(sentinel, bar);
+      var obs = new IntersectionObserver(function(entries) {
+        bar.classList.toggle('is-docked', !entries[0].isIntersecting);
+      }, { threshold: 0, rootMargin: '-68px 0px 0px 0px' });
+      obs.observe(sentinel);
+    })();
   }
 
   const wait = setInterval(() => {
