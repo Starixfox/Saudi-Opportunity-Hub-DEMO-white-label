@@ -1796,8 +1796,23 @@ body::before { display: none; }
   border-bottom: 2px solid #006C35 !important;
   box-shadow: 0 2px 8px rgba(0,108,53,0.08);
   padding: 0 32px;
+  transition: height 220ms ease, padding 220ms ease, box-shadow 220ms ease;
 }
 [data-theme="light"] .navbar { background: #ffffff !important; }
+
+/* Scrolled/shrunk navbar state — triggered by JS after 80px scroll */
+.navbar.navbar--scrolled {
+  height: 44px !important;
+  box-shadow: 0 1px 6px rgba(0,108,53,0.12) !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+/* Hide logo text and secondary elements in shrunk state to keep it tight */
+.navbar--scrolled .is-logo-tagline,
+.navbar--scrolled .nav-logo-text span:first-child {
+  display: none;
+}
+/* Results bar top is updated by JS when navbar shrinks */
 
 /* IS Logo block */
 .is-logo-block {
@@ -3436,6 +3451,31 @@ document.addEventListener('DOMContentLoaded', function () {
   localStorage.setItem('is-demo-lang', 'en');
   translatePage('en');
 });
+
+// Navbar scroll-shrink: collapses navbar to 44px on scroll and moves the results
+// bar to top:44px so it sits as high as possible while browsing.
+(function() {
+  var navbar = document.querySelector('.navbar');
+  if (!navbar) return;
+  var SHRINK_AT = 80;       // px scrolled before shrinking
+  var HEIGHT_FULL = 68;     // default navbar height
+  var HEIGHT_SMALL = 44;    // shrunk navbar height
+  var ticking = false;
+  function update() {
+    var scrolled = window.scrollY > SHRINK_AT;
+    navbar.classList.toggle('navbar--scrolled', scrolled);
+    // Update results bar top to match live navbar height
+    var bar = document.getElementById('resultsBar');
+    if (bar) bar.style.top = scrolled ? HEIGHT_SMALL + 'px' : HEIGHT_FULL + 'px';
+    ticking = false;
+  }
+  function onScroll() {
+    if (!ticking) { requestAnimationFrame(update); ticking = true; }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  // Run once on load to set correct initial state
+  update();
+})();
 </script>
 
 <div id="compareTray" class="compare-tray compare-tray--hidden" role="complementary" aria-label="Comparison tray">
