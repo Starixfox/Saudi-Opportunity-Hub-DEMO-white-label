@@ -3555,21 +3555,208 @@ document.addEventListener('DOMContentLoaded', function () {
    ============================================================ */
 (function () {
 
-  /* ---- SECTOR MARKET DATA ---- */
+  /* ---- SECTOR MARKET DATA (enriched) ---- */
   var SECTOR_DATA = {
-    ict:        { name:'ICT & Digital Economy',    size:'$44.7B (2024)', growth:'9.1% CAGR to $107B by 2034', note:'Largest tech market in MENA. Digital economy = 15% of Saudi GDP.' },
-    innovation: { name:'Innovation & R&D',          size:'SAR 495B digital economy (2024)', growth:'Gov\'t ICT spend +20% YoY', note:'SDAIA, RDIA and KACST anchor the national innovation ecosystem.' },
-    energy:     { name:'Energy & Renewables',       size:'$32B pipeline (2025–2030)', growth:'Target: 130 GW renewables by 2030', note:'50% of power from renewables by 2030. $25B annual green export target.' },
-    healthcare: { name:'Healthcare & Life Sciences', size:'$28.7B hospital market (2024)', growth:'4.3% CAGR → $36.9B by 2030', note:'Private sector share target: 65% by 2030. Digital health: $4.4B → $18.3B.' },
-    financial:  { name:'Financial Services & Fintech', size:'$2.85B fintech (2025)', growth:'13.1% CAGR → $5.28B by 2030', note:'Mobile payments: 67.8% of transactions. Neobanking expanding rapidly.' },
-    industrial: { name:'Industrial & Manufacturing', size:'Saudi GDP SAR 4.6T (2025)', growth:'National Industrial Strategy target: global powerhouse', note:'Made in Saudi program. MODON industrial cities across the Kingdom.' },
-    environment:{ name:'Environment & Sustainability', size:'Net-zero target by 2060', growth:'SAF, green hydrogen, carbon capture programs', note:'Saudi Green Initiative: 10B trees planted, 30% land protected.' },
-    pharma:     { name:'Pharma & Biotech',          size:'$4.4B digital health (2025)', growth:'22.6% CAGR → $18.3B by 2032', note:'KACST and KFUPM anchor biotech research. PPP model expanding.' },
-    realestate: { name:'Real Estate & Construction', size:'$1.3T NEOM + giga-projects', growth:'Dozens of PPP tenders open', note:'Red Sea Project, NEOM, Diriyah Gate: unprecedented construction pipeline.' },
-    education:  { name:'Education & Human Capital',  size:'$4.4B higher ed budget (2025)', growth:'Scholarship + fellowship programs expanding', note:'King Scholarships, KAUST, and KFUPM lead research funding.' },
-    space:      { name:'Space Economy',             size:'$8.7B national (2024)', growth:'$31.6B projected by 2035', note:'$2B government program budget by 2030. ROI: SR 1.81 per riyal invested.' },
-    agriculture:{ name:'Agriculture & Food Security', size:'SAR 45B sector investment', growth:'Vision 2030: food security & water efficiency', note:'MEWA and Nusuk programs funding agri-tech and sustainable farming.' }
+    ict: {
+      name: 'ICT & Digital Economy',
+      size: '$44.7B (2024)',
+      growth: '9.1% CAGR → $107B by 2034',
+      note: 'Largest tech market in MENA. Digital economy = 15% of Saudi GDP (SAR 495B).',
+      stats: [
+        { label: 'Market size 2024',   value: '$44.7B',   pct: 44 },
+        { label: 'Projected 2030',     value: '$93.2B',   pct: 78 },
+        { label: 'Projected 2034',     value: '$107B',    pct: 100 },
+        { label: 'Data center capacity by 2030', value: '1.5 GW',  pct: 55 }
+      ],
+      players: ['SDAIA', 'MCIT', 'stc (SAR 75.9B revenue)', 'Mobily', 'Zain', 'HUMAIN (PIF AI Co.)'],
+      deals: ['NVIDIA $10B + 18,000 Blackwell chips via HUMAIN', 'AWS $5B cloud build', 'NEOM $20B AI data center (DataVolt + Supermicro)', 'Equinix $1B regional hub', 'Gov\'t ICT spend SAR 41.87B (+20% YoY)']
+    },
+    innovation: {
+      name: 'Innovation & R&D',
+      size: 'SAR 495B digital economy (2024)',
+      growth: 'Gov\'t ICT spend +20% YoY; NEOM $500B mega-project',
+      note: 'SDAIA, RDIA and KACST anchor the national innovation ecosystem. National AI Strategy targets top-15 AI country by 2030.',
+      stats: [
+        { label: 'Digital economy (2024)', value: 'SAR 495B', pct: 70 },
+        { label: 'Gov ICT spend 2023',     value: 'SAR 41.87B', pct: 45 },
+        { label: 'NEOM total investment',  value: '$500B',    pct: 100 },
+        { label: 'HUMAIN launch (2025)',   value: 'PIF-backed', pct: 30 }
+      ],
+      players: ['SDAIA', 'RDIA', 'KACST', 'KFUPM', 'NEOM Tech', 'HUMAIN'],
+      deals: ['HUMAIN launched May 2025 as national AI company under PIF', 'KACST + ispace lunar exploration MOU (Apr 2026)', 'Saudi national AI strategy: top-15 global AI nations by 2030', 'SAR 41.87B government ICT budget (2023)']
+    },
+    energy: {
+      name: 'Energy & Renewables',
+      size: '$32B green pipeline (2025–2030)',
+      growth: 'Target: 130 GW renewables by 2030 (50% of power mix)',
+      note: 'NEOM Green Hydrogen $8.5B project (90% complete). $25B annual green energy export target.',
+      stats: [
+        { label: 'Renewables pipeline 2025–30', value: '$32B',    pct: 60 },
+        { label: 'ACWA Power KSA portfolio',    value: '$68B+',   pct: 100 },
+        { label: 'NEOM Green H2 project',       value: '$8.5B',   pct: 27 },
+        { label: 'New capacity signed Jul 2025', value: '15 GW',  pct: 50 }
+      ],
+      players: ['ACWA Power', 'Saudi Aramco', 'PIF / Badeel', 'Air Products', 'Ministry of Energy', 'NEOM'],
+      deals: ['ACWA Power 15 GW new capacity signed ($8.3B, Jul 2025)', 'Sudair 1,500 MW solar; Al Shuaibah 2,060 MW', 'NEOM Green Hydrogen: 600 tonnes H2/day from 2027', '$25B annual green export target by 2030']
+    },
+    healthcare: {
+      name: 'Healthcare & Life Sciences',
+      size: '$28.7B hospital market (2024)',
+      growth: '4.3% CAGR → $36.9B by 2030',
+      note: '100% foreign ownership allowed for hospitals. $69B govt health budget (2025). Digital health growing at 22.6% CAGR.',
+      stats: [
+        { label: 'Hospital market 2024',  value: '$28.7B', pct: 50 },
+        { label: 'Hospital market 2030',  value: '$36.9B', pct: 64 },
+        { label: 'Digital health 2025',   value: '$4.4B',  pct: 20 },
+        { label: 'Digital health 2032',   value: '$18.3B', pct: 100 }
+      ],
+      players: ['Ministry of Health (MoH)', 'NCP', 'SFDA', 'Saudi German Hospitals', 'Almoosa Health (IPO $450M)', 'Cigna'],
+      deals: ['$7B PPP health projects allocated by 2030', '$1.5B invested in telemedicine & AI diagnostics', 'Almoosa Health IPO: $450M on Tadawul', '290 hospitals + 2,300 health centres being privatised', '$2B private investment expected by 2030']
+    },
+    financial: {
+      name: 'Financial Services & Fintech',
+      size: '$2.85B fintech market (2025)',
+      growth: '13.1% CAGR → $5.28B by 2030',
+      note: '261 active fintechs (13% above target). BNPL market: SAR 24.8B (+164% YoY). Mobile payments 67.8% of transactions.',
+      stats: [
+        { label: 'Fintech market 2025', value: '$2.85B',    pct: 54 },
+        { label: 'Fintech market 2030', value: '$5.28B',    pct: 100 },
+        { label: 'POS transactions',   value: 'SAR 668B',  pct: 80 },
+        { label: 'BNPL growth YoY',    value: '+164%',     pct: 90 }
+      ],
+      players: ['SAMA', 'CMA', 'STC Pay', 'Lean Technologies', 'Raqamyah', 'Forus', 'Rasan (Tadawul IPO)'],
+      deals: ['Rasan IPO on Tadawul 2024', 'Open banking: 334K connected accounts (3x growth)', 'Robo-advisory AUM SAR 3.4B (+140% YoY)', 'E-commerce payments +33% YoY', '11,046 direct fintech jobs (76% above target)']
+    },
+    industrial: {
+      name: 'Industrial & Manufacturing',
+      size: 'SAR 4.6T national GDP (2025)',
+      growth: 'National Industrial Strategy: 24,000 factories by 2035',
+      note: 'Made in Saudi program. MODON manages 36 industrial cities. Mining sector: SAR 1.3T untapped minerals.',
+      stats: [
+        { label: 'National GDP 2025',      value: 'SAR 4.6T', pct: 100 },
+        { label: 'Mining resources',       value: 'SAR 1.3T', pct: 28 },
+        { label: 'MODON industrial cities', value: '36 cities', pct: 60 },
+        { label: 'Factory target 2035',    value: '24,000',   pct: 70 }
+      ],
+      players: ['MODON', 'SABIC', 'Saudi Aramco', 'Maaden', 'SIDF', 'Ministry of Industry & Mineral Resources'],
+      deals: ['SABIC + ExxonMobil $6.4B petrochemicals JV', 'Maaden $12B expansion plan', 'NEOM industrial zone: Aqaba Special Economic Zone', 'SIDF SAR 44B in industrial loans']
+    },
+    environment: {
+      name: 'Environment & Sustainability',
+      size: 'Net-zero target by 2060',
+      growth: 'Saudi Green Initiative: 10B trees, 30% land protected',
+      note: 'Carbon credit market emerging. Green hydrogen $8.5B flagship project. SAF and blue ammonia export programs underway.',
+      stats: [
+        { label: 'NEOM Green H2 capex',      value: '$8.5B',    pct: 60 },
+        { label: 'Trees target (SGI)',        value: '10B trees', pct: 50 },
+        { label: 'Renewables target 2030',   value: '130 GW',   pct: 100 },
+        { label: 'Land protection target',   value: '30%',      pct: 30 }
+      ],
+      players: ['Ministry of Environment (MEWA)', 'NEOM', 'ACWA Power', 'Saudi Aramco (carbon capture)', 'PIF / Badeel', 'SAF Coalition'],
+      deals: ['NEOM Green Hydrogen: 600T H2/day from 2027', 'Saudi Aramco CCS: 9M tonnes/year target by 2035', 'Saudi Green Initiative: $2.5B committed', 'Blue ammonia export MoUs: Japan, South Korea']
+    },
+    pharma: {
+      name: 'Pharma & Biotech',
+      size: '$7.04B pharma market by 2028',
+      growth: '6.08% CAGR; medical devices $3.1B; health insurance $6.8B',
+      note: 'SFDA streamlining drug approvals. KACST and KFUPM anchor biotech. 100% foreign ownership allowed for pharma manufacturing.',
+      stats: [
+        { label: 'Pharma market 2028',    value: '$7.04B', pct: 70 },
+        { label: 'Medical devices',       value: '$3.1B',  pct: 45 },
+        { label: 'Health insurance 2024', value: '$6.8B',  pct: 60 },
+        { label: 'Health insurance 2034', value: '$11.6B', pct: 100 }
+      ],
+      players: ['SFDA', 'KACST', 'KFUPM', 'Al Hayat Pharma', 'Tabuk Pharmaceuticals', 'Saudi Pharma Holding'],
+      deals: ['$7B PPP health projects by 2030', 'KACST biotech incubators in 5 cities', 'Vision 2030 target: 40% local drug manufacturing', 'SFDA fast-track approvals for innovative therapies']
+    },
+    realestate: {
+      name: 'Real Estate & Construction',
+      size: '$1.3T+ giga-project pipeline',
+      growth: 'NEOM $500B; Red Sea $28B; Diriyah Gate $20B',
+      note: 'Unprecedented construction pipeline. PPP tenders open across tourism, hospitality, and smart city segments.',
+      stats: [
+        { label: 'NEOM total investment', value: '$500B', pct: 100 },
+        { label: 'Red Sea Project',       value: '$28B',  pct: 56 },
+        { label: 'Diriyah Gate',          value: '$20B',  pct: 40 },
+        { label: 'Qiddiya',               value: '$8B',   pct: 16 }
+      ],
+      players: ['NEOM Company', 'Red Sea Global', 'Diriyah Gate Authority', 'PIF Real Estate', 'ROSHN', 'Saudi Aramco Residential'],
+      deals: ['NEOM: 170 km linear city The Line', 'ROSHN: 400,000 homes program', 'PPP tenders: 14 tourism mega-projects open 2025', '$9.2B in hospitality foreign investment (2024)']
+    },
+    education: {
+      name: 'Education & Human Capital',
+      size: '$4.4B higher ed budget (2025)',
+      growth: 'King Scholarship: 150,000+ alumni; KAUST endowment $8B+',
+      note: 'Human Capability Development Program targets world-class talent pipeline. Saudi universities fast-rising in QS rankings.',
+      stats: [
+        { label: 'Higher ed budget 2025', value: '$4.4B',    pct: 55 },
+        { label: 'KAUST endowment',       value: '$8B+',     pct: 100 },
+        { label: 'King Scholarship alumni', value: '150K+',  pct: 75 },
+        { label: 'Saudization target',    value: '70%+',     pct: 70 }
+      ],
+      players: ['KAUST', 'KFUPM', 'King Abdulaziz University', 'Ministry of Education', 'Misk Foundation', 'Human Capability Dev. Program'],
+      deals: ['KAUST AI research center: $100M+ endowment', 'Saudi + MIT collaboration 2025', 'Misk Foundation: 1M youth trained by 2030', 'King Scholarships to 35+ countries annually']
+    },
+    space: {
+      name: 'Space Economy',
+      size: '$8.7B national space economy (2024)',
+      growth: 'Commercial: $1.9B (2024) → $5.6B by 2035',
+      note: 'ROI: SR 1.81 per riyal invested. $2B govt budget by 2030. 15 startup graduates from Space Tech Incubation Program.',
+      stats: [
+        { label: 'National space economy 2024', value: '$8.7B',  pct: 28 },
+        { label: 'Commercial market 2024',      value: '$1.9B',  pct: 6 },
+        { label: 'Projected national 2035',     value: '$31.6B', pct: 100 },
+        { label: 'Commercial projected 2035',   value: '$5.6B',  pct: 18 }
+      ],
+      players: ['Saudi Space Agency (SSA)', 'KACST', 'CST', 'Neo Space Group (PIF)', 'Saudi Telecom (satellite)', 'NSG'],
+      deals: ['KACST + ispace lunar exploration partnership (Apr 2026)', 'Space Tech Incubation Program: SAR 41B investments attracted', '$2B government space budget committed by 2030', 'Saudi satellite constellation MoU with SpaceX 2025']
+    },
+    agriculture: {
+      name: 'Agriculture & Food Security',
+      size: '$136.9B market (2025)',
+      growth: '5.02% CAGR → $212.6B by 2034',
+      note: '85% of food currently imported. ADF approving $2B in loans in 2025. Saudi-China: 57 agritech agreements ($3.7B).',
+      stats: [
+        { label: 'Agri market 2025',    value: '$136.9B', pct: 64 },
+        { label: 'Projected 2034',      value: '$212.6B', pct: 100 },
+        { label: 'Agritech sub-market 2033', value: '$628M', pct: 15 },
+        { label: 'ADF loans 2025',      value: '$2B',     pct: 20 }
+      ],
+      players: ['MEWA', 'MISA', 'ADF (Agricultural Development Fund)', 'SALIC', 'Estidamah', 'Pure Harvest Smart Farms', 'Green Dunes (PIF)'],
+      deals: ['ADF SAR 6.47B loan approvals by end 2025', 'Saudi-China: 57 agreements worth $3.7B (agritech + food security)', 'Pure Harvest: hydroponic vertical farms (95% less water)', 'SAR 2.5B equipment-support program (Aug 2025)']
+    }
   };
+
+  /* ---- HELPER: render bar chart rows ---- */
+  function barChart(stats) {
+    if (!stats || !stats.length) return '';
+    var rows = stats.map(function(s) {
+      return '<div class="bar-row">' +
+        '<div class="bar-row__label"><strong>' + esc(s.label) + '</strong><span>' + esc(s.value) + '</span></div>' +
+        '<div class="bar-row__track"><div class="bar-row__fill" style="width:' + Math.min(100, s.pct||0) + '%"></div></div>' +
+        '</div>';
+    }).join('');
+    return '<div style="margin:10px 0 4px">' + rows + '</div>';
+  }
+
+  /* ---- HELPER: render key players pills ---- */
+  function playersList(players) {
+    if (!players || !players.length) return '';
+    var pills = players.map(function(p) {
+      return '<span style="display:inline-block;background:var(--surface-2,#f0f4ff);border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:10px;margin:2px 2px 2px 0;color:var(--text-muted)">' + esc(p) + '</span>';
+    }).join('');
+    return '<div style="margin-top:6px"><div style="font-size:10px;font-weight:700;color:var(--text-faint);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Key Players</div>' + pills + '</div>';
+  }
+
+  /* ---- HELPER: render recent deals list ---- */
+  function dealsList(deals) {
+    if (!deals || !deals.length) return '';
+    var items = deals.map(function(d) {
+      return '<li style="margin-bottom:3px">' + esc(d) + '</li>';
+    }).join('');
+    return '<div style="margin-top:8px"><div style="font-size:10px;font-weight:700;color:var(--text-faint);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Recent Deals & Milestones</div>' +
+      '<ul style="margin:0;padding-left:14px;font-size:11px;color:var(--text-muted);line-height:1.5">' + items + '</ul></div>';
+  }
 
   function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -3653,7 +3840,10 @@ document.addEventListener('DOMContentLoaded', function () {
             '<div><div class="panel-sector-stat__value">' + esc(ctx.size) + '</div><div class="panel-sector-stat__label">Market size</div></div>' +
             '<div><div class="panel-sector-stat__value">' + esc(ctx.growth) + '</div><div class="panel-sector-stat__label">Growth outlook</div></div>' +
           '</div>' +
+          (ctx.stats ? barChart(ctx.stats) : '') +
           '<div class="panel-sector-context__note">' + esc(ctx.note) + '</div>' +
+          (ctx.players ? playersList(ctx.players) : '') +
+          (ctx.deals ? dealsList(ctx.deals) : '') +
         '</div>';
     }
 
