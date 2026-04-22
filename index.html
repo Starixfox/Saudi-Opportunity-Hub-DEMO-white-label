@@ -1028,7 +1028,7 @@ section:last-of-type { border-bottom: none; }
 /* ── INSIGHTS ────────────────────────────────── */
 .insights-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--space-6);
 }
 
@@ -1154,6 +1154,134 @@ section:last-of-type { border-bottom: none; }
 }
 
 .insight-block p strong { color: var(--text); font-weight: 600; }
+
+/* ── MARKET STAT CARDS ─────────────────────── */
+.market-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.market-stat-grid--sm .market-stat__value {
+  font-size: var(--text-lg);
+}
+
+.market-stat {
+  background: var(--surface-2, var(--bg));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+}
+
+.market-stat__value {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--accent, #1a6cf5);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 2px;
+}
+
+.market-stat__label {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.market-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.market-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--accent-faint, rgba(26,108,245,0.08));
+  color: var(--accent, #1a6cf5);
+  border: 1px solid var(--accent-muted, rgba(26,108,245,0.18));
+}
+
+.market-footnote {
+  font-size: 11px;
+  color: var(--text-faint);
+  line-height: 1.55;
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-3);
+  margin-top: var(--space-1);
+}
+
+.market-wide-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.market-wide-divider {
+  width: 1px;
+  background: var(--border);
+  align-self: stretch;
+  margin: var(--space-2) 0;
+}
+
+.market-wide-col__title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-3);
+}
+
+/* ── DEEP-DIVE PANEL ENRICHMENT ─────────────── */
+.panel-sector-context {
+  background: var(--surface-2, var(--bg));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.panel-sector-context__title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+
+.panel-sector-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.panel-sector-stat__value {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--accent, #1a6cf5);
+  line-height: 1.15;
+}
+
+.panel-sector-stat__label {
+  font-size: 10px;
+  color: var(--text-faint);
+}
+
+.panel-sector-context__note {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-2);
+}
 
 /* ── ABOUT ───────────────────────────────────── */
 .about-grid {
@@ -2368,35 +2496,171 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
       A high-level view of the landscape &mdash; program types, regional distribution, and status breakdown across all sectors and regions.
     </p>
     <div class="insights-grid">
-      <div class="insight-card">
-        <div class="insight-card-title">By program type</div>
-        <div class="insight-card-sub">Distribution across grants, tenders, accelerators, fellowships, and investment programs</div>
-        <div id="insights-type-chart" class="chart-container"></div>
-      </div>
-      <div class="insight-card">
-        <div class="insight-card-title">By region</div>
-        <div class="insight-card-sub">Breakdown between Saudi Arabia, GCC, and globally open programs</div>
-        <div id="insights-region-chart" class="chart-container"></div>
-      </div>
-      <div class="insight-card">
-        <div class="insight-card-title">By status</div>
-        <div class="insight-card-sub">Currently open vs. recurring (closed but returning) vs. closed programs</div>
-        <div id="insights-status-chart" class="chart-container"></div>
-      </div>
-      <div class="insight-card">
-        <div class="insight-card-title">Top institutions by program count</div>
-        <div class="insight-card-sub">Organizations with the most tracked opportunities in the dataset</div>
-        <div id="insights-top-institutions" class="chart-container"></div>
-      </div>
-      <div class="insight-card insight-card--wide">
-        <div id="insights-snapshot" class="chart-container"></div>
-      </div>
-    </div>
 
-    <p class="section-sub" style="margin-top:var(--space-8);margin-bottom:0;">
-      <strong style="color:var(--text);">Landscape snapshot (March 2026):</strong>
-      Saudi Arabia's opportunity landscape has expanded into a multi-sector, multi-region ecosystem spanning Vision 2030-aligned investment programs (PIF, SVC), regulatory facilitation (CST, SDAIA), world-class research infrastructure (KAUST, KACST), and a growing pipeline of GCC and global programs across Energy, ICT, Healthcare, Agriculture, Financial Services, and more.
-    </p>
+      <!-- CARD 1: ICT & Digital Economy -->
+      <div class="insight-card">
+        <div class="insight-card-title">ICT &amp; Digital Economy</div>
+        <div class="insight-card-sub">Saudi Arabia is the largest and fastest-growing tech market in MENA</div>
+        <div class="market-stat-grid">
+          <div class="market-stat">
+            <div class="market-stat__value">$44.7B</div>
+            <div class="market-stat__label">ICT market size (2024)</div>
+          </div>
+          <div class="market-stat">
+            <div class="market-stat__value">$107B</div>
+            <div class="market-stat__label">Projected by 2034</div>
+          </div>
+          <div class="market-stat">
+            <div class="market-stat__value">9.1%</div>
+            <div class="market-stat__label">CAGR 2025&ndash;2034</div>
+          </div>
+          <div class="market-stat">
+            <div class="market-stat__value">15%</div>
+            <div class="market-stat__label">GDP contribution (digital economy)</div>
+          </div>
+        </div>
+        <div class="market-tags">
+          <span class="market-tag">AI &amp; IoT</span>
+          <span class="market-tag">Cloud</span>
+          <span class="market-tag">Smart Cities</span>
+          <span class="market-tag">Cybersecurity</span>
+        </div>
+        <div class="market-footnote">Vision 2030 target: reduce oil dependency via digital transformation. Gov't ICT spending grew 20% YoY in 2023.</div>
+      </div>
+
+      <!-- CARD 2: Energy & Renewables -->
+      <div class="insight-card">
+        <div class="insight-card-title">Energy &amp; Renewables</div>
+        <div class="insight-card-sub">Saudi Arabia is targeting 50% renewable power by 2030</div>
+        <div class="market-stat-grid">
+          <div class="market-stat">
+            <div class="market-stat__value">130 GW</div>
+            <div class="market-stat__label">Renewable capacity target by 2030</div>
+          </div>
+          <div class="market-stat">
+            <div class="market-stat__value">$32B</div>
+            <div class="market-stat__label">Green energy investment pipeline 2025&ndash;2030</div>
+          </div>
+          <div class="market-stat">
+            <div class="market-stat__value">50%</div>
+            <div class="market-stat__label">Power from renewables by 2030</div>
+          </div>
+          <div class="market-stat">
+            <div class="market-stat__value">$25B</div>
+            <div class="market-stat__label">Annual green energy export target</div>
+          </div>
+        </div>
+        <div class="market-tags">
+          <span class="market-tag">Solar</span>
+          <span class="market-tag">Wind</span>
+          <span class="market-tag">Hydrogen</span>
+          <span class="market-tag">NEOM</span>
+        </div>
+        <div class="market-footnote">NEOM and ACWA Power are anchor investors. Electricity cost target: &minus;40% by 2030.</div>
+      </div>
+
+      <!-- CARD 3: Healthcare -->
+      <div class="insight-card">
+        <div class="insight-card-title">Healthcare &amp; Life Sciences</div>
+        <div class="insight-card-sub">Rapid privatisation opening the sector to foreign investment</div>
+        <div class="market-stat-grid">
+          <div class="market-stat">
+            <div class="market-stat__value">$28.7B</div>
+            <div class="market-stat__label">Hospital services market (2024)</div>
+          </div>
+          <div class="market-stat">
+            <div class="market-stat__value">$36.9B</div>
+            <div class="market-stat__label">Projected by 2030</div>
+          </div>
+          <div class="market-stat">
+            <div class="market-stat__value">65%</div>
+            <div class="market-stat__label">Private sector share target by 2030</div>
+          </div>
+          <div class="market-stat">
+            <div class="market-stat__value">$69B</div>
+            <div class="market-stat__label">Government health &amp; social budget (2025)</div>
+          </div>
+        </div>
+        <div class="market-tags">
+          <span class="market-tag">Digital Health</span>
+          <span class="market-tag">MedTech</span>
+          <span class="market-tag">Pharma</span>
+          <span class="market-tag">Telemedicine</span>
+        </div>
+        <div class="market-footnote">Digital health sub-market: $4.4B (2025) growing at 22.6% CAGR to $18.3B by 2032.</div>
+      </div>
+
+      <!-- CARD 4: Space Economy -->
+      <div class="insight-card">
+        <div class="insight-card-title">Space Economy</div>
+        <div class="insight-card-sub">One of the fastest-growing space markets globally</div>
+        <div class="market-stat-grid">
+          <div class="market-stat">
+            <div class="market-stat__value">$8.7B</div>
+            <div class="market-stat__label">National space economy (2024)</div>
+          </div>
+          <div class="market-stat">
+            <div class="market-stat__value">$31.6B</div>
+            <div class="market-stat__label">Projected by 2035</div>
+          </div>
+          <div class="market-stat">
+            <div class="market-stat__value">$2B</div>
+            <div class="market-stat__label">Government space program budget by 2030</div>
+          </div>
+          <div class="market-stat">
+            <div class="market-stat__value">SR 1.81</div>
+            <div class="market-stat__label">ROI per riyal invested</div>
+          </div>
+        </div>
+        <div class="market-tags">
+          <span class="market-tag">Satellites</span>
+          <span class="market-tag">Earth Observation</span>
+          <span class="market-tag">Launch Services</span>
+          <span class="market-tag">Space Tourism</span>
+        </div>
+        <div class="market-footnote">Commercial market growing from $1.9B (2024) to $5.6B by 2035. Downstream sector to account for &gt;50% of annual market value.</div>
+      </div>
+
+      <!-- CARD 5: Fintech + Vision 2030 KPIs (full width) -->
+      <div class="insight-card insight-card--wide">
+        <div class="insight-card-title">Fintech &amp; Vision 2030 — Key Benchmarks</div>
+        <div class="insight-card-sub">Financial services transformation and top-line program KPIs from the hub</div>
+        <div class="market-wide-grid">
+          <div class="market-wide-col">
+            <div class="market-wide-col__title">Fintech Market</div>
+            <div class="market-stat-grid market-stat-grid--sm">
+              <div class="market-stat">
+                <div class="market-stat__value">$2.85B</div>
+                <div class="market-stat__label">Market size (2025)</div>
+              </div>
+              <div class="market-stat">
+                <div class="market-stat__value">$5.28B</div>
+                <div class="market-stat__label">Projected by 2030</div>
+              </div>
+              <div class="market-stat">
+                <div class="market-stat__value">13.1%</div>
+                <div class="market-stat__label">CAGR</div>
+              </div>
+              <div class="market-stat">
+                <div class="market-stat__value">67.8%</div>
+                <div class="market-stat__label">Mobile payments share</div>
+              </div>
+            </div>
+            <div class="market-tags" style="margin-top:var(--space-3)">
+              <span class="market-tag">Neobanking</span>
+              <span class="market-tag">Digital Payments</span>
+              <span class="market-tag">RegTech</span>
+            </div>
+          </div>
+          <div class="market-wide-divider"></div>
+          <div class="market-wide-col">
+            <div class="market-wide-col__title">Hub Snapshot</div>
+            <div id="insights-snapshot" class="chart-container"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </section>
 
   <section id="about" aria-label="About this hub">
@@ -3273,72 +3537,29 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <script>
 /* ============================================================
-   Insights Section — Bar Charts
-   Reads window.opportunitiesData once loaded, renders bar
-   charts into the #insights-* containers.
+   Insights Snapshot + Program Deep-Dive Panel
    ============================================================ */
 (function () {
 
-  /* --- label helpers --- */
-  function labelType(v) {
-    var map = { accelerator:'Accelerator', fellowship:'Fellowship', grant:'Grant',
-      investment_program:'Investment', loan_program:'Loan', other:'Other',
-      partnership_program:'Partnership', tender:'Tender', tender_rfp:'Tender / RFP' };
-    return map[v] || v || 'Other';
-  }
-  function labelRegion(v) {
-    var map = { GCC:'GCC', Global:'Global', Global_including_Saudi:'Global (incl. Saudi)',
-      Saudi:'Saudi Arabia', Saudi_GCC:'Saudi + GCC', Saudi_only:'Saudi Arabia' };
-    return map[v] || v || 'Other';
-  }
-  function labelStatus(v) {
-    var map = { open:'Open', closed_but_recurring:'Recurring', recurring:'Recurring' };
-    return map[v] || v || 'Other';
-  }
-  function countBy(data, field, labelFn) {
-    var counts = {};
-    data.forEach(function(r) {
-      var key = labelFn(r[field]);
-      counts[key] = (counts[key] || 0) + 1;
-    });
-    return counts;
-  }
-  function sortedEntries(counts) {
-    return Object.entries(counts).sort(function(a,b){ return b[1]-a[1]; });
-  }
-  function esc(str) {
-    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
+  /* ---- SECTOR MARKET DATA ---- */
+  var SECTOR_DATA = {
+    ict:        { name:'ICT & Digital Economy',    size:'$44.7B (2024)', growth:'9.1% CAGR to $107B by 2034', note:'Largest tech market in MENA. Digital economy = 15% of Saudi GDP.' },
+    innovation: { name:'Innovation & R&D',          size:'SAR 495B digital economy (2024)', growth:'Gov\'t ICT spend +20% YoY', note:'SDAIA, RDIA and KACST anchor the national innovation ecosystem.' },
+    energy:     { name:'Energy & Renewables',       size:'$32B pipeline (2025–2030)', growth:'Target: 130 GW renewables by 2030', note:'50% of power from renewables by 2030. $25B annual green export target.' },
+    healthcare: { name:'Healthcare & Life Sciences', size:'$28.7B hospital market (2024)', growth:'4.3% CAGR → $36.9B by 2030', note:'Private sector share target: 65% by 2030. Digital health: $4.4B → $18.3B.' },
+    financial:  { name:'Financial Services & Fintech', size:'$2.85B fintech (2025)', growth:'13.1% CAGR → $5.28B by 2030', note:'Mobile payments: 67.8% of transactions. Neobanking expanding rapidly.' },
+    industrial: { name:'Industrial & Manufacturing', size:'Saudi GDP SAR 4.6T (2025)', growth:'National Industrial Strategy target: global powerhouse', note:'Made in Saudi program. MODON industrial cities across the Kingdom.' },
+    environment:{ name:'Environment & Sustainability', size:'Net-zero target by 2060', growth:'SAF, green hydrogen, carbon capture programs', note:'Saudi Green Initiative: 10B trees planted, 30% land protected.' },
+    pharma:     { name:'Pharma & Biotech',          size:'$4.4B digital health (2025)', growth:'22.6% CAGR → $18.3B by 2032', note:'KACST and KFUPM anchor biotech research. PPP model expanding.' },
+    realestate: { name:'Real Estate & Construction', size:'$1.3T NEOM + giga-projects', growth:'Dozens of PPP tenders open', note:'Red Sea Project, NEOM, Diriyah Gate: unprecedented construction pipeline.' },
+    education:  { name:'Education & Human Capital',  size:'$4.4B higher ed budget (2025)', growth:'Scholarship + fellowship programs expanding', note:'King Scholarships, KAUST, and KFUPM lead research funding.' },
+    space:      { name:'Space Economy',             size:'$8.7B national (2024)', growth:'$31.6B projected by 2035', note:'$2B government program budget by 2030. ROI: SR 1.81 per riyal invested.' },
+    agriculture:{ name:'Agriculture & Food Security', size:'SAR 45B sector investment', growth:'Vision 2030: food security & water efficiency', note:'MEWA and Nusuk programs funding agri-tech and sustainable farming.' }
+  };
 
-  /* --- renderers --- */
-  function renderBars(id, counts) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    var entries = sortedEntries(counts);
-    var max = entries[0] ? entries[0][1] : 1;
-    el.innerHTML = '<div class="bar-list">' +
-      entries.map(function(e) {
-        var pct = Math.round((e[1]/max)*100);
-        return '<div class="bar-row">' +
-          '<div class="bar-row__label"><span>' + esc(e[0]) + '</span><strong>' + e[1] + '</strong></div>' +
-          '<div class="bar-row__track"><div class="bar-row__fill" style="width:' + pct + '%"></div></div>' +
-          '</div>';
-      }).join('') +
-    '</div>';
-  }
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  function renderTopInstitutions(data) {
-    var el = document.getElementById('insights-top-institutions');
-    if (!el) return;
-    var counts = countBy(data, 'sponsor_institution', function(v){ return v || 'Unknown'; });
-    var entries = sortedEntries(counts).slice(0, 10);
-    el.innerHTML = '<ol class="institution-list">' +
-      entries.map(function(e) {
-        return '<li><span>' + esc(e[0]) + '</span><strong>' + e[1] + '</strong></li>';
-      }).join('') +
-    '</ol>';
-  }
-
+  /* ---- HUB SNAPSHOT (card 5 right column) ---- */
   function renderSnapshot(data) {
     var el = document.getElementById('insights-snapshot');
     if (!el) return;
@@ -3346,30 +3567,137 @@ document.addEventListener('DOMContentLoaded', function () {
     var recurring = data.filter(function(r){ return r.status === 'closed_but_recurring' || r.status === 'recurring'; }).length;
     var saudi = data.filter(function(r){ return r.eligibility_region === 'Saudi_only' || r.eligibility_region === 'Saudi'; }).length;
     var global_ = data.filter(function(r){ return r.eligibility_region === 'Global' || r.eligibility_region === 'Global_including_Saudi'; }).length;
+    var newCount = data.filter(function(r){ return r.isNew; }).length;
     el.innerHTML =
-      '<div class="insight-block">' +
-        '<div class="insight-block__title">Landscape snapshot</div>' +
-        '<p>Tracking <strong>' + data.length + '</strong> opportunities across 15 sectors. ' +
-        '<strong>' + open + '</strong> are currently open and <strong>' + recurring + '</strong> are recurring programs. ' +
-        '<strong>' + saudi + '</strong> are Saudi-only while <strong>' + global_ + '</strong> are open globally.</p>' +
-      '</div>';
+      '<div class="panel-sector-stats" style="grid-template-columns:repeat(2,1fr);gap:var(--space-2);margin-bottom:var(--space-3)">' +
+        stat(data.length, 'Total opportunities') +
+        stat(open, 'Currently open') +
+        stat(recurring, 'Recurring programs') +
+        stat(newCount, 'Recently added') +
+        stat(saudi, 'Saudi-only') +
+        stat(global_, 'Global / incl. Saudi') +
+      '</div>' +
+      '<div class="market-footnote">Data across 15 sectors spanning grants, tenders, accelerators, fellowships, and investment programs.</div>';
   }
 
-  function renderAll(data) {
-    renderBars('insights-type-chart',   countBy(data, 'type',   labelType));
-    renderBars('insights-region-chart', countBy(data, 'eligibility_region', labelRegion));
-    renderBars('insights-status-chart', countBy(data, 'status', labelStatus));
-    renderTopInstitutions(data);
-    renderSnapshot(data);
+  function stat(val, label) {
+    return '<div class="market-stat"><div class="market-stat__value">' + val + '</div><div class="market-stat__label">' + esc(label) + '</div></div>';
   }
 
-  /* --- wait for opportunitiesData to be set by the fetch script --- */
+  /* ---- DEEP-DIVE PANEL ---- */
+  var panel       = document.getElementById('detailPanel');
+  var overlay     = document.getElementById('panelOverlay');
+  var panelTitle  = document.getElementById('panelTitle');
+  var panelDesc   = document.getElementById('panelDesc');
+  var panelFields = document.getElementById('panelFields');
+  var panelBadges = document.getElementById('panelBadges');
+  var panelLink   = document.getElementById('panelLink');
+  var panelClose  = document.getElementById('panelClose');
+
+  function pretty(s) {
+    return String(s||'').replace(/_/g,' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+  }
+
+  function badge(label, cls) {
+    return '<span class="pill ' + (cls||'') + '" style="font-size:11px;padding:3px 10px">' + esc(label) + '</span>';
+  }
+
+  function field(label, value) {
+    if (!value || value === 'Not specified' || value === 'Unknown sponsor') return '';
+    return '<div class="panel-field"><div class="panel-field-label">' + esc(label) + '</div>' +
+           '<div class="panel-field-value">' + esc(value) + '</div></div>';
+  }
+
+  function sectorContext(sectors) {
+    for (var i = 0; i < (sectors||[]).length; i++) {
+      var d = SECTOR_DATA[sectors[i]];
+      if (d) return d;
+    }
+    return null;
+  }
+
+  function openPanel(item) {
+    if (!panel || !item) return;
+    panelTitle.textContent = item.title || 'Opportunity Details';
+    panelDesc.textContent  = item.description_short || '';
+
+    // Badges
+    panelBadges.innerHTML =
+      badge(pretty(item.type || 'Other')) +
+      badge(item.country || pretty(item.eligibility_region) || 'Global') +
+      (item.status === 'open' ? badge('Open', 'status-open') : '') +
+      (item.isNew ? badge('New', 'badge-new') : '');
+
+    // Sector context block
+    var ctx = sectorContext(item.sectors || []);
+    var sectorHtml = '';
+    if (ctx) {
+      sectorHtml =
+        '<div class="panel-sector-context">' +
+          '<div class="panel-sector-context__title">&#9656; Sector Context — ' + esc(ctx.name) + '</div>' +
+          '<div class="panel-sector-stats">' +
+            '<div><div class="panel-sector-stat__value">' + esc(ctx.size) + '</div><div class="panel-sector-stat__label">Market size</div></div>' +
+            '<div><div class="panel-sector-stat__value">' + esc(ctx.growth) + '</div><div class="panel-sector-stat__label">Growth outlook</div></div>' +
+          '</div>' +
+          '<div class="panel-sector-context__note">' + esc(ctx.note) + '</div>' +
+        '</div>';
+    }
+
+    // Program fields
+    panelFields.innerHTML =
+      sectorHtml +
+      field('Sponsor / Institution', item.sponsor_institution) +
+      field('Funding', item.funding_amount) +
+      field('Funding type', pretty(item.funding_type)) +
+      field('Eligibility', item.eligibility_entities) +
+      field('Deadline', item.deadline_date) +
+      field('Last verified', item.last_verified) +
+      field('Language', item.language) +
+      (item.sectors && item.sectors.length ? field('Sectors', item.sectors.map(pretty).join(', ')) : '') +
+      (item.profiles && item.profiles.length ? field('Audience', item.profiles.map(pretty).join(', ')) : '');
+
+    panelLink.href = item.application_link || '#';
+    panelLink.style.display = item.application_link ? '' : 'none';
+
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden', 'false');
+    if (overlay) { overlay.classList.add('visible'); overlay.setAttribute('aria-hidden', 'false'); }
+    document.body.classList.add('panel-open');
+    panel.focus();
+  }
+
+  function closePanel() {
+    if (!panel) return;
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden', 'true');
+    if (overlay) { overlay.classList.remove('visible'); overlay.setAttribute('aria-hidden', 'true'); }
+    document.body.classList.remove('panel-open');
+  }
+
+  // Wire close button and overlay
+  if (panelClose) panelClose.addEventListener('click', closePanel);
+  if (overlay)    overlay.addEventListener('click', closePanel);
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePanel(); });
+
+  // Wire card row clicks — using event delegation on the table body
+  document.addEventListener('click', function(e) {
+    var row = e.target.closest('.opp-card-row');
+    if (!row) return;
+    // Don\'t open panel if user clicked the "Go to Website" link
+    if (e.target.closest('.opp-card-link')) return;
+    var id = row.dataset.id;
+    var data = window.opportunitiesData || [];
+    var item = data.find(function(r){ return r.id === id; });
+    if (item) openPanel(item);
+  });
+
+  /* ---- BOOT: wait for data then render snapshot ---- */
   var attempts = 0;
   var interval = setInterval(function() {
     attempts++;
     if (Array.isArray(window.opportunitiesData) && window.opportunitiesData.length > 0) {
       clearInterval(interval);
-      renderAll(window.opportunitiesData);
+      renderSnapshot(window.opportunitiesData);
     } else if (attempts > 150) {
       clearInterval(interval);
     }
