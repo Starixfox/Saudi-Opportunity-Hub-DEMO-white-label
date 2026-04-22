@@ -2187,6 +2187,203 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
 [data-theme="dark"] .is-lang-sep { color: rgba(255,255,255,0.3); }
 
 
+/* ── SKELETON LOADER ─────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+.kpi-value[data-loading="true"] {
+  color: transparent !important;
+  user-select: none;
+  pointer-events: none;
+  min-width: 48px;
+  height: 1.4em;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--surface-3) 25%, var(--surface-elevated) 50%, var(--surface-3) 75%);
+  background-size: 800px 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  display: block;
+}
+[data-theme="light"] .kpi-value[data-loading="true"] {
+  background: linear-gradient(90deg, #e8edf5 25%, #f4f7fc 50%, #e8edf5 75%);
+  background-size: 800px 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kpi-value[data-loading="true"] { animation: none; background: var(--surface-3); }
+}
+
+/* ── ACTIVE FILTER CHIPS ─────────────────────── */
+.active-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0 var(--space-3);
+}
+.active-chips-row:empty { display: none; }
+
+.active-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: var(--green-highlight);
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  transition: background var(--transition);
+}
+[data-theme="light"] .active-chip {
+  background: #e6f5ee;
+  border-color: #a8d5be;
+  color: #006C35;
+}
+.active-chip__label { color: var(--text-muted); font-weight: 400; }
+.active-chip__dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 2px;
+  color: var(--green);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.active-chip__dismiss:hover { background: rgba(0,166,81,0.25); }
+
+.active-chips-clear-all {
+  margin-left: auto;
+  padding: 4px 8px;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.active-chips-clear-all:hover { color: var(--text); }
+html[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
+
+/* ── SORT CONTROL ─────────────────────────────── */
+/* results-bar already has justify-content: space-between in base CSS */
+.sort-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+.sort-label {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.sort-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 5px 28px 5px 10px;
+  height: 30px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background-color: var(--surface-2);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237c89ab' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  color: var(--text);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color var(--transition);
+  min-width: 170px;
+}
+.sort-select:hover { border-color: var(--border-light); }
+.sort-select:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+[data-theme="light"] .sort-select { background-color: var(--surface); }
+@media (max-width: 600px) {
+  .sort-control { width: 100%; }
+  .sort-select { width: 100%; min-width: 0; }
+  .results-bar { flex-wrap: wrap; gap: var(--space-2); }
+}
+
+/* ── DATA PROVENANCE STRIP ───────────────────── */
+.provenance-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--green-dim);
+}
+[data-theme="light"] .provenance-strip {
+  background: var(--surface-3);
+  border-color: #dde3ed;
+  border-left-color: #a8d5be;
+}
+.prov-item { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.prov-item--warning { color: var(--gold); }
+.prov-label { font-size: var(--text-xs); font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.prov-value { font-size: var(--text-xs); color: var(--text-muted); font-weight: 400; }
+.prov-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.prov-dot--green { background: var(--green); box-shadow: 0 0 5px var(--green-glow); }
+.prov-divider { width: 1px; height: 14px; background: var(--border-light); flex-shrink: 0; }
+@media (max-width: 640px) {
+  .provenance-strip { flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+  .prov-divider { display: none; }
+}
+
+/* ── RESULTS COUNT STYLES ────────────────────── */
+#resultsCount { font-size: var(--text-sm); color: var(--text-muted); }
+#resultsCount strong { color: var(--text); font-weight: 600; }
+.rc-open   { color: var(--status-open-text); font-weight: 500; }
+.rc-funded { color: var(--blue); font-weight: 500; }
+.rc-summary { color: var(--text-faint); font-weight: 400; }
+@media (max-width: 700px) { .rc-summary { display: none; } }
+
+/* ── INSIGHT SECTOR LINK ─────────────────────── */
+.insight-sector-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: var(--space-4);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--green);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: gap var(--transition), opacity var(--transition);
+}
+.insight-sector-link:hover { gap: 7px; opacity: 0.85; }
+.insight-sector-link:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: var(--radius-sm); }
+
 </style>
 </head>
 <body>
@@ -2265,19 +2462,19 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
       <div class="hero-text">
         <div class="hero-badge">Pilot Demo</div>
         <h1 class="hero-title">
-          Global<br><span class="accent">Opportunity Hub</span>
+          Funding Opportunities<br><span class="accent">Saudi Arabia to Global</span>
         </h1>
         <p class="hero-desc">
-          Demo view: <strong>funding opportunities</strong> — grants, tenders, accelerators, fellowships and investment programs across <strong>15 sectors</strong> spanning Energy, ICT, Healthcare, Agriculture and more, covering <strong>Saudi Arabia, the GCC, and global programs</strong>.
+          A structured dataset of grants, tenders, accelerators, fellowships, and investment programs across 15 sectors — covering Saudi Arabia, the GCC, and global initiatives open to Saudi-based organizations. This is a pilot release; data reflects a working snapshot as of March 2026.
         </p>
         <div class="hero-ctas">
           <a href="#opportunities" class="btn-primary">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            Browse opportunities
+            Browse the Database
           </a>
           <a href="mailto:jblancoapodaca@gmail.com?subject=Dataset%20Suggestion" class="btn-secondary">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg>
-            Suggest an entry
+            Submit a Correction
           </a>
         </div>
       </div>
@@ -2286,32 +2483,32 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
         <div class="kpi-card saudi" data-tooltip="Programs issued in or led by Saudi institutions — grants, tenders, accelerators, and public-sector programs from SSA, CST, RDIA, Monsha'at, KAUST and more.">
           <div class="kpi-icon saudi">&#x1F1F8;&#x1F1E6;</div>
           <div class="kpi-body">
-            <div class="kpi-value" id="kpiSaudi">&#8212;</div>
-            <div class="kpi-label">Saudi opportunities</div>
+            <div class="kpi-value" id="kpiSaudi" data-loading="true"><span class="sr-only">Loading…</span></div>
+            <div class="kpi-label">Saudi Arabia</div>
             <div class="kpi-note">Programs issued in or led by Saudi institutions</div>
           </div>
         </div>
         <div class="kpi-card gcc" data-tooltip="Programs led by UAE, Oman, Qatar, Bahrain, Kuwait, and other regional partners.">
           <div class="kpi-icon gcc">&#x1F310;</div>
           <div class="kpi-body">
-            <div class="kpi-value" id="kpiGcc">&#8212;</div>
-            <div class="kpi-label">GCC regional</div>
+            <div class="kpi-value" id="kpiGcc" data-loading="true"><span class="sr-only">Loading…</span></div>
+            <div class="kpi-label">GCC (excl. KSA)</div>
             <div class="kpi-note">Led by UAE, Oman, Qatar and regional partners</div>
           </div>
         </div>
         <div class="kpi-card global" data-tooltip="International programs globally open or partially accessible to Saudi-based startups, researchers, and institutions.">
           <div class="kpi-icon global">&#x1F30D;</div>
           <div class="kpi-body">
-            <div class="kpi-value" id="kpiGlobal">&#8212;</div>
-            <div class="kpi-label">Global (Saudi-eligible)</div>
+            <div class="kpi-value" id="kpiGlobal" data-loading="true"><span class="sr-only">Loading…</span></div>
+            <div class="kpi-label">Global / Open to Saudi</div>
             <div class="kpi-note">International programs</div>
           </div>
         </div>
         <div class="kpi-card" style="border-left: 3px solid var(--green);" data-tooltip="Total tracked opportunities in the dataset across all regions.">
           <div class="kpi-icon">&#x2726;</div>
           <div class="kpi-body">
-            <div class="kpi-value" id="kpiTotal">&#8212;</div>
-            <div class="kpi-label">Total opportunities</div>
+            <div class="kpi-value" id="kpiTotal" data-loading="true"><span class="sr-only">Loading…</span></div>
+            <div class="kpi-label">Total Records</div>
             <div class="kpi-note">Across all regions and program types</div>
           </div>
         </div>
@@ -2321,39 +2518,68 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
     <div class="who-strip" role="list">
       <div class="who-item" role="listitem">
         <div class="who-role">Startups & SMEs</div>
-        <div class="who-desc">Find grants, accelerators, and investors aligned to your stage and sector — from Agriculture to ICT.</div>
+        <div class="who-desc">Find accelerators, seed funds, and government grant programs relevant to your sector and stage. Filter by region and program type to surface the most applicable opportunities.</div>
       </div>
       <div class="who-item" role="listitem">
         <div class="who-role">Researchers & Universities</div>
-        <div class="who-desc">Discover fellowships, research calls, and international collaboration tracks across all key sectors.</div>
+        <div class="who-desc">Identify fellowship programs, research grants, and institutional funding across Saudi Arabia, the GCC, and international bodies. Search by sector or funding source to support grant applications.</div>
       </div>
       <div class="who-item" role="listitem">
         <div class="who-role">Government & Public Sector</div>
-        <div class="who-desc">Scan tenders, ecosystem initiatives, and capacity-building programs relevant to public-sector priorities.</div>
+        <div class="who-desc">Map the funding landscape across sectors and regions to inform program design, gap analysis, or policy review. Access structured data on program types, eligibility, and regional distribution.</div>
       </div>
       <div class="who-item" role="listitem">
         <div class="who-role">Investors & Ecosystem</div>
-        <div class="who-desc">Map active programs in Saudi, GCC, and globally to identify deal-flow and co-investment opportunities across sectors.</div>
+        <div class="who-desc">Understand co-investment programs, government-backed venture initiatives, and ecosystem support structures across the GCC. Use the database to identify strategic alignment opportunities.</div>
       </div>
     </div>
   </section>
 
   <section id="opportunities" aria-label="Opportunities database">
     <div class="section-label">Database</div>
-    <h2 class="section-heading">Opportunities</h2>
+    <h2 class="section-heading">Funding Database</h2>
     <p class="section-sub">
-      Search and filter structured records of grants, tenders, accelerators, investment programs, fellowships, and ecosystem initiatives across 15 key sectors in Saudi Arabia, the GCC, and globally.
+      Search and filter structured records across grants, tenders, accelerators, investment programs, fellowships, and ecosystem initiatives. Coverage spans 15 sectors, Saudi Arabia, the GCC, and qualifying global programs.
     </p>
+
+    <!-- DATA PROVENANCE STRIP -->
+    <div class="provenance-strip" role="note" aria-label="Data provenance">
+      <span class="prov-item">
+        <span class="prov-dot prov-dot--green" aria-hidden="true"></span>
+        <span class="prov-label">Dataset</span>
+        <span class="prov-value">v1.2 &middot; March 2026</span>
+      </span>
+      <span class="prov-divider" aria-hidden="true"></span>
+      <span class="prov-item">
+        <span class="prov-label">Records</span>
+        <span class="prov-value" id="provRecordCount">&mdash;</span>
+      </span>
+      <span class="prov-divider" aria-hidden="true"></span>
+      <span class="prov-item">
+        <span class="prov-label">Verified</span>
+        <span class="prov-value">Human-reviewed &middot; March 2026</span>
+      </span>
+      <span class="prov-divider" aria-hidden="true"></span>
+      <span class="prov-item">
+        <span class="prov-label">Sources</span>
+        <span class="prov-value">Gov portals &middot; RDIA &middot; CST &middot; KAUST &middot; Monsha'at</span>
+      </span>
+      <span class="prov-divider" aria-hidden="true"></span>
+      <span class="prov-item prov-item--warning">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span class="prov-value">Verify deadlines directly with sponsors</span>
+      </span>
+    </div>
 
     <!-- IS STATS STRIP -->
     <div class="is-stats-strip" role="list" aria-label="Platform highlights">
-      <div class="is-stat-item" role="listitem">1,000+ active funding opportunities</div>
+      <div class="is-stat-item" role="listitem">1,000+ funding records</div>
       <div class="is-stat-divider" aria-hidden="true"></div>
       <div class="is-stat-item" role="listitem">15 sectors covered</div>
       <div class="is-stat-divider" aria-hidden="true"></div>
-      <div class="is-stat-item" role="listitem">Demo snapshot — data as of March 2026</div>
+      <div class="is-stat-item" role="listitem">Data snapshot: March 2026</div>
       <div class="is-stat-divider" aria-hidden="true"></div>
-      <div class="is-stat-item" role="listitem">API integration available</div>
+      <div class="is-stat-item" role="listitem">Available for API integration</div>
     </div>
 
     <div class="filter-bar" role="search" aria-label="Filter opportunities">
@@ -2467,8 +2693,21 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
       </div>
     </div>
 
+    <!-- ACTIVE FILTER CHIPS -->
+    <div id="activeFilterChips" class="active-chips-row" role="status" aria-live="polite" aria-label="Active filters" hidden></div>
+
     <div class="results-bar" aria-live="polite" aria-atomic="true">
       <span id="resultsCount">Loading&hellip;</span>
+      <div class="sort-control">
+        <label for="sortSelect" class="sort-label">Sort</label>
+        <select id="sortSelect" class="sort-select" aria-label="Sort opportunities">
+          <option value="default">Default</option>
+          <option value="newest">Newest first</option>
+          <option value="deadline">Deadline soon</option>
+          <option value="funding">Funding: largest first</option>
+          <option value="open_first">Open first</option>
+        </select>
+      </div>
     </div>
 
     <div id="oppsTableWrapper">
@@ -2479,7 +2718,7 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
     <div class="recently-added-widget" aria-label="Recently added opportunities">
       <div class="widget-header">
         <div class="widget-title">
-          Recently added to the dataset
+          New to the Database
           <span class="widget-badge">NEW</span>
         </div>
       </div>
@@ -2491,9 +2730,9 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
 
   <section id="insights" aria-label="Data insights and analytics">
     <div class="section-label">Analytics</div>
-    <h2 class="section-heading">Insights</h2>
+    <h2 class="section-heading">Landscape Overview</h2>
     <p class="section-sub">
-      A high-level view of the landscape &mdash; program types, regional distribution, and status breakdown across all sectors and regions.
+      Program-type distribution, regional breakdown, and status summary across all sectors and geographies. Use these charts to orient your research before drilling into individual records.
     </p>
     <div class="insights-grid">
 
@@ -2526,6 +2765,7 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
           <span class="market-tag">Cybersecurity</span>
         </div>
         <div class="market-footnote">Vision 2030 target: reduce oil dependency via digital transformation. Gov't ICT spending grew 20% YoY in 2023.</div>
+        <a class="insight-sector-link" href="#opportunities" data-sector-filter="ict" aria-label="Browse ICT programs">Browse ICT programs →</a>
       </div>
 
       <!-- CARD 2: Energy & Renewables -->
@@ -2557,6 +2797,7 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
           <span class="market-tag">NEOM</span>
         </div>
         <div class="market-footnote">NEOM and ACWA Power are anchor investors. Electricity cost target: &minus;40% by 2030.</div>
+        <a class="insight-sector-link" href="#opportunities" data-sector-filter="energy" aria-label="Browse Energy programs">Browse Energy programs →</a>
       </div>
 
       <!-- CARD 3: Healthcare -->
@@ -2588,6 +2829,7 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
           <span class="market-tag">Telemedicine</span>
         </div>
         <div class="market-footnote">Digital health sub-market: $4.4B (2025) growing at 22.6% CAGR to $18.3B by 2032.</div>
+        <a class="insight-sector-link" href="#opportunities" data-sector-filter="healthcare" aria-label="Browse Healthcare programs">Browse Healthcare programs →</a>
       </div>
 
       <!-- CARD 4: Space Economy -->
@@ -2619,6 +2861,7 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
           <span class="market-tag">Space Tourism</span>
         </div>
         <div class="market-footnote">Commercial market growing from $1.9B (2024) to $5.6B by 2035. Downstream sector to account for &gt;50% of annual market value.</div>
+        <a class="insight-sector-link" href="#opportunities" data-sector-filter="space" aria-label="Browse Space programs">Browse Space programs →</a>
       </div>
 
       <!-- CARD 5: Fintech + Vision 2030 KPIs (full width) -->
@@ -2658,6 +2901,7 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
             <div id="insights-snapshot" class="chart-container"></div>
           </div>
         </div>
+        <a class="insight-sector-link" href="#opportunities" data-sector-filter="financial" aria-label="Browse Fintech programs">Browse Fintech programs →</a>
       </div>
 
     </div>
@@ -2665,7 +2909,7 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
 
   <section id="about" aria-label="About this hub">
     <div class="section-label">About</div>
-    <h2 class="section-heading">About the Hub</h2>
+    <h2 class="section-heading">About This Hub</h2>
     <div class="about-grid">
       <div class="about-prose">
         <p>The <strong>Saudi Opportunity Hub</strong> is a private demo platform tracking grants, tenders, accelerators, investment programs, and fellowships across <strong>15 key sectors</strong> of Saudi Arabia's evolving economy.</p>
@@ -2722,9 +2966,9 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
 
   <section id="feedback" aria-label="Contribute to the hub">
     <div class="section-label">Contribute</div>
-    <h2 class="section-heading">Help keep this hub current</h2>
+    <h2 class="section-heading">Submit Feedback or Corrections</h2>
     <p class="section-sub">
-      Use this form to send internal feedback, corrections, or notes directly to the development team.
+      Found a missing record, outdated entry, or incorrect detail? Use this form to flag it directly to the development team. Your input shapes the next dataset release.
     </p>
 
     <div class="feedback-container">
@@ -2878,18 +3122,18 @@ const TRANSLATIONS = {
     navContribute:    'Feedback',
     // Hero
     heroBadge:    'Pilot Demo',
-    heroTitle:    'Global<br><span class="accent">Opportunity Hub</span>',
-    heroDesc:     'Demo view: <strong>funding opportunities</strong> — grants, tenders, accelerators, fellowships and investment programs across <strong>15 sectors</strong> spanning Energy, ICT, Healthcare, Agriculture and more, covering <strong>Saudi Arabia, the GCC, and global programs</strong>.',
-    heroCta1:     'Browse opportunities',
-    heroCta2:     'Suggest an entry',
+    heroTitle:    'Funding Opportunities<br><span class="accent">Saudi Arabia to Global</span>',
+    heroDesc:     'A structured dataset of grants, tenders, accelerators, fellowships, and investment programs across <strong>15 sectors</strong> — covering Saudi Arabia, the GCC, and global initiatives open to Saudi-based organizations. This is a pilot release; data reflects a working snapshot as of March 2026.',
+    heroCta1:     'Browse the Database',
+    heroCta2:     'Submit a Correction',
     // KPI cards
-    kpiSaudiLabel:  'Saudi opportunities',
+    kpiSaudiLabel:  'Saudi Arabia',
     kpiSaudiNote:   'Programs issued in or led by Saudi institutions',
-    kpiGccLabel:    'GCC regional',
+    kpiGccLabel:    'GCC (excl. KSA)',
     kpiGccNote:     'Led by UAE, Oman, Qatar and regional partners',
-    kpiGlobalLabel: 'Global (Saudi-eligible)',
+    kpiGlobalLabel: 'Global / Open to Saudi',
     kpiGlobalNote:  'International programs',
-    kpiTotalLabel:  'Total opportunities',
+    kpiTotalLabel:  'Total Records',
     kpiTotalNote:   'Across all regions and program types',
     // Who strip
     who1Role: 'Startups & SMEs',
@@ -2901,21 +3145,21 @@ const TRANSLATIONS = {
     who4Role: 'Investors & Ecosystem',
     who4Desc: 'Map active programs in Saudi, GCC, and globally to identify deal-flow and co-investment opportunities.',
     // Stats strip
-    stat1: '1,000+ active funding opportunities',
+    stat1: '1,000+ funding records',
     stat2: '15 sectors covered',
-    stat3: 'Demo snapshot — data as of March 2026',
-    stat4: 'API integration available',
+    stat3: 'Data snapshot: March 2026',
+    stat4: 'Available for API integration',
     // Section labels & headings
     sectionLabelOpps:     'Database',
-    sectionHeadingOpps:   'Opportunities',
-    sectionSubOpps:       'Search and filter structured records of grants, tenders, accelerators, investment programs, fellowships, and ecosystem initiatives across 15 key sectors in Saudi Arabia, the GCC, and globally.',
+    sectionHeadingOpps:   'Funding Database',
+    sectionSubOpps:       'Search and filter structured records across grants, tenders, accelerators, investment programs, fellowships, and ecosystem initiatives. Coverage spans 15 sectors, Saudi Arabia, the GCC, and qualifying global programs.',
     sectionLabelInsights: 'Analytics',
-    sectionHeadingInsights: 'Insights',
-    sectionSubInsights:   'A high-level view of the landscape — program types, regional distribution, and status breakdown across all sectors and regions.',
+    sectionHeadingInsights: 'Landscape Overview',
+    sectionSubInsights:   'Program-type distribution, regional breakdown, and status summary across all sectors and geographies. Use these charts to orient your research before drilling into individual records.',
     sectionLabelAbout:    'About',
-    sectionHeadingAbout:  'About the Hub',
+    sectionHeadingAbout:  'About This Hub',
     sectionLabelContrib:  'Feedback',
-    sectionHeadingContrib:'Demo Feedback & Notes',
+    sectionHeadingContrib:'Submit Feedback or Corrections',
     // Filter labels
     filterSearch:   'Search by title or sponsor',
     filterSector:   'Sector',
@@ -3196,6 +3440,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const PER_PAGE = 10;
   let currentPage = 1;
   let filteredData = [];
+  var sortedData = [];
+  var currentSort = 'default';
   let selectedProfile = 'all';
   let booted = false;
 
@@ -3291,12 +3537,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const gcc = allData.filter(d => regionGroup(d) === 'gcc').length;
     const global = allData.filter(d => regionGroup(d) === 'global').length;
     const total = allData.length;
-    const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
-    setText('resultsCount', `${filteredData.length} opportunities found`);
-    setText('kpiSaudi', saudi);
-    setText('kpiGcc', gcc);
-    setText('kpiGlobal', global);
-    setText('kpiTotal', total);
+    setKpiValue('kpiSaudi', saudi.toLocaleString());
+    setKpiValue('kpiGcc', gcc.toLocaleString());
+    setKpiValue('kpiGlobal', global.toLocaleString());
+    setKpiValue('kpiTotal', total.toLocaleString());
+    updateResultsBar(allData);
   }
 
   function renderRecentlyAdded() {
@@ -3358,9 +3603,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const tbody = document.getElementById('oppsTableBody');
     if (!tbody) return;
     const start = (currentPage - 1) * PER_PAGE;
-    const pageItems = filteredData.slice(start, start + PER_PAGE);
+    const pageItems = (sortedData.length ? sortedData : filteredData).slice(start, start + PER_PAGE);
     if (!pageItems.length) {
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon">⌕</div><div class="empty-title">No opportunities found</div><div class="empty-sub">Try adjusting the filters or search term.</div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon">⌕</div><div class="empty-title">No records match your current filters</div><div class="empty-sub">Try broadening your search — adjust the sector, region, or program type. If you believe a relevant opportunity is missing from the database, use the feedback form to flag it.</div></td></tr>';
       renderPagination();
       updateCounts(dataSource());
       return;
@@ -3426,10 +3671,248 @@ document.addEventListener('DOMContentLoaded', function () {
     updateCounts(dataSource());
   }
 
+  /* ---- SORT HELPERS ---- */
+  function parseFundingAmount(str) {
+    if (!str) return 0;
+    var s = str.toString().replace(/,/g,'');
+    var m = s.match(/([\.\d]+)\s*([BMKbmk])?/);
+    if (!m) return 0;
+    var num = parseFloat(m[1]) || 0;
+    var sfx = (m[2]||'').toUpperCase();
+    if (sfx === 'B') num *= 1e9;
+    else if (sfx === 'M') num *= 1e6;
+    else if (sfx === 'K') num *= 1e3;
+    return num;
+  }
+
+  function parseDateValue(str) {
+    if (!str) return 0;
+    var s = str.toString().trim();
+    var d = new Date(s);
+    if (!isNaN(d.getTime())) return d.getTime();
+    var monthMap = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+    var m2 = s.match(/([a-z]+)\s+(\d{4})/i);
+    if (m2) { var mn = monthMap[(m2[1]||'').toLowerCase().slice(0,3)]; if (mn !== undefined) return new Date(parseInt(m2[2]), mn, 1).getTime(); }
+    var m3 = s.match(/(\d{4})/);
+    if (m3) return new Date(parseInt(m3[1]), 0, 1).getTime();
+    return 0;
+  }
+
+  function statusPriority(item) {
+    var s = (item.status||'').toLowerCase();
+    if (s === 'open') return 0;
+    if (s.includes('recurring')) return 1;
+    return 2;
+  }
+
+  function sortData(data) {
+    var copy = data.slice();
+    if (currentSort === 'default') return copy;
+    copy.sort(function(a,b) {
+      if (currentSort === 'newest') {
+        return parseDateValue(b.last_verified) - parseDateValue(a.last_verified);
+      }
+      if (currentSort === 'deadline') {
+        var da = parseDateValue(a.deadline_date);
+        var db = parseDateValue(b.deadline_date);
+        if (da === 0 && db === 0) return 0;
+        if (da === 0) return 1;
+        if (db === 0) return -1;
+        return da - db;
+      }
+      if (currentSort === 'funding') {
+        return parseFundingAmount(b.funding_amount) - parseFundingAmount(a.funding_amount);
+      }
+      if (currentSort === 'open_first') {
+        var pa = statusPriority(a), pb = statusPriority(b);
+        if (pa !== pb) return pa - pb;
+        return 0;
+      }
+      return 0;
+    });
+    return copy;
+  }
+
+  function wireSort() {
+    var sel = document.getElementById('sortSelect');
+    if (!sel) return;
+    sel.addEventListener('change', function() {
+      currentSort = sel.value;
+      sortedData = sortData(filteredData);
+      currentPage = 1;
+      renderCards();
+    });
+  }
+
+  /* ---- ACTIVE FILTER CHIPS ---- */
+  function renderActiveChips() {
+    var container = document.getElementById('activeFilterChips');
+    if (!container) return;
+
+    function getChips() {
+      var chips = [];
+      var searchEl = document.getElementById('searchInput');
+      var searchVal = (searchEl ? searchEl.value : '').trim();
+      if (searchVal) chips.push({ id: 'search', prefix: 'Search', value: searchVal, dismiss: function() { if (searchEl) { searchEl.value = ''; } } });
+
+      var sectorEl = document.getElementById('sectorFilter');
+      if (sectorEl && sectorEl.value !== 'all') {
+        var sLabel = sectorEl.options[sectorEl.selectedIndex] ? sectorEl.options[sectorEl.selectedIndex].text : sectorEl.value;
+        chips.push({ id: 'sector', prefix: 'Sector', value: sLabel, dismiss: function() { if (sectorEl) sectorEl.value = 'all'; } });
+      }
+
+      var regionEl = document.getElementById('countryFilter');
+      if (regionEl && regionEl.value !== 'all') {
+        var rLabel = regionEl.options[regionEl.selectedIndex] ? regionEl.options[regionEl.selectedIndex].text : regionEl.value;
+        chips.push({ id: 'region', prefix: 'Region', value: rLabel, dismiss: function() { if (regionEl) regionEl.value = 'all'; } });
+      }
+
+      var typeEl = document.getElementById('typeFilter');
+      if (typeEl && typeEl.value !== 'all') {
+        var tLabel = typeEl.options[typeEl.selectedIndex] ? typeEl.options[typeEl.selectedIndex].text : typeEl.value;
+        chips.push({ id: 'type', prefix: 'Type', value: tLabel, dismiss: function() { if (typeEl) typeEl.value = 'all'; } });
+      }
+
+      var statusEl = document.getElementById('statusFilter');
+      if (statusEl && statusEl.value !== 'all') {
+        var stLabel = statusEl.options[statusEl.selectedIndex] ? statusEl.options[statusEl.selectedIndex].text : statusEl.value;
+        chips.push({ id: 'status', prefix: 'Status', value: stLabel, dismiss: function() { if (statusEl) statusEl.value = 'all'; } });
+      }
+
+      if (selectedProfile !== 'all') {
+        var activeBtn = document.querySelector('.profile-chip.active');
+        var pLabel = activeBtn ? activeBtn.textContent.trim() : selectedProfile;
+        chips.push({ id: 'profile', prefix: 'Profile', value: pLabel, dismiss: function() {
+          selectedProfile = 'all';
+          document.querySelectorAll('.profile-chip').forEach(function(b) {
+            var active = b.dataset.profile === 'all';
+            b.classList.toggle('active', active);
+            b.setAttribute('aria-pressed', active ? 'true' : 'false');
+          });
+        }});
+      }
+      return chips;
+    }
+
+    var chips = getChips();
+    if (chips.length === 0) { container.hidden = true; container.innerHTML = ''; return; }
+    container.hidden = false;
+
+    var html = chips.map(function(c) {
+      return '<span class="active-chip">' +
+        '<span class="active-chip__label">' + c.prefix + ':</span> ' + c.value +
+        '<button class="active-chip__dismiss" type="button" data-chip-id="' + c.id + '" aria-label="Remove filter ' + c.prefix + '">\u00d7</button>' +
+        '</span>';
+    }).join('');
+    if (chips.length >= 2) html += '<button class="active-chips-clear-all" type="button">Clear all</button>';
+    container.innerHTML = html;
+
+    var dismissBtns = container.querySelectorAll('.active-chip__dismiss');
+    var chipsData = chips;
+    dismissBtns.forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var cid = btn.dataset.chipId;
+        var chip = chipsData.find ? chipsData.find(function(c){ return c.id === cid; }) : null;
+        if (!chip) { for (var i=0;i<chipsData.length;i++) { if (chipsData[i].id===cid){chip=chipsData[i];break;} } }
+        if (chip) { chip.dismiss(); applyFilters(); }
+      });
+    });
+    var clearBtn = container.querySelector('.active-chips-clear-all');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function() {
+        var resetBtn = document.getElementById('resetFilters');
+        if (resetBtn) resetBtn.click();
+      });
+    }
+  }
+
+  /* ---- RESULTS BAR ---- */
+  function isFiltered() {
+    var searchVal = ((document.getElementById('searchInput') || {}).value || '').trim();
+    var sectorVal = (document.getElementById('sectorFilter') || {}).value || 'all';
+    var regionVal = (document.getElementById('countryFilter') || {}).value || 'all';
+    var typeVal   = (document.getElementById('typeFilter') || {}).value || 'all';
+    var statusVal = (document.getElementById('statusFilter') || {}).value || 'all';
+    return searchVal !== '' || sectorVal !== 'all' || regionVal !== 'all' || typeVal !== 'all' || statusVal !== 'all' || selectedProfile !== 'all';
+  }
+
+  function buildFilterSummary() {
+    var parts = [];
+    var searchVal = ((document.getElementById('searchInput') || {}).value || '').trim();
+    if (searchVal) parts.push('"' + searchVal + '"');
+    var sectorEl = document.getElementById('sectorFilter');
+    if (sectorEl && sectorEl.value !== 'all') parts.push('Sector: ' + (sectorEl.options[sectorEl.selectedIndex] ? sectorEl.options[sectorEl.selectedIndex].text : sectorEl.value));
+    var regionEl = document.getElementById('countryFilter');
+    if (regionEl && regionEl.value !== 'all') parts.push('Region: ' + (regionEl.options[regionEl.selectedIndex] ? regionEl.options[regionEl.selectedIndex].text : regionEl.value));
+    var typeEl = document.getElementById('typeFilter');
+    if (typeEl && typeEl.value !== 'all') parts.push('Type: ' + (typeEl.options[typeEl.selectedIndex] ? typeEl.options[typeEl.selectedIndex].text : typeEl.value));
+    var statusEl = document.getElementById('statusFilter');
+    if (statusEl && statusEl.value !== 'all') parts.push('Status: ' + (statusEl.options[statusEl.selectedIndex] ? statusEl.options[statusEl.selectedIndex].text : statusEl.value));
+    if (selectedProfile !== 'all') {
+      var activeBtn = document.querySelector('.profile-chip.active');
+      parts.push('Profile: ' + (activeBtn ? activeBtn.textContent.trim() : selectedProfile));
+    }
+    return parts.join(' \u00b7 ');
+  }
+
+  function updateResultsBar(allData) {
+    var el = document.getElementById('resultsCount');
+    if (!el) return;
+    if (!isFiltered()) {
+      var openCount   = allData.filter(function(d){ return (d.status||'').toLowerCase().indexOf('open') !== -1; }).length;
+      var fundedCount = allData.filter(function(d){ var f=(d.funding_amount||'').toString().trim(); return f && !/not specified|tba|n\/a|varies|see details/i.test(f); }).length;
+      el.innerHTML = '<strong>' + allData.length.toLocaleString() + '</strong> opportunities &nbsp;&middot;&nbsp; <span class="rc-open">' + openCount.toLocaleString() + ' open</span> &nbsp;&middot;&nbsp; <span class="rc-funded">' + fundedCount.toLocaleString() + ' with funding</span>';
+    } else {
+      var summary = buildFilterSummary();
+      el.innerHTML = 'Showing <strong>' + filteredData.length.toLocaleString() + '</strong> result' + (filteredData.length !== 1 ? 's' : '') + (summary ? ' <span class="rc-summary">&mdash; ' + summary + '</span>' : '');
+    }
+  }
+
+  /* ---- SECTOR DEEP LINKS ---- */
+  function wireSectorDeepLinks() {
+    document.querySelectorAll('[data-sector-filter]').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        var sectorValue = link.dataset.sectorFilter;
+        var sectorEl = document.getElementById('sectorFilter');
+        var targetSection = document.getElementById('opportunities');
+        if (!sectorEl || !targetSection) return;
+        sectorEl.value = sectorValue;
+        sectorEl.dispatchEvent(new Event('change', { bubbles: true }));
+        sectorEl.dispatchEvent(new Event('input', { bubbles: true }));
+        requestAnimationFrame(function() {
+          targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setTimeout(function() { sectorEl.focus({ preventScroll: true }); }, 350);
+        });
+      });
+    });
+  }
+
+  /* ---- KPI SKELETON REMOVAL ---- */
+  function setKpiValue(id, value) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = value;
+    el.removeAttribute('data-loading');
+    el.removeAttribute('aria-busy');
+    var srOnly = el.querySelector('.sr-only');
+    if (srOnly) srOnly.parentNode.removeChild(srOnly);
+  }
+
+  function updateProvenanceCount() {
+    var el = document.getElementById('provRecordCount');
+    if (!el) return;
+    var total = window.opportunitiesData ? window.opportunitiesData.length : 0;
+    el.textContent = total > 0 ? total.toLocaleString() + ' records' : '\u2014';
+  }
+
   function applyFilters() {
     filteredData = dataSource().filter(matchesFilters);
+    sortedData = sortData(filteredData);
     currentPage = 1;
     renderCards();
+    renderActiveChips();
   }
 
   function wireFilters() {
@@ -3536,9 +4019,13 @@ document.addEventListener('DOMContentLoaded', function () {
     booted = true;
     installStyles();
     wireFilters();
+    wireSort();
+    wireSectorDeepLinks();
     renderRecentlyAdded();
     filteredData = dataSource().slice();
     applyFilters();
+    renderActiveChips();
+    updateProvenanceCount();
   }
 
   const wait = setInterval(() => {
