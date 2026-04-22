@@ -309,7 +309,7 @@
   }
 
   async function loadDataset() {
-    const candidates = ['./data/opportunities.json', './opportunities.json', './data/dataset.json', './dataset.json'];
+    const candidates = ['./opportunitiesData.json', './data/opportunities.json', './opportunities.json', './data/dataset.json', './dataset.json'];
     for (const url of candidates) {
       try {
         const response = await fetch(url, { cache: 'no-store' });
