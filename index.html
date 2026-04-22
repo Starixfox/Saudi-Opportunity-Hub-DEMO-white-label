@@ -3407,7 +3407,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     <span class="status-badge ${statusClass(item.status)}">${pretty(item.status || 'Unknown')}</span>
                     ${item.isNew ? '<span class="badge-new">New</span>' : ''}
                   </div>
-                  <a class="panel-link-btn opp-card-link" href="${item.application_link || '#'}" ${item.application_link ? 'target="_blank" rel="noopener noreferrer"' : ''}>Go to Website</a>
+                  <div class="opp-card-btns">
+                    <button class="opp-insights-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" type="button">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                      View Insights
+                    </button>
+                    <a class="panel-link-btn opp-card-link" href="${item.application_link || '#'}" ${item.application_link ? 'target="_blank" rel="noopener noreferrer"' : ''}>Go to Website</a>
+                  </div>
                 </div>
                 <div class="opp-card-sponsor">${item.sponsor_institution ? `<strong>Sponsor:</strong> ${item.sponsor_institution}` : ''}</div>
               </div>
@@ -3470,7 +3476,7 @@ document.addEventListener('DOMContentLoaded', function () {
       .table-scroll table { min-width: 100%; }
       .table-scroll thead { display: none; }
       .table-scroll tbody { display: grid; gap: 50px; }
-      .table-scroll tbody tr { display: block; border-bottom: none; cursor: pointer; background: transparent !important; }
+      .table-scroll tbody tr { display: block; border-bottom: none; cursor: default; background: transparent !important; }
       .opp-card-cell { padding: 0 !important; }
       .opp-card-noimg {
         position: relative; display: block; min-height: 0; max-width: 100%;
@@ -3503,6 +3509,9 @@ document.addEventListener('DOMContentLoaded', function () {
       .opp-card-label { color: rgba(255,255,255,.72); font-size: 11px; }
       .opp-card-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
       .opp-card-badges { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+      .opp-card-btns { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+      .opp-insights-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: 12px; font-weight: 600; border-radius: 999px; border: 1.5px solid rgba(255,255,255,.22); background: rgba(255,255,255,.08); color: rgba(255,255,255,.90); cursor: pointer; white-space: nowrap; transition: background 0.15s, border-color 0.15s; }
+      .opp-insights-btn:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.40); color: #fff; }
       .opp-card-link { width: auto; white-space: nowrap; background: #35d5c5; border-radius: 999px; box-shadow: 0 6px 16px rgba(47,213,199,.16); padding: 8px 14px; font-size: 12px; }
       .opp-card-sponsor { margin-top: 8px; color: rgba(255,255,255,.66); font-size: 11px; }
       .pagination { gap: 4px; margin-top: 14px; }
@@ -3685,25 +3694,19 @@ document.addEventListener('DOMContentLoaded', function () {
   if (overlay)    overlay.addEventListener('click', closePanel);
   document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePanel(); });
 
-  // Wire card row clicks — using event delegation
+  // Wire "View Insights" button clicks via event delegation
   document.addEventListener('click', function(e) {
-    var row = e.target.closest('.opp-card-row');
-    if (!row) return;
-    // Don't open panel if user clicked the "Go to Website" link
-    if (e.target.closest('.opp-card-link, a, button')) return;
-    var id = row.dataset.id;
+    var btn = e.target.closest('.opp-insights-btn');
+    if (!btn) return;
+    e.stopPropagation();
+    var id = btn.dataset.id;
+    var titleAttr = btn.dataset.title || '';
     var allData = window.opportunitiesData || window.allOpportunities || [];
     var item = null;
     // Try by ID first
     if (id) item = allData.find(function(r){ return String(r.id) === String(id); });
-    // Fallback: match by title from the card heading
-    if (!item) {
-      var titleEl = row.querySelector('.opp-card-title');
-      if (titleEl) {
-        var titleText = titleEl.textContent.trim();
-        item = allData.find(function(r){ return (r.title||'').trim() === titleText; });
-      }
-    }
+    // Fallback: match by title attribute
+    if (!item && titleAttr) item = allData.find(function(r){ return (r.title||'').trim() === titleAttr.trim(); });
     if (item) openPanel(item);
   });
 
