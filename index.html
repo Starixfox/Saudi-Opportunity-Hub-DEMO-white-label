@@ -1059,6 +1059,102 @@ section:last-of-type { border-bottom: none; }
   width: 100%;
 }
 
+/* ── INSIGHT BLOCKS (rendered by script.js) ─── */
+.insight-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.insight-block__title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: var(--space-1);
+}
+
+.bar-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bar-row__label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.bar-row__label strong {
+  font-weight: 600;
+  color: var(--text);
+  margin-left: var(--space-2);
+  white-space: nowrap;
+}
+
+.bar-row__track {
+  height: 8px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar-row__fill {
+  height: 100%;
+  background: var(--accent, #1a6cf5);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.institution-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.institution-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--text-xs);
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.institution-list li:last-child { border-bottom: none; }
+
+.institution-list li strong {
+  font-weight: 600;
+  color: var(--text);
+  margin-left: var(--space-2);
+  white-space: nowrap;
+}
+
+.insight-card--wide {
+  grid-column: 1 / -1;
+}
+
+.insight-block p {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.insight-block p strong { color: var(--text); font-weight: 600; }
+
 /* ── ABOUT ───────────────────────────────────── */
 .about-grid {
   display: grid;
@@ -2275,30 +2371,25 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
       <div class="insight-card">
         <div class="insight-card-title">By program type</div>
         <div class="insight-card-sub">Distribution across grants, tenders, accelerators, fellowships, and investment programs</div>
-        <div class="chart-container" style="max-height:280px;">
-          <canvas id="typeChart" aria-label="Program type distribution chart"></canvas>
-        </div>
+        <div id="insights-type-chart" class="chart-container"></div>
       </div>
       <div class="insight-card">
         <div class="insight-card-title">By region</div>
         <div class="insight-card-sub">Breakdown between Saudi Arabia, GCC, and globally open programs</div>
-        <div class="chart-container" style="max-height:180px;">
-          <canvas id="regionChart" aria-label="Regional distribution chart"></canvas>
-        </div>
+        <div id="insights-region-chart" class="chart-container"></div>
       </div>
       <div class="insight-card">
         <div class="insight-card-title">By status</div>
         <div class="insight-card-sub">Currently open vs. recurring (closed but returning) vs. closed programs</div>
-        <div class="chart-container" style="max-height:180px;">
-          <canvas id="statusChart" aria-label="Status distribution chart"></canvas>
-        </div>
+        <div id="insights-status-chart" class="chart-container"></div>
       </div>
       <div class="insight-card">
         <div class="insight-card-title">Top institutions by program count</div>
         <div class="insight-card-sub">Organizations with the most tracked opportunities in the dataset</div>
-        <div class="chart-container" style="max-height:320px;">
-          <canvas id="sponsorChart" aria-label="Top sponsors chart"></canvas>
-        </div>
+        <div id="insights-top-institutions" class="chart-container"></div>
+      </div>
+      <div class="insight-card insight-card--wide">
+        <div id="insights-snapshot" class="chart-container"></div>
       </div>
     </div>
 
