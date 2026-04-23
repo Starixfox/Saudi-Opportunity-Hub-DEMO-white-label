@@ -5127,6 +5127,7 @@ document.addEventListener('DOMContentLoaded', function () {
       clearInterval(wait);
       boot();
       window.__renderCards = renderCards; // expose for language toggle
+      window.t = t;                       // expose for script 4 panel (openPanel uses t())
     }
   }, 200);
 })();
@@ -5136,6 +5137,9 @@ document.addEventListener('DOMContentLoaded', function () {
    Insights Snapshot + Program Deep-Dive Panel
    ============================================================ */
 (function () {
+  // t() is defined in script 3's IIFE — access it via window.t (exposed when data loads).
+  // Fallback to identity so calls never throw if data hasn't loaded yet.
+  function t(str) { return (typeof window.t === 'function' ? window.t : function(s){return s;})(str); }
 
   /* ---- SECTOR MARKET DATA (enriched) ---- */
   var SECTOR_DATA = {
