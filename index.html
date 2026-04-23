@@ -4844,22 +4844,26 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       /* ============================================================
-         SKELETON SHIMMER — insight cards, KPI cards, market stats
-         Pure CSS ::after overlay. No DOM text nodes touched.
+         SKELETON SHIMMER — insight cards, KPI cards, opp cards
+         Pure CSS pseudo-element overlay. No DOM text nodes touched.
          Triggered by body.is-translating (set/removed by JS).
          ============================================================ */
       @keyframes sk-shimmer {
-        0%   { background-position: -600px 0; }
-        100% { background-position:  600px 0; }
+        0%   { background-position: -800px 0; }
+        100% { background-position:  800px 0; }
       }
 
-      /* Cards need a stacking context for ::after to overlay them */
-      .insight-card, .kpi-card, .market-stat {
+      /* Stacking context needed for pseudo-element overlays */
+      .insight-card, .kpi-card, .market-stat,
+      .occ-row, .opp-card-content {
         position: relative;
         overflow: hidden;
       }
 
-      /* Light-theme shimmer overlay */
+      /* ───────────────────────────────────────────────────────
+         INSIGHT CARDS + KPI CARDS + MARKET STAT
+         Use ::after (no existing ::after conflicts)
+      ─────────────────────────────────────────────────────── */
       body.is-translating .insight-card::after,
       body.is-translating .kpi-card::after,
       body.is-translating .market-stat::after {
@@ -4869,53 +4873,119 @@ document.addEventListener('DOMContentLoaded', function () {
         z-index: 20;
         border-radius: inherit;
         pointer-events: none;
-        background: linear-gradient(
-          105deg,
-          rgba(210,218,230,0)    0%,
-          rgba(210,218,230,0)   35%,
-          rgba(210,218,230,0.7) 50%,
-          rgba(210,218,230,0)   65%,
-          rgba(210,218,230,0)  100%
-        );
-        background-size: 600px 100%;
-        animation: sk-shimmer 1.4s ease infinite;
+        /* Opaque base so text is completely hidden */
+        background:
+          linear-gradient(
+            100deg,
+            #dde4ef 0%,
+            #dde4ef 30%,
+            #edf1f8 45%,
+            #f5f7fb 50%,
+            #edf1f8 55%,
+            #dde4ef 70%,
+            #dde4ef 100%
+          );
+        background-size: 800px 100%;
+        animation: sk-shimmer 1.6s ease infinite;
       }
-
-      /* Dark-theme shimmer overlay */
       [data-theme="dark"] body.is-translating .insight-card::after,
       [data-theme="dark"] body.is-translating .kpi-card::after,
       [data-theme="dark"] body.is-translating .market-stat::after {
-        background: linear-gradient(
-          105deg,
-          rgba(255,255,255,0)    0%,
-          rgba(255,255,255,0)   35%,
-          rgba(255,255,255,0.09) 50%,
-          rgba(255,255,255,0)   65%,
-          rgba(255,255,255,0)  100%
-        );
-        background-size: 600px 100%;
-        animation: sk-shimmer 1.4s ease infinite;
+        background:
+          linear-gradient(
+            100deg,
+            #1a2236 0%,
+            #1a2236 30%,
+            #242f47 45%,
+            #2a3652 50%,
+            #242f47 55%,
+            #1a2236 70%,
+            #1a2236 100%
+          );
+        background-size: 800px 100%;
+        animation: sk-shimmer 1.6s ease infinite;
       }
 
-      /* Slight blur on card text while loading */
-      body.is-translating .insight-card,
-      body.is-translating .kpi-card {
-        filter: blur(0.6px);
+      /* ───────────────────────────────────────────────────────
+         DETAILED OPP CARDS (.opp-card-noimg)
+         ::after is taken (decorative gradient) — use ::before on
+         .opp-card-content which has z-index:1 already
+      ─────────────────────────────────────────────────────── */
+      body.is-translating .opp-card-content::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+        pointer-events: none;
+        background:
+          linear-gradient(
+            100deg,
+            #0c1e30 0%,
+            #0c1e30 30%,
+            #142840 45%,
+            #1a3050 50%,
+            #142840 55%,
+            #0c1e30 70%,
+            #0c1e30 100%
+          );
+        background-size: 800px 100%;
+        animation: sk-shimmer 1.6s ease infinite;
       }
 
-      /* Smooth unblur when translation finishes */
-      .insight-card, .kpi-card {
+      /* ───────────────────────────────────────────────────────
+         COMPACT OPP CARDS (.occ-row)
+         No existing ::after — safe to use
+      ─────────────────────────────────────────────────────── */
+      body.is-translating .occ-row::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+        border-radius: inherit;
+        pointer-events: none;
+        background:
+          linear-gradient(
+            100deg,
+            #dde4ef 0%,
+            #dde4ef 30%,
+            #edf1f8 45%,
+            #f5f7fb 50%,
+            #edf1f8 55%,
+            #dde4ef 70%,
+            #dde4ef 100%
+          );
+        background-size: 800px 100%;
+        animation: sk-shimmer 1.6s ease infinite;
+      }
+      [data-theme="dark"] body.is-translating .occ-row::after {
+        background:
+          linear-gradient(
+            100deg,
+            #111827 0%,
+            #111827 30%,
+            #1c2640 45%,
+            #222e4a 50%,
+            #1c2640 55%,
+            #111827 70%,
+            #111827 100%
+          );
+        background-size: 800px 100%;
+        animation: sk-shimmer 1.6s ease infinite;
+      }
+
+      /* Smooth unblur / transition when skeleton lifts */
+      .insight-card, .kpi-card, .occ-row {
         transition: filter 0.4s ease;
       }
 
-      /* Stagger each card’s shimmer phase for organic feel */
-      body.is-translating .insight-card:nth-child(2)::after,
-      body.is-translating .kpi-card:nth-child(2)::after  { animation-delay: 0.15s; }
-      body.is-translating .insight-card:nth-child(3)::after,
-      body.is-translating .kpi-card:nth-child(3)::after  { animation-delay: 0.30s; }
-      body.is-translating .insight-card:nth-child(4)::after,
-      body.is-translating .kpi-card:nth-child(4)::after  { animation-delay: 0.45s; }
-      body.is-translating .insight-card:nth-child(5)::after { animation-delay: 0.60s; }
+      /* Stagger shimmer phase per card for organic feel */
+      body.is-translating .insight-card:nth-child(2)::after  { animation-delay: 0.12s; }
+      body.is-translating .insight-card:nth-child(3)::after  { animation-delay: 0.24s; }
+      body.is-translating .insight-card:nth-child(4)::after  { animation-delay: 0.36s; }
+      body.is-translating .insight-card:nth-child(5)::after  { animation-delay: 0.48s; }
+      body.is-translating .kpi-card:nth-child(2)::after      { animation-delay: 0.12s; }
+      body.is-translating .kpi-card:nth-child(3)::after      { animation-delay: 0.24s; }
+      body.is-translating .kpi-card:nth-child(4)::after      { animation-delay: 0.36s; }
     `;
     document.head.appendChild(style);
   }
@@ -5788,7 +5858,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Promise.all ensures shimmer shows for at least 700ms even when
     // translation is instant (cached). No DOM text nodes are touched.
     document.body.classList.add('is-translating');
-    var minDelay = new Promise(function(res){ setTimeout(res, 700); });
+    var minDelay = new Promise(function(res){ setTimeout(res, 1200); });
     try {
       await Promise.all([translateAll(document.body), minDelay]);
     } finally {
