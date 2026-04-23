@@ -2481,37 +2481,38 @@ html[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
         </div>
       </div>
 
+      <div class="kpi-grid-header" role="note">Classified by programme origin &mdash; where the opportunity is issued from</div>
       <div class="kpi-grid">
-        <div class="kpi-card saudi" data-tooltip="Programs issued in or led by Saudi institutions — grants, tenders, accelerators, and public-sector programs from SSA, CST, RDIA, Monsha'at, KAUST and more.">
+        <div class="kpi-card saudi" data-tooltip="Programs issued or led by Saudi institutions — CST, RDIA, Monsha'at, KAUST, KACST, PIF-backed entities, and other KSA government bodies. Classified by programme origin, not applicant eligibility.">
           <div class="kpi-icon saudi">&#x1F1F8;&#x1F1E6;</div>
           <div class="kpi-body">
             <div class="kpi-value" id="kpiSaudi" data-loading="true"><span class="sr-only">Loading…</span></div>
-            <div class="kpi-label">Saudi Arabia</div>
-            <div class="kpi-note">Programs issued in or led by Saudi institutions</div>
+            <div class="kpi-label">Saudi-Issued</div>
+            <div class="kpi-note">Programmes from Saudi institutions &amp; government bodies</div>
           </div>
         </div>
-        <div class="kpi-card gcc" data-tooltip="Programs led by UAE, Oman, Qatar, Bahrain, Kuwait, and other regional partners.">
+        <div class="kpi-card gcc" data-tooltip="Programmes led by UAE, Oman, Qatar, Bahrain, Kuwait, and other GCC partners — excluding Saudi Arabia. Classified by programme origin.">
           <div class="kpi-icon gcc">&#x1F310;</div>
           <div class="kpi-body">
             <div class="kpi-value" id="kpiGcc" data-loading="true"><span class="sr-only">Loading…</span></div>
-            <div class="kpi-label">GCC (excl. KSA)</div>
-            <div class="kpi-note">Led by UAE, Oman, Qatar and regional partners</div>
+            <div class="kpi-label">GCC-Issued</div>
+            <div class="kpi-note">From UAE, Oman, Qatar &amp; regional partners (excl. KSA)</div>
           </div>
         </div>
-        <div class="kpi-card global" data-tooltip="International programs globally open or partially accessible to Saudi-based startups, researchers, and institutions.">
+        <div class="kpi-card global" data-tooltip="Programmes issued by international organisations, global accelerators, and companies outside the GCC — many of which are open or accessible to Saudi-based applicants.">
           <div class="kpi-icon global">&#x1F30D;</div>
           <div class="kpi-body">
             <div class="kpi-value" id="kpiGlobal" data-loading="true"><span class="sr-only">Loading…</span></div>
-            <div class="kpi-label">Global / Open to Saudi</div>
-            <div class="kpi-note">International programs</div>
+            <div class="kpi-label">Internationally Issued</div>
+            <div class="kpi-note">Global programmes, many accessible to Saudi applicants</div>
           </div>
         </div>
-        <div class="kpi-card" style="border-left: 3px solid var(--green);" data-tooltip="Total tracked opportunities in the dataset across all regions.">
+        <div class="kpi-card" style="border-left: 3px solid var(--green);" data-tooltip="Total records in the dataset — Saudi-issued + GCC-issued + Internationally-issued programmes combined.">
           <div class="kpi-icon">&#x2726;</div>
           <div class="kpi-body">
             <div class="kpi-value" id="kpiTotal" data-loading="true"><span class="sr-only">Loading…</span></div>
             <div class="kpi-label">Total Records</div>
-            <div class="kpi-note">Across all regions and program types</div>
+            <div class="kpi-note">All three origin tiers combined</div>
           </div>
         </div>
       </div>
@@ -2938,7 +2939,7 @@ html[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
       <div class="about-prose">
         <p>The <strong>Saudi Opportunity Hub</strong> is a private demo platform tracking grants, tenders, accelerators, investment programs, and fellowships across <strong>15 key sectors</strong> of Saudi Arabia's evolving economy.</p>
         <p>Saudi Arabia's Vision 2030 commitments have generated a diverse portfolio of funding and partnership opportunities across Agriculture, Energy, Healthcare, ICT, Financial Services, Tourism, and more &mdash; from government-backed programs to global accelerators actively recruiting Saudi startups, researchers, and institutions. This hub aggregates those signals in one place.</p>
-        <p>Coverage spans three tiers: <strong>Saudi</strong> programs issued by Saudi institutions (CST, RDIA, Monsha'at, KAUST, KACST, PIF-backed entities); <strong>GCC</strong> programs from UAE, Oman, Qatar, Bahrain, and Kuwait; and <strong>Global</strong> programs from international agencies, accelerators, and companies worldwide.</p>
+        <p>Programmes are classified by origin across three tiers: <strong>Saudi-issued</strong> &mdash; programmes from Saudi institutions including CST, RDIA, Monsha'at, KAUST, KACST, and PIF-backed entities; <strong>GCC-issued</strong> &mdash; programmes from UAE, Oman, Qatar, Bahrain, and Kuwait; and <strong>Internationally issued</strong> &mdash; global programmes from international agencies, accelerators, and companies, many of which are open or accessible to Saudi-based applicants. Origin tier (who issues the programme) is distinct from applicant eligibility (who can apply), which is tracked separately in each record.</p>
         <p>This is a proprietary demo. It is <strong>not affiliated with, endorsed by, or representative of</strong> any government, authority, or program listed. Always verify details directly with the sponsoring organization.</p>
         <div class="audience-grid">
           <div class="audience-card">
@@ -2962,7 +2963,7 @@ html[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
       <div class="about-meta-list">
         <div class="about-meta-item">
           <div class="about-meta-label">Coverage scope</div>
-          <div class="about-meta-value">Saudi Arabia &middot; GCC &middot; Global programs &mdash; across 15 key sectors</div>
+          <div class="about-meta-value">Saudi-issued &middot; GCC-issued &middot; Internationally issued &mdash; across 15 key sectors. Applicant eligibility tracked per record.</div>
         </div>
         <div class="about-meta-item">
           <div class="about-meta-label">Program types tracked</div>
@@ -3715,7 +3716,6 @@ document.addEventListener('DOMContentLoaded', function () {
                       ${statusLabel}
                     </span>
                     <span class="occ-chip">${region}</span>
-                    ${funding ? `<span class="occ-chip occ-chip--funding">${funding}</span>` : ''}
                     ${deadline ? `<span class="occ-chip occ-chip--deadline">${deadline}</span>` : ''}
                   </div>
                   <div class="occ-actions">
@@ -4631,6 +4631,38 @@ document.addEventListener('DOMContentLoaded', function () {
         .preset-chip { min-height: 30px; }
         .opp-card-title { font-size: clamp(16px, 4vw, 22px); }
       }
+
+      /* ============================================================
+         KPI GRID HEADER  (origin-tier classification note)
+         ============================================================ */
+      .kpi-grid-header {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 10px;
+        padding-left: 2px;
+      }
+      [data-theme="dark"] .kpi-grid-header {
+        color: #7a91b0;
+      }
+
+      /* ============================================================
+         SNAPSHOT AXIS NOTE  (hub snapshot sub-label)
+         ============================================================ */
+      .snapshot-axis-note {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 10px;
+        padding: 0 2px;
+      }
+      [data-theme="dark"] .snapshot-axis-note {
+        color: #7a91b0;
+      }
     `;
     document.head.appendChild(style);
   }
@@ -5136,19 +5168,20 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!el) return;
     var open = data.filter(function(r){ return r.status === 'open'; }).length;
     var recurring = data.filter(function(r){ return r.status === 'closed_but_recurring' || r.status === 'recurring'; }).length;
-    var saudi = data.filter(function(r){ return r.eligibility_region === 'Saudi_only' || r.eligibility_region === 'Saudi'; }).length;
-    var global_ = data.filter(function(r){ return r.eligibility_region === 'Global' || r.eligibility_region === 'Global_including_Saudi'; }).length;
+    var saudiElig = data.filter(function(r){ return r.eligibility_region === 'Saudi_only' || r.eligibility_region === 'Saudi'; }).length;
+    var globalElig = data.filter(function(r){ return r.eligibility_region === 'Global' || r.eligibility_region === 'Global_including_Saudi'; }).length;
     var newCount = data.filter(function(r){ return r.isNew; }).length;
     el.innerHTML =
+      '<div class="snapshot-axis-note">Programme status &amp; applicant eligibility &mdash; across all origin tiers</div>' +
       '<div class="panel-sector-stats" style="grid-template-columns:repeat(2,1fr);gap:var(--space-2);margin-bottom:var(--space-3)">' +
-        stat(data.length, 'Total opportunities') +
+        stat(data.length, 'Total records') +
         stat(open, 'Currently open') +
-        stat(recurring, 'Recurring programs') +
+        stat(recurring, 'Recurring programmes') +
         stat(newCount, 'Recently added') +
-        stat(saudi, 'Saudi-only') +
-        stat(global_, 'Global / incl. Saudi') +
+        stat(saudiElig, 'KSA-only eligibility') +
+        stat(globalElig, 'Open globally') +
       '</div>' +
-      '<div class="market-footnote">Data across 15 sectors spanning grants, tenders, accelerators, fellowships, and investment programs.</div>';
+      '<div class="market-footnote">Status and eligibility counts above. Programme origin (Saudi-issued / GCC-issued / International) is shown in the Overview section.</div>';
   }
 
   function stat(val, label) {
