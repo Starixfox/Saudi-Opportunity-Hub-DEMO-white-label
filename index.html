@@ -5731,7 +5731,16 @@ document.addEventListener('DOMContentLoaded', function () {
     if (window.__lang !== 'ar') return;
     swapSelectOptions(true);
     var container = document.getElementById('oppsTableBody');
-    if (container) await translateAll(container);
+    if (!container) return;
+    // Skeleton on the cards container while data-driven strings are translated.
+    // CSS ::after/.occ-row::after + .opp-card-content::before cover all card text.
+    document.body.classList.add('is-translating');
+    var minDelay = new Promise(function(res){ setTimeout(res, 1200); });
+    try {
+      await Promise.all([translateAll(container), minDelay]);
+    } finally {
+      document.body.classList.remove('is-translating');
+    }
   };
   // Update static compare tray strings when Arabic activates
   window.__updateTrayLang = function(isAr) {
@@ -5854,11 +5863,12 @@ document.addEventListener('DOMContentLoaded', function () {
     if (ar) { ar.classList.add('is-lang-active'); ar.setAttribute('aria-current','page'); }
     if (en) { en.classList.remove('is-lang-active'); en.removeAttribute('aria-current'); }
     try { localStorage.setItem('is-demo-lang','ar'); } catch(e){}
-    // Skeleton: body.is-translating triggers CSS ::after shimmer on cards.
-    // Promise.all ensures shimmer shows for at least 700ms even when
-    // translation is instant (cached). No DOM text nodes are touched.
+    // Skeleton: body.is-translating triggers CSS ::after shimmer on insight/KPI cards.
+    // Promise.all with 1500ms min ensures shimmer is always visible for at least
+    // one full shimmer sweep even when translation comes back instantly from cache.
+    // No DOM text nodes touched — translateAll works unaffected.
     document.body.classList.add('is-translating');
-    var minDelay = new Promise(function(res){ setTimeout(res, 1200); });
+    var minDelay = new Promise(function(res){ setTimeout(res, 1500); });
     try {
       await Promise.all([translateAll(document.body), minDelay]);
     } finally {
