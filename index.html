@@ -4842,6 +4842,80 @@ document.addEventListener('DOMContentLoaded', function () {
       [data-theme="dark"] .snapshot-axis-note {
         color: #7a91b0;
       }
+
+      /* ============================================================
+         SKELETON SHIMMER — insight cards, KPI cards, market stats
+         Pure CSS ::after overlay. No DOM text nodes touched.
+         Triggered by body.is-translating (set/removed by JS).
+         ============================================================ */
+      @keyframes sk-shimmer {
+        0%   { background-position: -600px 0; }
+        100% { background-position:  600px 0; }
+      }
+
+      /* Cards need a stacking context for ::after to overlay them */
+      .insight-card, .kpi-card, .market-stat {
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Light-theme shimmer overlay */
+      body.is-translating .insight-card::after,
+      body.is-translating .kpi-card::after,
+      body.is-translating .market-stat::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        border-radius: inherit;
+        pointer-events: none;
+        background: linear-gradient(
+          105deg,
+          rgba(210,218,230,0)    0%,
+          rgba(210,218,230,0)   35%,
+          rgba(210,218,230,0.7) 50%,
+          rgba(210,218,230,0)   65%,
+          rgba(210,218,230,0)  100%
+        );
+        background-size: 600px 100%;
+        animation: sk-shimmer 1.4s ease infinite;
+      }
+
+      /* Dark-theme shimmer overlay */
+      [data-theme="dark"] body.is-translating .insight-card::after,
+      [data-theme="dark"] body.is-translating .kpi-card::after,
+      [data-theme="dark"] body.is-translating .market-stat::after {
+        background: linear-gradient(
+          105deg,
+          rgba(255,255,255,0)    0%,
+          rgba(255,255,255,0)   35%,
+          rgba(255,255,255,0.09) 50%,
+          rgba(255,255,255,0)   65%,
+          rgba(255,255,255,0)  100%
+        );
+        background-size: 600px 100%;
+        animation: sk-shimmer 1.4s ease infinite;
+      }
+
+      /* Slight blur on card text while loading */
+      body.is-translating .insight-card,
+      body.is-translating .kpi-card {
+        filter: blur(0.6px);
+      }
+
+      /* Smooth unblur when translation finishes */
+      .insight-card, .kpi-card {
+        transition: filter 0.4s ease;
+      }
+
+      /* Stagger each card’s shimmer phase for organic feel */
+      body.is-translating .insight-card:nth-child(2)::after,
+      body.is-translating .kpi-card:nth-child(2)::after  { animation-delay: 0.15s; }
+      body.is-translating .insight-card:nth-child(3)::after,
+      body.is-translating .kpi-card:nth-child(3)::after  { animation-delay: 0.30s; }
+      body.is-translating .insight-card:nth-child(4)::after,
+      body.is-translating .kpi-card:nth-child(4)::after  { animation-delay: 0.45s; }
+      body.is-translating .insight-card:nth-child(5)::after { animation-delay: 0.60s; }
     `;
     document.head.appendChild(style);
   }
@@ -5710,8 +5784,16 @@ document.addEventListener('DOMContentLoaded', function () {
     if (ar) { ar.classList.add('is-lang-active'); ar.setAttribute('aria-current','page'); }
     if (en) { en.classList.remove('is-lang-active'); en.removeAttribute('aria-current'); }
     try { localStorage.setItem('is-demo-lang','ar'); } catch(e){}
-    // Translate static HTML (navbar, hero, about, sections — not cards)
-    await translateAll(document.body);
+    // Skeleton: body.is-translating triggers CSS ::after shimmer on cards.
+    // Promise.all ensures shimmer shows for at least 700ms even when
+    // translation is instant (cached). No DOM text nodes are touched.
+    document.body.classList.add('is-translating');
+    var minDelay = new Promise(function(res){ setTimeout(res, 700); });
+    try {
+      await Promise.all([translateAll(document.body), minDelay]);
+    } finally {
+      document.body.classList.remove('is-translating');
+    }
     // Re-render cards using t() so they output Arabic directly — no translateAll needed
     if (typeof window.__renderCards === 'function') window.__renderCards();
     if (typeof window.__updateTrayLang === 'function') window.__updateTrayLang(true);
