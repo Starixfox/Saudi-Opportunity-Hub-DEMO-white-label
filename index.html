@@ -3671,6 +3671,7 @@ document.addEventListener('DOMContentLoaded', function () {
       tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon">&#x2315;</div><div class="empty-title">No matching opportunities found</div><div class="empty-sub">' + sugText + '</div><div style="margin-top:16px"><button class="empty-reset-btn" onclick="document.getElementById(\'resetBtn\')?.click()">Reset all filters</button></div></td></tr>';
       renderPagination();
       updateCounts(dataSource());
+      if (typeof window.__retranslate === 'function') window.__retranslate();
       return;
     }
     var searchTerm = (document.getElementById('searchInput') ? document.getElementById('searchInput').value : '').trim();
@@ -3795,6 +3796,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }).join('');
     renderPagination();
     updateCounts(dataSource());
+    // Re-apply Arabic translation if active — view switch re-renders all card HTML
+    if (typeof window.__retranslate === 'function') window.__retranslate();
   }
 
   /* ---- SORT HELPERS ---- */
@@ -5377,6 +5380,11 @@ document.addEventListener('DOMContentLoaded', function () {
     el.setAttribute('dir', 'rtl');
     await translateNodes(el);
     await translateAttrs(el);
+  };
+  // Expose for renderCards: re-translate the full body after a view switch
+  window.__retranslate = async function() {
+    if (window.__lang !== 'ar') return;
+    await translateAll(document.body);
   };
   function restoreEnglish(){
     function walk(node){
