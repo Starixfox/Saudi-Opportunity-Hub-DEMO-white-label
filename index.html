@@ -3769,6 +3769,14 @@ document.addEventListener('DOMContentLoaded', function () {
     'Equity or quasi-equity funding in exchange for a stake in your organization.': 'تمويل بحصة ملكية مقابل حصة في مؤسستك.',
     'Open exclusively to organizations or individuals based in Saudi Arabia.': 'مفتوح حصراً للمؤسسات أو الأفراد في المملكة العربية السعودية.',
     'Open to applicants worldwide, including Saudi Arabia.': 'مفتوح للمتقدمين من جميع أنحاء العالم، بما فيها المملكة.',
+    // Detailed card stat labels
+    'Funding / Size':  'التمويل / الحجم',
+    'TBA':             'يُحدد لاحقاً',
+    'Unknown':         'غير معروف',
+    'Opportunity':     'فرصة',
+    'saudi':           'سعودي',
+    'gcc':             'دول الخليج',
+    'global':          'عالمي',
     // Country / region names
     'Saudi Arabia':    'المملكة العربية السعودية',
     'UAE':             'الإمارات',
@@ -3909,26 +3917,37 @@ document.addEventListener('DOMContentLoaded', function () {
       }).join('');
       renderPagination();
       updateCounts(dataSource());
+      if (typeof window.__retranslate === 'function') window.__retranslate();
       return;
     }
     tbody.innerHTML = pageItems.map(item => {
       const region = regionGroup(item);
+      const regionLabel = t({ saudi: 'Saudi Arabia', gcc: 'GCC', global: 'Global' }[region] || region);
       const chips = [pretty(item.funding_type), ...(item.profiles || []).slice(0,2).map(pretty), ...(item.sectors || []).slice(0,2).map(pretty)].filter(Boolean).slice(0,5);
+      const typeStr   = t(pretty(item.type || 'Other'));
+      const countryStr = t(item.country || pretty(item.eligibility_region) || 'Global');
+      const statusStr  = t(pretty(item.status || 'Unknown'));
+      const deadlineStr = t(item.deadline_date || 'TBA');
+      const fundingLabel  = t('Funding / Size');
+      const statusLabel   = t('Status');
+      const deadlineLabel = t('Deadline');
+      const verifiedLabel = t('Last verified');
+      const newLabel      = t('New');
       return `
         <tr class="opp-card-row" data-id="${item.id || ''}">
           <td colspan="7" class="opp-card-cell">
             <article class="opp-card-noimg">
               <button class="opp-select-btn" data-id="${item.id || ''}" title="${t('Add to comparison')}" aria-label="${t('Select for comparison')}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></button>
               <div class="opp-card-content">
-                <h3 class="opp-card-title">${highlightTerm(item.title || 'Untitled opportunity', searchTerm)}</h3>
+                <h3 class="opp-card-title">${highlightTerm(item.title || t('Untitled'), searchTerm)}</h3>
                 <div class="opp-card-meta">
                   <span class="opp-meta-item">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="10" width="18" height="11" rx="2"/><path d="M7 10V6a1 1 0 0 1 1-1h2v5M15 10V4h1a1 1 0 0 1 1 1v5"/></svg>
-                    <span>${pretty(item.type || 'Opportunity')}</span>
+                    <span>${typeStr}</span>
                   </span>
                   <span class="opp-meta-item">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 21s7-4.35 7-10a7 7 0 1 0-14 0c0 5.65 7 10 7 10Z"/><circle cx="12" cy="11" r="2.5"/></svg>
-                    <span>${item.country || pretty(item.eligibility_region) || 'Global'}</span>
+                    <span>${countryStr}</span>
                   </span>
                 </div>
                 <p class="opp-card-desc">${highlightTerm(item.description_short || t('No description available.'), searchTerm)}</p>
@@ -3936,23 +3955,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="opp-card-stats">
                   <div class="opp-card-stat">
                     <div class="opp-card-value">${item.funding_amount || t('See details')}</div>
-                    <div class="opp-card-label">Funding / Size</div>
+                    <div class="opp-card-label">${fundingLabel}</div>
                   </div>
                   <div class="opp-card-stat">
-                    <div class="opp-card-value">${withTooltip(pretty(item.status || 'Unknown'))}</div>
-                    <div class="opp-card-label">Status</div>
+                    <div class="opp-card-value">${withTooltip(statusStr)}</div>
+                    <div class="opp-card-label">${statusLabel}</div>
                   </div>
                   <div class="opp-card-stat">
-                    <div class="opp-card-value">${item.deadline_date || 'TBA'}</div>
-                    <div class="opp-card-label">Deadline${item.last_verified ? ` &middot; <span title="Last verified: ${item.last_verified}" class="gloss-tip" data-tip="Data last verified: ${item.last_verified}">Verified ${item.last_verified}</span>` : ''}</div>
+                    <div class="opp-card-value">${deadlineStr}</div>
+                    <div class="opp-card-label">${deadlineLabel}${item.last_verified ? ` &middot; <span title="${verifiedLabel}: ${item.last_verified}" class="gloss-tip" data-tip="${verifiedLabel}: ${item.last_verified}">${verifiedLabel} ${item.last_verified}</span>` : ''}</div>
                   </div>
                 </div>
                 <div class="opp-card-actions">
                   <div class="opp-card-badges">
-                    <span class="pill ${typeClass(item.type)}">${withTooltip(pretty(item.type || 'Other'))}</span>
-                    <span class="region-tag region-${region}">${region}</span>
-                    <span class="status-badge ${statusClass(item.status)}">${pretty(item.status || 'Unknown')}</span>
-                    ${item.isNew ? '<span class="badge-new">New</span>' : ''}
+                    <span class="pill ${typeClass(item.type)}">${withTooltip(typeStr)}</span>
+                    <span class="region-tag region-${region}">${regionLabel}</span>
+                    <span class="status-badge ${statusClass(item.status)}">${statusStr}</span>
+                    ${item.isNew ? `<span class="badge-new">${newLabel}</span>` : ''}
                   </div>
                   <div class="opp-card-btns">
                     <button class="opp-insights-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" type="button">
