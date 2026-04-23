@@ -4842,55 +4842,6 @@ document.addEventListener('DOMContentLoaded', function () {
       [data-theme="dark"] .snapshot-axis-note {
         color: #7a91b0;
       }
-      /* ============================================================
-         SKELETON LOADING STATES — Arabic live translation
-         ============================================================ */
-      @keyframes sk-shimmer {
-        0%   { background-position: -400px 0; }
-        100% { background-position:  400px 0; }
-      }
-      .sk-text {
-        display: inline-block;
-        border-radius: 4px;
-        color: transparent !important;
-        background: linear-gradient(
-          90deg,
-          rgba(120,140,170,.22) 25%,
-          rgba(180,200,220,.38) 50%,
-          rgba(120,140,170,.22) 75%
-        );
-        background-size: 400px 100%;
-        animation: sk-shimmer 1.4s ease infinite;
-        user-select: none;
-        pointer-events: none;
-        vertical-align: middle;
-        min-width: 3ch;
-      }
-      /* In dark theme use a slightly brighter shimmer */
-      [data-theme="dark"] .sk-text {
-        background: linear-gradient(
-          90deg,
-          rgba(255,255,255,.06) 25%,
-          rgba(255,255,255,.14) 50%,
-          rgba(255,255,255,.06) 75%
-        );
-        background-size: 400px 100%;
-        animation: sk-shimmer 1.4s ease infinite;
-      }
-      /* While translating: body gets .is-translating
-         Anything wrapped in .sk-text shows shimmer, real text hidden.
-         Opacity on wrapper so layout doesn't shift at all. */
-      body.is-translating .sk-text {
-        opacity: 1;
-      }
-      /* Smooth reveal: when skeleton is removed, nearby elements fade in */
-      .sk-reveal {
-        animation: sk-reveal 0.35s ease forwards;
-      }
-      @keyframes sk-reveal {
-        from { opacity: 0.4; }
-        to   { opacity: 1; }
-      }
     `;
     document.head.appendChild(style);
   }
@@ -5616,69 +5567,6 @@ document.addEventListener('DOMContentLoaded', function () {
     opts.forEach((o,i) => { if (!o.dataset.en) o.dataset.en = orig[i]; if (tr[i] && tr[i] !== orig[i]) o.textContent = tr[i]; });
   }
   async function translateAll(root){ root = root || document.body; await translateNodes(root); await translateAttrs(root); await translateOptions(root); }
-
-  /* ── SKELETON HELPERS ───────────────────────────────────────────────
-     wrapForSkeleton(root)  — walks every meaningful text node inside
-       `root` and wraps its trimmed content in a <span class="sk-text">.
-       Skips: empty nodes, pure-whitespace nodes, nodes already wrapped,
-       nodes inside <script>/<style>/<svg>/<noscript>.
-     unwrapSkeleton(root)   — removes all .sk-text spans, restoring the
-       original text node, then adds .sk-reveal to root for a fade-in.
-     Both functions are idempotent and safe to call on dynamic content.
-  ──────────────────────────────────────────────────────────────────── */
-  var SKELETON_SKIP_TAGS = new Set(['SCRIPT','STYLE','SVG','NOSCRIPT','TEMPLATE','CODE','PRE']);
-  function wrapForSkeleton(root) {
-    if (!root) return;
-    var walker = document.createTreeWalker(
-      root,
-      NodeFilter.SHOW_TEXT,
-      {
-        acceptNode: function(node) {
-          // Skip if already inside a .sk-text span
-          var p = node.parentNode;
-          if (p && p.classList && p.classList.contains('sk-text')) return NodeFilter.FILTER_REJECT;
-          // Skip elements we should never touch
-          while (p) {
-            if (p.nodeType === 1 && SKELETON_SKIP_TAGS.has(p.tagName)) return NodeFilter.FILTER_REJECT;
-            p = p.parentNode;
-          }
-          // Only accept non-empty, non-whitespace text
-          return node.nodeValue && node.nodeValue.trim().length > 0
-            ? NodeFilter.FILTER_ACCEPT
-            : NodeFilter.FILTER_SKIP;
-        }
-      }
-    );
-    var nodes = [];
-    var n;
-    while ((n = walker.nextNode())) nodes.push(n);
-    nodes.forEach(function(textNode) {
-      var span = document.createElement('span');
-      span.className = 'sk-text';
-      // Store the original text so unwrap can restore it without re-render
-      span.dataset.skOrig = textNode.nodeValue;
-      // Preserve approximate width using a non-breaking space of same length
-      span.textContent = textNode.nodeValue; // real text — color:transparent hides it
-      textNode.parentNode.replaceChild(span, textNode);
-    });
-  }
-  function unwrapSkeleton(root) {
-    if (!root) return;
-    var spans = Array.from(root.querySelectorAll('.sk-text'));
-    spans.forEach(function(span) {
-      var orig = span.dataset.skOrig;
-      var textNode = document.createTextNode(orig !== undefined ? orig : span.textContent);
-      if (span.parentNode) span.parentNode.replaceChild(textNode, span);
-    });
-    // Subtle fade-in after skeleton removed
-    if (root.classList) {
-      root.classList.remove('sk-reveal');
-      // Force reflow then add class
-      void root.offsetWidth;
-      root.classList.add('sk-reveal');
-    }
-  }
-
   // Expose for panel: translate a specific element immediately
   window.__translatePanel = async function(el) {
     if (!el) return;
@@ -5695,16 +5583,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (window.__lang !== 'ar') return;
     swapSelectOptions(true);
     var container = document.getElementById('oppsTableBody');
-    if (!container) return;
-    // Show skeleton on the cards container while API translate runs
-    document.body.classList.add('is-translating');
-    wrapForSkeleton(container);
-    try {
-      await translateAll(container);
-    } finally {
-      unwrapSkeleton(container);
-      document.body.classList.remove('is-translating');
-    }
+    if (container) await translateAll(container);
   };
   // Update static compare tray strings when Arabic activates
   window.__updateTrayLang = function(isAr) {
@@ -5827,27 +5706,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (ar) { ar.classList.add('is-lang-active'); ar.setAttribute('aria-current','page'); }
     if (en) { en.classList.remove('is-lang-active'); en.removeAttribute('aria-current'); }
     try { localStorage.setItem('is-demo-lang','ar'); } catch(e){}
-    // Show skeleton on static content while Google Translate API runs
-    // (cards are excluded — they re-render fresh via __renderCards below)
-    var cardBody = document.getElementById('oppsTableBody');
-    var staticTargets = [
-      document.querySelector('.hero-text'),
-      document.querySelector('.kpi-grid'),
-      document.querySelector('.filter-bar'),
-      document.querySelector('#resultsBar'),
-      document.querySelector('.preset-chips-row'),
-      document.querySelector('.profile-chips'),
-      document.querySelector('.section-heading')
-    ].filter(Boolean);
-    document.body.classList.add('is-translating');
-    staticTargets.forEach(wrapForSkeleton);
-    try {
-      // Translate static HTML (navbar, hero, about, sections — not cards)
-      await translateAll(document.body);
-    } finally {
-      staticTargets.forEach(unwrapSkeleton);
-      document.body.classList.remove('is-translating');
-    }
+    // Translate static HTML (navbar, hero, about, sections — not cards)
+    await translateAll(document.body);
     // Re-render cards using t() so they output Arabic directly — no translateAll needed
     if (typeof window.__renderCards === 'function') window.__renderCards();
     if (typeof window.__updateTrayLang === 'function') window.__updateTrayLang(true);
