@@ -3769,6 +3769,54 @@ document.addEventListener('DOMContentLoaded', function () {
     'Equity or quasi-equity funding in exchange for a stake in your organization.': 'تمويل بحصة ملكية مقابل حصة في مؤسستك.',
     'Open exclusively to organizations or individuals based in Saudi Arabia.': 'مفتوح حصراً للمؤسسات أو الأفراد في المملكة العربية السعودية.',
     'Open to applicants worldwide, including Saudi Arabia.': 'مفتوح للمتقدمين من جميع أنحاء العالم، بما فيها المملكة.',
+    // Country / region names
+    'Saudi Arabia':    'المملكة العربية السعودية',
+    'UAE':             'الإمارات',
+    'Qatar':           'قطر',
+    'Oman':            'عُمان',
+    'Bahrain':         'البحرين',
+    'Kuwait':          'الكويت',
+    'GCC':             'دول الخليج',
+    'Global':          'عالمي',
+    'Europe':          'أوروبا',
+    'European Union':  'الاتحاد الأوروبي',
+    'United States':   'الولايات المتحدة',
+    'United Kingdom':  'المملكة المتحدة',
+    'Germany':         'ألمانيا',
+    'France':          'فرنسا',
+    'Japan':           'اليابان',
+    'Canada':          'كندا',
+    'India':           'الهند',
+    'Denmark':         'الدنمارك',
+    'Sweden':          'السويد',
+    'Switzerland':     'سويسرا',
+    'Philippines':     'الفلبين',
+    // Programme types
+    'Grant':             'منحة',
+    'Tender':            'عطاء',
+    'Tender Rfp':        'عطاء / طلب عروض',
+    'Accelerator':       'مسرّعة',
+    'Fellowship':        'زمالة',
+    'Investment Program':'برنامج استثماري',
+    'Loan Program':      'برنامج قرض',
+    'Partnership Program':'برنامج شراكة',
+    'Other':             'أخرى',
+    // Common deadline phrases
+    'Rolling / Open':    'مستمر / مفتوح',
+    'Rolling calls per priority area': 'طلبات متجددة حسب الأولوية',
+    'Check website for next call': 'تحقق من الموقع للدورة القادمة',
+    'Annual cycle':      'دورة سنوية',
+    'Annual cycle; check CST website for current year deadlines': 'دورة سنوية — راجع موقع هيئة الاتصالات',
+    'Annual cycle; check SSA portal for 2026 dates': 'دورة سنوية — راجع بوابة وكالة الفضاء',
+    'Annual call; check RSG website': 'نداء سنوي — راجع موقع RSG',
+    'Annual cohort; dates vary': 'دفعة سنوية — المواعيد متغيرة',
+    'Annual cohorts; Cohort 11 in 2025': 'دفعات سنوية — الدفعة 11 في 2025',
+    'Multiple rounds per year': 'جولات متعددة سنوياً',
+    'Multiple events per year': 'فعاليات متعددة سنوياً',
+    '2025 edition closed; 2026 edition tentatively planned': 'نسخة 2025 مغلقة — نسخة 2026 مخططة',
+    '2025 edition concluded; next cycle expected 2026': 'نسخة 2025 انتهت — الدورة القادمة 2026',
+    'Finalization expected 2026': 'من المتوقع الإنهاء في 2026',
+    'Batch 11 expected H1 2026; check 500 Global website': 'الدفعة 11 متوقعة النصف الأول 2026',
   };
 
   /* t(str) — returns Arabic string if in AR mode, else original */
@@ -3805,14 +3853,14 @@ document.addEventListener('DOMContentLoaded', function () {
     if (currentView === 'compact') {
       tbody.innerHTML = pageItems.map(function(item) {
         // Compact: derive the 6 highest-value data points only
-        var typeLabel  = pretty(item.type || 'Other');
+        var typeLabel  = t(pretty(item.type || 'Other'));
         var statusCls  = statusClass(item.status);
         var statusDot  = item.status === 'open' ? '#16a34a'
                        : item.status === 'closed_but_recurring' ? '#d97706'
                        : item.status === 'recurring' ? '#2563eb' : '#94a3b8';
         var funding    = item.funding_amount || '';
-        var region     = item.country || pretty(item.eligibility_region) || 'Global';
-        var deadline   = item.deadline_date ? item.deadline_date : '';
+        var region     = t(item.country || pretty(item.eligibility_region) || 'Global');
+        var deadline   = item.deadline_date ? (t(item.deadline_date) || item.deadline_date) : '';
         var sponsor    = item.sponsor_institution || '';
         var titleStr   = highlightTerm(item.title || t('Untitled'), searchTerm);
         var applyHref  = item.application_link || '#';
