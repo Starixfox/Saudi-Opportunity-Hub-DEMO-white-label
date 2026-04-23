@@ -2651,13 +2651,13 @@ html[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
             Type
           </label>
           <select id="typeFilter" class="filter-select" aria-label="Filter by opportunity type">
-            <option value="all">All types</option>
-            <option value="grant">Grant</option>
-            <option value="tender">Tender / Competition</option>
-            <option value="accelerator">Accelerator</option>
-            <option value="investment_program">Investment program</option>
-            <option value="fellowship">Fellowship</option>
-            <option value="other">Other</option>
+            <option value="all" data-ar="جميع الأنواع">All types</option>
+            <option value="grant" data-ar="منحة">Grant</option>
+            <option value="tender" data-ar="عطاء / مسابقة">Tender / Competition</option>
+            <option value="accelerator" data-ar="مسرّعة">Accelerator</option>
+            <option value="investment_program" data-ar="برنامج استثماري">Investment program</option>
+            <option value="fellowship" data-ar="زمالة">Fellowship</option>
+            <option value="other" data-ar="أخرى">Other</option>
           </select>
         </div>
 
@@ -2667,10 +2667,10 @@ html[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
             Status
           </label>
           <select id="statusFilter" class="filter-select" aria-label="Filter by status">
-            <option value="all">All statuses</option>
-            <option value="open">Open</option>
-            <option value="closed_but_recurring">Recurring</option>
-            <option value="closed">Closed</option>
+            <option value="all" data-ar="جميع الحالات">All statuses</option>
+            <option value="open" data-ar="مفتوح">Open</option>
+            <option value="closed_but_recurring" data-ar="دوري">Recurring</option>
+            <option value="closed" data-ar="مغلق">Closed</option>
           </select>
         </div>
       </div>
@@ -2725,11 +2725,11 @@ html[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
       <div class="sort-control">
         <label for="sortSelect" class="sort-label">Sort</label>
         <select id="sortSelect" class="sort-select" aria-label="Sort opportunities">
-          <option value="default">Default</option>
-          <option value="newest">Newest first</option>
-          <option value="deadline">Deadline soon</option>
-          <option value="funding">Funding: largest first</option>
-          <option value="open_first">Open first</option>
+          <option value="default" data-ar="افتراضي">Default</option>
+          <option value="newest" data-ar="الأحدث أولاً">Newest first</option>
+          <option value="deadline" data-ar="الموعد قريب">Deadline soon</option>
+          <option value="funding" data-ar="التمويل: الأكبر أولاً">Funding: largest first</option>
+          <option value="open_first" data-ar="المفتوح أولاً">Open first</option>
         </select>
       </div>
     </div>
@@ -3444,7 +3444,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <div id="compareTray" class="compare-tray compare-tray--hidden" role="complementary" aria-label="Comparison tray">
   <div class="compare-tray__header">
-    <span class="compare-tray__count"><span id="compareCount">0</span> selected for comparison</span>
+    <span class="compare-tray__count"><span id="compareCount">0</span> <span id="compareTrayLabel">selected for comparison</span></span>
     <div class="compare-tray__actions">
       <button class="compare-tray__compare-btn" id="compareOpenBtn" disabled>Compare</button>
       <button class="compare-tray__clear" id="compareClearBtn">Clear all</button>
@@ -3457,7 +3457,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <div id="compareModal" class="compare-modal compare-modal--hidden" role="dialog" aria-modal="true" aria-label="Compare opportunities">
   <div class="compare-modal__inner">
     <div class="compare-modal__header">
-      <h2>Compare Opportunities</h2>
+      <h2 id="compareModalTitle">Compare Opportunities</h2>
       <button class="compare-modal__close" id="compareModalClose" aria-label="Close">✕</button>
     </div>
     <div class="compare-modal__body" id="compareModalBody"></div>
@@ -3604,7 +3604,7 @@ document.addEventListener('DOMContentLoaded', function () {
     el.innerHTML = recent.map(item => `
       <div class="changelog-item">
         <div class="changelog-item-title"><a class="changelog-link" href="${item.application_link || '#'}" ${item.application_link ? 'target="_blank" rel="noopener noreferrer"' : ''}>${item.title || 'Untitled opportunity'}</a></div>
-        <div class="changelog-item-meta"><span class="pill ${typeClass(item.type)} pill-xs">${pretty(item.type || 'Other')}</span><span class="changelog-date">${item.last_verified || 'Recently added'}</span></div>
+        <div class="changelog-item-meta"><span class="pill ${typeClass(item.type)} pill-xs">${pretty(item.type || 'Other')}</span><span class="changelog-date">${item.last_verified || t('Recently added')}</span></div>
       </div>
     `).join('');
   }
@@ -3635,7 +3635,7 @@ document.addEventListener('DOMContentLoaded', function () {
     html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} data-page="next">›</button>`;
     var showStart = (currentPage - 1) * PER_PAGE + 1;
     var showEnd = Math.min(currentPage * PER_PAGE, filteredData.length);
-    html += `<span class="page-info">${showStart}\u2013${showEnd} of ${filteredData.length}</span>`;
+    html += `<span class="page-info">${showStart}\u2013${showEnd} ${t('of')} ${filteredData.length}</span>`;
     pagination.innerHTML = html;
     pagination.querySelectorAll('.page-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -3650,6 +3650,133 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  /* ============================================================
+     Arabic UI string map — used by t() for all JS-rendered text
+     ============================================================ */
+  var AR_UI = {
+    // Compact card
+    'Insights':            'تحليلات',
+    'Apply →':             'تقدّم ←',
+    'Open':                'مفتوح',
+    'Closed':              'مغلق',
+    'Recurring':           'دوري',
+    'Global':              'عالمي',
+    'Other':               'أخرى',
+    // Detailed card
+    'View Insights':       'عرض التحليلات',
+    'Go to Website':       'الانتقال للموقع',
+    'Sponsor:':            'الجهة الراعية:',
+    'Recently added':      'أُضيف مؤخراً',
+    'Untitled':            'بلا عنوان',
+    'No description available.': 'لا يوجد وصف.',
+    // Panel
+    'Opportunity Details': 'تفاصيل الفرصة',
+    'Sector Context — ':   'سياق القطاع — ',
+    'Market size':         'حجم السوق',
+    'Growth outlook':      'توقعات النمو',
+    'Sponsor / Institution': 'الجهة الراعية',
+    'Funding':             'التمويل',
+    'Funding type':        'نوع التمويل',
+    'Eligibility':         'الأهلية',
+    'Deadline':            'الموعد النهائي',
+    'Last verified':       'آخر تحقق',
+    'Language':            'اللغة',
+    'Sectors':             'القطاعات',
+    'Audience':            'الفئة المستهدفة',
+    'New':                 'جديد',
+    'Not specified':       'غير محدد',
+    'Unknown sponsor':     'جهة راعية غير معروفة',
+    // Results bar
+    'opportunities':       'فرصة',
+    'open':                'مفتوح',
+    'with funding':        'بتمويل محدد',
+    'Showing':             'عرض',
+    'result':              'نتيجة',
+    'results':             'نتائج',
+    // Pagination
+    'of':                  'من',
+    // Active chips
+    'Search':              'بحث',
+    'Sector':              'القطاع',
+    'Region':              'المنطقة',
+    'Type':                'النوع',
+    'Status':              'الحالة',
+    'Remove filter':       'إزالة الفلتر',
+    'Sponsor / Institution': 'الجهة الراعية',
+    // Compare tray
+    'selected for comparison': 'محدد للمقارنة',
+    'Compare':             'قارن',
+    'Clear all':           'مسح الكل',
+    'You can compare up to': 'يمكنك مقارنة ما يصل إلى',
+    'opportunities at a time.': 'فرص في آن واحد.',
+    'Compare Opportunities': 'مقارنة الفرص',
+    'Add to comparison':   'أضف للمقارنة',
+    'Select for comparison': 'اختر للمقارنة',
+    'See details':         'عرض التفاصيل',
+    // Empty state
+    'No matching opportunities found': 'لا توجد فرص مطابقة',
+    'Try broadening your search criteria.': 'جرّب توسيع معايير البحث.',
+    'Try':                 'جرّب',
+    'clearing the search term': 'مسح مصطلح البحث',
+    'removing the program type filter': 'إزالة فلتر نوع البرنامج',
+    'broadening the region': 'توسيع نطاق المنطقة',
+    'changing the sector': 'تغيير القطاع',
+    'including closed or recurring programs': 'تضمين البرامج المغلقة أو الدورية',
+    'Reset all filters':   'إعادة تعيين جميع الفلاتر',
+    // Snapshot
+    'Total records':       'إجمالي السجلات',
+    'Currently open':      'مفتوح حالياً',
+    'Recurring programmes':'برامج دورية',
+    'Recently added':      'أُضيف مؤخراً',
+    'KSA-only eligibility':'للمملكة فقط',
+    'Open globally':       'مفتوح عالمياً',
+    // Sort
+    'Default':             'افتراضي',
+    'Newest first':        'الأحدث أولاً',
+    'Deadline soon':       'الموعد قريب',
+    'Funding: largest first': 'التمويل: الأكبر أولاً',
+    'Open first':          'المفتوح أولاً',
+    // View toggle
+    'Detailed':            'تفصيلي',
+    'Compact':             'مضغوط',
+    // Quick filter presets
+    'Quick filters:':      'فلاتر سريعة:',
+    'Open Grants':         'منح مفتوحة',
+    'Saudi Only':          'سعودي فقط',
+    'ICT & Tech':          'تقنية المعلومات',
+    'Startup-Friendly':    'صديق للشركات الناشئة',
+    'Energy & Green':      'الطاقة والبيئة',
+    'Healthcare':          'الرعاية الصحية',
+    'Global Programs':     'برامج عالمية',
+    'Investment Ready':    'جاهز للاستثمار',
+    // Profile chips
+    'All profiles':        'جميع الملفات',
+    'Startup / SME':       'ناشئة / متوسطة',
+    'Researcher / University': 'باحث / جامعة',
+    'Government':          'حكومة',
+    'Investor':            'مستثمر',
+    'Student':             'طالب',
+    // Recently added widget
+    'New to the Database': 'جديد في قاعدة البيانات',
+    // Glossary badge statuses
+    'Applications are currently being accepted.': 'التقديم مفتوح حالياً.',
+    'Not currently open, but opens again on a regular cycle. Check back for the next round.': 'غير مفتوح حالياً، لكنه يفتح دورياً. تابع الجولة القادمة.',
+    'This program runs multiple times per year. Applications may open at any time.': 'يعمل هذا البرنامج عدة مرات في السنة. قد يفتح التقديم في أي وقت.',
+    'Non-repayable funds awarded to qualifying organizations or individuals.': 'أموال غير قابلة للاسترداد تُمنح للمؤسسات أو الأفراد المؤهلين.',
+    'A structured program offering mentorship, funding, and resources for early-stage ventures.': 'برنامج منظم يقدم الإرشاد والتمويل والموارد للشركات الناشئة.',
+    'A funded research or professional development position, typically time-limited.': 'منصب بحثي أو تطويري ممول، عادةً محدد المدة.',
+    'Repayable financing at favorable terms, often below-market interest.': 'تمويل قابل للسداد بشروط ميسرة، وغالباً بفائدة أقل من السوق.',
+    'Equity or quasi-equity funding in exchange for a stake in your organization.': 'تمويل بحصة ملكية مقابل حصة في مؤسستك.',
+    'Open exclusively to organizations or individuals based in Saudi Arabia.': 'مفتوح حصراً للمؤسسات أو الأفراد في المملكة العربية السعودية.',
+    'Open to applicants worldwide, including Saudi Arabia.': 'مفتوح للمتقدمين من جميع أنحاء العالم، بما فيها المملكة.',
+  };
+
+  /* t(str) — returns Arabic string if in AR mode, else original */
+  function t(str) {
+    if (window.__lang !== 'ar') return str;
+    return AR_UI[str] !== undefined ? AR_UI[str] : str;
+  }
+
   const SECTOR_IMAGES = { agriculture: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=640&q=80', energy: 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=640&q=80', healthcare: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=640&q=80', environment: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=640&q=80', industrial: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=640&q=80', pharma: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=640&q=80', chemicals: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=640&q=80', realestate: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=640&q=80', financial: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=640&q=80', transport: 'https://images.unsplash.com/photo-1494412651409-8963ce7935a7?w=640&q=80', mining: 'https://images.unsplash.com/photo-1582901867919-4a4d1a3e7b4a?w=640&q=80', tourism: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=640&q=80', education: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=640&q=80', ict: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=640&q=80', innovation: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=640&q=80' }; function sectorImg(item) { const sectors = (item.sectors || []).map(s => norm(s)); for (const s of sectors) { for (const key of Object.keys(SECTOR_IMAGES)) { if (s.includes(key)) return SECTOR_IMAGES[key]; } } return SECTOR_IMAGES.innovation; } function renderCards() {
     const tbody = document.getElementById('oppsTableBody');
     if (!tbody) return;
@@ -3662,13 +3789,13 @@ document.addEventListener('DOMContentLoaded', function () {
       var sectorEl = document.getElementById('sectorFilter');
       var statusEl = document.getElementById('statusFilter');
       var searchEl = document.getElementById('searchInput');
-      if (searchEl && searchEl.value.trim()) suggestions.push('clearing the search term');
-      if (typeEl && typeEl.value && typeEl.value !== 'all') suggestions.push('removing the program type filter');
-      if (regionEl && regionEl.value && regionEl.value !== 'all') suggestions.push('broadening the region');
-      if (sectorEl && sectorEl.value && sectorEl.value !== 'all') suggestions.push('changing the sector');
-      if (statusEl && statusEl.value && statusEl.value !== 'all') suggestions.push('including closed or recurring programs');
-      var sugText = suggestions.length ? 'Try ' + suggestions.slice(0,2).join(' or ') + '.' : 'Try broadening your search criteria.';
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon">&#x2315;</div><div class="empty-title">No matching opportunities found</div><div class="empty-sub">' + sugText + '</div><div style="margin-top:16px"><button class="empty-reset-btn" onclick="document.getElementById(\'resetBtn\')?.click()">Reset all filters</button></div></td></tr>';
+      if (searchEl && searchEl.value.trim()) suggestions.push(t('clearing the search term'));
+      if (typeEl && typeEl.value && typeEl.value !== 'all') suggestions.push(t('removing the program type filter'));
+      if (regionEl && regionEl.value && regionEl.value !== 'all') suggestions.push(t('broadening the region'));
+      if (sectorEl && sectorEl.value && sectorEl.value !== 'all') suggestions.push(t('changing the sector'));
+      if (statusEl && statusEl.value && statusEl.value !== 'all') suggestions.push(t('including closed or recurring programs'));
+      var sugText = suggestions.length ? t('Try') + ' ' + suggestions.slice(0,2).join(window.__lang === 'ar' ? ' أو ' : ' or ') + '.' : t('Try broadening your search criteria.');
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon">&#x2315;</div><div class="empty-title">' + t('No matching opportunities found') + '</div><div class="empty-sub">' + sugText + '</div><div style="margin-top:16px"><button class="empty-reset-btn" onclick="document.getElementById(\'resetBtn\')?.click()">' + t('Reset all filters') + '</button></div></td></tr>';
       renderPagination();
       updateCounts(dataSource());
       if (typeof window.__retranslate === 'function') window.__retranslate();
@@ -3687,14 +3814,14 @@ document.addEventListener('DOMContentLoaded', function () {
         var region     = item.country || pretty(item.eligibility_region) || 'Global';
         var deadline   = item.deadline_date ? item.deadline_date : '';
         var sponsor    = item.sponsor_institution || '';
-        var titleStr   = highlightTerm(item.title || 'Untitled', searchTerm);
+        var titleStr   = highlightTerm(item.title || t('Untitled'), searchTerm);
         var applyHref  = item.application_link || '#';
         var applyAttrs = item.application_link ? 'target="_blank" rel="noopener noreferrer"' : '';
 
         // Status label: shorten verbose statuses
-        var statusLabel = item.status === 'open' ? 'Open'
-                        : item.status === 'closed_but_recurring' ? 'Recurring'
-                        : item.status === 'recurring' ? 'Recurring' : 'Closed';
+        var statusLabel = item.status === 'open' ? t('Open')
+                        : item.status === 'closed_but_recurring' ? t('Recurring')
+                        : item.status === 'recurring' ? t('Recurring') : t('Closed');
 
         return `
           <tr class="opp-card-row opp-card-row--compact" data-id="${item.id || ''}">
@@ -3721,9 +3848,9 @@ document.addEventListener('DOMContentLoaded', function () {
                   <div class="occ-actions">
                     <button class="opp-insights-btn occ-insights-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" type="button" aria-label="View insights for ${(item.title||'').replace(/"/g,'&quot;')}">
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                      Insights
+                      ${t('Insights')}
                     </button>
-                    <a class="occ-apply-btn" href="${applyHref}" ${applyAttrs}>Apply →</a>
+                    <a class="occ-apply-btn" href="${applyHref}" ${applyAttrs}>${t('Apply →')}</a>
                   </div>
                 </div>
 
@@ -3743,7 +3870,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <tr class="opp-card-row" data-id="${item.id || ''}">
           <td colspan="7" class="opp-card-cell">
             <article class="opp-card-noimg">
-              <button class="opp-select-btn" data-id="${item.id || ''}" title="Add to comparison" aria-label="Select for comparison"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></button>
+              <button class="opp-select-btn" data-id="${item.id || ''}" title="${t('Add to comparison')}" aria-label="${t('Select for comparison')}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></button>
               <div class="opp-card-content">
                 <h3 class="opp-card-title">${highlightTerm(item.title || 'Untitled opportunity', searchTerm)}</h3>
                 <div class="opp-card-meta">
@@ -3756,11 +3883,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     <span>${item.country || pretty(item.eligibility_region) || 'Global'}</span>
                   </span>
                 </div>
-                <p class="opp-card-desc">${highlightTerm(item.description_short || 'No description available.', searchTerm)}</p>
+                <p class="opp-card-desc">${highlightTerm(item.description_short || t('No description available.'), searchTerm)}</p>
                 <div class="opp-card-chips">${chips.map(c => `<span class="opp-card-chip">${c}</span>`).join('')}</div>
                 <div class="opp-card-stats">
                   <div class="opp-card-stat">
-                    <div class="opp-card-value">${item.funding_amount || 'See details'}</div>
+                    <div class="opp-card-value">${item.funding_amount || t('See details')}</div>
                     <div class="opp-card-label">Funding / Size</div>
                   </div>
                   <div class="opp-card-stat">
@@ -3782,12 +3909,12 @@ document.addEventListener('DOMContentLoaded', function () {
                   <div class="opp-card-btns">
                     <button class="opp-insights-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" type="button">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                      View Insights
+                      ${t('View Insights')}
                     </button>
-                    <a class="panel-link-btn opp-card-link" href="${item.application_link || '#'}" ${item.application_link ? 'target="_blank" rel="noopener noreferrer"' : ''}>Go to Website</a>
+                    <a class="panel-link-btn opp-card-link" href="${item.application_link || '#'}" ${item.application_link ? 'target="_blank" rel="noopener noreferrer"' : ''}>${t('Go to Website')}</a>
                   </div>
                 </div>
-                <div class="opp-card-sponsor">${item.sponsor_institution ? `<strong>Sponsor:</strong> ${item.sponsor_institution}` : ''}</div>
+                <div class="opp-card-sponsor">${item.sponsor_institution ? `<strong>${t('Sponsor:')}</strong> ${item.sponsor_institution}` : ''}</div>
               </div>
             <div class="opp-card-image"><img src="${sectorImg(item)}" alt="" loading="lazy" onerror="this.style.display='none';this.parentNode.classList.add('opp-card-image-fallback');"/></div></article>
           </td>
@@ -3882,30 +4009,30 @@ document.addEventListener('DOMContentLoaded', function () {
       var chips = [];
       var searchEl = document.getElementById('searchInput');
       var searchVal = (searchEl ? searchEl.value : '').trim();
-      if (searchVal) chips.push({ id: 'search', prefix: 'Search', value: searchVal, dismiss: function() { if (searchEl) { searchEl.value = ''; } } });
+      if (searchVal) chips.push({ id: 'search', prefix: t('Search'), value: searchVal, dismiss: function() { if (searchEl) { searchEl.value = ''; } } });
 
       var sectorEl = document.getElementById('sectorFilter');
       if (sectorEl && sectorEl.value !== 'all') {
         var sLabel = sectorEl.options[sectorEl.selectedIndex] ? sectorEl.options[sectorEl.selectedIndex].text : sectorEl.value;
-        chips.push({ id: 'sector', prefix: 'Sector', value: sLabel, dismiss: function() { if (sectorEl) sectorEl.value = 'all'; } });
+        chips.push({ id: 'sector', prefix: t('Sector'), value: sLabel, dismiss: function() { if (sectorEl) sectorEl.value = 'all'; } });
       }
 
       var regionEl = document.getElementById('countryFilter');
       if (regionEl && regionEl.value !== 'all') {
         var rLabel = regionEl.options[regionEl.selectedIndex] ? regionEl.options[regionEl.selectedIndex].text : regionEl.value;
-        chips.push({ id: 'region', prefix: 'Region', value: rLabel, dismiss: function() { if (regionEl) regionEl.value = 'all'; } });
+        chips.push({ id: 'region', prefix: t('Region'), value: rLabel, dismiss: function() { if (regionEl) regionEl.value = 'all'; } });
       }
 
       var typeEl = document.getElementById('typeFilter');
       if (typeEl && typeEl.value !== 'all') {
         var tLabel = typeEl.options[typeEl.selectedIndex] ? typeEl.options[typeEl.selectedIndex].text : typeEl.value;
-        chips.push({ id: 'type', prefix: 'Type', value: tLabel, dismiss: function() { if (typeEl) typeEl.value = 'all'; } });
+        chips.push({ id: 'type', prefix: t('Type'), value: tLabel, dismiss: function() { if (typeEl) typeEl.value = 'all'; } });
       }
 
       var statusEl = document.getElementById('statusFilter');
       if (statusEl && statusEl.value !== 'all') {
         var stLabel = statusEl.options[statusEl.selectedIndex] ? statusEl.options[statusEl.selectedIndex].text : statusEl.value;
-        chips.push({ id: 'status', prefix: 'Status', value: stLabel, dismiss: function() { if (statusEl) statusEl.value = 'all'; } });
+        chips.push({ id: 'status', prefix: t('Status'), value: stLabel, dismiss: function() { if (statusEl) statusEl.value = 'all'; } });
       }
 
       if (selectedProfile !== 'all') {
@@ -3930,10 +4057,10 @@ document.addEventListener('DOMContentLoaded', function () {
     var html = chips.map(function(c) {
       return '<span class="active-chip">' +
         '<span class="active-chip__label">' + c.prefix + ':</span> ' + c.value +
-        '<button class="active-chip__dismiss" type="button" data-chip-id="' + c.id + '" aria-label="Remove filter ' + c.prefix + '">\u00d7</button>' +
+        '<button class="active-chip__dismiss" type="button" data-chip-id="' + c.id + '" aria-label="' + t('Remove filter') + ' ' + c.prefix + '">\u00d7</button>' +
         '</span>';
     }).join('');
-    if (chips.length >= 2) html += '<button class="active-chips-clear-all" type="button">Clear all</button>';
+    if (chips.length >= 2) html += '<button class="active-chips-clear-all" type="button">' + t('Clear all') + '</button>';
     container.innerHTML = html;
 
     var dismissBtns = container.querySelectorAll('.active-chip__dismiss');
@@ -3991,10 +4118,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!isFiltered()) {
       var openCount   = allData.filter(function(d){ return (d.status||'').toLowerCase().indexOf('open') !== -1; }).length;
       var fundedCount = allData.filter(function(d){ var f=(d.funding_amount||'').toString().trim(); return f && !/not specified|tba|n\/a|varies|see details/i.test(f); }).length;
-      el.innerHTML = '<strong>' + allData.length.toLocaleString() + '</strong> opportunities &nbsp;&middot;&nbsp; <span class="rc-open">' + openCount.toLocaleString() + ' open</span> &nbsp;&middot;&nbsp; <span class="rc-funded">' + fundedCount.toLocaleString() + ' with funding</span>';
+      el.innerHTML = '<strong>' + allData.length.toLocaleString() + '</strong> ' + t('opportunities') + ' &nbsp;&middot;&nbsp; <span class="rc-open">' + openCount.toLocaleString() + ' ' + t('open') + '</span> &nbsp;&middot;&nbsp; <span class="rc-funded">' + fundedCount.toLocaleString() + ' ' + t('with funding') + '</span>';
     } else {
       var summary = buildFilterSummary();
-      el.innerHTML = 'Showing <strong>' + filteredData.length.toLocaleString() + '</strong> result' + (filteredData.length !== 1 ? 's' : '') + (summary ? ' <span class="rc-summary">&mdash; ' + summary + '</span>' : '');
+      el.innerHTML = t('Showing') + ' <strong>' + filteredData.length.toLocaleString() + '</strong> ' + (filteredData.length !== 1 ? t('results') : t('result')) + (summary ? ' <span class="rc-summary">&mdash; ' + summary + '</span>' : '');
     }
   }
 
@@ -4813,7 +4940,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (slotsEl) {
       slotsEl.innerHTML = compareItems.map(function(item) {
-        return '<div class="compare-slot"><span class="compare-slot__title" title="' + (item.title||'') + '">' + (item.title||'Untitled') + '</span><button class="compare-slot__remove" data-remove-id="' + (item.id||'') + '" aria-label="Remove">✕</button></div>';
+        return '<div class="compare-slot"><span class="compare-slot__title" title="' + (item.title||'') + '">' + t(item.title||'Untitled') + '</span><button class="compare-slot__remove" data-remove-id="' + (item.id||'') + '" aria-label="Remove">✕</button></div>';
       }).join('');
       slotsEl.querySelectorAll('.compare-slot__remove').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -4833,16 +4960,16 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!modal || !body) return;
     body.innerHTML = compareItems.map(function(item) {
       return '<div class="compare-item">' +
-        '<div class="compare-item__title">' + (item.title||'Untitled') + '</div>' +
+        '<div class="compare-item__title">' + (item.title||t('Untitled')) + '</div>' +
         [
-          ['Type', pretty(item.type||'')],
-          ['Status', pretty(item.status||'')],
-          ['Funding', item.funding_amount||'\u2014'],
-          ['Deadline', item.deadline_date||'\u2014'],
-          ['Region', item.country || pretty(item.eligibility_region)||'Global'],
-          ['Sponsor', item.sponsor_institution||'\u2014'],
-          ['Profiles', (item.profiles||[]).map(pretty).join(', ')||'\u2014'],
-          ['Sectors', (item.sectors||[]).map(pretty).join(', ')||'\u2014']
+          [t('Type'), pretty(item.type||'')],
+          [t('Status'), pretty(item.status||'')],
+          [t('Funding'), item.funding_amount||'\u2014'],
+          [t('Deadline'), item.deadline_date||'\u2014'],
+          [t('Region'), item.country || pretty(item.eligibility_region)||t('Global')],
+          [t('Sponsor / Institution'), item.sponsor_institution||'\u2014'],
+          [t('Audience'), (item.profiles||[]).map(pretty).join(', ')||'\u2014'],
+          [t('Sectors'), (item.sectors||[]).map(pretty).join(', ')||'\u2014']
         ].map(function(r) {
           return '<div class="compare-item__row"><span class="compare-item__key">' + r[0] + '</span><span class="compare-item__val">' + r[1] + '</span></div>';
         }).join('') +
@@ -4904,7 +5031,7 @@ document.addEventListener('DOMContentLoaded', function () {
           btn.classList.remove('selected');
         } else {
           if (compareItems.length >= MAX_COMPARE) {
-            alert('You can compare up to ' + MAX_COMPARE + ' opportunities at a time.');
+            alert(t('You can compare up to') + ' ' + MAX_COMPARE + ' ' + t('opportunities at a time.'));
             return;
           }
           compareItems.push(item);
@@ -5208,15 +5335,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function openPanel(item) {
     if (!panel || !item) return;
-    panelTitle.textContent = item.title || 'Opportunity Details';
+    panelTitle.textContent = item.title || t('Opportunity Details');
     panelDesc.textContent  = item.description_short || '';
 
     // Badges
     panelBadges.innerHTML =
       badge(pretty(item.type || 'Other')) +
       badge(item.country || pretty(item.eligibility_region) || 'Global') +
-      (item.status === 'open' ? badge('Open', 'status-open') : '') +
-      (item.isNew ? badge('New', 'badge-new') : '');
+      (item.status === 'open' ? badge(t('Open'), 'status-open') : '') +
+      (item.isNew ? badge(t('New'), 'badge-new') : '');
 
     // Sector context block
     var ctx = sectorContext(item.sectors || []);
@@ -5224,10 +5351,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (ctx) {
       sectorHtml =
         '<div class="panel-sector-context">' +
-          '<div class="panel-sector-context__title">&#9656; Sector Context — ' + esc(ctx.name) + '</div>' +
+          '<div class="panel-sector-context__title">&#9656; ' + t('Sector Context — ') + esc(ctx.name) + '</div>' +
           '<div class="panel-sector-stats">' +
-            '<div><div class="panel-sector-stat__value">' + esc(ctx.size) + '</div><div class="panel-sector-stat__label">Market size</div></div>' +
-            '<div><div class="panel-sector-stat__value">' + esc(ctx.growth) + '</div><div class="panel-sector-stat__label">Growth outlook</div></div>' +
+            '<div><div class="panel-sector-stat__value">' + esc(ctx.size) + '</div><div class="panel-sector-stat__label">' + t('Market size') + '</div></div>' +
+            '<div><div class="panel-sector-stat__value">' + esc(ctx.growth) + '</div><div class="panel-sector-stat__label">' + t('Growth outlook') + '</div></div>' +
           '</div>' +
           (ctx.stats ? barChart(ctx.stats) : '') +
           '<div class="panel-sector-context__note">' + esc(ctx.note) + '</div>' +
@@ -5239,15 +5366,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Program fields
     panelFields.innerHTML =
       sectorHtml +
-      field('Sponsor / Institution', item.sponsor_institution) +
-      field('Funding', item.funding_amount) +
-      field('Funding type', pretty(item.funding_type)) +
-      field('Eligibility', item.eligibility_entities) +
-      field('Deadline', item.deadline_date) +
-      field('Last verified', item.last_verified) +
-      field('Language', item.language) +
-      (item.sectors && item.sectors.length ? field('Sectors', item.sectors.map(pretty).join(', ')) : '') +
-      (item.profiles && item.profiles.length ? field('Audience', item.profiles.map(pretty).join(', ')) : '');
+      field(t('Sponsor / Institution'), item.sponsor_institution) +
+      field(t('Funding'), item.funding_amount) +
+      field(t('Funding type'), pretty(item.funding_type)) +
+      field(t('Eligibility'), item.eligibility_entities) +
+      field(t('Deadline'), item.deadline_date) +
+      field(t('Last verified'), item.last_verified) +
+      field(t('Language'), item.language) +
+      (item.sectors && item.sectors.length ? field(t('Sectors'), item.sectors.map(pretty).join(', ')) : '') +
+      (item.profiles && item.profiles.length ? field(t('Audience'), item.profiles.map(pretty).join(', ')) : '');
 
     panelLink.href = item.application_link || '#';
     panelLink.style.display = item.application_link ? '' : 'none';
@@ -5386,6 +5513,17 @@ document.addEventListener('DOMContentLoaded', function () {
     if (window.__lang !== 'ar') return;
     await translateAll(document.body);
   };
+  // Update static compare tray strings when Arabic activates
+  window.__updateTrayLang = function(isAr) {
+    var trayLabel = document.getElementById('compareTrayLabel');
+    var compareBtn = document.getElementById('compareOpenBtn');
+    var clearBtn   = document.getElementById('compareClearBtn');
+    var modalTitle = document.getElementById('compareModalTitle');
+    if (trayLabel) trayLabel.textContent = isAr ? 'محدد للمقارنة' : 'selected for comparison';
+    if (compareBtn) compareBtn.textContent = isAr ? 'قارن' : 'Compare';
+    if (clearBtn)   clearBtn.textContent   = isAr ? 'مسح الكل' : 'Clear all';
+    if (modalTitle) modalTitle.textContent = isAr ? 'مقارنة الفرص' : 'Compare Opportunities';
+  };
   function restoreEnglish(){
     function walk(node){
       if (node.nodeType === 3 && node.__originalEn) { node.nodeValue = node.__originalEn; return; }
@@ -5394,6 +5532,69 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     walk(document.body);
   }
+  /* Swap <option> text using data-ar / data-en attributes */
+  function swapSelectOptions(isAr) {
+    document.querySelectorAll('select option[data-ar]').forEach(function(opt) {
+      if (!opt.dataset.en) opt.dataset.en = opt.textContent;
+      opt.textContent = isAr ? opt.dataset.ar : opt.dataset.en;
+    });
+    // Also translate view toggle button labels
+    var btnD = document.getElementById('viewBtnDetailed');
+    var btnC = document.getElementById('viewBtnCompact');
+    if (btnD) { var spanD = btnD.querySelector('span'); if (spanD) spanD.textContent = isAr ? 'تفصيلي' : 'Detailed'; }
+    if (btnC) { var spanC = btnC.querySelector('span'); if (spanC) spanC.textContent = isAr ? 'مضغوط' : 'Compact'; }
+    // Translate preset chips
+    var presetMap = {
+      'open-grants': ['منح مفتوحة', 'Open Grants'],
+      'saudi-only':  ['سعودي فقط',    'Saudi Only'],
+      'ict-tech':    ['تقنية المعلومات',   'ICT & Tech'],
+      'startup-friendly': ['صديق للناشئة', 'Startup-Friendly'],
+      'energy-green': ['الطاقة والبيئة', 'Energy & Green'],
+      'healthcare':  ['الرعاية الصحية', 'Healthcare'],
+      'global-programs': ['برامج عالمية', 'Global Programs'],
+      'investment-ready': ['جاهز للاستثمار', 'Investment Ready']
+    };
+    document.querySelectorAll('.preset-chip[data-preset]').forEach(function(chip) {
+      var key = chip.dataset.preset;
+      if (presetMap[key]) chip.textContent = isAr ? presetMap[key][0] : presetMap[key][1];
+    });
+    // Translate preset label
+    var presetLbl = document.querySelector('.preset-label');
+    if (presetLbl) presetLbl.textContent = isAr ? 'فلاتر سريعة:' : 'Quick filters:';
+    // Translate profile chips
+    var profileMap = {
+      'all':        ['جميع الملفات',   'All profiles'],
+      'startup':    ['ناشئة / متوسطة', 'Startup / SME'],
+      'researcher': ['باحث / جامعة',   'Researcher / University'],
+      'government': ['حكومة',            'Government'],
+      'investor':   ['مستثمر',          'Investor'],
+      'student':    ['طالب',            'Student'],
+      'new':        ['جديد',              'NEW']
+    };
+    document.querySelectorAll('.profile-chip[data-profile]').forEach(function(chip) {
+      var key = chip.dataset.profile;
+      if (profileMap[key]) {
+        // Preserve the icon span
+        var icon = chip.querySelector('.chip-icon');
+        var iconHtml = icon ? icon.outerHTML : '';
+        chip.innerHTML = iconHtml + ' ' + (isAr ? profileMap[key][0] : profileMap[key][1]);
+      }
+    });
+    // Translate sort label
+    var sortLbl = document.querySelector('.sort-label');
+    if (sortLbl) sortLbl.textContent = isAr ? 'ترتيب' : 'Sort';
+    // Translate reset filters button
+    var resetFiltersBtn = document.getElementById('resetFilters');
+    if (resetFiltersBtn) resetFiltersBtn.textContent = isAr ? 'إعادة تعيين' : 'Reset filters';
+    // Translate recently added widget title
+    var widgetTitle = document.querySelector('.widget-title');
+    if (widgetTitle) {
+      var badge = widgetTitle.querySelector('.widget-badge');
+      var badgeHtml = badge ? badge.outerHTML : '';
+      widgetTitle.innerHTML = (isAr ? 'جديد في قاعدة البيانات' : 'New to the Database') + ' ' + badgeHtml;
+    }
+  }
+
   let scheduled = false;
   function schedule(root){ if (scheduled) return; scheduled = true; requestAnimationFrame(async () => { scheduled = false; if (window.__lang === 'ar') await translateAll(root || document.body); }); }
   let observer = null;
@@ -5423,6 +5624,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (en) { en.classList.remove('is-lang-active'); en.removeAttribute('aria-current'); }
     try { localStorage.setItem('is-demo-lang','ar'); } catch(e){}
     await translateAll(document.body);
+    if (typeof window.__updateTrayLang === 'function') window.__updateTrayLang(true);
+    swapSelectOptions(true);
     startObserver();
   }
   function activateEnglish(){
@@ -5435,6 +5638,8 @@ document.addEventListener('DOMContentLoaded', function () {
     try { localStorage.setItem('is-demo-lang','en'); } catch(e){}
     stopObserver();
     restoreEnglish();
+    if (typeof window.__updateTrayLang === 'function') window.__updateTrayLang(false);
+    swapSelectOptions(false);
     // Reset panel direction to LTR
     const pnl = document.getElementById('detailPanel');
     if (pnl) pnl.setAttribute('dir', 'ltr');
