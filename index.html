@@ -2397,7 +2397,7 @@ body[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
     <span>Vision 2030 Investment Platform</span>
   </div>
   <div class="is-top-bar-right">
-        <a id="langAr" class="is-lang-btn" href="ar.html" lang="ar" dir="rtl">العربية</a>
+        <a id="langAr" class="is-lang-btn" href="#" lang="ar" dir="rtl">العربية</a>
         <span class="is-lang-sep">|</span>
         <a id="langEn" class="is-lang-btn is-lang-active" href="index.html" lang="en">English</a>
       </div>
@@ -3283,7 +3283,8 @@ function translatePage(lang) {
   const html = document.documentElement;
 
   // Direction & lang attribute
-  html.setAttribute('dir', t.dir);
+  // Note: dir is managed exclusively by script 5 (activateArabic/activateEnglish).
+  // Removing html.dir here prevents scroll-reset on language switch.
   html.setAttribute('lang', t.lang);
   document.title = t.pageTitle;
 
@@ -5856,13 +5857,23 @@ document.addEventListener('DOMContentLoaded', function () {
   function stopObserver(){ if (observer) { observer.disconnect(); observer = null; } }
   window.__pauseObserver = function() { /* no-op: observer only watches panel now */ };
   async function activateArabic(){
-    // Changing dir on <html> triggers a browser-level scroll reset to 0.
-    // We intercept by locking the scroll position with a one-time scroll
-    // listener that immediately re-applies the saved Y on any scroll event
-    // fired within the next 300ms (the window during which the browser resets).
+    // Save scroll position before any DOM changes that might cause a browser
+    // scroll-to-top (body.dir flip is known to reset scroll in some engines).
+    var savedScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+    // Disable smooth-scroll so any browser-native scroll-reset goes to 0 instantly
+    // (instead of animating), making our restore unnoticeable.
+    document.documentElement.style.scrollBehavior = 'auto';
     window.__lang = 'ar';
-    HTML.setAttribute('lang','ar'); /* dir set on body only — avoids scroll reset */
+    HTML.setAttribute('lang','ar');
     document.body.dir = 'rtl';
+    // Immediately restore scroll position after the dir flip.
+    window.scrollTo({ top: savedScrollY, left: 0, behavior: 'instant' });
+    // Re-enable smooth scroll on the next frame (after browser has settled).
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        document.documentElement.style.scrollBehavior = '';
+      });
+    });
     const ar = document.getElementById('langAr'); const en = document.getElementById('langEn');
     if (ar) { ar.classList.add('is-lang-active'); ar.setAttribute('aria-current','page'); }
     if (en) { en.classList.remove('is-lang-active'); en.removeAttribute('aria-current'); }
