@@ -5856,19 +5856,26 @@ document.addEventListener('DOMContentLoaded', function () {
   function stopObserver(){ if (observer) { observer.disconnect(); observer = null; } }
   window.__pauseObserver = function() { /* no-op: observer only watches panel now */ };
   async function activateArabic(){
-    // dir=rtl on <html> causes the browser to reset scrollY to 0 after layout.
-    // We restore using a double-rAF (two animation frames) which fires after
-    // the browser has finished its RTL relayout and repaint.
+    // Changing dir on <html> triggers a browser-level scroll reset to 0.
+    // We intercept by locking the scroll position with a one-time scroll
+    // listener that immediately re-applies the saved Y on any scroll event
+    // fired within the next 300ms (the window during which the browser resets).
     var savedScroll = window.scrollY;
+    var scrollLock = true;
+    function onScrollDuringDirFlip() {
+      if (scrollLock) { window.scrollTo(0, savedScroll); }
+    }
+    window.addEventListener('scroll', onScrollDuringDirFlip, { passive: false, capture: true });
     window.__lang = 'ar';
     HTML.setAttribute('lang','ar'); HTML.setAttribute('dir','rtl');
     document.body.dir = 'rtl';
-    // Double rAF: first frame = layout recalc, second frame = after paint
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        window.scrollTo(0, savedScroll);
-      });
-    });
+    // Restore scroll explicitly after the dir flip
+    window.scrollTo(0, savedScroll);
+    // Release lock after 300ms — enough time for all browser resets to fire
+    setTimeout(function() {
+      scrollLock = false;
+      window.removeEventListener('scroll', onScrollDuringDirFlip, { capture: true });
+    }, 300);
     const ar = document.getElementById('langAr'); const en = document.getElementById('langEn');
     if (ar) { ar.classList.add('is-lang-active'); ar.setAttribute('aria-current','page'); }
     if (en) { en.classList.remove('is-lang-active'); en.removeAttribute('aria-current'); }
