@@ -5856,9 +5856,13 @@ document.addEventListener('DOMContentLoaded', function () {
   function stopObserver(){ if (observer) { observer.disconnect(); observer = null; } }
   window.__pauseObserver = function() { /* no-op: observer only watches panel now */ };
   async function activateArabic(){
+    // Save scroll position — dir/lang attribute changes can trigger browser scroll reset
+    var savedScroll = window.scrollY;
     window.__lang = 'ar';
     HTML.setAttribute('lang','ar'); HTML.setAttribute('dir','rtl');
     document.body.dir = 'rtl';
+    // Restore immediately after RTL flip
+    window.scrollTo({ top: savedScroll, behavior: 'instant' });
     const ar = document.getElementById('langAr'); const en = document.getElementById('langEn');
     if (ar) { ar.classList.add('is-lang-active'); ar.setAttribute('aria-current','page'); }
     if (en) { en.classList.remove('is-lang-active'); en.removeAttribute('aria-current'); }
