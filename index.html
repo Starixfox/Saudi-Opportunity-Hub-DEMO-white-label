@@ -3843,17 +3843,14 @@ document.addEventListener('DOMContentLoaded', function () {
       if (sectorEl && sectorEl.value && sectorEl.value !== 'all') suggestions.push(t('changing the sector'));
       if (statusEl && statusEl.value && statusEl.value !== 'all') suggestions.push(t('including closed or recurring programs'));
       var sugText = suggestions.length ? t('Try') + ' ' + suggestions.slice(0,2).join(window.__lang === 'ar' ? ' أو ' : ' or ') + '.' : t('Try broadening your search criteria.');
-      window.__renderGuard = true;
       tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon">&#x2315;</div><div class="empty-title">' + t('No matching opportunities found') + '</div><div class="empty-sub">' + sugText + '</div><div style="margin-top:16px"><button class="empty-reset-btn" onclick="document.getElementById(\'resetBtn\')?.click()">' + t('Reset all filters') + '</button></div></td></tr>';
       renderPagination();
       updateCounts(dataSource());
-      window.__renderGuard = false;
       if (typeof window.__retranslate === 'function') window.__retranslate();
       return;
     }
     var searchTerm = (document.getElementById('searchInput') ? document.getElementById('searchInput').value : '').trim();
     if (currentView === 'compact') {
-      window.__renderGuard = true;
       tbody.innerHTML = pageItems.map(function(item) {
         // Compact: derive the 6 highest-value data points only
         var typeLabel  = t(pretty(item.type || 'Other'));
@@ -3914,7 +3911,6 @@ document.addEventListener('DOMContentLoaded', function () {
       updateCounts(dataSource());
       return;
     }
-    window.__renderGuard = true;
     tbody.innerHTML = pageItems.map(item => {
       const region = regionGroup(item);
       const chips = [pretty(item.funding_type), ...(item.profiles || []).slice(0,2).map(pretty), ...(item.sectors || []).slice(0,2).map(pretty)].filter(Boolean).slice(0,5);
@@ -3975,7 +3971,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }).join('');
     renderPagination();
     updateCounts(dataSource());
-    window.__renderGuard = false;
     if (typeof window.__retranslate === 'function') window.__retranslate();
   }
 
@@ -5112,6 +5107,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (Array.isArray(window.opportunitiesData) || Array.isArray(window.allOpportunities)) {
       clearInterval(wait);
       boot();
+      window.__renderCards = renderCards; // expose for language toggle
     }
   }, 200);
 })();
@@ -5648,46 +5644,34 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  /* Observer watches ONLY the detail panel — never document.body.
+     All card/UI re-translation on view toggle is handled by t() at render time.
+     translateAll(body) is called once on activateArabic() for static HTML only. */
   let scheduled = false;
-  function schedule(root){ if (scheduled) return; scheduled = true; requestAnimationFrame(async () => { scheduled = false; if (window.__lang === 'ar') await translateAll(root || document.body); }); }
+  function schedulePanel(panelEl){
+    if (scheduled) return; scheduled = true;
+    requestAnimationFrame(async () => {
+      scheduled = false;
+      if (window.__lang === 'ar' && panelEl && panelEl.isConnected) {
+        await translateNodes(panelEl);
+        await translateAttrs(panelEl);
+      }
+    });
+  }
   let observer = null;
   function startObserver(){
     if (observer) return;
-    observer = new MutationObserver(muts => {
+    const panelEl = document.getElementById('detailPanel');
+    if (!panelEl) return;
+    observer = new MutationObserver(function() {
       if (window.__lang !== 'ar') return;
-      // Do NOT re-translate while renderCards() is writing — cards are already in Arabic via t()
-      if (window.__renderGuard) return;
-      // If any mutation touches the detail panel, translate it directly
-      const panelEl = document.getElementById('detailPanel');
-      const touchesPanel = muts.some(m => panelEl && (panelEl.contains(m.target) || panelEl === m.target));
-      if (touchesPanel && panelEl) {
-        panelEl.setAttribute('dir','rtl');
-        schedule(panelEl);
-      } else {
-        schedule(document.body);
-      }
+      panelEl.setAttribute('dir','rtl');
+      schedulePanel(panelEl);
     });
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    observer.observe(panelEl, { childList: true, subtree: true, characterData: true });
   }
   function stopObserver(){ if (observer) { observer.disconnect(); observer = null; } }
-  // Pause observer briefly after renderCards so freshly-rendered Arabic t() strings are not re-processed
-  window.__pauseObserver = function() {
-    if (!observer) return;
-    observer.disconnect();
-    setTimeout(function() {
-      if (window.__lang === 'ar' && !observer) {
-        observer = new MutationObserver(muts => {
-          if (window.__lang !== 'ar') return;
-          if (window.__renderGuard) return;
-          const panelEl = document.getElementById('detailPanel');
-          const touchesPanel = muts.some(m => panelEl && (panelEl.contains(m.target) || panelEl === m.target));
-          if (touchesPanel && panelEl) { panelEl.setAttribute('dir','rtl'); schedule(panelEl); }
-          else { schedule(document.body); }
-        });
-        observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-      }
-    }, 400);
-  };
+  window.__pauseObserver = function() { /* no-op: observer only watches panel now */ };
   async function activateArabic(){
     window.__lang = 'ar';
     HTML.setAttribute('lang','ar'); HTML.setAttribute('dir','rtl');
@@ -5696,7 +5680,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (ar) { ar.classList.add('is-lang-active'); ar.setAttribute('aria-current','page'); }
     if (en) { en.classList.remove('is-lang-active'); en.removeAttribute('aria-current'); }
     try { localStorage.setItem('is-demo-lang','ar'); } catch(e){}
+    // Translate static HTML (navbar, hero, about, sections — not cards)
     await translateAll(document.body);
+    // Re-render cards using t() so they output Arabic directly — no translateAll needed
+    if (typeof window.__renderCards === 'function') window.__renderCards();
     if (typeof window.__updateTrayLang === 'function') window.__updateTrayLang(true);
     swapSelectOptions(true);
     startObserver();
@@ -5711,6 +5698,8 @@ document.addEventListener('DOMContentLoaded', function () {
     try { localStorage.setItem('is-demo-lang','en'); } catch(e){}
     stopObserver();
     restoreEnglish();
+    // Re-render cards using t() so they output English directly
+    if (typeof window.__renderCards === 'function') window.__renderCards();
     if (typeof window.__updateTrayLang === 'function') window.__updateTrayLang(false);
     swapSelectOptions(false);
     // Reset panel direction to LTR
