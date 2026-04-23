@@ -5856,13 +5856,16 @@ document.addEventListener('DOMContentLoaded', function () {
   function stopObserver(){ if (observer) { observer.disconnect(); observer = null; } }
   window.__pauseObserver = function() { /* no-op: observer only watches panel now */ };
   async function activateArabic(){
-    // Save scroll position — dir/lang attribute changes can trigger browser scroll reset
+    // Changing dir on <html> causes browsers to reset scroll to 0.
+    // Fix: freeze overflow so no scroll event fires, flip dir,
+    // restore scroll, then unfreeze — all synchronously.
     var savedScroll = window.scrollY;
+    document.body.style.overflow = 'hidden';
     window.__lang = 'ar';
     HTML.setAttribute('lang','ar'); HTML.setAttribute('dir','rtl');
     document.body.dir = 'rtl';
-    // Restore immediately after RTL flip
-    window.scrollTo({ top: savedScroll, behavior: 'instant' });
+    window.scrollTo(0, savedScroll);
+    document.body.style.overflow = '';
     const ar = document.getElementById('langAr'); const en = document.getElementById('langEn');
     if (ar) { ar.classList.add('is-lang-active'); ar.setAttribute('aria-current','page'); }
     if (en) { en.classList.remove('is-lang-active'); en.removeAttribute('aria-current'); }
