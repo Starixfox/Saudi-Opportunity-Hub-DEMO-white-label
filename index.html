@@ -2091,42 +2091,42 @@ h1, h2, h3, h4, h5, h6,
 }
 
 /* RTL support when Arabic is active */
-html[dir="rtl"] {
+body[dir="rtl"] {
   direction: rtl;
   text-align: right;
 }
-html[dir="rtl"] .navbar { flex-direction: row-reverse; }
-html[dir="rtl"] .navbar-links { flex-direction: row-reverse; }
-html[dir="rtl"] .nav-actions { flex-direction: row-reverse; }
-html[dir="rtl"] .is-top-bar { flex-direction: row-reverse; }
-html[dir="rtl"] .is-top-bar-left { flex-direction: row-reverse; }
-html[dir="rtl"] .is-top-bar-right { flex-direction: row-reverse; }
-html[dir="rtl"] .hero-grid { direction: rtl; }
-html[dir="rtl"] .hero-text { text-align: right; }
-html[dir="rtl"] .hero-ctas { justify-content: flex-end; }
-html[dir="rtl"] .filter-bar { direction: rtl; }
-html[dir="rtl"] .filter-row { flex-direction: row-reverse; flex-wrap: wrap; }
-html[dir="rtl"] .filter-label { flex-direction: row-reverse; }
-html[dir="rtl"] .results-bar { flex-direction: row-reverse; }
-html[dir="rtl"] .is-stats-strip { flex-direction: row-reverse; }
-html[dir="rtl"] .is-logo-block { flex-direction: row-reverse; }
-html[dir="rtl"] .section-label,
-html[dir="rtl"] .section-heading,
-html[dir="rtl"] .section-sub { text-align: right; }
-html[dir="rtl"] .profile-chips { flex-direction: row-reverse; }
-html[dir="rtl"] .kpi-card { flex-direction: row-reverse; text-align: right; }
-html[dir="rtl"] .filter-profile-row { flex-direction: row-reverse; }
-html[dir="rtl"] .reset-btn { margin-left: 0; margin-right: auto; }
-html[dir="rtl"] .is-pilot-banner { flex-direction: row-reverse; }
-html[dir="rtl"] .title-wrap { flex-direction: row-reverse; text-align: right; }
-html[dir="rtl"] .panel-header { flex-direction: row-reverse; }
-html[dir="rtl"] .panel-badges { flex-direction: row-reverse; }
-html[dir="rtl"] .footer-inner { flex-direction: row-reverse; }
-html[dir="rtl"] .footer-links { flex-direction: row-reverse; }
-html[dir="rtl"] .who-strip { direction: rtl; }
-html[dir="rtl"] .about-grid { direction: rtl; }
-html[dir="rtl"] .about-prose { text-align: right; }
-html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
+body[dir="rtl"] .navbar { flex-direction: row-reverse; }
+body[dir="rtl"] .navbar-links { flex-direction: row-reverse; }
+body[dir="rtl"] .nav-actions { flex-direction: row-reverse; }
+body[dir="rtl"] .is-top-bar { flex-direction: row-reverse; }
+body[dir="rtl"] .is-top-bar-left { flex-direction: row-reverse; }
+body[dir="rtl"] .is-top-bar-right { flex-direction: row-reverse; }
+body[dir="rtl"] .hero-grid { direction: rtl; }
+body[dir="rtl"] .hero-text { text-align: right; }
+body[dir="rtl"] .hero-ctas { justify-content: flex-end; }
+body[dir="rtl"] .filter-bar { direction: rtl; }
+body[dir="rtl"] .filter-row { flex-direction: row-reverse; flex-wrap: wrap; }
+body[dir="rtl"] .filter-label { flex-direction: row-reverse; }
+body[dir="rtl"] .results-bar { flex-direction: row-reverse; }
+body[dir="rtl"] .is-stats-strip { flex-direction: row-reverse; }
+body[dir="rtl"] .is-logo-block { flex-direction: row-reverse; }
+body[dir="rtl"] .section-label,
+body[dir="rtl"] .section-heading,
+body[dir="rtl"] .section-sub { text-align: right; }
+body[dir="rtl"] .profile-chips { flex-direction: row-reverse; }
+body[dir="rtl"] .kpi-card { flex-direction: row-reverse; text-align: right; }
+body[dir="rtl"] .filter-profile-row { flex-direction: row-reverse; }
+body[dir="rtl"] .reset-btn { margin-left: 0; margin-right: auto; }
+body[dir="rtl"] .is-pilot-banner { flex-direction: row-reverse; }
+body[dir="rtl"] .title-wrap { flex-direction: row-reverse; text-align: right; }
+body[dir="rtl"] .panel-header { flex-direction: row-reverse; }
+body[dir="rtl"] .panel-badges { flex-direction: row-reverse; }
+body[dir="rtl"] .footer-inner { flex-direction: row-reverse; }
+body[dir="rtl"] .footer-links { flex-direction: row-reverse; }
+body[dir="rtl"] .who-strip { direction: rtl; }
+body[dir="rtl"] .about-grid { direction: rtl; }
+body[dir="rtl"] .about-prose { text-align: right; }
+body[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
 
 /* ── IS DARK THEME OVERRIDES ─────────────────── */
 [data-theme="dark"] {
@@ -2289,7 +2289,7 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
   text-underline-offset: 2px;
 }
 .active-chips-clear-all:hover { color: var(--text); }
-html[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
+body[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
 
 /* ── SORT CONTROL ─────────────────────────────── */
 /* results-bar already has justify-content: space-between in base CSS */
@@ -5860,22 +5860,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // We intercept by locking the scroll position with a one-time scroll
     // listener that immediately re-applies the saved Y on any scroll event
     // fired within the next 300ms (the window during which the browser resets).
-    var savedScroll = window.scrollY;
-    var scrollLock = true;
-    function onScrollDuringDirFlip() {
-      if (scrollLock) { window.scrollTo(0, savedScroll); }
-    }
-    window.addEventListener('scroll', onScrollDuringDirFlip, { passive: false, capture: true });
     window.__lang = 'ar';
-    HTML.setAttribute('lang','ar'); HTML.setAttribute('dir','rtl');
+    HTML.setAttribute('lang','ar'); /* dir set on body only — avoids scroll reset */
     document.body.dir = 'rtl';
-    // Restore scroll explicitly after the dir flip
-    window.scrollTo(0, savedScroll);
-    // Release lock after 300ms — enough time for all browser resets to fire
-    setTimeout(function() {
-      scrollLock = false;
-      window.removeEventListener('scroll', onScrollDuringDirFlip, { capture: true });
-    }, 300);
     const ar = document.getElementById('langAr'); const en = document.getElementById('langEn');
     if (ar) { ar.classList.add('is-lang-active'); ar.setAttribute('aria-current','page'); }
     if (en) { en.classList.remove('is-lang-active'); en.removeAttribute('aria-current'); }
@@ -5899,7 +5886,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   function activateEnglish(){
     window.__lang = 'en';
-    HTML.setAttribute('lang','en'); HTML.setAttribute('dir','ltr');
+    HTML.setAttribute('lang','en'); /* dir set on body only — avoids scroll reset */
     document.body.dir = 'ltr';
     const ar = document.getElementById('langAr'); const en = document.getElementById('langEn');
     if (en) { en.classList.add('is-lang-active'); en.setAttribute('aria-current','page'); }
