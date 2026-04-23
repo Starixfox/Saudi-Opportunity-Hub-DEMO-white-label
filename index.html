@@ -5856,16 +5856,23 @@ document.addEventListener('DOMContentLoaded', function () {
   function stopObserver(){ if (observer) { observer.disconnect(); observer = null; } }
   window.__pauseObserver = function() { /* no-op: observer only watches panel now */ };
   async function activateArabic(){
-    // Changing dir on <html> causes browsers to reset scroll to 0.
-    // Fix: freeze overflow so no scroll event fires, flip dir,
-    // restore scroll, then unfreeze — all synchronously.
+    // Changing dir on <html> resets browser scroll to 0 as part of RTL layout.
+    // Reliable fix: position:fixed body lock (same technique used by modal overlays).
+    // This pins the viewport in place, prevents scroll reset, then restores.
     var savedScroll = window.scrollY;
-    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = '-' + savedScroll + 'px';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
     window.__lang = 'ar';
     HTML.setAttribute('lang','ar'); HTML.setAttribute('dir','rtl');
     document.body.dir = 'rtl';
+    // Unfreeze and restore scroll position
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
     window.scrollTo(0, savedScroll);
-    document.body.style.overflow = '';
     const ar = document.getElementById('langAr'); const en = document.getElementById('langEn');
     if (ar) { ar.classList.add('is-lang-active'); ar.setAttribute('aria-current','page'); }
     if (en) { en.classList.remove('is-lang-active'); en.removeAttribute('aria-current'); }
