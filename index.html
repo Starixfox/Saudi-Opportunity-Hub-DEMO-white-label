@@ -3846,6 +3846,7 @@ document.addEventListener('DOMContentLoaded', function () {
       tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon">&#x2315;</div><div class="empty-title">' + t('No matching opportunities found') + '</div><div class="empty-sub">' + sugText + '</div><div style="margin-top:16px"><button class="empty-reset-btn" onclick="document.getElementById(\'resetBtn\')?.click()">' + t('Reset all filters') + '</button></div></td></tr>';
       renderPagination();
       updateCounts(dataSource());
+      if (window.__lang === 'ar' && typeof window.__pauseObserver === 'function') window.__pauseObserver();
       if (typeof window.__retranslate === 'function') window.__retranslate();
       return;
     }
@@ -3971,7 +3972,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }).join('');
     renderPagination();
     updateCounts(dataSource());
-    // Re-apply Arabic translation if active — view switch re-renders all card HTML
+    // Cards already in Arabic via t() — just refresh static UI strings.
+    // Disconnect observer BEFORE calling retranslate so the DOM writes don't trigger re-translation
+    if (window.__lang === 'ar' && typeof window.__pauseObserver === 'function') window.__pauseObserver();
     if (typeof window.__retranslate === 'function') window.__retranslate();
   }
 
@@ -5556,10 +5559,11 @@ document.addEventListener('DOMContentLoaded', function () {
     await translateNodes(el);
     await translateAttrs(el);
   };
-  // Expose for renderCards: re-translate the full body after a view switch
-  window.__retranslate = async function() {
+  // Expose for renderCards: cards already rendered in Arabic via t() — just re-run swapSelectOptions
+  // Do NOT call translateAll here: it would mark Arabic strings as __originalEn and corrupt future restores
+  window.__retranslate = function() {
     if (window.__lang !== 'ar') return;
-    await translateAll(document.body);
+    swapSelectOptions(true);
   };
   // Update static compare tray strings when Arabic activates
   window.__updateTrayLang = function(isAr) {
@@ -5663,6 +5667,23 @@ document.addEventListener('DOMContentLoaded', function () {
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
   }
   function stopObserver(){ if (observer) { observer.disconnect(); observer = null; } }
+  // Pause observer briefly after renderCards so freshly-rendered Arabic t() strings are not re-processed
+  window.__pauseObserver = function() {
+    if (!observer) return;
+    observer.disconnect();
+    setTimeout(function() {
+      if (window.__lang === 'ar' && !observer) {
+        observer = new MutationObserver(muts => {
+          if (window.__lang !== 'ar') return;
+          const panelEl = document.getElementById('detailPanel');
+          const touchesPanel = muts.some(m => panelEl && (panelEl.contains(m.target) || panelEl === m.target));
+          if (touchesPanel && panelEl) { panelEl.setAttribute('dir','rtl'); schedule(panelEl); }
+          else { schedule(document.body); }
+        });
+        observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+      }
+    }, 400);
+  };
   async function activateArabic(){
     window.__lang = 'ar';
     HTML.setAttribute('lang','ar'); HTML.setAttribute('dir','rtl');
