@@ -3854,7 +3854,7 @@ document.addEventListener('DOMContentLoaded', function () {
       tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon">&#x2315;</div><div class="empty-title">' + t('No matching opportunities found') + '</div><div class="empty-sub">' + sugText + '</div><div style="margin-top:16px"><button class="empty-reset-btn" onclick="document.getElementById(\'resetBtn\')?.click()">' + t('Reset all filters') + '</button></div></td></tr>';
       renderPagination();
       updateCounts(dataSource());
-      if (typeof window.__retranslate === 'function') window.__retranslate();
+      if (typeof window.__retranslate === 'function') window.__retranslate(); // async — fires after render
       return;
     }
     var searchTerm = (document.getElementById('searchInput') ? document.getElementById('searchInput').value : '').trim();
@@ -3917,7 +3917,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }).join('');
       renderPagination();
       updateCounts(dataSource());
-      if (typeof window.__retranslate === 'function') window.__retranslate();
+      if (typeof window.__retranslate === 'function') window.__retranslate(); // async — fires after render
       return;
     }
     tbody.innerHTML = pageItems.map(item => {
@@ -3990,7 +3990,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }).join('');
     renderPagination();
     updateCounts(dataSource());
-    if (typeof window.__retranslate === 'function') window.__retranslate();
+    if (typeof window.__retranslate === 'function') window.__retranslate(); // async — fires after render
   }
 
   /* ---- SORT HELPERS ---- */
@@ -5575,11 +5575,15 @@ document.addEventListener('DOMContentLoaded', function () {
     await translateNodes(el);
     await translateAttrs(el);
   };
-  // Expose for renderCards: cards already rendered in Arabic via t() — just re-run swapSelectOptions
-  // Do NOT call translateAll here: it would mark Arabic strings as __originalEn and corrupt future restores
-  window.__retranslate = function() {
+  // Called after every renderCards() when Arabic is active.
+  // Runs translateAll on just the cards container so titles, descriptions,
+  // sponsor names and all data-driven text get translated via the cached API.
+  // t() already handles fixed UI strings; this covers the dynamic data strings.
+  window.__retranslate = async function() {
     if (window.__lang !== 'ar') return;
     swapSelectOptions(true);
+    var container = document.getElementById('oppsTableBody');
+    if (container) await translateAll(container);
   };
   // Update static compare tray strings when Arabic activates
   window.__updateTrayLang = function(isAr) {
@@ -5593,7 +5597,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (modalTitle) modalTitle.textContent = isAr ? 'مقارنة الفرص' : 'Compare Opportunities';
   };
   function restoreEnglish(){
+    // Skip the cards container — it will be cleanly re-rendered by window.__renderCards()
+    const cardBody = document.getElementById('oppsTableBody');
     function walk(node){
+      if (node === cardBody) return; // skip cards — re-rendered by __renderCards
       if (node.nodeType === 3 && node.__originalEn) { node.nodeValue = node.__originalEn; return; }
       if (node.nodeType === 1) { for (const a of ATTRS) { const k = 'en'+a; if (node.dataset && node.dataset[k]) node.setAttribute(a, node.dataset[k]); } if (node.tagName === 'OPTION' && node.dataset.en) node.textContent = node.dataset.en; }
       node.childNodes && node.childNodes.forEach(walk);
