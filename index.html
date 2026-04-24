@@ -4987,6 +4987,199 @@ document.addEventListener('DOMContentLoaded', function () {
       body.is-translating .kpi-card:nth-child(2)::after      { animation-delay: 0.12s; }
       body.is-translating .kpi-card:nth-child(3)::after      { animation-delay: 0.24s; }
       body.is-translating .kpi-card:nth-child(4)::after      { animation-delay: 0.36s; }
+
+      /* ============================================================
+         RESPONSIVE OPPORTUNITY CARDS
+         Desktop  : unchanged (≥ 901px)
+         Tablet   : 600–900px — tighter padding, smaller title, 2-col stats
+         Mobile   : ≤ 599px  — full-width, single-col, stacked layout
+         ============================================================ */
+
+      /* ── SECTION & CONTAINER ───────────────────────────────── */
+      @media (max-width: 900px) {
+        #opportunities { padding-block: var(--space-8); }
+        #oppsTableWrapper { overflow-x: hidden; }
+      }
+      @media (max-width: 599px) {
+        #opportunities { padding-block: var(--space-6); }
+      }
+
+      /* ── DETAILED CARD — TABLET (600–900px) ─────────────────── */
+      @media (max-width: 900px) and (min-width: 600px) {
+        .opp-card-noimg { border-radius: 20px; }
+        .opp-card-content { padding: 18px 20px 14px; }
+        .opp-card-title {
+          font-size: clamp(17px, 2.2vw, 22px);
+          max-width: none;
+          -webkit-line-clamp: 3;
+        }
+        .opp-card-desc { font-size: 13px; -webkit-line-clamp: 4; max-width: 100%; }
+        .opp-card-stats {
+          grid-template-columns: 1fr 1fr;
+          gap: 0;
+        }
+        .opp-card-stat {
+          padding: 10px 12px 10px 0;
+          border-right: 1px solid rgba(255,255,255,.14);
+          border-bottom: none;
+        }
+        .opp-card-stat:nth-child(2) {
+          padding-left: 12px;
+          border-right: none;
+        }
+        .opp-card-stat:last-child {
+          grid-column: 1 / -1;
+          padding: 10px 0 0;
+          border-right: none;
+          border-top: 1px solid rgba(255,255,255,.10);
+        }
+        .opp-card-value { font-size: clamp(13px, 1.4vw, 17px); }
+        .opp-card-actions { flex-direction: row; align-items: center; }
+      }
+
+      /* ── DETAILED CARD — MOBILE (≤ 599px) ───────────────────── */
+      @media (max-width: 599px) {
+        /* Card container: full width, comfortable radius */
+        .opp-card-noimg {
+          border-radius: 16px;
+          box-shadow: 0 4px 18px rgba(0,0,0,.35);
+        }
+        /* Decorative gradient — keep but clip shorter */
+        .opp-card-noimg::after { height: 90px; }
+
+        /* Inner padding: comfortable but not excessive */
+        .opp-card-content { padding: 16px 16px 14px; }
+
+        /* Title: readable mobile size, no char-width cap */
+        .opp-card-title {
+          font-size: clamp(15px, 4.5vw, 19px);
+          max-width: none;
+          line-height: 1.15;
+          letter-spacing: -.015em;
+          -webkit-line-clamp: 3;
+          margin-bottom: 8px;
+        }
+
+        /* Meta row: wrap cleanly */
+        .opp-card-meta { gap: 8px; font-size: 11px; margin-bottom: 8px; }
+        .opp-meta-item { gap: 6px; }
+
+        /* Description: shorter clamp on mobile */
+        .opp-card-desc {
+          font-size: 12.5px;
+          line-height: 1.5;
+          -webkit-line-clamp: 3;
+          max-width: 100%;
+          margin-bottom: 10px;
+        }
+
+        /* Chips: allow wrapping, tighter gap */
+        .opp-card-chips { gap: 5px; margin-bottom: 10px; }
+        .opp-card-chip { font-size: 9px; padding: 4px 8px; }
+
+        /* Stats: 2 columns side by side (avoids 3-tall stack) */
+        .opp-card-stats {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0;
+          margin-bottom: 10px;
+        }
+        .opp-card-stat {
+          padding: 0 10px 10px 0;
+          border-right: 1px solid rgba(255,255,255,.14);
+          border-bottom: none;
+        }
+        .opp-card-stat:nth-child(2) {
+          padding-left: 10px;
+          padding-right: 0;
+          border-right: none;
+        }
+        .opp-card-stat:last-child {
+          grid-column: 1 / -1;
+          padding: 10px 0 0;
+          border-right: none;
+          border-top: 1px solid rgba(255,255,255,.10);
+          border-bottom: none;
+        }
+        .opp-card-value { font-size: clamp(13px, 3.8vw, 15px); }
+        .opp-card-label { font-size: 10px; }
+
+        /* Actions: stack vertically, full-width buttons */
+        .opp-card-actions {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 8px;
+          margin-top: 2px;
+        }
+        .opp-card-badges { flex-wrap: wrap; }
+        .opp-card-btns {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          width: 100%;
+        }
+        .opp-insights-btn,
+        .opp-card-link,
+        .panel-link-btn {
+          width: 100%;
+          justify-content: center;
+          min-height: 44px;
+          font-size: 13px;
+          padding: 10px 16px;
+        }
+
+        /* Sponsor line */
+        .opp-card-sponsor { font-size: 10.5px; margin-top: 6px; }
+
+        /* Compare select button — larger tap target */
+        .opp-select-btn {
+          top: 10px;
+          right: 10px;
+          width: 26px;
+          height: 26px;
+        }
+      }
+
+      /* ── COMPACT CARD — TABLET (600–900px) ──────────────────── */
+      @media (max-width: 900px) and (min-width: 600px) {
+        .occ-row { padding: 10px 16px; gap: 14px; }
+        .occ-title { font-size: 13px; }
+        .occ-secondary { flex-shrink: 1; }
+        .occ-chips { gap: 4px; }
+      }
+
+      /* ── FILTER BAR — MOBILE ─────────────────────────────────── */
+      @media (max-width: 599px) {
+        .filter-bar { padding: var(--space-4) var(--space-4); border-radius: var(--radius-lg); }
+        .filter-group.search { min-width: 0; }
+        .filter-input { font-size: 14px; }
+      }
+
+      /* ── TABLE GRID GAP — TABLET/MOBILE ─────────────────────── */
+      @media (max-width: 900px) {
+        .table-scroll tbody { gap: 20px; }
+      }
+      @media (max-width: 599px) {
+        .table-scroll tbody { gap: 14px; }
+      }
+
+      /* ── RTL RESPONSIVE FIXES ───────────────────────────────── */
+      @media (max-width: 599px) {
+        body[dir="rtl"] .opp-card-stat {
+          padding: 0 0 10px 10px;
+          border-left: 1px solid rgba(255,255,255,.14);
+          border-right: none;
+        }
+        body[dir="rtl"] .opp-card-stat:nth-child(2) {
+          padding-right: 10px;
+          padding-left: 0;
+          border-left: none;
+        }
+        body[dir="rtl"] .opp-card-stat:last-child {
+          border-left: none;
+          padding: 10px 0 0;
+        }
+      }
     `;
     document.head.appendChild(style);
   }
