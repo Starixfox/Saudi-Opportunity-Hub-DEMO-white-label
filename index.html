@@ -1693,9 +1693,9 @@ html[data-theme="light"],
   --gold:             #C9A66B;
   --gold-dim:         #faf3e7;
 
-  /* Premium light backgrounds — warm blue-green tint */
-  --bg:               #eef2f7;
-  --bg-deep:          #e6ecf5;
+  /* Dark navy-teal-purple theme — sampled from reference card */
+  --bg:               #0b1628;
+  --bg-deep:          #080f1c;
   --surface:          #ffffff;
   --surface-2:        #f8f9fb;
   --surface-3:        #f0f4f9;
@@ -1751,14 +1751,25 @@ body::before { display: none; }
    The #opportunities section gets a slightly deeper tint
    so the dark opportunity cards feel deliberately placed.
 ──────────────────────────────────────────────── */
+/* Colors sampled from reference card:
+   Left:   #0b1628  (deep navy)
+   Center: #0e4a48  (dark teal)
+   Right:  #2e1b52  (deep purple)
+   Accent: #35d5c5  (teal highlight — matches existing opp cards)
+*/
 body {
-  background-color: transparent !important;
-  background-image: linear-gradient(160deg, #dce6f5 0%, #e6edf7 35%, #eaf0f6 65%, #e2ecf5 100%) !important;
+  background-color: #0b1628 !important;
+  background-image: linear-gradient(135deg,
+    #0b1628 0%,
+    #0d2a3a 25%,
+    #0e4040 50%,
+    #1e1a42 75%,
+    #2e1b52 100%) !important;
   background-attachment: fixed !important;
   min-height: 100vh;
 }
 #opportunities {
-  background: linear-gradient(180deg, rgba(10,28,55,0.03) 0%, rgba(10,28,55,0.08) 100%);
+  background: transparent;
 }
 main {
   background: transparent !important;
