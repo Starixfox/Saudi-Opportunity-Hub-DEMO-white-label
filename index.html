@@ -1693,9 +1693,9 @@ html[data-theme="light"],
   --gold:             #C9A66B;
   --gold-dim:         #faf3e7;
 
-  /* Orange-dominant premium gradient theme */
-  --bg:               #1c0a00;
-  --bg-deep:          #120600;
+  /* Light orange-peach gradient theme */
+  --bg:               #fff4e8;
+  --bg-deep:          #fde8c8;
   --surface:          #ffffff;
   --surface-2:        #f8f9fb;
   --surface-3:        #f0f4f9;
@@ -1751,21 +1751,20 @@ body::before { display: none; }
    The #opportunities section gets a slightly deeper tint
    so the dark opportunity cards feel deliberately placed.
 ──────────────────────────────────────────────── */
-/* Orange-dominant premium gradient:
-   Base:   #1c0a00  (near-black burnt orange)
-   Mid:    #6b2800  (deep amber-orange — dominant)
-   Accent: #8c3a00  (warm orange peak)
-   Edge:   #1a2a08  (barely-visible dark olive green overflow)
+/* Light orange-peach gradient — fits IS green #006C35 + gold #C9A66B palette:
+   Base:   #fff4e8  (warm cream, very light)
+   Mid:    #fde8c8  (soft peach-amber)
+   Peak:   #fdf0da  (light golden-orange)
+   Edge:   #eef7ee  (barely-visible mint-green whisper)
 */
 body {
-  background-color: #1c0a00 !important;
+  background-color: #fff4e8 !important;
   background-image: linear-gradient(135deg,
-    #1c0a00 0%,
-    #4a1800 20%,
-    #7a3200 45%,
-    #6b2800 65%,
-    #2a1a04 85%,
-    #1a2808 100%) !important;
+    #fff4e8 0%,
+    #fde8c8 30%,
+    #fdf0da 55%,
+    #f5f7ee 82%,
+    #eef7ee 100%) !important;
   background-attachment: fixed !important;
   min-height: 100vh;
 }
