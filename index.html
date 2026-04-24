@@ -1693,16 +1693,16 @@ html[data-theme="light"],
   --gold:             #C9A66B;
   --gold-dim:         #faf3e7;
 
-  /* Clean light backgrounds */
-  --bg:               #f7f8fa;
-  --bg-deep:          #eef1f6;
+  /* Premium light backgrounds — warm blue-green tint */
+  --bg:               #eef2f7;
+  --bg-deep:          #e6ecf5;
   --surface:          #ffffff;
-  --surface-2:        #f9fafb;
-  --surface-3:        #f2f5f8;
+  --surface-2:        #f8f9fb;
+  --surface-3:        #f0f4f9;
   --surface-elevated: #ffffff;
-  --border:           #dde3ed;
-  --border-light:     #e8edf5;
-  --divider:          #edf2f7;
+  --border:           #d4dce9;
+  --border-light:     #dfe6f0;
+  --divider:          #e8edf5;
 
   --text:             #12243a;
   --text-muted:       #4a5568;
@@ -1743,6 +1743,24 @@ html[data-theme="light"],
 /* ── REMOVE DARK STARFIELD (not fitting IS light brand) ── */
 [data-theme="light"] body::before { display: none; }
 body::before { display: none; }
+
+/* ── PREMIUM PAGE BACKGROUND ────────────────────
+   A soft blue-slate gradient that gives the page depth and
+   makes the white card surfaces pop. The gradient is subtle
+   enough to feel professional rather than decorative.
+   The #opportunities section gets a slightly deeper tint
+   so the dark opportunity cards feel deliberately placed.
+──────────────────────────────────────────────── */
+body {
+  background: linear-gradient(160deg, #e8eef8 0%, #edf2f7 40%, #e9f0f5 70%, #e4ecf4 100%) fixed;
+  min-height: 100vh;
+}
+#opportunities {
+  background: linear-gradient(180deg, transparent 0%, rgba(12,32,60,0.04) 30%, rgba(12,32,60,0.07) 100%);
+}
+main {
+  background: transparent;
+}
 
 /* ── IS TOP UTILITY BAR ──────────────────────── */
 .is-top-bar {
