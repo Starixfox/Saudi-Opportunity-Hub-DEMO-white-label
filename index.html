@@ -1752,14 +1752,16 @@ body::before { display: none; }
    so the dark opportunity cards feel deliberately placed.
 ──────────────────────────────────────────────── */
 body {
-  background: linear-gradient(160deg, #e8eef8 0%, #edf2f7 40%, #e9f0f5 70%, #e4ecf4 100%) fixed;
+  background-color: transparent !important;
+  background-image: linear-gradient(160deg, #dce6f5 0%, #e6edf7 35%, #eaf0f6 65%, #e2ecf5 100%) !important;
+  background-attachment: fixed !important;
   min-height: 100vh;
 }
 #opportunities {
-  background: linear-gradient(180deg, transparent 0%, rgba(12,32,60,0.04) 30%, rgba(12,32,60,0.07) 100%);
+  background: linear-gradient(180deg, rgba(10,28,55,0.03) 0%, rgba(10,28,55,0.08) 100%);
 }
 main {
-  background: transparent;
+  background: transparent !important;
 }
 
 /* ── IS TOP UTILITY BAR ──────────────────────── */
