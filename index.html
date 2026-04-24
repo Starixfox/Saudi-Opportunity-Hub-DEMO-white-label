@@ -5130,6 +5130,17 @@ document.addEventListener('DOMContentLoaded', function () {
           padding: 10px 16px;
         }
 
+        /* Hide decorative image panel — saves ~320px, gives content full width */
+        .opp-card-image { display: none !important; }
+
+        /* Without the image, content fills the full card */
+        .opp-card-content { order: 1; flex: 1 1 auto; }
+
+        /* Card doesn't need row-flex without image */
+        .opp-card-noimg {
+          flex-direction: column !important;
+        }
+
         /* Sponsor line */
         .opp-card-sponsor { font-size: 10.5px; margin-top: 6px; }
 
@@ -5140,6 +5151,15 @@ document.addEventListener('DOMContentLoaded', function () {
           width: 26px;
           height: 26px;
         }
+      }
+
+      /* ── DETAILED CARD IMAGE — TABLET: hide at ≤900px, show only on desktop ─ */
+      @media (max-width: 900px) {
+        /* Hide the right-side image panel on tablet and mobile.
+           The decorative gradient on .opp-card-noimg::after still shows. */
+        .opp-card-image { display: none !important; }
+        .opp-card-noimg { flex-direction: column !important; }
+        .opp-card-content { flex: 1 1 auto; }
       }
 
       /* ── COMPACT CARD — TABLET (600–900px) ──────────────────── */
