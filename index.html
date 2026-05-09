@@ -3831,16 +3831,51 @@ document.addEventListener('DOMContentLoaded', function () {
     'Sweden':          'السويد',
     'Switzerland':     'سويسرا',
     'Philippines':     'الفلبين',
-    // Programme types
-    'Grant':             'منحة',
-    'Tender':            'عطاء',
-    'Tender Rfp':        'عطاء / طلب عروض',
-    'Accelerator':       'مسرّعة',
-    'Fellowship':        'زمالة',
-    'Investment Program':'برنامج استثماري',
-    'Loan Program':      'برنامج قرض',
-    'Partnership Program':'برنامج شراكة',
-    'Other':             'أخرى',
+    // Programme types (pretty-cased from JSON values)
+    'Grant':               'منحة',
+    'grant':               'منحة',
+    'Tender':              'عطاء',
+    'tender':              'عطاء',
+    'Tender Rfp':          'عطاء / طلب عروض',
+    'tender_rfp':          'عطاء / طلب عروض',
+    'Tender_Rfp':          'عطاء / طلب عروض',
+    'Accelerator':         'مسرّعة',
+    'accelerator':         'مسرّعة',
+    'Fellowship':          'زمالة',
+    'fellowship':          'زمالة',
+    'Investment Program':  'برنامج استثماري',
+    'investment_program':  'برنامج استثماري',
+    'Investment_Program':  'برنامج استثماري',
+    'Loan Program':        'برنامج قرض',
+    'loan_program':        'برنامج قرض',
+    'Loan_Program':        'برنامج قرض',
+    'Partnership Program': 'برنامج شراكة',
+    'partnership_program': 'برنامج شراكة',
+    'Partnership_Program': 'برنامج شراكة',
+    'Other':               'أخرى',
+    'other':               'أخرى',
+    // Status values (raw + pretty-cased)
+    'open':                    'مفتوح',
+    'Open':                    'مفتوح',
+    'closed but recurring':    'مغلق مع تكرار دوري',
+    'Closed But Recurring':    'مغلق مع تكرار دوري',
+    'closed_but_recurring':    'مغلق مع تكرار دوري',
+    'Closed_But_Recurring':    'مغلق مع تكرار دوري',
+    'recurring':               'دوري',
+    'Recurring':               'دوري',
+    // Audience / profile values (raw + pretty-cased)
+    'startup':     'شركة ناشئة',
+    'Startup':     'شركة ناشئة',
+    'corporate':   'شركات',
+    'Corporate':   'شركات',
+    'government':  'حكومة',
+    'Government':  'حكومة',
+    'investor':    'مستثمر',
+    'Investor':    'مستثمر',
+    'researcher':  'باحث',
+    'Researcher':  'باحث',
+    'student':     'طالب',
+    'Student':     'طالب',
     // Common deadline phrases
     'Rolling / Open':    'مستمر / مفتوح',
     'Rolling calls per priority area': 'طلبات متجددة حسب الأولوية',
@@ -5423,18 +5458,21 @@ document.addEventListener('DOMContentLoaded', function () {
     var overlay = document.getElementById('compareOverlay');
     var body = document.getElementById('compareModalBody');
     if (!modal || !body) return;
+    // tv(v) — translate a value string through AR_UI when in Arabic mode
+    function tv(v) { return t(pretty(v)) !== pretty(v) ? t(pretty(v)) : t(v) !== v ? t(v) : pretty(v); }
     body.innerHTML = compareItems.map(function(item) {
+      var regionVal = item.country || pretty(item.eligibility_region) || t('Global');
       return '<div class="compare-item">' +
         '<div class="compare-item__title">' + (item.title||t('Untitled')) + '</div>' +
         [
-          [t('Type'), pretty(item.type||'')],
-          [t('Status'), pretty(item.status||'')],
-          [t('Funding'), item.funding_amount||'\u2014'],
-          [t('Deadline'), item.deadline_date||'\u2014'],
-          [t('Region'), item.country || pretty(item.eligibility_region)||t('Global')],
+          [t('Type'),                tv(item.type||'')],
+          [t('Status'),              tv(item.status||'')],
+          [t('Funding'),             item.funding_amount||'\u2014'],
+          [t('Deadline'),            item.deadline_date||'\u2014'],
+          [t('Region'),              t(regionVal)],
           [t('Sponsor / Institution'), item.sponsor_institution||'\u2014'],
-          [t('Audience'), (item.profiles||[]).map(pretty).join(', ')||'\u2014'],
-          [t('Sectors'), (item.sectors||[]).map(pretty).join(', ')||'\u2014']
+          [t('Audience'),            (item.profiles||[]).map(tv).join('\u060c ')||'\u2014'],
+          [t('Sectors'),             (item.sectors||[]).map(tv).join('\u060c ')||'\u2014']
         ].map(function(r) {
           return '<div class="compare-item__row"><span class="compare-item__key">' + r[0] + '</span><span class="compare-item__val">' + r[1] + '</span></div>';
         }).join('') +
