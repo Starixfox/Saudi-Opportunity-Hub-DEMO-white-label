@@ -5453,33 +5453,57 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  function openCompareModal() {
+  async function openCompareModal() {
     var modal = document.getElementById('compareModal');
     var overlay = document.getElementById('compareOverlay');
     var body = document.getElementById('compareModalBody');
     if (!modal || !body) return;
+
     // tv(v) — translate a value string through AR_UI when in Arabic mode
     function tv(v) { return t(pretty(v)) !== pretty(v) ? t(pretty(v)) : t(v) !== v ? t(v) : pretty(v); }
+
+    // Collect all free-text values that need live translation in Arabic mode
+    var needsLiveTranslation = window.__lang === 'ar' && typeof window.__translateMany === 'function';
+    var liveTranslated = {};
+    if (needsLiveTranslation) {
+      var freeTextValues = [];
+      compareItems.forEach(function(item) {
+        if (item.funding_amount) freeTextValues.push(item.funding_amount);
+        if (item.deadline_date)  freeTextValues.push(item.deadline_date);
+        if (item.sponsor_institution) freeTextValues.push(item.sponsor_institution);
+        if (item.title) freeTextValues.push(item.title);
+      });
+      // Show modal immediately with a loading state
+      body.innerHTML = '<div style="color:rgba(255,255,255,.5);padding:20px;text-align:center">\u062c\u0627\u0631\u064a \u0627\u0644\u062a\u0631\u062c\u0645\u0629\u2026</div>';
+      modal.classList.remove('compare-modal--hidden');
+      if (overlay) overlay.classList.remove('compare-overlay--hidden');
+      var translated = await window.__translateMany(freeTextValues);
+      freeTextValues.forEach(function(v, i) { liveTranslated[v] = translated[i] || v; });
+    } else {
+      modal.classList.remove('compare-modal--hidden');
+      if (overlay) overlay.classList.remove('compare-overlay--hidden');
+    }
+
+    function lv(v) { return (needsLiveTranslation && v && liveTranslated[v]) ? liveTranslated[v] : (v || '\u2014'); }
+
     body.innerHTML = compareItems.map(function(item) {
       var regionVal = item.country || pretty(item.eligibility_region) || t('Global');
       return '<div class="compare-item">' +
-        '<div class="compare-item__title">' + (item.title||t('Untitled')) + '</div>' +
+        '<div class="compare-item__title">' + lv(item.title || t('Untitled')) + '</div>' +
         [
-          [t('Type'),                tv(item.type||'')],
-          [t('Status'),              tv(item.status||'')],
-          [t('Funding'),             item.funding_amount||'\u2014'],
-          [t('Deadline'),            item.deadline_date||'\u2014'],
-          [t('Region'),              t(regionVal)],
-          [t('Sponsor / Institution'), item.sponsor_institution||'\u2014'],
-          [t('Audience'),            (item.profiles||[]).map(tv).join('\u060c ')||'\u2014'],
-          [t('Sectors'),             (item.sectors||[]).map(tv).join('\u060c ')||'\u2014']
+          [t('Type'),                  tv(item.type||'')],
+          [t('Status'),                tv(item.status||'')],
+          [t('Funding'),               lv(item.funding_amount)],
+          [t('Deadline'),              lv(item.deadline_date)],
+          [t('Region'),                t(regionVal)],
+          [t('Sponsor / Institution'), lv(item.sponsor_institution)],
+          [t('Audience'),              (item.profiles||[]).map(tv).join('\u060c ')||'\u2014'],
+          [t('Sectors'),               (item.sectors||[]).map(tv).join('\u060c ')||'\u2014']
         ].map(function(r) {
           return '<div class="compare-item__row"><span class="compare-item__key">' + r[0] + '</span><span class="compare-item__val">' + r[1] + '</span></div>';
         }).join('') +
       '</div>';
     }).join('');
-    modal.classList.remove('compare-modal--hidden');
-    if (overlay) { overlay.classList.remove('compare-overlay--hidden'); }
   }
 
   function wireCompareTray() {
@@ -6009,6 +6033,8 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   async function translateAll(root){ root = root || document.body; await translateNodes(root); await translateAttrs(root); await translateOptions(root); }
   // Expose for panel: translate a specific element immediately
+  window.__translateMany = async function(items) { return translateMany(items); };
+  window.__translateOne  = async function(text)  { return translateOne(text); };
   window.__translatePanel = async function(el) {
     if (!el) return;
     // Apply RTL direction to panel
