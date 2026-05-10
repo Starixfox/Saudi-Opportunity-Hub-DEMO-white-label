@@ -6017,7 +6017,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const HTML = document.documentElement;
   const CACHE_KEY = 'isDemoArCacheV1';
   const SKIP_TAGS = new Set(['SCRIPT','STYLE','NOSCRIPT','IFRAME','SVG','PATH','CODE','PRE','CANVAS']);
-  const ATTRS = ['placeholder','title','aria-label'];
+  const ATTRS = ['placeholder','title','aria-label','data-tooltip'];
   const AR_RE = /[\u0600-\u06FF]/;
   const EN_RE = /[A-Za-z]/;
   let CACHE = {};
@@ -6188,6 +6188,49 @@ document.addEventListener('DOMContentLoaded', function () {
       var badgeHtml = badge ? badge.outerHTML : '';
       widgetTitle.innerHTML = (isAr ? 'جديد في قاعدة البيانات' : 'New to the Database') + ' ' + badgeHtml;
     }
+    // ── Placeholders ──────────────────────────────────────────────────────────
+    var searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.placeholder = isAr
+      ? 'مثال: KAUST، طاقة، رعاية صحية…'
+      : 'e.g. KAUST, Energy, Healthcare, Agriculture…';
+    var feedbackText = document.getElementById('feedbackText');
+    if (feedbackText) feedbackText.placeholder = isAr
+      ? 'مثال: تم تحديث موعد SA-005 إلى مارس 2026، أو فرصة جديدة من KAUST…'
+      : "e.g. SA-005 deadline updated to March 2026, or 'New call from KAUST for satellite research grants…'";
+    var feedbackContact = document.getElementById('feedbackContact');
+    if (feedbackContact) feedbackContact.placeholder = isAr ? 'بريدك@المثال.كوم' : 'your@email.com';
+    // ── title attributes ──────────────────────────────────────────────────────
+    var themeBtn = document.getElementById('themeToggle');
+    if (themeBtn) themeBtn.title = isAr ? 'تبديل السمة' : 'Toggle theme';
+    var newOnlyBtn = document.getElementById('newOnlyToggle');
+    if (newOnlyBtn) newOnlyBtn.title = isAr ? 'عرض الفرص المضافة حديثاً فقط' : 'Show only newly added opportunities';
+    var btnDetailed = document.getElementById('viewBtnDetailed');
+    if (btnDetailed) btnDetailed.title = isAr ? 'عرض تفصيلي' : 'Detailed view';
+    var btnCompact = document.getElementById('viewBtnCompact');
+    if (btnCompact) btnCompact.title = isAr ? 'عرض مضغوط' : 'Compact view';
+    // ── KPI card data-tooltip ─────────────────────────────────────────────────
+    var kpiTooltipMap = [
+      { sel: '.kpi-card.saudi',  ar: 'برامج صادرة عن مؤسسات سعودية — CST وRDIA ومنشآت وKAUST وKACST وجهات حكومية سعودية أخرى، مصنفة حسب مصدر البرنامج لا أهلية المتقدم.',           en: "Programs issued or led by Saudi institutions — CST, RDIA, Monsha'at, KAUST, KACST, PIF-backed entities, and other KSA government bodies. Classified by programme origin, not applicant eligibility." },
+      { sel: '.kpi-card.gcc',    ar: 'برامج من دول الخليج — الإمارات وعُمان وقطر والبحرين والكويت وشركاء خليجيون آخرون — باستثناء المملكة العربية السعودية.',                                                                                                     en: 'Programmes led by UAE, Oman, Qatar, Bahrain, Kuwait, and other GCC partners — excluding Saudi Arabia. Classified by programme origin.' },
+      { sel: '.kpi-card.global', ar: 'برامج من منظمات دولية ومسرّعات عالمية وشركات خارج منطقة الخليج — كثير منها متاح للمتقدمين من السعودية.',                                                                                                                                            en: 'Programmes issued by international organisations, global accelerators, and companies outside the GCC — many of which are open or accessible to Saudi-based applicants.' },
+      { sel: '.kpi-card.total',  ar: 'إجمالي السجلات في قاعدة البيانات — برامج سعودية + خليجية + دولية مجتمعة.',                                                                                                                                                                                                                      en: 'Total records in the dataset — Saudi-issued + GCC-issued + Internationally-issued programmes combined.' }
+    ];
+    kpiTooltipMap.forEach(function(entry) {
+      var el = document.querySelector(entry.sel);
+      if (el) el.setAttribute('data-tooltip', isAr ? entry.ar : entry.en);
+    });
+    // ── Section aria-labels ───────────────────────────────────────────────────
+    var sectionAriaMap = [
+      { id: 'overview',     ar: 'نظرة عامة' },
+      { id: 'opportunities',ar: 'قاعدة بيانات الفرص' },
+      { id: 'insights',     ar: 'إحصاءات وتحليلات البيانات' },
+      { id: 'about',        ar: 'حول هذه المنصة' },
+      { id: 'feedback',     ar: 'المساهمة في المنصة' }
+    ];
+    sectionAriaMap.forEach(function(entry) {
+      var el = document.getElementById(entry.id);
+      if (el) el.setAttribute('aria-label', isAr ? entry.ar : entry.id);
+    });
   }
 
   /* Observer watches ONLY the detail panel — never document.body.
