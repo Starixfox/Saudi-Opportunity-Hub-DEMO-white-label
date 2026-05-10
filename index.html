@@ -2634,7 +2634,7 @@ body[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             Search by title or sponsor
           </label>
-          <input id="searchInput" class="filter-input" type="text" placeholder="e.g. KAUST, Energy, Healthcare, Agriculture&hellip;" autocomplete="off" aria-label="Search opportunities">
+          <input id="searchInput" class="filter-input" type="text" placeholder="e.g. KAUST, Energy, Healthcare, Agriculture&hellip;" autocomplete="off" aria-label="Search opportunities" data-notranslate-placeholder>
         </div>
 
         <div class="filter-group">
@@ -3046,13 +3046,13 @@ body[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
             </div>
             <div class="form-group">
               <label class="form-label" for="feedbackContact">How can we contact you? <span style="color: var(--text-faint); font-weight: 400; text-transform: none;">(optional)</span></label>
-              <input id="feedbackContact" name="contact" type="email" class="form-input" placeholder="your@email.com">
+              <input id="feedbackContact" name="contact" type="email" class="form-input" placeholder="your@email.com" data-notranslate-placeholder>
             </div>
           </div>
 
           <div class="form-group">
             <label class="form-label" for="feedbackText">Details &mdash; links, IDs, corrections, comments</label>
-            <textarea id="feedbackText" name="details" rows="4" class="form-textarea" required placeholder="e.g. SA-005 deadline updated to March 2026, or 'New call from KAUST for satellite research grants&hellip;'"></textarea>
+            <textarea id="feedbackText" name="details" rows="4" class="form-textarea" required placeholder="e.g. SA-005 deadline updated to March 2026, or 'New call from KAUST for satellite research grants&hellip;'" data-notranslate-placeholder></textarea>
           </div>
 
           <button type="submit" class="btn-submit">
@@ -6063,7 +6063,11 @@ document.addEventListener('DOMContentLoaded', function () {
   async function translateAttrs(root){
     const els = [root, ...root.querySelectorAll('*')];
     const work = [];
-    els.forEach(el => ATTRS.forEach(a => { const v = el.getAttribute && el.getAttribute(a); if (needs(v)) work.push({el,a,v:norm(v)}); }));
+    els.forEach(el => ATTRS.forEach(a => {
+      // Skip placeholder on elements that are managed manually by swapSelectOptions
+      if (a === 'placeholder' && el.hasAttribute && el.hasAttribute('data-notranslate-placeholder')) return;
+      const v = el.getAttribute && el.getAttribute(a); if (needs(v)) work.push({el,a,v:norm(v)});
+    }));
     if (!work.length) return;
     const tr = await translateMany(work.map(x => x.v));
     work.forEach((it,i) => { if (!it.el.dataset['en'+it.a]) it.el.dataset['en'+it.a] = it.v; if (tr[i] && tr[i] !== it.v) it.el.setAttribute(it.a, tr[i]); });
@@ -6298,6 +6302,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof window.__renderCards === 'function') window.__renderCards();
     if (typeof window.__updateTrayLang === 'function') window.__updateTrayLang(true);
     swapSelectOptions(true);
+    // swapSelectOptions runs after translateAll, but translateAttrs may have cached
+    // bad entries for placeholders. Force-set them again on the next frame to win.
+    requestAnimationFrame(function() { swapSelectOptions(true); });
     startObserver();
   }
   function activateEnglish(){
