@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sign In — Opportunity Hub</title>
 
-  <!-- Fonts: Satoshi (headlines) + Inter (body) via Fontshare / Google -->
+  <!-- Fonts: Satoshi + Inter (LTR) | Noto Kufi Arabic (RTL) -->
   <link rel="preconnect" href="https://api.fontshare.com" />
   <link href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap" rel="stylesheet" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <style>
     /* ─────────────────────────────────────────────────────────────
@@ -52,6 +52,7 @@
       /* Typography */
       --font-display: 'Satoshi', system-ui, sans-serif;
       --font-body:    'Inter', system-ui, sans-serif;
+      --font-arabic:  'Noto Kufi Arabic', system-ui, sans-serif;
     }
 
     /* ─────────────────────────────────────────────────────────────
@@ -67,6 +68,135 @@
       background: var(--bg);
       min-height: 100vh;
       display: flex;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       RTL / ARABIC OVERRIDES
+    ───────────────────────────────────────────────────────────── */
+    [dir="rtl"] body,
+    [dir="rtl"] .form-input,
+    [dir="rtl"] .form-label,
+    [dir="rtl"] .auth-tab,
+    [dir="rtl"] .btn-submit,
+    [dir="rtl"] .checkbox-label,
+    [dir="rtl"] .forgot-link,
+    [dir="rtl"] .auth-footer,
+    [dir="rtl"] .terms-text,
+    [dir="rtl"] .auth-divider,
+    [dir="rtl"] .field-error,
+    [dir="rtl"] #auth-error {
+      font-family: var(--font-arabic);
+    }
+
+    [dir="rtl"] .brand-tagline,
+    [dir="rtl"] .brand-logo-name,
+    [dir="rtl"] .brand-desc,
+    [dir="rtl"] .stat-pill,
+    [dir="rtl"] .brand-vision p {
+      font-family: var(--font-arabic);
+      letter-spacing: 0;
+    }
+
+    [dir="rtl"] .auth-header h1 {
+      font-family: var(--font-arabic);
+      letter-spacing: 0;
+    }
+
+    [dir="rtl"] .auth-header p {
+      font-family: var(--font-arabic);
+    }
+
+    /* Flip the password toggle button to left side in RTL */
+    [dir="rtl"] .input-wrapper .form-input {
+      padding-right: 14px;
+      padding-left: 44px;
+    }
+
+    [dir="rtl"] .toggle-password {
+      right: auto;
+      left: 12px;
+    }
+
+    /* Brand logo flip */
+    [dir="rtl"] .brand-logo {
+      flex-direction: row-reverse;
+    }
+
+    /* Stats row */
+    [dir="rtl"] .brand-stats {
+      flex-direction: row-reverse;
+    }
+
+    /* Vision bar */
+    [dir="rtl"] .brand-vision {
+      flex-direction: row-reverse;
+      text-align: right;
+    }
+
+    /* auth-extras: checkbox + forgot link */
+    [dir="rtl"] .auth-extras {
+      flex-direction: row-reverse;
+    }
+
+    [dir="rtl"] .checkbox-label {
+      flex-direction: row-reverse;
+    }
+
+    /* Error message bar */
+    [dir="rtl"] #auth-error {
+      flex-direction: row-reverse;
+      text-align: right;
+    }
+
+    /* Form text alignment */
+    [dir="rtl"] .form-label,
+    [dir="rtl"] .field-error {
+      text-align: right;
+    }
+
+    /* Auth footer */
+    [dir="rtl"] .auth-footer {
+      direction: rtl;
+    }
+
+    /* Language toggle button */
+    .lang-toggle {
+      position: absolute;
+      top: 18px;
+      right: 20px;
+      background: var(--surface-2);
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background .15s, border-color .15s, color .15s;
+      z-index: 10;
+      font-family: var(--font-body);
+      letter-spacing: 0.2px;
+    }
+
+    .lang-toggle:hover {
+      background: var(--green-light);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .lang-toggle-globe {
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    /* In RTL mode, flip toggle to left side */
+    [dir="rtl"] .lang-toggle {
+      right: auto;
+      left: 20px;
+      font-family: var(--font-arabic);
     }
 
     /* ─────────────────────────────────────────────────────────────
@@ -140,6 +270,7 @@
       font-size: 18px;
       color: var(--gold);
       letter-spacing: -0.5px;
+      flex-shrink: 0;
     }
 
     .brand-logo-name {
@@ -158,6 +289,11 @@
       text-transform: uppercase;
       display: block;
       margin-top: 1px;
+    }
+
+    [dir="rtl"] .brand-logo-sub {
+      letter-spacing: 0;
+      text-transform: none;
     }
 
     .brand-middle {
@@ -214,11 +350,22 @@
       line-height: 1;
     }
 
+    [dir="rtl"] .stat-pill strong {
+      font-family: var(--font-arabic);
+      letter-spacing: 0;
+    }
+
     .stat-pill span {
       font-size: 11px;
       color: rgba(255,255,255,.45);
       text-transform: uppercase;
       letter-spacing: 0.5px;
+    }
+
+    [dir="rtl"] .stat-pill span {
+      font-family: var(--font-arabic);
+      text-transform: none;
+      letter-spacing: 0;
     }
 
     .brand-bottom {
@@ -259,6 +406,7 @@
       padding: 48px 40px;
       background: var(--surface);
       overflow-y: auto;
+      position: relative;
     }
 
     .auth-box {
@@ -308,6 +456,10 @@
       color: var(--text-muted);
       cursor: pointer;
       transition: all .18s ease;
+    }
+
+    [dir="rtl"] .auth-tab {
+      font-family: var(--font-arabic);
     }
 
     .auth-tab.is-active {
@@ -382,6 +534,11 @@
       transition: border-color .15s ease, box-shadow .15s ease;
       outline: none;
       appearance: none;
+    }
+
+    [dir="rtl"] .form-input {
+      font-family: var(--font-arabic);
+      text-align: right;
     }
 
     .form-input::placeholder { color: var(--text-faint); }
@@ -504,6 +661,11 @@
       overflow: hidden;
     }
 
+    [dir="rtl"] .btn-submit {
+      font-family: var(--font-arabic);
+      letter-spacing: 0;
+    }
+
     .btn-submit:hover {
       background: var(--green-hover);
       box-shadow: 0 4px 16px rgba(0,108,53,.25);
@@ -545,6 +707,12 @@
       text-transform: uppercase;
     }
 
+    [dir="rtl"] .auth-divider {
+      font-family: var(--font-arabic);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
     .auth-divider::before,
     .auth-divider::after {
       content: '';
@@ -577,6 +745,10 @@
       cursor: pointer;
       transition: background .15s, border-color .15s, box-shadow .15s;
       text-decoration: none;
+    }
+
+    [dir="rtl"] .btn-sso {
+      font-family: var(--font-arabic);
     }
 
     .btn-sso:hover {
@@ -612,6 +784,10 @@
       .auth-extras { flex-direction: column; align-items: flex-start; gap: 10px; }
       .sso-grid { grid-template-columns: 1fr; }
     }
+
+    [dir="rtl"] @media (max-width: 480px) {
+      .auth-extras { align-items: flex-end; }
+    }
   </style>
 </head>
 <body>
@@ -626,18 +802,18 @@
       <a href="index.html" class="brand-logo">
         <div class="brand-logo-mark">OH</div>
         <div>
-          <div class="brand-logo-name">Opportunity Hub</div>
-          <span class="brand-logo-sub">Saudi Vision 2030</span>
+          <div class="brand-logo-name" data-en="Opportunity Hub" data-ar="منصة الفرص">Opportunity Hub</div>
+          <span class="brand-logo-sub" data-en="Saudi Vision 2030" data-ar="رؤية السعودية 2030">Saudi Vision 2030</span>
         </div>
       </a>
     </div>
 
     <div class="brand-middle">
       <h2 class="brand-tagline">
-        Unlock Saudi Arabia's<br>
-        <em>investment landscape</em>
+        <span data-en="Unlock Saudi Arabia's" data-ar="اكتشف فرص">Unlock Saudi Arabia's</span><br>
+        <em data-en="investment landscape" data-ar="المملكة العربية السعودية الاستثمارية">investment landscape</em>
       </h2>
-      <p class="brand-desc">
+      <p class="brand-desc" data-en="A curated intelligence platform tracking grants, tenders, accelerators, and investment programs across 15 key sectors — updated in real time." data-ar="منصة ذكاء متكاملة لتتبع المنح والمناقصات والمسرّعات وبرامج الاستثمار عبر 15 قطاعًا رئيسيًا — محدّثة في الوقت الفعلي.">
         A curated intelligence platform tracking grants, tenders, accelerators,
         and investment programs across 15 key sectors — updated in real time.
       </p>
@@ -645,15 +821,15 @@
       <div class="brand-stats">
         <div class="stat-pill">
           <strong>1,034</strong>
-          <span>Opportunities</span>
+          <span data-en="Opportunities" data-ar="فرصة">Opportunities</span>
         </div>
         <div class="stat-pill">
           <strong>15</strong>
-          <span>Sectors</span>
+          <span data-en="Sectors" data-ar="قطاعًا">Sectors</span>
         </div>
         <div class="stat-pill">
           <strong>3</strong>
-          <span>Regions</span>
+          <span data-en="Regions" data-ar="مناطق">Regions</span>
         </div>
       </div>
     </div>
@@ -661,7 +837,10 @@
     <div class="brand-bottom">
       <div class="brand-vision">
         <div class="vision-dot"></div>
-        <p><strong>Vision 2030 aligned</strong> — Covering Saudi, GCC, and international programmes open to KSA-based applicants.</p>
+        <p>
+          <strong data-en="Vision 2030 aligned" data-ar="متوافق مع رؤية 2030">Vision 2030 aligned</strong>
+          <span data-en=" — Covering Saudi, GCC, and international programmes open to KSA-based applicants." data-ar=" — يشمل البرامج السعودية وبرامج دول الخليج والبرامج الدولية المتاحة للمتقدمين داخل المملكة."> — Covering Saudi, GCC, and international programmes open to KSA-based applicants.</span>
+        </p>
       </div>
     </div>
   </aside>
@@ -670,6 +849,13 @@
        RIGHT: Auth Form
   ══════════════════════════════════════════ -->
   <main class="auth-form-panel">
+
+    <!-- Language toggle button -->
+    <button class="lang-toggle" id="lang-toggle" type="button" aria-label="Switch language">
+      <span class="lang-toggle-globe">🌐</span>
+      <span id="lang-toggle-label">العربية</span>
+    </button>
+
     <div class="auth-box">
 
       <!-- Dynamic header (changes with mode) -->
@@ -687,6 +873,8 @@
           aria-selected="true"
           aria-controls="auth-form"
           data-mode="signin"
+          data-en="Sign In"
+          data-ar="تسجيل الدخول"
         >Sign In</button>
         <button
           class="auth-tab"
@@ -695,14 +883,13 @@
           aria-selected="false"
           aria-controls="auth-form"
           data-mode="signup"
+          data-en="Create Account"
+          data-ar="إنشاء حساب"
         >Create Account</button>
       </div>
 
       <!-- ─────────────────────────────────────
            ERROR / SUCCESS MESSAGE
-           Supabase will populate this div with
-           messages like "Invalid login credentials"
-           or "Check your email to confirm signup"
       ───────────────────────────────────────── -->
       <div id="auth-error" role="alert" aria-live="polite">
         <svg class="msg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -721,25 +908,29 @@
         <!-- Name fields — sign-up only -->
         <div class="form-row signup-only" id="name-row">
           <div class="form-group">
-            <label class="form-label" for="first-name">First name</label>
+            <label class="form-label" for="first-name" data-en="First name" data-ar="الاسم الأول">First name</label>
             <input
               class="form-input"
               type="text"
               id="first-name"
               name="first_name"
               placeholder="Sarah"
+              data-ph-en="Sarah"
+              data-ph-ar="سارة"
               autocomplete="given-name"
             />
-            <div class="field-error" id="first-name-error">Please enter your first name.</div>
+            <div class="field-error" id="first-name-error" data-en="Please enter your first name." data-ar="يرجى إدخال اسمك الأول.">Please enter your first name.</div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="last-name">Last name</label>
+            <label class="form-label" for="last-name" data-en="Last name" data-ar="اسم العائلة">Last name</label>
             <input
               class="form-input"
               type="text"
               id="last-name"
               name="last_name"
               placeholder="Al-Rashid"
+              data-ph-en="Al-Rashid"
+              data-ph-ar="الراشد"
               autocomplete="family-name"
             />
           </div>
@@ -747,35 +938,39 @@
 
         <!-- Organisation — sign-up only -->
         <div class="form-group signup-only" id="org-row">
-          <label class="form-label" for="organisation">Organisation</label>
+          <label class="form-label" for="organisation" data-en="Organisation" data-ar="المؤسسة">Organisation</label>
           <input
             class="form-input"
             type="text"
             id="organisation"
             name="organisation"
             placeholder="KAUST, PIF, Startup name…"
+            data-ph-en="KAUST, PIF, Startup name…"
+            data-ph-ar="كاوست، صندوق الاستثمارات العامة، اسم الشركة..."
             autocomplete="organization"
           />
         </div>
 
         <!-- Email -->
         <div class="form-group">
-          <label class="form-label" for="email">Email address</label>
+          <label class="form-label" for="email" data-en="Email address" data-ar="البريد الإلكتروني">Email address</label>
           <input
             class="form-input"
             type="email"
             id="email"
             name="email"
             placeholder="sarah@example.com"
+            data-ph-en="sarah@example.com"
+            data-ph-ar="sarah@example.com"
             autocomplete="email"
             required
           />
-          <div class="field-error" id="email-error">Please enter a valid email address.</div>
+          <div class="field-error" id="email-error" data-en="Please enter a valid email address." data-ar="يرجى إدخال بريد إلكتروني صحيح.">Please enter a valid email address.</div>
         </div>
 
         <!-- Password -->
         <div class="form-group">
-          <label class="form-label" for="password">Password</label>
+          <label class="form-label" for="password" data-en="Password" data-ar="كلمة المرور">Password</label>
           <div class="input-wrapper">
             <input
               class="form-input"
@@ -783,6 +978,8 @@
               id="password"
               name="password"
               placeholder="••••••••"
+              data-ph-en="••••••••"
+              data-ph-ar="••••••••"
               autocomplete="current-password"
               required
               minlength="8"
@@ -792,6 +989,10 @@
               class="toggle-password"
               id="toggle-password"
               aria-label="Show password"
+              data-ar-label-show="إظهار كلمة المرور"
+              data-ar-label-hide="إخفاء كلمة المرور"
+              data-en-label-show="Show password"
+              data-en-label-hide="Hide password"
               tabindex="-1"
             >
               <!-- Eye icon -->
@@ -807,12 +1008,12 @@
               </svg>
             </button>
           </div>
-          <div class="field-error" id="password-error">Password must be at least 8 characters.</div>
+          <div class="field-error" id="password-error" data-en="Password must be at least 8 characters." data-ar="يجب أن تكون كلمة المرور 8 أحرف على الأقل.">Password must be at least 8 characters.</div>
         </div>
 
         <!-- Confirm password — sign-up only -->
         <div class="form-group signup-only" id="confirm-row">
-          <label class="form-label" for="confirm-password">Confirm password</label>
+          <label class="form-label" for="confirm-password" data-en="Confirm password" data-ar="تأكيد كلمة المرور">Confirm password</label>
           <div class="input-wrapper">
             <input
               class="form-input"
@@ -820,28 +1021,30 @@
               id="confirm-password"
               name="confirm_password"
               placeholder="••••••••"
+              data-ph-en="••••••••"
+              data-ph-ar="••••••••"
               autocomplete="new-password"
               minlength="8"
             />
           </div>
-          <div class="field-error" id="confirm-error">Passwords do not match.</div>
+          <div class="field-error" id="confirm-error" data-en="Passwords do not match." data-ar="كلمتا المرور غير متطابقتين.">Passwords do not match.</div>
         </div>
 
         <!-- Remember me + Forgot password (sign-in only) -->
         <div class="auth-extras" id="signin-extras">
           <label class="checkbox-label">
             <input type="checkbox" id="remember-me" name="remember_me" />
-            Remember me
+            <span data-en="Remember me" data-ar="تذكّرني">Remember me</span>
           </label>
-          <a href="#" class="forgot-link" id="forgot-link">Forgot password?</a>
+          <a href="#" class="forgot-link" id="forgot-link" data-en="Forgot password?" data-ar="نسيت كلمة المرور؟">Forgot password?</a>
         </div>
 
         <!-- Terms (sign-up only) -->
         <p class="terms-text" id="terms-text">
-          By creating an account you agree to our
-          <a href="#">Terms of Service</a> and
-          <a href="#">Privacy Policy</a>.
-          This is a private demo platform — access is invitation-only.
+          <span data-en="By creating an account you agree to our" data-ar="بإنشاء حساب، فإنك توافق على">By creating an account you agree to our</span>
+          <a href="#" data-en="Terms of Service" data-ar="شروط الخدمة">Terms of Service</a> <span data-en="and" data-ar="و">and</span>
+          <a href="#" data-en="Privacy Policy" data-ar="سياسة الخصوصية">Privacy Policy</a>.
+          <span data-en="This is a private demo platform — access is invitation-only." data-ar="هذه منصة تجريبية خاصة — الوصول بالدعوة فقط.">This is a private demo platform — access is invitation-only.</span>
         </p>
 
         <!-- Submit -->
@@ -853,9 +1056,9 @@
       </form>
 
       <!-- Divider -->
-      <div class="auth-divider">or continue with</div>
+      <div class="auth-divider"><span data-en="or continue with" data-ar="أو تابع باستخدام">or continue with</span></div>
 
-      <!-- SSO Buttons (wired up to Supabase OAuth later) -->
+      <!-- SSO Buttons -->
       <div class="sso-grid">
         <button class="btn-sso" id="btn-google" type="button">
           <!-- Google icon -->
@@ -865,7 +1068,7 @@
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
           </svg>
-          Google
+          <span data-en="Google" data-ar="جوجل">Google</span>
         </button>
         <button class="btn-sso" id="btn-microsoft" type="button">
           <!-- Microsoft icon -->
@@ -875,16 +1078,16 @@
             <rect x="1" y="13" width="10" height="10" fill="#00A4EF"/>
             <rect x="13" y="13" width="10" height="10" fill="#FFB900"/>
           </svg>
-          Microsoft
+          <span data-en="Microsoft" data-ar="مايكروسوفت">Microsoft</span>
         </button>
       </div>
 
       <!-- Footer -->
       <div class="auth-footer">
-        Private demo &mdash;
-        <a href="index.html">Back to Opportunity Hub</a>
+        <span data-en="Private demo" data-ar="نسخة تجريبية خاصة">Private demo</span> &mdash;
+        <a href="index.html" data-en="Back to Opportunity Hub" data-ar="العودة إلى منصة الفرص">Back to Opportunity Hub</a>
         &nbsp;·&nbsp;
-        <a href="#">Contact support</a>
+        <a href="#" data-en="Contact support" data-ar="تواصل مع الدعم">Contact support</a>
       </div>
 
     </div><!-- /.auth-box -->
@@ -927,6 +1130,65 @@
      STATE
   ────────────────────────────────────────────────────────────── */
   let currentMode = 'signin'; // 'signin' | 'signup'
+  let currentLang = localStorage.getItem('oh-login-lang') || 'en'; // 'en' | 'ar'
+
+  /* ──────────────────────────────────────────────────────────────
+     ARABIC STRING MAP — all dynamic text that JS sets via .textContent
+  ────────────────────────────────────────────────────────────── */
+  const AR = {
+    /* Header titles */
+    title_signin:    'مرحبًا بعودتك',
+    title_signup:    'إنشاء حسابك',
+    subtitle_signin: 'سجّل دخولك إلى حساب منصة الفرص للمتابعة.',
+    subtitle_signup: 'انضم إلى منصة الفرص لتتابع برامج رؤية السعودية 2030.',
+
+    /* Submit button labels */
+    submit_signin:   'تسجيل الدخول',
+    submit_signup:   'إنشاء الحساب',
+
+    /* Validation errors (shown via JS) */
+    err_email_required:   'البريد الإلكتروني مطلوب.',
+    err_email_invalid:    'يرجى إدخال بريد إلكتروني صحيح.',
+    err_password_required:'كلمة المرور مطلوبة.',
+    err_password_short:   'يجب أن تكون كلمة المرور 8 أحرف على الأقل.',
+    err_firstname:        'يرجى إدخال اسمك الأول.',
+    err_confirm:          'كلمتا المرور غير متطابقتين.',
+    err_email_first:      'أدخل بريدك الإلكتروني أعلاه أولاً.',
+
+    /* Auth messages (shown via JS) */
+    msg_demo_signin:  'وضع العرض: لم يتم توصيل Supabase بعد. أضف بياناتك الاعتمادية لتفعيل المصادقة.',
+    msg_demo_signup:  'وضع العرض: سيعمل إنشاء الحساب بعد إضافة بيانات Supabase.',
+    msg_oauth:        'سيعمل تسجيل الدخول عبر {provider} بعد تهيئة Supabase.',
+    msg_reset:        'إذا كان هناك حساب لـ {email}، ستتلقى رابط إعادة التعيين قريبًا.',
+    msg_reset_fail:   'فشل إرسال البريد الإلكتروني. يرجى المحاولة مرة أخرى.',
+    msg_generic_err:  'حدث خطأ ما. يرجى المحاولة مرة أخرى.',
+
+    /* Language toggle label */
+    lang_toggle_label: 'English',
+  };
+
+  const EN = {
+    title_signin:    'Welcome back',
+    title_signup:    'Create your account',
+    subtitle_signin: 'Sign in to your Opportunity Hub account to continue.',
+    subtitle_signup: 'Join Opportunity Hub to track Saudi Vision 2030 programmes.',
+    submit_signin:   'Sign In',
+    submit_signup:   'Create Account',
+    err_email_required:   'Email address is required.',
+    err_email_invalid:    'Please enter a valid email address.',
+    err_password_required:'Password is required.',
+    err_password_short:   'Password must be at least 8 characters.',
+    err_firstname:        'Please enter your first name.',
+    err_confirm:          'Passwords do not match.',
+    err_email_first:      'Enter your email address above first.',
+    msg_demo_signin:  'Demo mode: Supabase not connected yet. Add your credentials to activate authentication.',
+    msg_demo_signup:  'Demo mode: Account creation will work once Supabase credentials are added.',
+    msg_oauth:        'OAuth via {provider} will work once Supabase is configured.',
+    msg_reset:        'If an account exists for {email}, you\'ll receive a reset link shortly.',
+    msg_reset_fail:   'Failed to send reset email. Please try again.',
+    msg_generic_err:  'Something went wrong. Please try again.',
+    lang_toggle_label: 'العربية',
+  };
 
   /* ──────────────────────────────────────────────────────────────
      ELEMENT REFS
@@ -940,6 +1202,8 @@
   const submitLabel    = document.getElementById('submit-label');
   const authError      = document.getElementById('auth-error');
   const authErrorText  = document.getElementById('auth-error-text');
+  const langToggleBtn  = document.getElementById('lang-toggle');
+  const langToggleLabel= document.getElementById('lang-toggle-label');
 
   // Sign-in only elements
   const signinExtras   = document.getElementById('signin-extras');
@@ -967,6 +1231,64 @@
   const btnMicrosoft   = document.getElementById('btn-microsoft');
 
   /* ──────────────────────────────────────────────────────────────
+     LANGUAGE SWITCH
+  ────────────────────────────────────────────────────────────── */
+  function switchLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('oh-login-lang', lang);
+
+    const isAr = lang === 'ar';
+    const html  = document.documentElement;
+
+    // Set document direction + lang
+    html.setAttribute('dir',  isAr ? 'rtl' : 'ltr');
+    html.setAttribute('lang', isAr ? 'ar'  : 'en');
+
+    // Update lang toggle button label
+    langToggleLabel.textContent = isAr ? AR.lang_toggle_label : EN.lang_toggle_label;
+
+    // Swap all [data-en] / [data-ar] text nodes
+    document.querySelectorAll('[data-en][data-ar]').forEach(function(el) {
+      // Only update text if the element is NOT an input/button that we handle separately
+      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return;
+      el.textContent = isAr ? el.dataset.ar : el.dataset.en;
+    });
+
+    // Swap all placeholder attributes [data-ph-en] / [data-ph-ar]
+    document.querySelectorAll('[data-ph-en][data-ph-ar]').forEach(function(el) {
+      el.placeholder = isAr ? el.dataset.phAr : el.dataset.phEn;
+    });
+
+    // Update password toggle aria-label
+    const pwdIsShowing = passwordInput.type === 'text';
+    if (isAr) {
+      togglePwdBtn.setAttribute('aria-label', pwdIsShowing ? AR.lang_toggle_label : 'إظهار كلمة المرور');
+    } else {
+      togglePwdBtn.setAttribute('aria-label', pwdIsShowing ? 'Hide password' : 'Show password');
+    }
+
+    // Re-render dynamic content that was set via switchMode()
+    refreshModeText();
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+     REFRESH DYNAMIC TEXT (called after lang switch or mode switch)
+  ────────────────────────────────────────────────────────────── */
+  function refreshModeText() {
+    const isAr     = currentLang === 'ar';
+    const isSignUp = currentMode === 'signup';
+    const S        = isAr ? AR : EN;
+
+    authTitle.textContent    = isSignUp ? S.title_signup    : S.title_signin;
+    authSubtitle.textContent = isSignUp ? S.subtitle_signup : S.subtitle_signin;
+    submitLabel.textContent  = isSignUp ? S.submit_signup   : S.submit_signin;
+
+    // Tab labels
+    tabSignIn.textContent = isAr ? AR.submit_signin  : 'Sign In';
+    tabSignUp.textContent = isAr ? 'إنشاء حساب'     : 'Create Account';
+  }
+
+  /* ──────────────────────────────────────────────────────────────
      MODE SWITCH: Sign In ↔ Sign Up
   ────────────────────────────────────────────────────────────── */
   function switchMode(mode) {
@@ -981,14 +1303,13 @@
     tabSignIn.setAttribute('aria-selected', String(!isSignUp));
     tabSignUp.setAttribute('aria-selected', String(isSignUp));
 
-    // Header copy
-    authTitle.textContent    = isSignUp ? 'Create your account'       : 'Welcome back';
-    authSubtitle.textContent = isSignUp
-      ? 'Join Opportunity Hub to track Saudi Vision 2030 programmes.'
-      : 'Sign in to your Opportunity Hub account to continue.';
+    // Header copy + button label (respects current language)
+    refreshModeText();
 
     // Show/hide sign-up-only fields
-    [nameRow, orgRow, confirmRow].forEach(el => el.classList.toggle('is-visible', isSignUp));
+    [nameRow, orgRow, confirmRow].forEach(function(el) {
+      el.classList.toggle('is-visible', isSignUp);
+    });
     termsText.classList.toggle('is-visible', isSignUp);
 
     // Hide sign-in-only elements
@@ -997,16 +1318,24 @@
     // Update autocomplete on password field
     passwordInput.setAttribute('autocomplete', isSignUp ? 'new-password' : 'current-password');
 
-    // Button label
-    submitLabel.textContent = isSignUp ? 'Create Account' : 'Sign In';
-
     // Reset field validation states
-    form.querySelectorAll('.form-input').forEach(el => el.classList.remove('is-invalid'));
-    form.querySelectorAll('.field-error').forEach(el => el.classList.remove('is-visible'));
+    form.querySelectorAll('.form-input').forEach(function(el) {
+      el.classList.remove('is-invalid');
+    });
+    form.querySelectorAll('.field-error').forEach(function(el) {
+      el.classList.remove('is-visible');
+    });
   }
 
-  tabSignIn.addEventListener('click', () => switchMode('signin'));
-  tabSignUp.addEventListener('click', () => switchMode('signup'));
+  tabSignIn.addEventListener('click', function() { switchMode('signin'); });
+  tabSignUp.addEventListener('click', function() { switchMode('signup'); });
+
+  /* ──────────────────────────────────────────────────────────────
+     LANGUAGE TOGGLE BUTTON
+  ────────────────────────────────────────────────────────────── */
+  langToggleBtn.addEventListener('click', function() {
+    switchLang(currentLang === 'en' ? 'ar' : 'en');
+  });
 
   /* ──────────────────────────────────────────────────────────────
      PASSWORD VISIBILITY TOGGLE
@@ -1016,15 +1345,23 @@
     passwordInput.type = isPassword ? 'text' : 'password';
     eyeShow.style.display = isPassword ? 'none' : 'block';
     eyeHide.style.display = isPassword ? 'block' : 'none';
-    this.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+    if (currentLang === 'ar') {
+      this.setAttribute('aria-label', isPassword ? AR['lang_toggle_label'] : 'إظهار كلمة المرور');
+    } else {
+      this.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+    }
   });
 
   /* ──────────────────────────────────────────────────────────────
      VALIDATION HELPERS
   ────────────────────────────────────────────────────────────── */
-  function showFieldError(input, errorEl, message) {
+  function t(key) {
+    return currentLang === 'ar' ? AR[key] : EN[key];
+  }
+
+  function showFieldError(input, errorEl, messageKey) {
     input.classList.add('is-invalid');
-    errorEl.textContent = message;
+    errorEl.textContent = t(messageKey);
     errorEl.classList.add('is-visible');
     return false;
   }
@@ -1046,27 +1383,30 @@
     const firstNameError= document.getElementById('first-name-error');
 
     // Clear all first
-    [emailInput, passwordInput, confirmInput, firstNameInput].forEach(el => {
-      if (el) clearFieldError(el, document.getElementById(el.id + '-error') || document.createElement('div'));
+    [emailInput, passwordInput, confirmInput, firstNameInput].forEach(function(el) {
+      if (el) {
+        var errEl = document.getElementById(el.id + '-error');
+        if (errEl) clearFieldError(el, errEl);
+      }
     });
 
     // Email
     const email = emailInput.value.trim();
     if (!email) {
-      showFieldError(emailInput, emailError, 'Email address is required.');
+      showFieldError(emailInput, emailError, 'err_email_required');
       valid = false;
     } else if (!isValidEmail(email)) {
-      showFieldError(emailInput, emailError, 'Please enter a valid email address.');
+      showFieldError(emailInput, emailError, 'err_email_invalid');
       valid = false;
     }
 
     // Password
     const password = passwordInput.value;
     if (!password) {
-      showFieldError(passwordInput, passwordError, 'Password is required.');
+      showFieldError(passwordInput, passwordError, 'err_password_required');
       valid = false;
     } else if (password.length < 8) {
-      showFieldError(passwordInput, passwordError, 'Password must be at least 8 characters.');
+      showFieldError(passwordInput, passwordError, 'err_password_short');
       valid = false;
     }
 
@@ -1074,13 +1414,13 @@
     if (currentMode === 'signup') {
       // First name
       if (!firstNameInput.value.trim()) {
-        showFieldError(firstNameInput, firstNameError, 'Please enter your first name.');
+        showFieldError(firstNameInput, firstNameError, 'err_firstname');
         valid = false;
       }
 
       // Confirm password
       if (confirmInput.value !== passwordInput.value) {
-        showFieldError(confirmInput, confirmError, 'Passwords do not match.');
+        showFieldError(confirmInput, confirmError, 'err_confirm');
         valid = false;
       }
     }
@@ -1096,15 +1436,20 @@
     submitBtn.classList.toggle('is-loading', loading);
   }
 
-  function showMessage(text, type = 'error') {
+  function showMessage(textOrKey, type, replacements) {
     authError.className = type === 'error' ? 'is-error' : 'is-success';
-    authErrorText.textContent = text;
-
-    // Swap icon based on type
-    const iconPath = authError.querySelector('circle');
-    if (iconPath) {
-      iconPath.style.stroke = type === 'success' ? 'currentColor' : 'currentColor';
+    var text = textOrKey;
+    // If it's a key in our string map, resolve it
+    if (EN[textOrKey] !== undefined) {
+      text = t(textOrKey);
     }
+    // Apply replacements like {email}, {provider}
+    if (replacements) {
+      Object.keys(replacements).forEach(function(k) {
+        text = text.replace('{' + k + '}', replacements[k]);
+      });
+    }
+    authErrorText.textContent = text;
   }
 
   function clearMessages() {
@@ -1121,7 +1466,7 @@
 
     if (!email || !isValidEmail(email)) {
       emailInput.focus();
-      showFieldError(emailInput, document.getElementById('email-error'), 'Enter your email address above first.');
+      showFieldError(emailInput, document.getElementById('email-error'), 'err_email_first');
       return;
     }
 
@@ -1137,9 +1482,9 @@
       ──────────────────────────────────────────────────────── */
       console.log('[Supabase placeholder] resetPasswordForEmail:', email);
 
-      showMessage(`If an account exists for ${email}, you'll receive a reset link shortly.`, 'success');
+      showMessage('msg_reset', 'success', { email: email });
     } catch (err) {
-      showMessage(err.message || 'Failed to send reset email. Please try again.');
+      showMessage('msg_reset_fail', 'error');
     } finally {
       setLoading(false);
     }
@@ -1149,21 +1494,17 @@
      FORM SUBMIT — main auth handler
   ────────────────────────────────────────────────────────────── */
   form.addEventListener('submit', async function (e) {
-    e.preventDefault();   // always prevent default browser submission
+    e.preventDefault();
     clearMessages();
 
-    // ── Step 1: Frontend validation ─────────────────────────────
     if (!validateForm()) return;
 
-    // ── Step 2: Collect values ───────────────────────────────────
     const email    = emailInput.value.trim();
     const password = passwordInput.value;
-    // Sign-up extras (available but optional in Supabase metadata)
     const firstName    = firstNameInput.value.trim();
     const lastName     = document.getElementById('last-name').value.trim();
     const organisation = document.getElementById('organisation').value.trim();
 
-    // ── Step 3: Show loading state ───────────────────────────────
     setLoading(true);
 
     try {
@@ -1173,18 +1514,13 @@
              email,
              password
            });
-
            if (error) throw error;
-
-           // On success: redirect to the main app
            window.location.href = 'index.html';
         ──────────────────────────────────────────────────────── */
         console.log('[Supabase placeholder] signInWithPassword:', { email, password: '***' });
 
-        // ── DEMO ONLY (remove when Supabase is connected) ──────────
-        await new Promise(r => setTimeout(r, 1200)); // simulate network delay
-        showMessage('Demo mode: Supabase not connected yet. Add your credentials to activate authentication.', 'success');
-        // window.location.href = 'index.html'; // ← uncomment to redirect on success
+        await new Promise(function(r) { setTimeout(r, 1200); });
+        showMessage('msg_demo_signin', 'success');
 
       } else {
         /* ── SUPABASE: Sign Up ─────────────────────────────────────
@@ -1199,26 +1535,17 @@
                }
              }
            });
-
            if (error) throw error;
-
-           // Supabase sends a confirmation email by default.
            showMessage('Account created! Check your email to confirm your address.', 'success');
         ──────────────────────────────────────────────────────── */
         console.log('[Supabase placeholder] signUp:', { email, firstName, lastName, organisation });
 
-        // ── DEMO ONLY (remove when Supabase is connected) ──────────
-        await new Promise(r => setTimeout(r, 1400));
-        showMessage('Demo mode: Account creation will work once Supabase credentials are added.', 'success');
+        await new Promise(function(r) { setTimeout(r, 1400); });
+        showMessage('msg_demo_signup', 'success');
       }
 
     } catch (err) {
-      /* ── SUPABASE: Show server-side errors to the user ─────────
-         Supabase error messages are user-friendly (e.g.
-         "Invalid login credentials", "User already registered").
-         Display them directly in #auth-error.
-      ──────────────────────────────────────────────────────── */
-      showMessage(err.message || 'Something went wrong. Please try again.');
+      showMessage(err.message || t('msg_generic_err'), 'error');
     } finally {
       setLoading(false);
     }
@@ -1233,7 +1560,7 @@
     try {
       /* ── SUPABASE: OAuth sign-in ───────────────────────────────
          const { error } = await supabase.auth.signInWithOAuth({
-           provider,  // 'google' | 'azure' (for Microsoft)
+           provider,
            options: {
              redirectTo: window.location.origin + '/index.html'
            }
@@ -1241,17 +1568,17 @@
          if (error) throw error;
       ──────────────────────────────────────────────────────── */
       console.log('[Supabase placeholder] signInWithOAuth:', provider);
-      await new Promise(r => setTimeout(r, 800));
-      showMessage(`OAuth via ${provider} will work once Supabase is configured.`, 'success');
+      await new Promise(function(r) { setTimeout(r, 800); });
+      showMessage('msg_oauth', 'success', { provider: provider });
     } catch (err) {
-      showMessage(err.message || `Failed to sign in with ${provider}.`);
+      showMessage(err.message || t('msg_generic_err'), 'error');
     } finally {
       setLoading(false);
     }
   }
 
-  btnGoogle.addEventListener('click',    () => handleOAuth('google'));
-  btnMicrosoft.addEventListener('click', () => handleOAuth('azure'));
+  btnGoogle.addEventListener('click',    function() { handleOAuth('google'); });
+  btnMicrosoft.addEventListener('click', function() { handleOAuth('azure'); });
 
   /* ──────────────────────────────────────────────────────────────
      INLINE VALIDATION (real-time, on blur)
@@ -1259,7 +1586,7 @@
   emailInput.addEventListener('blur', function () {
     const emailError = document.getElementById('email-error');
     if (this.value && !isValidEmail(this.value)) {
-      showFieldError(this, emailError, 'Please enter a valid email address.');
+      showFieldError(this, emailError, 'err_email_invalid');
     } else {
       clearFieldError(this, emailError);
     }
@@ -1268,7 +1595,7 @@
   passwordInput.addEventListener('blur', function () {
     const passwordError = document.getElementById('password-error');
     if (this.value && this.value.length < 8) {
-      showFieldError(this, passwordError, 'Password must be at least 8 characters.');
+      showFieldError(this, passwordError, 'err_password_short');
     } else {
       clearFieldError(this, passwordError);
     }
@@ -1277,21 +1604,29 @@
   confirmInput.addEventListener('blur', function () {
     const confirmError = document.getElementById('confirm-error');
     if (currentMode === 'signup' && this.value && this.value !== passwordInput.value) {
-      showFieldError(this, confirmError, 'Passwords do not match.');
+      showFieldError(this, confirmError, 'err_confirm');
     } else {
       clearFieldError(this, confirmError);
     }
   });
 
   /* ──────────────────────────────────────────────────────────────
-     INIT: check for existing session
+     INIT
   ────────────────────────────────────────────────────────────── */
-  (async function checkSession() {
+  (async function init() {
     /* ── SUPABASE: Redirect if already logged in ───────────────
        const { data: { session } } = await supabase.auth.getSession();
        if (session) window.location.href = 'index.html';
     ──────────────────────────────────────────────────────────── */
     console.log('[Supabase placeholder] getSession — user not redirected in demo mode.');
+
+    // Apply saved language preference on load
+    if (currentLang === 'ar') {
+      switchLang('ar');
+    } else {
+      // Ensure EN toggle label is correct
+      langToggleLabel.textContent = EN.lang_toggle_label;
+    }
   })();
 
 })();
