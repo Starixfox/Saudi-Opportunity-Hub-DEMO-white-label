@@ -3437,6 +3437,7 @@ function translatePage(lang) {
 
   // Table headers
   const thTexts = [t.thTitle, t.thType, t.thRegion, t.thEligibility, t.thFunding, t.thStatus, t.thDeadline];
+  const ths = document.querySelectorAll('.occ-row-header th, .occ-header th, .table-header th, thead th');
   ths.forEach((th, i) => { if (thTexts[i]) th.textContent = thTexts[i]; });
 
   // Theme toggle title
@@ -6070,7 +6071,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }));
     if (!work.length) return;
     const tr = await translateMany(work.map(x => x.v));
-    work.forEach((it,i) => { if (!it.el.dataset['en'+it.a]) it.el.dataset['en'+it.a] = it.v; if (tr[i] && tr[i] !== it.v) it.el.setAttribute(it.a, tr[i]); });
+    work.forEach((it,i) => {
+      // dataset keys cannot contain hyphens — sanitise attr name (e.g. aria-label -> ariaLabel)
+      const safeKey = 'en_' + it.a.replace(/-([a-z])/g, (_,c) => c.toUpperCase());
+      if (!it.el.dataset[safeKey]) it.el.dataset[safeKey] = it.v;
+      if (tr[i] && tr[i] !== it.v) it.el.setAttribute(it.a, tr[i]);
+    });
   }
   async function translateOptions(root){
     const opts = Array.from(root.querySelectorAll('option'));
@@ -6126,7 +6132,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function walk(node){
       if (node === cardBody) return; // skip cards — re-rendered by __renderCards
       if (node.nodeType === 3 && node.__originalEn) { node.nodeValue = node.__originalEn; return; }
-      if (node.nodeType === 1) { for (const a of ATTRS) { const k = 'en'+a; if (node.dataset && node.dataset[k]) node.setAttribute(a, node.dataset[k]); } if (node.tagName === 'OPTION' && node.dataset.en) node.textContent = node.dataset.en; }
+      if (node.nodeType === 1) { for (const a of ATTRS) { const k = 'en_' + a.replace(/-([a-z])/g, (_,c) => c.toUpperCase()); if (node.dataset && node.dataset[k]) node.setAttribute(a, node.dataset[k]); } if (node.tagName === 'OPTION' && node.dataset.en) node.textContent = node.dataset.en; }
       node.childNodes && node.childNodes.forEach(walk);
     }
     walk(document.body);
