@@ -1087,8 +1087,7 @@
 
       <!-- Footer -->
       <div class="auth-footer">
-        <span data-en="Private demo" data-ar="نسخة تجريبية خاصة">Private demo</span> &mdash;
-        <a href="index.html" data-en="Back to Opportunity Hub" data-ar="العودة إلى منصة الفرص">Back to Opportunity Hub</a>
+        <span data-en="Private demo" data-ar="نسخة تجريبية خاصة">Private demo</span>
         &nbsp;·&nbsp;
         <a href="#" data-en="Contact support" data-ar="تواصل مع الدعم">Contact support</a>
       </div>
@@ -1552,7 +1551,7 @@
     try {
       // ── SUPABASE: Reset password ──────────────────────────────
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/login.html'
+        redirectTo: 'https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label'
       });
       if (resetError) throw resetError;
 
