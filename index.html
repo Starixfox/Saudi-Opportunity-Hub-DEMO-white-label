@@ -2437,9 +2437,31 @@ body[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
 .insight-sector-link:hover { gap: 7px; opacity: 0.85; }
 .insight-sector-link:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: var(--radius-sm); }
 
+
+/* Page entrance animation — triggered after login loading screen */
+@keyframes page-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+body.page-entering {
+  animation: page-fade-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
 </style>
 </head>
 <body>
+
+<!-- Page entrance: fade in if arriving from login -->
+<script>
+(function(){
+  if (sessionStorage.getItem('oh-from-login') === '1') {
+    sessionStorage.removeItem('oh-from-login');
+    document.body.classList.add('page-entering');
+    document.body.addEventListener('animationend', function(){
+      document.body.classList.remove('page-entering');
+    }, { once: true });
+  }
+})();
+</script>
 
 <!-- IS TOP UTILITY BAR -->
 <div class="is-top-bar">
