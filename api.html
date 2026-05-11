@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Access — Saudi Opportunity Hub</title>
+
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── TOKENS ──────────────────────────────────── */
+    :root {
+      --font-display: 'Satoshi', 'Inter', system-ui, sans-serif;
+      --font-body:    'Inter', system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+      --space-1:  0.25rem;  --space-2:  0.5rem;   --space-3:  0.75rem;
+      --space-4:  1rem;     --space-5:  1.25rem;  --space-6:  1.5rem;
+      --space-8:  2rem;     --space-10: 2.5rem;   --space-12: 3rem;
+      --space-16: 4rem;     --space-20: 5rem;
+
+      --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem;
+      --radius-xl: 1rem; --radius-full: 9999px;
+
+      --text-xs:   0.75rem;  --text-sm:   0.875rem;
+      --text-base: 1rem;     --text-lg:   1.125rem;
+      --text-xl:   1.375rem; --text-2xl:  2rem;
+    }
+
+    /* Light theme */
+    [data-theme="light"] {
+      --bg:               #f5f7fa;
+      --bg-deep:          #eef1f6;
+      --surface:          #ffffff;
+      --surface-2:        #f9fafb;
+      --surface-3:        #f0f4f9;
+      --border:           #e2e8f0;
+      --divider:          #edf2f7;
+      --text:             #1a1f36;
+      --text-muted:       #64748b;
+      --text-faint:       #94a3b8;
+      --green:            #007a3d;
+      --green-hover:      #006232;
+      --green-dim:        #e0f5ec;
+      --green-glow:       rgba(0,122,61,0.10);
+      --gold:             #b45309;
+      --gold-dim:         #fef3c7;
+      --code-bg:          #0f1420;
+      --code-text:        #c9d1e0;
+      --method-get:       #15803d;
+      --method-get-bg:    #dcfce7;
+    }
+
+    /* Dark theme */
+    [data-theme="dark"] {
+      --bg:               #0a0d14;
+      --bg-deep:          #060810;
+      --surface:          #111827;
+      --surface-2:        #0e1523;
+      --surface-3:        #141d2e;
+      --border:           #1e2840;
+      --divider:          #1a2236;
+      --text:             #e8eaf2;
+      --text-muted:       #7c89ab;
+      --text-faint:       #3f4a68;
+      --green:            #00a651;
+      --green-hover:      #00c460;
+      --green-dim:        #00361a;
+      --green-glow:       rgba(0,166,81,0.15);
+      --gold:             #f5a623;
+      --gold-dim:         #3d2800;
+      --code-bg:          #080c14;
+      --code-text:        #c9d1e0;
+      --method-get:       #4ade80;
+      --method-get-bg:    rgba(74,222,128,0.1);
+    }
+
+    /* ── RESET ───────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAVBAR ──────────────────────────────────── */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-8);
+      height: 60px;
+      gap: var(--space-4);
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      text-decoration: none;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: var(--text-base);
+      color: var(--text);
+    }
+    .nav-logo svg { flex-shrink: 0; }
+    .nav-logo span { color: var(--green); }
+    .nav-links-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-6);
+      list-style: none;
+    }
+    .nav-links-bar a {
+      font-size: var(--text-sm);
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-links-bar a:hover,
+    .nav-links-bar a.active { color: var(--green); }
+    .btn-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      background: var(--green);
+      color: #fff;
+      border-radius: var(--radius-full);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-nav:hover { background: var(--green-hover); }
+    .theme-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 5px 8px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 1rem;
+      transition: border-color 0.15s;
+    }
+    .theme-btn:hover { border-color: var(--green); color: var(--green); }
+    @media (max-width: 680px) {
+      .nav-links-bar { display: none; }
+      .navbar { padding: 0 var(--space-4); }
+    }
+
+    /* ── LAYOUT ──────────────────────────────────── */
+    .page-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: var(--space-16) var(--space-6) var(--space-20);
+    }
+
+    /* ── HERO ────────────────────────────────────── */
+    .api-hero {
+      margin-bottom: var(--space-12);
+      padding-bottom: var(--space-12);
+      border-bottom: 1px solid var(--divider);
+    }
+    .api-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green);
+      background: var(--green-dim);
+      border-radius: var(--radius-full);
+      padding: 4px 12px;
+      margin-bottom: var(--space-5);
+    }
+    .api-hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 3vw + 1rem, 2.75rem);
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.15;
+      margin-bottom: var(--space-4);
+    }
+    .api-hero h1 .accent { color: var(--green); }
+    .api-hero p {
+      font-size: var(--text-lg);
+      color: var(--text-muted);
+      max-width: 620px;
+      line-height: 1.65;
+    }
+    .base-url-box {
+      margin-top: var(--space-6);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-3);
+      background: var(--code-bg);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius-lg);
+      padding: var(--space-3) var(--space-5);
+    }
+    .base-url-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #7c89ab;
+      flex-shrink: 0;
+    }
+    .base-url-value {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: #a8d8b3;
+      word-break: break-all;
+    }
+
+    /* ── SECTION HEADINGS ────────────────────────── */
+    .api-section { margin-bottom: var(--space-12); }
+    .section-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: var(--space-3);
+    }
+    .api-section > h2 {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: var(--space-6);
+    }
+
+    /* ── ENDPOINT CARD ───────────────────────────── */
+    .endpoint-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      margin-bottom: var(--space-6);
+    }
+    .endpoint-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-6);
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+    }
+    .method-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      background: var(--method-get-bg);
+      color: var(--method-get);
+      flex-shrink: 0;
+    }
+    .endpoint-path {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text);
+      font-weight: 500;
+    }
+    .endpoint-summary {
+      margin-left: auto;
+      font-size: var(--text-xs);
+      color: var(--text-faint);
+    }
+    .endpoint-body {
+      padding: var(--space-6);
+    }
+    .endpoint-desc {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: var(--space-5);
+    }
+
+    /* ── PARAMS TABLE ────────────────────────────── */
+    .params-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: var(--space-3);
+    }
+    .params-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: var(--space-5);
+      font-size: var(--text-sm);
+    }
+    .params-table th {
+      text-align: left;
+      padding: var(--space-2) var(--space-3);
+      background: var(--surface-3);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: var(--text-xs);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+    .params-table td {
+      padding: var(--space-3);
+      border-bottom: 1px solid var(--divider);
+      vertical-align: top;
+      color: var(--text-muted);
+    }
+    .params-table td:first-child {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .param-type {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      background: var(--bg-deep, var(--surface-3));
+      color: var(--gold);
+      padding: 1px 6px;
+      border-radius: var(--radius-sm);
+    }
+    .param-required {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: rgba(239,68,68,0.1);
+      color: #ef4444;
+      padding: 1px 6px;
+      border-radius: var(--radius-sm);
+    }
+    .param-optional {
+      display: inline-block;
+      font-size: 0.65rem;
+      color: var(--text-faint);
+      padding: 1px 6px;
+    }
+
+    /* ── CODE BLOCKS ─────────────────────────────── */
+    .code-tabs {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 0;
+    }
+    .code-tab {
+      padding: 5px 14px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      color: #7c89ab;
+      background: rgba(255,255,255,0.04);
+      border: none;
+      transition: background 0.15s, color 0.15s;
+    }
+    .code-tab.active { background: var(--code-bg); color: #e8eaf2; }
+    pre.code-block {
+      background: var(--code-bg);
+      border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md);
+      padding: var(--space-5);
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.65;
+      color: var(--code-text);
+      margin-bottom: var(--space-5);
+    }
+    /* Syntax colours */
+    .tok-key    { color: #80bfff; }   /* JSON keys */
+    .tok-str    { color: #a8d8b3; }   /* strings */
+    .tok-num    { color: #f5c06a; }   /* numbers */
+    .tok-bool   { color: #f59e9e; }   /* booleans/null */
+    .tok-op     { color: #7c89ab; }   /* brackets */
+    .tok-kw     { color: #c9a66b; }   /* curl flags / method */
+    .tok-url    { color: #7dd3fc; }   /* URLs */
+    .tok-hdr    { color: #b48ead; }   /* headers */
+    .tok-cmt    { color: #4a5270; font-style: italic; }
+
+    /* Response headers strip */
+    .response-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-2);
+      font-size: var(--text-xs);
+    }
+    .status-200 {
+      font-weight: 700;
+      color: var(--method-get);
+      font-family: var(--font-mono);
+    }
+    .content-type-label {
+      color: var(--text-faint);
+      font-family: var(--font-mono);
+    }
+
+    /* ── AUTH SECTION ────────────────────────────── */
+    .auth-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--gold);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      margin-bottom: var(--space-6);
+    }
+    .auth-box h3 {
+      font-family: var(--font-display);
+      font-size: var(--text-base);
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: var(--space-3);
+    }
+    .auth-box p { font-size: var(--text-sm); color: var(--text-muted); line-height: 1.65; margin-bottom: var(--space-4); }
+
+    /* ── RATE LIMITS TABLE ───────────────────────── */
+    .limits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+    .limit-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4) var(--space-5);
+    }
+    .limit-tier {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: var(--space-2);
+    }
+    .limit-value {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .limit-desc { font-size: var(--text-xs); color: var(--text-muted); }
+
+    /* ── CTA ─────────────────────────────────────── */
+    .cta-box {
+      background: linear-gradient(135deg, var(--green-dim) 0%, var(--surface) 100%);
+      border: 1px solid var(--green);
+      border-radius: var(--radius-xl);
+      padding: var(--space-10) var(--space-8);
+      text-align: center;
+    }
+    .cta-box h2 {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: var(--space-3);
+    }
+    .cta-box p { font-size: var(--text-base); color: var(--text-muted); margin-bottom: var(--space-6); max-width: 480px; margin-left: auto; margin-right: auto; }
+    .btn-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      background: var(--green);
+      color: #fff;
+      border-radius: var(--radius-full);
+      font-size: var(--text-base);
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-cta:hover { background: var(--green-hover); transform: translateY(-1px); }
+
+    /* ── FOOTER ──────────────────────────────────── */
+    .site-footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: var(--space-8) var(--space-8);
+    }
+    .footer-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-4);
+    }
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      text-decoration: none;
+      font-family: var(--font-display);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .footer-logo span { color: var(--green); }
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: var(--space-6);
+      list-style: none;
+      flex-wrap: wrap;
+    }
+    .footer-links a {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .footer-links a:hover { color: var(--text); }
+    .footer-disclaimer {
+      width: 100%;
+      font-size: var(--text-xs);
+      color: var(--text-faint);
+      border-top: 1px solid var(--divider);
+      padding-top: var(--space-4);
+      margin-top: var(--space-2);
+      line-height: 1.6;
+    }
+    @media (max-width: 640px) {
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+      .footer-links { gap: var(--space-4); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     NAVBAR
+═══════════════════════════════════════════ -->
+<nav class="navbar" role="navigation" aria-label="Main navigation">
+  <a href="index.html" class="nav-logo" aria-label="Saudi Opportunity Hub Home">
+    <svg width="28" height="28" viewBox="0 0 36 36" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="18" cy="18" r="17" stroke="#00a651" stroke-width="1.5" opacity="0.4"/>
+      <ellipse cx="18" cy="18" rx="17" ry="6.5" stroke="#00a651" stroke-width="1.5" opacity="0.7" transform="rotate(-25 18 18)"/>
+      <circle cx="18" cy="18" r="3.5" fill="#00a651"/>
+      <circle cx="28.5" cy="10" r="1.8" fill="#00a651" opacity="0.8"/>
+    </svg>
+    <span><span>Saudi</span> Opportunity Hub</span>
+  </a>
+
+  <ul class="nav-links-bar" role="list">
+    <li><a href="index.html">Overview</a></li>
+    <li><a href="index.html#opportunities">Opportunities</a></li>
+    <li><a href="api.html" class="active">API Access</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+
+  <div style="display:flex;align-items:center;gap:var(--space-3);">
+    <button class="theme-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <span id="themeIcon">🌙</span>
+    </button>
+    <a href="contact.html" class="btn-nav">
+      Request Access
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     PAGE CONTENT
+═══════════════════════════════════════════ -->
+<main>
+<div class="page-wrap">
+
+  <!-- HERO -->
+  <div class="api-hero">
+    <div class="api-badge">&#9679;&nbsp; REST API — v1</div>
+    <h1>Opportunity Hub <span class="accent">API</span></h1>
+    <p>Programmatic access to <strong>1,034+ curated Saudi funding opportunities</strong> — grants, tenders, accelerators, fellowships, and investment programs across 15 sectors, updated weekly.</p>
+    <div class="base-url-box">
+      <span class="base-url-label">Base URL</span>
+      <span class="base-url-value">https://saudi-opportunity-hub-demo-white-label-production.up.railway.app</span>
+    </div>
+  </div>
+
+  <!-- AUTHENTICATION -->
+  <section class="api-section" id="authentication">
+    <div class="section-label">Security</div>
+    <h2>Authentication</h2>
+
+    <div class="auth-box">
+      <h3>API Key — Header Authentication</h3>
+      <p>All API requests require a valid API key passed as a request header. Keys are issued per organisation and tied to your access tier. Contact us to request a key.</p>
+      <pre class="code-block"><span class="tok-hdr">X-API-Key</span><span class="tok-op">: </span><span class="tok-str">oh_live_xxxxxxxxxxxxxxxxxxxx</span></pre>
+      <p style="margin-bottom:0;font-size:0.8rem;color:var(--text-faint);">&#9888;&nbsp; Keep your key private. Requests without a valid key return <code style="font-family:var(--font-mono);font-size:0.78rem;">401 Unauthorized</code>.</p>
+    </div>
+
+    <pre class="code-block"><span class="tok-cmt"># Example authenticated request</span>
+<span class="tok-kw">curl</span> <span class="tok-url">https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/opportunities</span> \
+  <span class="tok-kw">-H</span> <span class="tok-str">"X-API-Key: oh_live_xxxxxxxxxxxxxxxxxxxx"</span> \
+  <span class="tok-kw">-H</span> <span class="tok-str">"Accept: application/json"</span></pre>
+  </section>
+
+  <!-- ENDPOINTS -->
+  <section class="api-section" id="endpoints">
+    <div class="section-label">Reference</div>
+    <h2>Endpoints</h2>
+
+    <!-- 1. GET /api/opportunities -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge">GET</span>
+        <span class="endpoint-path">/api/opportunities</span>
+        <span class="endpoint-summary">List all opportunities</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="endpoint-desc">Returns the full paginated list of opportunities. Use query parameters to filter by sector, status, type, region, or funding range. Results are sorted by publication date (newest first) by default.</p>
+
+        <div class="params-label">Query Parameters</div>
+        <table class="params-table">
+          <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>sector</td>
+              <td><span class="param-type">string</span></td>
+              <td><span class="param-optional">optional</span></td>
+              <td>Filter by sector slug. E.g. <code style="font-family:var(--font-mono);font-size:0.78rem;">ict</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">energy</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">health</code></td>
+            </tr>
+            <tr>
+              <td>status</td>
+              <td><span class="param-type">string</span></td>
+              <td><span class="param-optional">optional</span></td>
+              <td><code style="font-family:var(--font-mono);font-size:0.78rem;">open</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">closed</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">rolling</code></td>
+            </tr>
+            <tr>
+              <td>type</td>
+              <td><span class="param-type">string</span></td>
+              <td><span class="param-optional">optional</span></td>
+              <td><code style="font-family:var(--font-mono);font-size:0.78rem;">grant</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">tender</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">accelerator</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">fellowship</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">investment</code></td>
+            </tr>
+            <tr>
+              <td>origin</td>
+              <td><span class="param-type">string</span></td>
+              <td><span class="param-optional">optional</span></td>
+              <td><code style="font-family:var(--font-mono);font-size:0.78rem;">saudi</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">gcc</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">global</code></td>
+            </tr>
+            <tr>
+              <td>page</td>
+              <td><span class="param-type">integer</span></td>
+              <td><span class="param-optional">optional</span></td>
+              <td>Page number (default: <code style="font-family:var(--font-mono);font-size:0.78rem;">1</code>)</td>
+            </tr>
+            <tr>
+              <td>limit</td>
+              <td><span class="param-type">integer</span></td>
+              <td><span class="param-optional">optional</span></td>
+              <td>Results per page, max 100 (default: <code style="font-family:var(--font-mono);font-size:0.78rem;">20</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="params-label">Example Request</div>
+        <pre class="code-block"><span class="tok-kw">curl</span> <span class="tok-url">https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/opportunities?sector=ict&amp;status=open&amp;limit=5</span> \
+  <span class="tok-kw">-H</span> <span class="tok-str">"X-API-Key: oh_live_xxxxxxxxxxxxxxxxxxxx"</span></pre>
+
+        <div class="response-meta">
+          <span class="status-200">200 OK</span>
+          <span class="content-type-label">application/json</span>
+        </div>
+        <pre class="code-block"><span class="tok-op">{</span>
+  <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"ok"</span><span class="tok-op">,</span>
+  <span class="tok-key">"total"</span><span class="tok-op">:</span> <span class="tok-num">87</span><span class="tok-op">,</span>
+  <span class="tok-key">"page"</span><span class="tok-op">:</span> <span class="tok-num">1</span><span class="tok-op">,</span>
+  <span class="tok-key">"limit"</span><span class="tok-op">:</span> <span class="tok-num">5</span><span class="tok-op">,</span>
+  <span class="tok-key">"data"</span><span class="tok-op">: [</span>
+    <span class="tok-op">{</span>
+      <span class="tok-key">"id"</span><span class="tok-op">:</span> <span class="tok-str">"SA-042"</span><span class="tok-op">,</span>
+      <span class="tok-key">"title"</span><span class="tok-op">:</span> <span class="tok-str">"SDAIA AI Innovation Fund — Round 3"</span><span class="tok-op">,</span>
+      <span class="tok-key">"type"</span><span class="tok-op">:</span> <span class="tok-str">"Grant"</span><span class="tok-op">,</span>
+      <span class="tok-key">"sector"</span><span class="tok-op">:</span> <span class="tok-str">"ICT"</span><span class="tok-op">,</span>
+      <span class="tok-key">"origin"</span><span class="tok-op">:</span> <span class="tok-str">"Saudi"</span><span class="tok-op">,</span>
+      <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"Open"</span><span class="tok-op">,</span>
+      <span class="tok-key">"funding_amount"</span><span class="tok-op">:</span> <span class="tok-str">"SAR 500,000 – 2,000,000"</span><span class="tok-op">,</span>
+      <span class="tok-key">"deadline"</span><span class="tok-op">:</span> <span class="tok-str">"2026-08-15"</span><span class="tok-op">,</span>
+      <span class="tok-key">"issuer"</span><span class="tok-op">:</span> <span class="tok-str">"Saudi Data and AI Authority (SDAIA)"</span><span class="tok-op">,</span>
+      <span class="tok-key">"eligibility"</span><span class="tok-op">:</span> <span class="tok-str">"Saudi-registered companies, max 5 years old"</span><span class="tok-op">,</span>
+      <span class="tok-key">"source_url"</span><span class="tok-op">:</span> <span class="tok-str">"https://sdaia.gov.sa/programs/ai-fund"</span><span class="tok-op">,</span>
+      <span class="tok-key">"last_verified"</span><span class="tok-op">:</span> <span class="tok-str">"2026-05-01"</span>
+    <span class="tok-op">},</span>
+    <span class="tok-cmt">// ... 4 more records</span>
+  <span class="tok-op">]</span>
+<span class="tok-op">}</span></pre>
+      </div>
+    </div>
+
+    <!-- 2. GET /api/opportunities/{id} -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge">GET</span>
+        <span class="endpoint-path">/api/opportunities/<span style="color:var(--gold);">{id}</span></span>
+        <span class="endpoint-summary">Get a single opportunity</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="endpoint-desc">Retrieve the full record for a single opportunity by its unique ID (e.g. <code style="font-family:var(--font-mono);font-size:0.78rem;">SA-001</code>). Returns all available fields including enriched metadata, tags, and source links.</p>
+
+        <div class="params-label">Path Parameters</div>
+        <table class="params-table">
+          <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>id</td>
+              <td><span class="param-type">string</span></td>
+              <td><span class="param-required">required</span></td>
+              <td>The unique opportunity ID. Format: <code style="font-family:var(--font-mono);font-size:0.78rem;">SA-001</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">GCC-015</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">INT-103</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="params-label">Example Request</div>
+        <pre class="code-block"><span class="tok-kw">curl</span> <span class="tok-url">https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/opportunities/SA-001</span> \
+  <span class="tok-kw">-H</span> <span class="tok-str">"X-API-Key: oh_live_xxxxxxxxxxxxxxxxxxxx"</span></pre>
+
+        <div class="response-meta">
+          <span class="status-200">200 OK</span>
+          <span class="content-type-label">application/json</span>
+        </div>
+        <pre class="code-block"><span class="tok-op">{</span>
+  <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"ok"</span><span class="tok-op">,</span>
+  <span class="tok-key">"data"</span><span class="tok-op">: {</span>
+    <span class="tok-key">"id"</span><span class="tok-op">:</span> <span class="tok-str">"SA-001"</span><span class="tok-op">,</span>
+    <span class="tok-key">"title"</span><span class="tok-op">:</span> <span class="tok-str">"Monsha'at SME Growth Fund"</span><span class="tok-op">,</span>
+    <span class="tok-key">"type"</span><span class="tok-op">:</span> <span class="tok-str">"Grant"</span><span class="tok-op">,</span>
+    <span class="tok-key">"sector"</span><span class="tok-op">:</span> <span class="tok-str">"Cross-Sector"</span><span class="tok-op">,</span>
+    <span class="tok-key">"origin"</span><span class="tok-op">:</span> <span class="tok-str">"Saudi"</span><span class="tok-op">,</span>
+    <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"Open"</span><span class="tok-op">,</span>
+    <span class="tok-key">"funding_amount"</span><span class="tok-op">:</span> <span class="tok-str">"SAR 100,000 – 500,000"</span><span class="tok-op">,</span>
+    <span class="tok-key">"deadline"</span><span class="tok-op">:</span> <span class="tok-str">"Rolling"</span><span class="tok-op">,</span>
+    <span class="tok-key">"issuer"</span><span class="tok-op">:</span> <span class="tok-str">"Monsha'at — Small &amp; Medium Enterprises General Authority"</span><span class="tok-op">,</span>
+    <span class="tok-key">"eligibility"</span><span class="tok-op">:</span> <span class="tok-str">"Saudi-registered SMEs, &lt;250 employees"</span><span class="tok-op">,</span>
+    <span class="tok-key">"description"</span><span class="tok-op">:</span> <span class="tok-str">"Non-repayable growth grants for Saudi SMEs across all sectors..."</span><span class="tok-op">,</span>
+    <span class="tok-key">"tags"</span><span class="tok-op">: [</span><span class="tok-str">"SME"</span><span class="tok-op">,</span> <span class="tok-str">"Growth"</span><span class="tok-op">,</span> <span class="tok-str">"Vision 2030"</span><span class="tok-op">],</span>
+    <span class="tok-key">"source_url"</span><span class="tok-op">:</span> <span class="tok-str">"https://monshaat.gov.sa/grants"</span><span class="tok-op">,</span>
+    <span class="tok-key">"last_verified"</span><span class="tok-op">:</span> <span class="tok-str">"2026-05-01"</span><span class="tok-op">,</span>
+    <span class="tok-key">"created_at"</span><span class="tok-op">:</span> <span class="tok-str">"2025-09-12"</span>
+  <span class="tok-op">}</span>
+<span class="tok-op">}</span></pre>
+      </div>
+    </div>
+
+    <!-- 3. GET /api/opportunities?sector=ict -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge">GET</span>
+        <span class="endpoint-path">/api/opportunities?sector=<span style="color:var(--gold);">ict</span></span>
+        <span class="endpoint-summary">Filter by sector</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="endpoint-desc">Filter opportunities to a specific sector. Combine with <code style="font-family:var(--font-mono);font-size:0.78rem;">status=open</code> to surface only currently active programs. Available sectors include <code style="font-family:var(--font-mono);font-size:0.78rem;">ict</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">energy</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">health</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">fintech</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">agri</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">tourism</code>, and more — see <a href="#meta" style="color:var(--green);">/api/meta</a> for the full list.</p>
+
+        <div class="params-label">Example Request</div>
+        <pre class="code-block"><span class="tok-kw">curl</span> <span class="tok-url">https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/opportunities?sector=ict&amp;status=open</span> \
+  <span class="tok-kw">-H</span> <span class="tok-str">"X-API-Key: oh_live_xxxxxxxxxxxxxxxxxxxx"</span></pre>
+
+        <div class="response-meta">
+          <span class="status-200">200 OK</span>
+          <span class="content-type-label">application/json</span>
+        </div>
+        <pre class="code-block"><span class="tok-op">{</span>
+  <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"ok"</span><span class="tok-op">,</span>
+  <span class="tok-key">"total"</span><span class="tok-op">:</span> <span class="tok-num">87</span><span class="tok-op">,</span>
+  <span class="tok-key">"filters_applied"</span><span class="tok-op">: {</span>
+    <span class="tok-key">"sector"</span><span class="tok-op">:</span> <span class="tok-str">"ict"</span><span class="tok-op">,</span>
+    <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"open"</span>
+  <span class="tok-op">},</span>
+  <span class="tok-key">"data"</span><span class="tok-op">: [ </span><span class="tok-cmt">/* array of matching records */</span> <span class="tok-op">]</span>
+<span class="tok-op">}</span></pre>
+      </div>
+    </div>
+
+    <!-- 4. GET /api/stats -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge">GET</span>
+        <span class="endpoint-path">/api/stats</span>
+        <span class="endpoint-summary">Dataset statistics</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="endpoint-desc">Returns high-level statistics about the current dataset — total records, breakdown by origin, status distribution, and top sectors by count.</p>
+
+        <div class="params-label">Example Request</div>
+        <pre class="code-block"><span class="tok-kw">curl</span> <span class="tok-url">https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/stats</span> \
+  <span class="tok-kw">-H</span> <span class="tok-str">"X-API-Key: oh_live_xxxxxxxxxxxxxxxxxxxx"</span></pre>
+
+        <div class="response-meta">
+          <span class="status-200">200 OK</span>
+          <span class="content-type-label">application/json</span>
+        </div>
+        <pre class="code-block"><span class="tok-op">{</span>
+  <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"ok"</span><span class="tok-op">,</span>
+  <span class="tok-key">"total_records"</span><span class="tok-op">:</span> <span class="tok-num">1034</span><span class="tok-op">,</span>
+  <span class="tok-key">"by_origin"</span><span class="tok-op">: {</span>
+    <span class="tok-key">"saudi"</span><span class="tok-op">:</span> <span class="tok-num">612</span><span class="tok-op">,</span>
+    <span class="tok-key">"gcc"</span><span class="tok-op">:</span> <span class="tok-num">198</span><span class="tok-op">,</span>
+    <span class="tok-key">"global"</span><span class="tok-op">:</span> <span class="tok-num">224</span>
+  <span class="tok-op">},</span>
+  <span class="tok-key">"by_status"</span><span class="tok-op">: {</span>
+    <span class="tok-key">"open"</span><span class="tok-op">:</span> <span class="tok-num">341</span><span class="tok-op">,</span>
+    <span class="tok-key">"rolling"</span><span class="tok-op">:</span> <span class="tok-num">89</span><span class="tok-op">,</span>
+    <span class="tok-key">"closed"</span><span class="tok-op">:</span> <span class="tok-num">604</span>
+  <span class="tok-op">},</span>
+  <span class="tok-key">"top_sectors"</span><span class="tok-op">: [</span>
+    <span class="tok-op">{</span> <span class="tok-key">"sector"</span><span class="tok-op">:</span> <span class="tok-str">"ICT"</span><span class="tok-op">,</span> <span class="tok-key">"count"</span><span class="tok-op">:</span> <span class="tok-num">87</span> <span class="tok-op">},</span>
+    <span class="tok-op">{</span> <span class="tok-key">"sector"</span><span class="tok-op">:</span> <span class="tok-str">"Energy"</span><span class="tok-op">,</span> <span class="tok-key">"count"</span><span class="tok-op">:</span> <span class="tok-num">74</span> <span class="tok-op">},</span>
+    <span class="tok-op">{</span> <span class="tok-key">"sector"</span><span class="tok-op">:</span> <span class="tok-str">"Health"</span><span class="tok-op">,</span> <span class="tok-key">"count"</span><span class="tok-op">:</span> <span class="tok-num">68</span> <span class="tok-op">}</span>
+  <span class="tok-op">],</span>
+  <span class="tok-key">"last_updated"</span><span class="tok-op">:</span> <span class="tok-str">"2026-05-11"</span>
+<span class="tok-op">}</span></pre>
+      </div>
+    </div>
+
+    <!-- 5. GET /api/meta -->
+    <div class="endpoint-card" id="meta">
+      <div class="endpoint-header">
+        <span class="method-badge">GET</span>
+        <span class="endpoint-path">/api/meta</span>
+        <span class="endpoint-summary">Filter options &amp; enum values</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="endpoint-desc">Returns all valid filter values (sectors, types, origins, statuses) for use in query parameters. Use this to build dynamic filter UIs or validate inputs.</p>
+
+        <div class="params-label">Example Request</div>
+        <pre class="code-block"><span class="tok-kw">curl</span> <span class="tok-url">https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/meta</span> \
+  <span class="tok-kw">-H</span> <span class="tok-str">"X-API-Key: oh_live_xxxxxxxxxxxxxxxxxxxx"</span></pre>
+
+        <div class="response-meta">
+          <span class="status-200">200 OK</span>
+          <span class="content-type-label">application/json</span>
+        </div>
+        <pre class="code-block"><span class="tok-op">{</span>
+  <span class="tok-key">"sectors"</span><span class="tok-op">: [</span><span class="tok-str">"ict"</span><span class="tok-op">,</span> <span class="tok-str">"energy"</span><span class="tok-op">,</span> <span class="tok-str">"health"</span><span class="tok-op">,</span> <span class="tok-str">"fintech"</span><span class="tok-op">,</span> <span class="tok-str">"agri"</span><span class="tok-op">,</span> <span class="tok-str">"tourism"</span><span class="tok-op">,</span>
+             <span class="tok-str">"logistics"</span><span class="tok-op">,</span> <span class="tok-str">"education"</span><span class="tok-op">,</span> <span class="tok-str">"manufacturing"</span><span class="tok-op">,</span> <span class="tok-str">"space"</span><span class="tok-op">, ...</span><span class="tok-op">],</span>
+  <span class="tok-key">"types"</span><span class="tok-op">: [</span><span class="tok-str">"grant"</span><span class="tok-op">,</span> <span class="tok-str">"tender"</span><span class="tok-op">,</span> <span class="tok-str">"accelerator"</span><span class="tok-op">,</span> <span class="tok-str">"fellowship"</span><span class="tok-op">,</span> <span class="tok-str">"investment"</span><span class="tok-op">],</span>
+  <span class="tok-key">"origins"</span><span class="tok-op">: [</span><span class="tok-str">"saudi"</span><span class="tok-op">,</span> <span class="tok-str">"gcc"</span><span class="tok-op">,</span> <span class="tok-str">"global"</span><span class="tok-op">],</span>
+  <span class="tok-key">"statuses"</span><span class="tok-op">: [</span><span class="tok-str">"open"</span><span class="tok-op">,</span> <span class="tok-str">"closed"</span><span class="tok-op">,</span> <span class="tok-str">"rolling"</span><span class="tok-op">]</span>
+<span class="tok-op">}</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- RATE LIMITS -->
+  <section class="api-section" id="rate-limits">
+    <div class="section-label">Usage</div>
+    <h2>Rate Limits</h2>
+    <div class="limits-grid">
+      <div class="limit-card">
+        <div class="limit-tier">Pilot / Demo</div>
+        <div class="limit-value">100</div>
+        <div class="limit-desc">requests / day</div>
+      </div>
+      <div class="limit-card">
+        <div class="limit-tier">Standard</div>
+        <div class="limit-value">5,000</div>
+        <div class="limit-desc">requests / day</div>
+      </div>
+      <div class="limit-card">
+        <div class="limit-tier">Enterprise</div>
+        <div class="limit-value">Unlimited</div>
+        <div class="limit-desc">custom SLA</div>
+      </div>
+    </div>
+    <p style="font-size:var(--text-sm);color:var(--text-muted);">Rate limit headers are included in every response: <code style="font-family:var(--font-mono);font-size:0.78rem;">X-RateLimit-Limit</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">X-RateLimit-Remaining</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">X-RateLimit-Reset</code>. Exceeding your limit returns <code style="font-family:var(--font-mono);font-size:0.78rem;">429 Too Many Requests</code>.</p>
+  </section>
+
+  <!-- ERROR CODES -->
+  <section class="api-section" id="errors">
+    <div class="section-label">Errors</div>
+    <h2>Error Responses</h2>
+    <table class="params-table">
+      <thead><tr><th>Code</th><th>Meaning</th><th>Common cause</th></tr></thead>
+      <tbody>
+        <tr><td>400</td><td>Bad Request</td><td>Invalid query parameter value</td></tr>
+        <tr><td>401</td><td>Unauthorized</td><td>Missing or invalid <code style="font-family:var(--font-mono);font-size:0.78rem;">X-API-Key</code></td></tr>
+        <tr><td>404</td><td>Not Found</td><td>Opportunity ID does not exist</td></tr>
+        <tr><td>429</td><td>Too Many Requests</td><td>Rate limit exceeded</td></tr>
+        <tr><td>500</td><td>Internal Server Error</td><td>Server-side issue — contact support</td></tr>
+      </tbody>
+    </table>
+    <pre class="code-block"><span class="tok-cmt">// Error response shape</span>
+<span class="tok-op">{</span>
+  <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"error"</span><span class="tok-op">,</span>
+  <span class="tok-key">"code"</span><span class="tok-op">:</span> <span class="tok-num">401</span><span class="tok-op">,</span>
+  <span class="tok-key">"message"</span><span class="tok-op">:</span> <span class="tok-str">"Unauthorized — invalid or missing API key"</span>
+<span class="tok-op">}</span></pre>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta-box">
+    <h2>Ready to integrate?</h2>
+    <p>Request API access and we'll issue your key, share the full schema reference, and help you get connected.</p>
+    <a href="contact.html" class="btn-cta">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg>
+      Request API Access
+    </a>
+  </div>
+
+</div><!-- /.page-wrap -->
+</main>
+
+<!-- ═══════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════ -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <a href="index.html" class="footer-logo">
+      <svg width="22" height="22" viewBox="0 0 36 36" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="18" cy="18" r="17" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+        <ellipse cx="18" cy="18" rx="17" ry="6.5" stroke="currentColor" stroke-width="1.5" opacity="0.7" transform="rotate(-25 18 18)"/>
+        <circle cx="18" cy="18" r="3.5" fill="currentColor"/>
+      </svg>
+      <span><span>Opportunity</span> Hub</span>
+    </a>
+    <ul class="footer-links" role="list">
+      <li><a href="index.html#overview">Overview</a></li>
+      <li><a href="index.html#opportunities">Opportunities</a></li>
+      <li><a href="index.html#insights">Insights</a></li>
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="api.html">API Access</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <p class="footer-disclaimer">
+      This is a private demo build for internal evaluation only. Not for public distribution. All program information is provided for awareness and research purposes only. Verify all details directly with sponsoring organizations.
+    </p>
+  </div>
+</footer>
+
+<script>
+/* Theme toggle */
+(function () {
+  var html = document.documentElement;
+  var btn  = document.getElementById('themeToggle');
+  var icon = document.getElementById('themeIcon');
+  var stored = localStorage.getItem('is-demo-lang-theme') || 'light';
+  html.setAttribute('data-theme', stored);
+  icon.textContent = stored === 'dark' ? '☀️' : '🌙';
+
+  btn.addEventListener('click', function () {
+    var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    icon.textContent = next === 'dark' ? '☀️' : '🌙';
+    localStorage.setItem('is-demo-lang-theme', next);
+  });
+})();
+</script>
+
+</body>
+</html>
