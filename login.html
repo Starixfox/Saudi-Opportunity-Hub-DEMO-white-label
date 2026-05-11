@@ -1190,6 +1190,7 @@
     });
     // Navigate after 1 second
     setTimeout(function() {
+      sessionStorage.setItem('oh-from-login', '1');
       window.location.href = 'index.html';
     }, 1000);
   }
