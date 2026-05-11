@@ -3,6 +3,26 @@
 <html lang="en" data-theme="light">
 <head>
 
+<!-- Supabase JS client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Session guard: redirect to login if not authenticated -->
+<script>
+(function() {
+  var SUPA_URL = 'https://dshrbbnjahjcwxzvzygh.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzaHJiYm5qYWhqY3d4enZ6eWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE3OTgsImV4cCI6MjA5NDA1Nzc5OH0.OpUGgfL91m7STsZpE6fnX281KN_Ge8oytR-2lM-3qTo';
+  var _supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+  // Expose globally so other scripts can use it (e.g. sign-out button)
+  window._supabase = _supabase;
+  // Check session on every page load
+  _supabase.auth.getSession().then(function(result) {
+    var session = result.data && result.data.session;
+    if (!session) {
+      window.location.href = 'login.html';
+    }
+  });
+})();
+</script>
+
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Saudi Opportunity Hub","url":"https://starixfox.github.io","creator":{"@type":"SoftwareApplication","name":"Perplexity Computer","url":"https://www.perplexity.ai/computer"}}</script>
 
 <meta charset="UTF-8">
@@ -2474,6 +2494,18 @@ body[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
     </ul>
 
     <div class="nav-actions">
+      <!-- Sign-out button -->
+      <button
+        id="signout-btn"
+        aria-label="Sign out"
+        title="Sign out"
+        style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:transparent;border:1.5px solid var(--border,#ddd);border-radius:999px;font-size:13px;font-weight:500;color:var(--text-muted,#555);cursor:pointer;transition:background .15s,border-color .15s,color .15s;"
+        onmouseover="this.style.background='var(--green-highlight,#e8f5ed)';this.style.borderColor='var(--green,#006C35)';this.style.color='var(--green,#006C35)';"
+        onmouseout="this.style.background='transparent';this.style.borderColor='var(--border,#ddd)';this.style.color='var(--text-muted,#555)';"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span class="signout-label" data-en="Sign out" data-ar="تسجيل الخروج">Sign out</span>
+      </button>
       <button class="theme-toggle" data-theme-toggle aria-label="Toggle light/dark mode" title="Toggle theme">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="themeIcon" aria-hidden="true">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
@@ -6340,5 +6372,25 @@ document.addEventListener('DOMContentLoaded', function () {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   window.addEventListener('load', wire);
   setTimeout(wire, 600); setTimeout(wire, 2000);
+})();
+</script>
+
+<!-- Sign-out handler -->
+<script>
+(function() {
+  var btn = document.getElementById('signout-btn');
+  if (!btn) return;
+  btn.addEventListener('click', async function() {
+    btn.disabled = true;
+    if (window._supabase) {
+      await window._supabase.auth.signOut();
+    }
+    window.location.href = 'login.html';
+  });
+  // Update label when Arabic is active
+  var label = btn.querySelector('.signout-label');
+  if (label && localStorage.getItem('is-demo-lang') === 'ar') {
+    label.textContent = label.getAttribute('data-ar') || 'تسجيل الخروج';
+  }
 })();
 </script>
