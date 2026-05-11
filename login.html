@@ -1098,6 +1098,56 @@
 
 </div><!-- /.auth-layout -->
 
+<!-- ══════════════════════════════════════════
+     LOADING SCREEN (shown on redirect to main app)
+══════════════════════════════════════════ -->
+<div id="loading-screen" aria-hidden="true" style="
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: linear-gradient(160deg, #012d18 0%, #006C35 45%, #014d26 70%, #1a0e00 100%);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+">
+  <!-- Logo mark -->
+  <div style="
+    width: 56px; height: 56px;
+    background: rgba(201,166,107,.15);
+    border: 1.5px solid rgba(201,166,107,.45);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Satoshi', system-ui, sans-serif;
+    font-weight: 700; font-size: 24px;
+    color: #C9A66B;
+    letter-spacing: -0.5px;
+  ">OH</div>
+  <!-- Spinner -->
+  <div style="
+    width: 32px; height: 32px;
+    border: 2.5px solid rgba(255,255,255,.15);
+    border-top-color: #C9A66B;
+    border-radius: 50%;
+    animation: ls-spin 0.7s linear infinite;
+  "></div>
+  <!-- Label -->
+  <p id="loading-label" style="
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+    color: rgba(255,255,255,.5);
+    letter-spacing: 0.3px;
+    margin: 0;
+  ">Loading Opportunity Hub…</p>
+</div>
+
+<style>
+@keyframes ls-spin { to { transform: rotate(360deg); } }
+</style>
+
 
 <!-- ══════════════════════════════════════════════════════════════
      JAVASCRIPT
@@ -1123,7 +1173,29 @@
   'use strict';
 
   /* ──────────────────────────────────────────────────────────────
-     SUPABASE CONFIG  (replace with your real values)
+     LOADING SCREEN → redirect helper
+  ────────────────────────────────────────────────────────────── */
+  function goToApp() {
+    var screen = document.getElementById('loading-screen');
+    var label  = document.getElementById('loading-label');
+    var isAr   = currentLang === 'ar';
+    if (label) label.textContent = isAr ? 'جارٍ تحميل منصة الفرص\u2026' : 'Loading Opportunity Hub\u2026';
+    // Show the overlay
+    screen.style.display = 'flex';
+    // Fade in on next frame
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        screen.style.opacity = '1';
+      });
+    });
+    // Navigate after 1 second
+    setTimeout(function() {
+      window.location.href = 'index.html';
+    }, 1000);
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+     SUPABASE CONFIG
   ────────────────────────────────────────────────────────────── */
   const SUPABASE_URL = 'https://dshrbbnjahjcwxzvzygh.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzaHJiYm5qYWhqY3d4enZ6eWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE3OTgsImV4cCI6MjA5NDA1Nzc5OH0.OpUGgfL91m7STsZpE6fnX281KN_Ge8oytR-2lM-3qTo';
@@ -1516,7 +1588,7 @@
           password
         });
         if (signInError) throw signInError;
-        window.location.href = 'index.html';
+        goToApp();
 
       } else {
         // ── SUPABASE: Sign Up ────────────────────────────────────
@@ -1544,7 +1616,7 @@
           );
         } else {
           // Email confirmations disabled — log straight in
-          window.location.href = 'index.html';
+          goToApp();
         }
       }
 
@@ -1617,7 +1689,7 @@
     // ── SUPABASE: Redirect if already logged in ─────────────
     const { data: { session: existingSession } } = await supabase.auth.getSession();
     if (existingSession) {
-      window.location.href = 'index.html';
+      goToApp();
       return;
     }
 
