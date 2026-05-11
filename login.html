@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sign In — Opportunity Hub</title>
 
+  <!-- Supabase JS client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <!-- Fonts: Satoshi + Inter (LTR) | Noto Kufi Arabic (RTL) -->
   <link rel="preconnect" href="https://api.fontshare.com" />
   <link href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap" rel="stylesheet" />
@@ -1122,9 +1125,9 @@
   /* ──────────────────────────────────────────────────────────────
      SUPABASE CONFIG  (replace with your real values)
   ────────────────────────────────────────────────────────────── */
-  const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-  const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
-  // const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); // ← uncomment when CDN is added
+  const SUPABASE_URL = 'https://dshrbbnjahjcwxzvzygh.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzaHJiYm5qYWhqY3d4enZ6eWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE3OTgsImV4cCI6MjA5NDA1Nzc5OH0.OpUGgfL91m7STsZpE6fnX281KN_Ge8oytR-2lM-3qTo';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   /* ──────────────────────────────────────────────────────────────
      STATE
@@ -1474,13 +1477,11 @@
     clearMessages();
 
     try {
-      /* ── SUPABASE: Reset password ──────────────────────────────
-         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-           redirectTo: window.location.origin + '/reset-password.html'
-         });
-         if (error) throw error;
-      ──────────────────────────────────────────────────────── */
-      console.log('[Supabase placeholder] resetPasswordForEmail:', email);
+      // ── SUPABASE: Reset password ──────────────────────────────
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/login.html'
+      });
+      if (resetError) throw resetError;
 
       showMessage('msg_reset', 'success', { email: email });
     } catch (err) {
@@ -1509,39 +1510,42 @@
 
     try {
       if (currentMode === 'signin') {
-        /* ── SUPABASE: Sign In ─────────────────────────────────────
-           const { data, error } = await supabase.auth.signInWithPassword({
-             email,
-             password
-           });
-           if (error) throw error;
-           window.location.href = 'index.html';
-        ──────────────────────────────────────────────────────── */
-        console.log('[Supabase placeholder] signInWithPassword:', { email, password: '***' });
-
-        await new Promise(function(r) { setTimeout(r, 1200); });
-        showMessage('msg_demo_signin', 'success');
+        // ── SUPABASE: Sign In ────────────────────────────────────
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        if (signInError) throw signInError;
+        window.location.href = 'index.html';
 
       } else {
-        /* ── SUPABASE: Sign Up ─────────────────────────────────────
-           const { data, error } = await supabase.auth.signUp({
-             email,
-             password,
-             options: {
-               data: {
-                 first_name:   firstName,
-                 last_name:    lastName,
-                 organisation: organisation
-               }
-             }
-           });
-           if (error) throw error;
-           showMessage('Account created! Check your email to confirm your address.', 'success');
-        ──────────────────────────────────────────────────────── */
-        console.log('[Supabase placeholder] signUp:', { email, firstName, lastName, organisation });
-
-        await new Promise(function(r) { setTimeout(r, 1400); });
-        showMessage('msg_demo_signup', 'success');
+        // ── SUPABASE: Sign Up ────────────────────────────────────
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: 'https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/login.html',
+            data: {
+              first_name:   firstName,
+              last_name:    lastName,
+              organisation: organisation
+            }
+          }
+        });
+        if (signUpError) throw signUpError;
+        // Supabase sends a confirmation email; show a friendly message
+        const isConfirmRequired = signUpData.user && !signUpData.session;
+        if (isConfirmRequired) {
+          showMessage(
+            currentLang === 'ar'
+              ? 'تم إنشاء حسابك! تحقق من بريدك الإلكتروني لتأكيد حسابك ثم سجّل دخولك.'
+              : 'Account created! Check your email to confirm your address, then sign in.',
+            'success'
+          );
+        } else {
+          // Email confirmations disabled — log straight in
+          window.location.href = 'index.html';
+        }
       }
 
     } catch (err) {
@@ -1558,18 +1562,14 @@
     clearMessages();
     setLoading(true);
     try {
-      /* ── SUPABASE: OAuth sign-in ───────────────────────────────
-         const { error } = await supabase.auth.signInWithOAuth({
-           provider,
-           options: {
-             redirectTo: window.location.origin + '/index.html'
-           }
-         });
-         if (error) throw error;
-      ──────────────────────────────────────────────────────── */
-      console.log('[Supabase placeholder] signInWithOAuth:', provider);
-      await new Promise(function(r) { setTimeout(r, 800); });
-      showMessage('msg_oauth', 'success', { provider: provider });
+      // ── SUPABASE: OAuth sign-in ──────────────────────────────
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: provider,
+        options: {
+          redirectTo: 'https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/index.html'
+        }
+      });
+      if (oauthError) throw oauthError;
     } catch (err) {
       showMessage(err.message || t('msg_generic_err'), 'error');
     } finally {
@@ -1614,11 +1614,12 @@
      INIT
   ────────────────────────────────────────────────────────────── */
   (async function init() {
-    /* ── SUPABASE: Redirect if already logged in ───────────────
-       const { data: { session } } = await supabase.auth.getSession();
-       if (session) window.location.href = 'index.html';
-    ──────────────────────────────────────────────────────────── */
-    console.log('[Supabase placeholder] getSession — user not redirected in demo mode.');
+    // ── SUPABASE: Redirect if already logged in ─────────────
+    const { data: { session: existingSession } } = await supabase.auth.getSession();
+    if (existingSession) {
+      window.location.href = 'index.html';
+      return;
+    }
 
     // Apply saved language preference on load
     if (currentLang === 'ar') {
