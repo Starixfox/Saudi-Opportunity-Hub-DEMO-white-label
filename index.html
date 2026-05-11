@@ -6395,6 +6395,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const pnl = document.getElementById('detailPanel');
     if (pnl) pnl.setAttribute('dir', 'ltr');
   }
+  // Expose so mobile menu handler (separate IIFE) can call these
+  window.activateArabic  = activateArabic;
+  window.activateEnglish = activateEnglish;
+
   function wire(){
     const ar = document.getElementById('langAr'); const en = document.getElementById('langEn');
     if (ar && !ar.__wired) { ar.__wired = true; ar.removeAttribute('href'); ar.style.cursor='pointer'; ar.addEventListener('click', e => { e.preventDefault(); activateArabic(); }); }
