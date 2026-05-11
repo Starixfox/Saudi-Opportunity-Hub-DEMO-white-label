@@ -1550,14 +1550,13 @@
 
     try {
       // ── SUPABASE: Reset password ──────────────────────────────
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label'
-      });
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email);
       if (resetError) throw resetError;
 
       showMessage('msg_reset', 'success', { email: email });
     } catch (err) {
-      showMessage('msg_reset_fail', 'error');
+      console.error('Reset error:', err);
+      showMessage(err.message || t('msg_reset_fail'), 'error');
     } finally {
       setLoading(false);
     }
