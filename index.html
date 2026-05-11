@@ -6508,3 +6508,52 @@ document.addEventListener('DOMContentLoaded', function () {
 
 })();
 </script>
+
+<script>
+/* ── Feedback form → Formspree ── */
+(function () {
+  var form = document.getElementById('feedbackForm');
+  var successBox = document.getElementById('formSuccess');
+  if (!form) return;
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var details = document.getElementById('feedbackText');
+    if (!details || !details.value.trim()) {
+      details && details.focus();
+      return;
+    }
+
+    var btn = form.querySelector('button[type="submit"]');
+    var origText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '&#8987; Sending&hellip;';
+
+    try {
+      var res = await fetch('https://formspree.io/f/xdayzqbr', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type:    document.getElementById('feedbackType') ? document.getElementById('feedbackType').value : '',
+          contact: document.getElementById('feedbackContact') ? document.getElementById('feedbackContact').value : '',
+          details: details.value.trim(),
+          _subject: 'Opportunity Hub — Feedback: ' + (document.getElementById('feedbackType') ? document.getElementById('feedbackType').options[document.getElementById('feedbackType').selectedIndex].text : 'Feedback')
+        })
+      });
+
+      if (res.ok) {
+        form.reset();
+        if (successBox) { successBox.style.display = 'block'; }
+        btn.innerHTML = origText;
+        btn.disabled = false;
+      } else {
+        throw new Error('server error');
+      }
+    } catch (err) {
+      btn.innerHTML = origText;
+      btn.disabled = false;
+      alert('Failed to send feedback. Please try again.');
+    }
+  });
+})();
+</script>
