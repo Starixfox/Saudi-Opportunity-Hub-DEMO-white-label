@@ -2438,6 +2438,16 @@ body[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
 .insight-sector-link:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: var(--radius-sm); }
 
 
+/* ── MOBILE HAMBURGER FIXES ──────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Show lang row inside open mobile menu */
+  .navbar-links.mobile-open .mobile-lang-row { display: flex !important; }
+  /* Hide sign-out text label on small screens — icon only */
+  .signout-label { display: none; }
+  /* Tighten sign-out button on mobile */
+  #signout-btn { padding: 6px 10px !important; }
+}
+
 /* Page entrance animation — triggered after login loading screen */
 @keyframes page-fade-in {
   from { opacity: 0; transform: translateY(10px); }
@@ -2513,6 +2523,11 @@ body.page-entering {
       <li><a href="#insights">Insights</a></li>
       <li><a href="#about">About</a></li>
       <li><a href="#feedback">Feedback</a></li>
+      <!-- Language toggle — visible in mobile menu only -->
+      <li class="mobile-lang-row" style="display:none; padding: 10px 16px; border-top: 1px solid var(--border); gap: 8px; align-items:center;">
+        <a id="langArMobile" class="is-lang-btn" href="#" lang="ar" dir="rtl" style="padding:6px 14px;">&#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;</a>
+        <a id="langEnMobile" class="is-lang-btn is-lang-active" href="#" lang="en" style="padding:6px 14px;">English</a>
+      </li>
     </ul>
 
     <div class="nav-actions">
@@ -6392,22 +6407,100 @@ document.addEventListener('DOMContentLoaded', function () {
 })();
 </script>
 
-<!-- Sign-out handler -->
+<!-- Sign-out + hamburger + mobile lang handler -->
 <script>
 (function() {
-  var btn = document.getElementById('signout-btn');
-  if (!btn) return;
-  btn.addEventListener('click', async function() {
-    btn.disabled = true;
-    if (window._supabase) {
-      await window._supabase.auth.signOut();
+
+  /* ── Sign-out ────────────────────────── */
+  var signoutBtn = document.getElementById('signout-btn');
+  if (signoutBtn) {
+    signoutBtn.addEventListener('click', async function() {
+      signoutBtn.disabled = true;
+      if (window._supabase) await window._supabase.auth.signOut();
+      window.location.href = 'login.html';
+    });
+    var label = signoutBtn.querySelector('.signout-label');
+    if (label && localStorage.getItem('is-demo-lang') === 'ar') {
+      label.textContent = label.getAttribute('data-ar') || 'تسجيل الخروج';
     }
-    window.location.href = 'login.html';
-  });
-  // Update label when Arabic is active
-  var label = btn.querySelector('.signout-label');
-  if (label && localStorage.getItem('is-demo-lang') === 'ar') {
-    label.textContent = label.getAttribute('data-ar') || 'تسجيل الخروج';
   }
+
+  /* ── Hamburger toggle ─────────────────── */
+  var hamburger = document.getElementById('hamburger');
+  var navLinks  = document.getElementById('navLinks');
+
+  if (hamburger && navLinks) {
+    hamburger.addEventListener('click', function() {
+      var isOpen = navLinks.classList.toggle('mobile-open');
+      hamburger.setAttribute('aria-expanded', isOpen);
+      // Swap icon: hamburger ↔ X
+      hamburger.querySelector('svg path') && (hamburger.querySelector('svg').innerHTML = isOpen
+        ? '<line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/>'
+        : '<path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2"/>');
+    });
+
+    // Close menu when a nav link is tapped
+    navLinks.querySelectorAll('a:not(.is-lang-btn)').forEach(function(a) {
+      a.addEventListener('click', function() {
+        navLinks.classList.remove('mobile-open');
+        hamburger.setAttribute('aria-expanded', 'false');
+        hamburger.querySelector('svg').innerHTML = '<path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2"/>';
+      });
+    });
+  }
+
+  /* ── Mobile lang buttons ──────────────── */
+  function wireMobileLang() {
+    var arM = document.getElementById('langArMobile');
+    var enM = document.getElementById('langEnMobile');
+    if (arM && !arM.__mwired) {
+      arM.__mwired = true;
+      arM.removeAttribute('href');
+      arM.style.cursor = 'pointer';
+      arM.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (typeof activateArabic === 'function') activateArabic();
+        // sync active state
+        arM.classList.add('is-lang-active');
+        enM && enM.classList.remove('is-lang-active');
+        // close menu
+        if (navLinks) navLinks.classList.remove('mobile-open');
+        if (hamburger) {
+          hamburger.setAttribute('aria-expanded','false');
+          hamburger.querySelector('svg').innerHTML = '<path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2"/>';
+        }
+      });
+    }
+    if (enM && !enM.__mwired) {
+      enM.__mwired = true;
+      enM.removeAttribute('href');
+      enM.style.cursor = 'pointer';
+      enM.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (typeof activateEnglish === 'function') activateEnglish();
+        enM.classList.add('is-lang-active');
+        arM && arM.classList.remove('is-lang-active');
+        if (navLinks) navLinks.classList.remove('mobile-open');
+        if (hamburger) {
+          hamburger.setAttribute('aria-expanded','false');
+          hamburger.querySelector('svg').innerHTML = '<path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2"/>';
+        }
+      });
+    }
+    // Sync active state on load
+    if (arM && enM) {
+      var isAr = localStorage.getItem('is-demo-lang') === 'ar';
+      arM.classList.toggle('is-lang-active', isAr);
+      enM.classList.toggle('is-lang-active', !isAr);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wireMobileLang);
+  } else {
+    wireMobileLang();
+  }
+  setTimeout(wireMobileLang, 800);
+
 })();
 </script>
