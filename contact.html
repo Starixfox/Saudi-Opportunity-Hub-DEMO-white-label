@@ -533,28 +533,33 @@
     setLoading(true);
 
     try {
-      const topic   = document.getElementById('contact-topic').value;
-      const subject = encodeURIComponent('Opportunity Hub Support: ' + (topic || 'General'));
-      const body    = encodeURIComponent(
-        'Name: ' + nameEl.value.trim() + '\n' +
-        'Email: ' + emailEl.value.trim() + '\n' +
-        'Topic: ' + (topic || 'General') + '\n\n' +
-        messageEl.value.trim()
-      );
+      const topic = document.getElementById('contact-topic').value;
 
-      // Open mailto — instant, no backend needed
-      window.location.href = 'mailto:jblancoapodaca@gmail.com?subject=' + subject + '&body=' + body;
+      const res = await fetch('https://formspree.io/f/xdayzqbr', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name:    nameEl.value.trim(),
+          email:   emailEl.value.trim(),
+          topic:   topic || 'General',
+          message: messageEl.value.trim(),
+          _subject: 'Opportunity Hub Support: ' + (topic || 'General')
+        })
+      });
 
-      // Show success after short delay
-      setTimeout(function() {
-        form.style.display = 'none';
-        document.getElementById('back-link').style.display = 'none';
-        successDiv.style.display = 'block';
-        setLoading(false);
-      }, 600);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Formspree error');
+      }
+
+      form.style.display = 'none';
+      document.getElementById('back-link').style.display = 'none';
+      successDiv.style.display = 'block';
 
     } catch (err) {
+      console.error('Contact form error:', err);
       showMsg(currentLang === 'ar' ? 'حدث خطأ ما. يرجى المحاولة مرة أخرى.' : 'Something went wrong. Please try again.', 'error');
+    } finally {
       setLoading(false);
     }
   });
