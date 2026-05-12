@@ -5500,41 +5500,50 @@ document.addEventListener('DOMContentLoaded', function () {
       @media (max-width: 900px) { .pagination { gap: 3px; } .page-btn { min-width: 28px; height: 28px; font-size: 11px; border-radius: 7px; } .page-info { width: 100%; margin-left: 0; text-align: center; margin-top: 4px; } }
       .opp-card-sponsor strong { color: rgba(255,255,255,.88); }
       /* Bookmark button anchored between content and image columns */
+      /* ── BOOKMARK EDGE BUTTON ─────────────────────────────────────
+         LTR: image is on the RIGHT  → button sits in top-left corner of image
+         RTL: image is on the LEFT   → button sits in top-right corner of image
+         Position is relative to .opp-card-noimg (position:relative/absolute)
+         Image width = 320px, button size = 34px
+      ──────────────────────────────────────────────────────────── */
       .opp-card-bookmark-edge {
         position: absolute;
-        /* Sits right at the border between content (order:1) and image (order:2) */
-        right: 320px; /* same as image width */
-        top: 50%;
-        transform: translate(50%, -50%);
-        z-index: 10;
-        width: 36px;
-        height: 36px;
+        /* LTR default: top-left corner of the image */
+        right: 286px;   /* 320px image - 34px/2 centers button on the left image edge */
+        top: 14px;
+        z-index: 15;
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
-        background: rgba(15, 25, 40, 0.85);
-        border: 1.5px solid rgba(255,255,255,0.20);
-        backdrop-filter: blur(6px);
-        color: rgba(255,255,255,0.75);
+        background: #006C35;
+        border: 2px solid rgba(255,255,255,0.30);
+        color: #ffffff;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.18s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+        transition: background 0.18s, border-color 0.18s, transform 0.15s;
         flex-shrink: 0;
       }
       .opp-card-bookmark-edge:hover {
-        background: rgba(0, 108, 53, 0.9);
-        border-color: #00a651;
-        color: #fff;
-        transform: translate(50%, -50%) scale(1.12);
+        background: #00a651;
+        border-color: rgba(255,255,255,0.55);
+        transform: scale(1.10);
       }
       .opp-card-bookmark-edge.bookmarked {
         background: #006C35;
-        border-color: #00a651;
+        border-color: #34d97b;
         color: #fff;
       }
       .opp-card-bookmark-edge.bookmarked:hover {
         background: #b91c1c;
         border-color: #ef4444;
+      }
+      /* RTL: image flips to the LEFT side → button goes to top-right corner of image */
+      body[dir="rtl"] .opp-card-bookmark-edge {
+        right: auto;
+        left: 286px;
       }
       /* Hide on mobile where image is hidden */
       @media (max-width: 640px) {
