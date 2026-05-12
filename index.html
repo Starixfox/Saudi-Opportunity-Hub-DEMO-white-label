@@ -2775,7 +2775,8 @@ body.page-entering {
   color: var(--green);
 }
 [data-theme="light"] .card-bookmark-btn { background: #f0f4fa; }
-[data-theme="light"] .card-bookmark-btn.opp-card-bookmark-edge { background: #006C35 !important; }
+[data-theme="light"] .card-bookmark-btn.opp-card-bookmark-edge { background: rgba(0,0,0,0.45) !important; }
+[data-theme="light"] .card-bookmark-btn.opp-card-bookmark-edge.bookmarked { background: #C9A66B !important; }
 
 /* ── WATCHLIST / SAVED SEARCHES PANEL ──────────────────── */
 .ws-panel {
@@ -5507,6 +5508,7 @@ document.addEventListener('DOMContentLoaded', function () {
          LTR: image RIGHT → button at top-left corner of image
          RTL: image LEFT  → button at top-right corner of image
       ──────────────────────────────────────────────────────────── */
+      /* NOT saved — dark translucent, white outline icon */
       .card-bookmark-btn.opp-card-bookmark-edge {
         position: absolute;
         right: 286px;
@@ -5516,35 +5518,52 @@ document.addEventListener('DOMContentLoaded', function () {
         width: 34px;
         height: 34px;
         border-radius: 50%;
-        background: #006C35 !important;
-        border: 2px solid rgba(255,255,255,0.35) !important;
-        color: #ffffff !important;
+        background: rgba(0,0,0,0.45) !important;
+        border: 2px solid rgba(255,255,255,0.40) !important;
+        color: rgba(255,255,255,0.70) !important;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.50);
-        transition: background 0.18s, border-color 0.18s, transform 0.15s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.40);
+        transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.15s;
         flex-shrink: 0;
       }
       .card-bookmark-btn.opp-card-bookmark-edge svg {
+        stroke: rgba(255,255,255,0.70) !important;
+        fill: none !important;
+        transition: stroke 0.18s;
+      }
+      /* NOT saved hover — brighten slightly */
+      .card-bookmark-btn.opp-card-bookmark-edge:hover {
+        background: rgba(0,0,0,0.65) !important;
+        border-color: rgba(255,255,255,0.70) !important;
         color: #ffffff !important;
+        transform: scale(1.08);
+      }
+      .card-bookmark-btn.opp-card-bookmark-edge:hover svg {
         stroke: #ffffff !important;
       }
-      .card-bookmark-btn.opp-card-bookmark-edge:hover {
-        background: #00a651 !important;
-        border-color: rgba(255,255,255,0.60) !important;
-        color: #ffffff !important;
-        transform: scale(1.10);
-      }
+      /* SAVED — solid gold fill, clearly different from unsaved */
       .card-bookmark-btn.opp-card-bookmark-edge.bookmarked {
-        background: #006C35 !important;
-        border-color: #34d97b !important;
-        color: #fff !important;
+        background: #C9A66B !important;
+        border-color: rgba(255,255,255,0.50) !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 10px rgba(201,166,107,0.55);
       }
+      .card-bookmark-btn.opp-card-bookmark-edge.bookmarked svg {
+        stroke: #ffffff !important;
+        fill: rgba(255,255,255,0.25) !important;
+      }
+      /* SAVED hover — red signals "click to remove" */
       .card-bookmark-btn.opp-card-bookmark-edge.bookmarked:hover {
-        background: #b91c1c !important;
-        border-color: #ef4444 !important;
+        background: #c0392b !important;
+        border-color: rgba(255,255,255,0.50) !important;
+        transform: scale(1.08);
+      }
+      .card-bookmark-btn.opp-card-bookmark-edge.bookmarked:hover svg {
+        stroke: #ffffff !important;
+        fill: none !important;
       }
       /* RTL: image flips to the LEFT → button at top-right corner of image */
       body[dir="rtl"] .card-bookmark-btn.opp-card-bookmark-edge {
