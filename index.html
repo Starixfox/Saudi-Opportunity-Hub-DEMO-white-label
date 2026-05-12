@@ -1309,6 +1309,8 @@ section:last-of-type { border-bottom: none; }
 
 /* Saved state for bookmark btn */
 .la-bookmark-btn.la-saved { color: var(--green); border-color: var(--green); background: var(--green-dim); }
+/* Active state for compare btn */
+.la-btn--compare-active { color: var(--gold,#f5a623); border-color: var(--gold,#f5a623); background: rgba(245,166,35,0.12); }
 
 .no-recent { padding: var(--space-5); color: var(--text-faint); font-size: var(--text-sm); text-align: center; }
 
@@ -5362,24 +5364,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Expose global compare handler (avoids multiline inline onclick)
     window._laCompare = function(btn) {
-      var id    = btn.dataset.cmpid || '';
-      var title = btn.dataset.cmptitle || '';
+      var id = btn.dataset.cmpid || '';
       if (!id) return;
-      var isAr2 = document.documentElement.lang === 'ar';
-      // Try to trigger the existing compare tray
-      var existingBtn = document.querySelector('.card-compare-btn[data-id="' + id + '"], .opp-card-row[data-id="' + id + '"] .card-compare-btn');
-      if (existingBtn) { existingBtn.click(); return; }
-      // Fallback: inject into compare tray directly
-      if (!window._compareTray2) { window._compareTray2 = []; }
-      var ct = window._compareTray2;
-      var idx = ct.indexOf(id);
-      if (idx > -1) { ct.splice(idx, 1); }
-      else if (ct.length < 3) { ct.push(id); }
-      else {
-        if (window.WS && WS.showToast) WS.showToast(isAr2 ? 'يمكنك مقارنة 3 فرص فقط' : 'Max 3 items to compare', 'warn');
-        return;
+      var isAr2 = window.__lang === 'ar';
+      // Look up the full item object so the compare modal has all fields
+      var allData = window.opportunitiesData || window.allOpportunities || [];
+      var item = allData.find(function(x) { return (x.id||'') === id; });
+      // Fallback: build a minimal item from the card's data attributes
+      if (!item) item = { id: id, title: btn.dataset.cmptitle || id };
+      var idx = compareItems.findIndex(function(x) { return (x.id||'') === id; });
+      if (idx >= 0) {
+        // Already in tray — remove it
+        compareItems.splice(idx, 1);
+        btn.classList.remove('la-btn--compare-active');
+        btn.title = isAr2 ? 'إضافة للمقارنة' : 'Add to comparison';
+        updateCompareTray();
+      } else {
+        if (compareItems.length >= MAX_COMPARE) {
+          if (window.WS && WS.showToast) WS.showToast(isAr2 ? 'يمكنك مقارنة 3 فرص فقط' : 'Max 3 items to compare', 'warn');
+          return;
+        }
+        compareItems.push(item);
+        btn.classList.add('la-btn--compare-active');
+        btn.title = isAr2 ? 'إزالة من المقارنة' : 'Remove from comparison';
+        updateCompareTray();
       }
-      if (window.WS && WS.showToast) WS.showToast(isAr2 ? 'أضيف للمقارنة' : 'Added to comparison', 'info');
     };
   }
 
