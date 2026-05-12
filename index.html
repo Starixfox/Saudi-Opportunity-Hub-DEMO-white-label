@@ -5238,6 +5238,8 @@ document.addEventListener('DOMContentLoaded', function () {
   function renderRecentlyAdded() {
     var el = document.getElementById('recentlyAddedList');
     if (!el) return;
+    // Local esc — not available in this IIFE scope
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     var recent = dataSource().filter(function(item){ return item.isNew; }).slice(0, 8);
     if (!recent.length) {
       el.innerHTML = '<div class="no-recent">' + (t('No newly flagged opportunities.') || 'No newly flagged opportunities.') + '</div>';
