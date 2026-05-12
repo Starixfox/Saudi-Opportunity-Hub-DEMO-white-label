@@ -8200,6 +8200,17 @@ document.addEventListener('DOMContentLoaded', function () {
     // swapSelectOptions runs after translateAll, but translateAttrs may have cached
     // bad entries for placeholders. Force-set them again on the next frame to win.
     requestAnimationFrame(function() { swapSelectOptions(true); });
+    // Set sign-out label to Arabic (covers runtime switch, not just page-load)
+    var signoutLabelAr = document.querySelector('.signout-label');
+    if (signoutLabelAr) signoutLabelAr.textContent = signoutLabelAr.getAttribute('data-ar') || 'تسجيل الخروج';
+    // Set WS panel direction to RTL
+    var wsPanelAr = document.getElementById('wsPanel');
+    if (wsPanelAr) wsPanelAr.setAttribute('dir', 'rtl');
+    // Re-render WS panel body if panel is currently open
+    var wsPanelEl = document.getElementById('wsPanel');
+    if (wsPanelEl && wsPanelEl.classList.contains('open') && window.WS && window.WS.openPanel) {
+      setTimeout(function() { if (window.WS && window.WS.openPanel) window.WS.openPanel(); }, 50);
+    }
     startObserver();
   }
   function activateEnglish(){
@@ -8219,6 +8230,41 @@ document.addEventListener('DOMContentLoaded', function () {
     // Reset panel direction to LTR
     const pnl = document.getElementById('detailPanel');
     if (pnl) pnl.setAttribute('dir', 'ltr');
+    // Reset sign-out label to English
+    var signoutLabel = document.querySelector('.signout-label');
+    if (signoutLabel) signoutLabel.textContent = signoutLabel.getAttribute('data-en') || 'Sign out';
+    // Reset WS panel static tab/title labels to English
+    var wsPanelTitle = document.querySelector('.ws-panel-title');
+    if (wsPanelTitle) wsPanelTitle.textContent = 'My Workspace';
+    var wsPanelDir = document.getElementById('wsPanel');
+    if (wsPanelDir) wsPanelDir.setAttribute('dir', 'ltr');
+    // Re-render WS panel body if panel is currently open (keeps content in sync)
+    var wsPanel = document.getElementById('wsPanel');
+    if (wsPanel && wsPanel.classList.contains('open') && window.WS && window.WS.openPanel) {
+      // Re-render panel body in English by triggering renderPanelBody via openPanel
+      setTimeout(function() { if (window.WS && window.WS.openPanel) window.WS.openPanel(); }, 50);
+    }
+    // Reset welcome modal strings to English (in case translateModal() rewrote them)
+    var obModalMap = {
+      obWelcomeTitle: 'Welcome to the Intelligence Hub',
+      obWelcomeSub:   'Your personal centre for Vision 2030 grants, tenders, and investment programmes',
+      obF1Title: 'Watchlist',
+      obF1Body:  'Save opportunities so you never lose track of a deadline.',
+      obF2Title: 'Saved Searches',
+      obF2Body:  'Save filter combinations and re-apply them in one click.',
+      obF3Title: 'Personalised Feed',
+      obF3Body:  'Set your sector interests to surface the most relevant opportunities first.',
+      obF4Title: 'Compare Mode',
+      obF4Body:  'Compare up to 3 opportunities side by side.'
+    };
+    Object.keys(obModalMap).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = obModalMap[id];
+    });
+    var obStartBtn = document.getElementById('obStartTourBtn');
+    var obSkipBtn  = document.getElementById('obSkipTourBtn');
+    if (obStartBtn) obStartBtn.textContent = 'Start product tour →';
+    if (obSkipBtn)  obSkipBtn.textContent  = 'Skip for now';
   }
   // Expose so mobile menu handler (separate IIFE) can call these
   window.activateArabic  = activateArabic;
