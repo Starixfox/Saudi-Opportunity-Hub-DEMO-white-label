@@ -3166,11 +3166,17 @@ body.page-entering {
   color: var(--text);
   box-shadow: 0 8px 24px rgba(0,0,0,0.2);
   z-index: 900;
-  transform: translateY(120%);
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(calc(100% + 40px));
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
   max-width: 320px;
 }
-.ws-toast.show { transform: translateY(0); }
+.ws-toast.show {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
 .ws-toast-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
@@ -3181,6 +3187,9 @@ body.page-entering {
 @media (max-width: 480px) {
   .ws-toast { bottom: var(--space-4); right: var(--space-4); left: var(--space-4); max-width: none; }
 }
+body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
+@media (max-width: 480px) {
+  body[dir="rtl"] .ws-toast { left: var(--space-4); right: var(--space-4); }
 </style>
 </head>
 <body>
@@ -4119,9 +4128,9 @@ body.page-entering {
 </div>
 
 <!-- ══ TOAST ════════════════════════════════════════════════════════ -->
-<div class="ws-toast" id="wsToast" role="status" aria-live="polite">
+<div class="ws-toast" id="wsToast" role="status" aria-live="polite" aria-hidden="true">
   <span class="ws-toast-dot"></span>
-  <span id="wsToastMsg">Saved</span>
+  <span id="wsToastMsg"></span>
 </div>
 
 <div class="panel-overlay" id="panelOverlay" role="presentation" aria-hidden="true"></div>
@@ -5963,6 +5972,14 @@ document.addEventListener('DOMContentLoaded', function () {
       .opp-select-btn.selected { background: #35d5c5; border-color: #35d5c5; }
       .opp-select-btn svg { display: none; }
       .opp-select-btn.selected svg { display: block; }
+      /* RTL: flip compare select button to the left side so it doesn't overlap bookmark */
+      body[dir="rtl"] .opp-select-btn { right: auto; left: 14px; }
+      /* Bookmark button inside compact .occ-actions must be static (not absolute) */
+      .occ-actions .card-bookmark-btn { position: static; width: 28px; height: 28px; flex-shrink: 0; }
+      /* RTL: ensure occ-actions gap doesn't cause overflow; secondary aligns to start in RTL */
+      body[dir="rtl"] .occ-secondary { align-items: flex-start; }
+      body[dir="rtl"] .occ-chips { justify-content: flex-start; }
+      body[dir="rtl"] .occ-actions { flex-direction: row-reverse; }
       @media (max-width: 768px) { .compare-tray { padding: 10px 12px; } .compare-modal__body { grid-template-columns: 1fr; } }
       .gloss-tip { position: relative; cursor: help; display: inline-flex; align-items: center; gap: 3px; }
       .gloss-icon { color: rgba(255,255,255,.35); flex-shrink: 0; }
@@ -7533,14 +7550,35 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ── TOAST ───────────────────────────────────────────────── */
   var toastTimer;
+
+  /* Pre-translated Arabic strings — no live translation, always correct in AR mode */
+  var WS_TOAST_AR = {
+    'Removed from watchlist':                          'تمت إزالتها من قائمة المتابعة',
+    'Added to watchlist — saved to My Workspace': 'تمت الإضافة إلى قائمة المتابعة — محفوظة في مساحتي',
+    'Search already saved':                            'تم حفظ هذا البحث مسبقاً',
+    'Search saved — find it in My Workspace':     'تم حفظ البحث — يمكنك إيجاده في مساحتي',
+    'Search deleted':                                  'تم حذف البحث',
+    'Preferences saved':                               'تم حفظ التفضيلات'
+  };
+
+  function isArabic() {
+    return document.body && document.body.dir === 'rtl';
+  }
+
   function showToast(msg) {
     var el = document.getElementById('wsToast');
     var msgEl = document.getElementById('wsToastMsg');
     if (!el || !msgEl) return;
     clearTimeout(toastTimer);
-    msgEl.textContent = msg;
+    /* Use pre-translated Arabic string when in Arabic mode */
+    var displayMsg = (isArabic() && WS_TOAST_AR[msg]) ? WS_TOAST_AR[msg] : msg;
+    msgEl.textContent = displayMsg;
+    el.setAttribute('aria-hidden', 'false');
     el.classList.add('show');
-    toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2500);
+    toastTimer = setTimeout(function () {
+      el.classList.remove('show');
+      el.setAttribute('aria-hidden', 'true');
+    }, 2500);
   }
 
   /* ── WATCHLIST ──────────────────────────────────────────── */
