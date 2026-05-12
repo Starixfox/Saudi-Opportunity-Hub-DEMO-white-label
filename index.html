@@ -5145,7 +5145,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
                 <div class="opp-card-sponsor">${item.sponsor_institution ? `<strong>${t('Sponsor:')}</strong> ${item.sponsor_institution}` : ''}</div>
               </div>
-            <button class="card-bookmark-btn opp-card-bookmark-edge" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" data-sector="${(item.sectors&&item.sectors[0])||''}" data-type="${item.type||''}" onclick="WS&&WS.toggleBookmark(this)" title="Save to Watchlist" aria-label="Save to Watchlist">
+            <button class="card-bookmark-btn opp-card-bookmark-edge" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" data-sector="${(item.sectors&&item.sectors[0])||''}" data-type="${item.type||''}" onclick="WS&&WS.toggleBookmark(this)" title="Save to Watchlist" aria-label="Save to Watchlist" data-label-en="Save to Watchlist" data-label-ar="حفظ في قائمة المتابعة" data-saved-en="Saved ✓" data-saved-ar="تم الحفظ ✓">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
             </button>
             <div class="opp-card-image"><img src="${sectorImg(item)}" alt="" loading="lazy" onerror="this.style.display='none';this.parentNode.classList.add('opp-card-image-fallback');"/></div></article>
@@ -5570,9 +5570,60 @@ document.addEventListener('DOMContentLoaded', function () {
         right: auto;
         left: 286px;
       }
-      /* Hide on mobile where image is hidden */
-      @media (max-width: 640px) {
-        .card-bookmark-btn.opp-card-bookmark-edge { display: none; }
+      /* On mobile: image is hidden so reflow bookmark into the action row */
+      @media (max-width: 900px) {
+        .card-bookmark-btn.opp-card-bookmark-edge {
+          position: static !important;
+          right: auto !important;
+          left: auto !important;
+          top: auto !important;
+          transform: none !important;
+          width: calc(100% - 32px) !important;
+          height: 44px !important;
+          border-radius: 10px !important;
+          margin: 0 16px 16px !important;
+          order: 10;
+          background: rgba(0,0,0,0.35) !important;
+          border: 1.5px solid rgba(255,255,255,0.30) !important;
+          color: rgba(255,255,255,0.80) !important;
+          font-size: 13px;
+          font-weight: 600;
+          gap: 8px;
+          box-shadow: none;
+        }
+        .card-bookmark-btn.opp-card-bookmark-edge::after {
+          content: attr(data-label-en);
+          font-size: 13px;
+          font-weight: 600;
+        }
+        body[dir="rtl"] .card-bookmark-btn.opp-card-bookmark-edge::after {
+          content: attr(data-label-ar);
+        }
+        .card-bookmark-btn.opp-card-bookmark-edge.bookmarked::after {
+          content: attr(data-saved-en);
+        }
+        body[dir="rtl"] .card-bookmark-btn.opp-card-bookmark-edge.bookmarked::after {
+          content: attr(data-saved-ar);
+        }
+        .card-bookmark-btn.opp-card-bookmark-edge svg {
+          stroke: rgba(255,255,255,0.80) !important;
+          width: 15px !important;
+          height: 15px !important;
+        }
+        .card-bookmark-btn.opp-card-bookmark-edge.bookmarked {
+          background: #C9A66B !important;
+          border-color: rgba(255,255,255,0.40) !important;
+          color: #fff !important;
+        }
+        .card-bookmark-btn.opp-card-bookmark-edge.bookmarked svg {
+          stroke: #ffffff !important;
+          fill: rgba(255,255,255,0.25) !important;
+        }
+        .card-bookmark-btn.opp-card-bookmark-edge.bookmarked:hover {
+          background: #c0392b !important;
+          border-color: rgba(255,255,255,0.40) !important;
+          transform: none !important;
+        }
       }
       @media (max-width: 900px) {
         .opp-card-content { padding: 16px; }
