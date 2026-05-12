@@ -7974,13 +7974,37 @@ document.addEventListener('DOMContentLoaded', function () {
 (function () {
   'use strict';
 
-  /* ── STORAGE KEYS ───────────────────────────────────────── */
-  var KEY_PREFS      = 'oh-ws-prefs';       // { role, org, sectors, alerts, view, status }
-  var KEY_WATCHLIST  = 'oh-ws-watchlist';   // [{ id, title, sector, type, savedAt }]
-  var KEY_SEARCHES   = 'oh-ws-searches';   // [{ id, label, query, savedAt }]
-  var KEY_HISTORY    = 'oh-ws-history';    // [{ id, title, sector, type, viewedAt }]
-  var KEY_NOTIFS     = 'oh-ws-notifs';     // [{ id, title, body, time, read }]
-  var KEY_LASTVISIT  = 'oh-ws-lastvisit';  // ISO date string
+  /* ── USER NAMESPACE ────────────────────────────────────────
+     Read the Supabase user ID synchronously from the auth token
+     stored in localStorage (sb-<ref>-auth-token). This lets us
+     namespace every key per account so users never share data.
+  ─────────────────────────────────────────────────────────── */
+  function getUid() {
+    try {
+      var raw = localStorage.getItem('sb-dshrbbnjahjcwxzvzygh-auth-token');
+      if (!raw) return 'anon';
+      var parsed = JSON.parse(raw);
+      /* Supabase v2 stores { user: { id } } or { access_token } (JWT) */
+      if (parsed && parsed.user && parsed.user.id) return parsed.user.id;
+      /* Fallback: decode the JWT sub claim */
+      var token = parsed && (parsed.access_token || parsed.token);
+      if (token) {
+        var payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload && payload.sub) return payload.sub;
+      }
+    } catch(e) {}
+    return 'anon';
+  }
+
+  var _uid = getUid();
+
+  /* ── STORAGE KEYS  (namespaced per user) ────────────────── */
+  var KEY_PREFS      = 'oh-ws-prefs:'      + _uid;
+  var KEY_WATCHLIST  = 'oh-ws-watchlist:'  + _uid;
+  var KEY_SEARCHES   = 'oh-ws-searches:'   + _uid;
+  var KEY_HISTORY    = 'oh-ws-history:'    + _uid;
+  var KEY_NOTIFS     = 'oh-ws-notifs:'     + _uid;
+  var KEY_LASTVISIT  = 'oh-ws-lastvisit:'  + _uid;
 
   /* ── HELPERS ───────────────────────────────────────────── */
   function load(key, fallback) {
@@ -8635,8 +8659,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 3000);
 
     // ── First-visit onboarding notification
-    if (!localStorage.getItem('oh-ws-welcomed')) {
-      localStorage.setItem('oh-ws-welcomed', '1');
+    if (!localStorage.getItem('oh-ws-welcomed:' + _uid)) {
+      localStorage.setItem('oh-ws-welcomed:' + _uid, '1');
       setTimeout(function() {
         addNotif(
           'Welcome to your workspace',
@@ -8709,9 +8733,23 @@ document.addEventListener('DOMContentLoaded', function () {
 ;(function() {
   'use strict';
 
-  var KEY_OB_DONE     = 'oh-ob-done';      // tour completed
-  var KEY_OB_MODAL    = 'oh-ob-modal';     // welcome modal shown
-  var KEY_OB_CL       = 'oh-ob-checklist'; // { saved, bookmarked, compared, settings, returned }
+  /* Onboarding keys — also namespaced per user so each account
+     gets their own welcome modal and tour state.              */
+  var _obUid = (function() {
+    try {
+      var raw = localStorage.getItem('sb-dshrbbnjahjcwxzvzygh-auth-token');
+      if (!raw) return 'anon';
+      var p = JSON.parse(raw);
+      if (p && p.user && p.user.id) return p.user.id;
+      var tok = p && (p.access_token || p.token);
+      if (tok) { var pl = JSON.parse(atob(tok.split('.')[1])); if (pl && pl.sub) return pl.sub; }
+    } catch(e) {}
+    return 'anon';
+  })();
+
+  var KEY_OB_DONE     = 'oh-ob-done:'      + _obUid;
+  var KEY_OB_MODAL    = 'oh-ob-modal:'     + _obUid;
+  var KEY_OB_CL       = 'oh-ob-checklist:' + _obUid;
 
   /* ── Language helper ────────────────────────────────────── */
   function isAr() { return document.body && document.body.dir === 'rtl'; }
@@ -8727,9 +8765,10 @@ document.addEventListener('DOMContentLoaded', function () {
   var cl = loadCL();
 
   /* Mark returned as done once they visit again */
-  var visits = parseInt(localStorage.getItem('oh-ob-visits') || '0', 10);
+  var _visitKey = 'oh-ob-visits:' + _obUid;
+  var visits = parseInt(localStorage.getItem(_visitKey) || '0', 10);
   visits++;
-  localStorage.setItem('oh-ob-visits', visits);
+  localStorage.setItem(_visitKey, visits);
   if (visits >= 2) { cl.returned = true; saveCL(cl); }
 
   /* ── Checklist items definition ─────────────────────────── */
