@@ -8800,7 +8800,7 @@ document.addEventListener('DOMContentLoaded', function () {
       {
         targetId: 'wsBar',
         title:    ar ? 'شريط مساحة العمل' : 'Your Workspace Bar',
-        body:     ar ? 'هذا الشريط يُظهر لك إحصائياتك الشخصية — عدد الفرص المحفوظة، عمليات البحث، والجديد منذ زيارتك الأخيرة. يظهر فقط بعد تسجيل الدخول.' : 'This bar shows your personal stats — saved opportunities, searches, and what's new since your last visit. It only appears after you sign in.',
+        body:     ar ? 'هذا الشريط يُظهر لك إحصائياتك الشخصية — عدد الفرص المحفوظة، عمليات البحث، والجديد منذ زيارتك الأخيرة. يظهر فقط بعد تسجيل الدخول.' : "This bar shows your personal stats — saved opportunities, searches, and what's new since your last visit. It only appears after you sign in.",
         placement: 'bottom'
       },
       {
@@ -9014,15 +9014,6 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(function() { updateCL('settings'); }, 300);
       });
     }
-    /* Restart from settings */
-    var restart = document.getElementById('settingsRestartTour');
-    if (restart) {
-      restart.addEventListener('click', function() {
-        var overlay = document.getElementById('settingsModalOverlay');
-        if (overlay) overlay.classList.remove('open');
-        setTimeout(startTour, 200);
-      });
-    }
   }
 
   /* Hook compare */
@@ -9042,6 +9033,23 @@ document.addEventListener('DOMContentLoaded', function () {
       btn.addEventListener('click', function() { startTour(); });
     }
   }
+
+  /* ── Delegated click handler for tour-trigger buttons ──────
+     Catches #settingsRestartTour and #obHelpBtn even if direct
+     listeners failed due to timing or prior JS errors.        */
+  document.addEventListener('click', function(e) {
+    var t = e.target.closest && e.target.closest('#settingsRestartTour, #obHelpBtn');
+    if (!t) return;
+    if (t.id === 'settingsRestartTour') {
+      e.stopPropagation();
+      var overlay = document.getElementById('settingsModalOverlay');
+      if (overlay) overlay.classList.remove('open');
+      setTimeout(startTour, 200);
+    } else if (t.id === 'obHelpBtn') {
+      e.stopPropagation();
+      startTour();
+    }
+  }, true); /* capture phase — fires before any stopPropagation */
 
   /* ── Welcome Modal ─────────────────────────────────────────── */
   function translateModal() {
