@@ -3192,6 +3192,7 @@ body.page-entering {
 body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
 @media (max-width: 480px) {
   body[dir="rtl"] .ws-toast { left: var(--space-4); right: var(--space-4); }
+}
 
 /* ════════════════════════════════════════════════════════════
    ONBOARDING SYSTEM — Welcome modal, Tour, Checklist
@@ -8933,7 +8934,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (tt) { tt.style.display = 'none'; }
     /* Restore scroll */
     document.body.style.overflow = '';
-    showToastOb(isAr() ? 'تم إكمال الجولة التعريفية ✓' : 'Tour complete — you're all set ✓');
+    showToastOb(isAr() ? 'تم إكمال الجولة التعريفية ✓' : "Tour complete — you're all set ✓");
   }
 
   function startTour() {
