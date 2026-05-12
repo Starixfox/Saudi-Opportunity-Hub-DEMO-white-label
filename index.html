@@ -2566,6 +2566,621 @@ body[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
 body.page-entering {
   animation: page-fade-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
+
+/* ══════════════════════════════════════════════════════════
+   PERSONALIZED WORKSPACE — styles
+   ══════════════════════════════════════════════════════════ */
+
+/* ── WORKSPACE BAR ──────────────────────────────────────── */
+.ws-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  padding: 10px var(--space-6);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--text-sm);
+}
+.ws-greeting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.ws-greeting strong { color: var(--text); }
+.ws-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.ws-stat {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  cursor: default;
+}
+.ws-stat svg { flex-shrink: 0; }
+.ws-stat strong { color: var(--text); font-weight: 600; }
+.ws-stat.ws-stat--updates strong { color: var(--green); }
+.ws-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.ws-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  transition: border-color var(--transition), color var(--transition), background var(--transition);
+  white-space: nowrap;
+}
+.ws-btn:hover {
+  border-color: var(--green);
+  color: var(--green);
+  background: var(--green-highlight);
+}
+.ws-btn.ws-btn--primary {
+  border-color: var(--green);
+  background: var(--green);
+  color: #fff;
+}
+.ws-btn.ws-btn--primary:hover { background: var(--green-hover); border-color: var(--green-hover); }
+[data-theme="light"] .ws-bar { background: #f4f6fa; border-bottom-color: #e0e7ef; }
+@media (max-width: 700px) {
+  .ws-bar { padding: 8px var(--space-4); }
+  .ws-actions { margin-left: 0; width: 100%; justify-content: flex-end; }
+}
+
+/* ── NOTIFICATION BELL ──────────────────────────────────── */
+.notif-btn {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  color: var(--text-muted);
+  border-radius: var(--radius-md);
+  transition: color var(--transition), background var(--transition);
+  display: flex;
+  align-items: center;
+}
+.notif-btn:hover { color: var(--text); background: var(--surface-3); }
+.notif-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 14px;
+  height: 14px;
+  background: var(--green);
+  color: #fff;
+  border-radius: var(--radius-full);
+  font-size: 0.6rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  pointer-events: none;
+}
+.notif-badge.hidden { display: none; }
+.notif-dropdown {
+  position: absolute;
+  top: calc(var(--nav-height) + 4px);
+  right: 0;
+  width: 340px;
+  max-height: 460px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  z-index: 500;
+  display: none;
+  flex-direction: column;
+}
+.notif-dropdown.open { display: flex; }
+.notif-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text);
+}
+.notif-clear-btn {
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition);
+}
+.notif-clear-btn:hover { color: var(--green); }
+.notif-list { list-style: none; padding: 0; margin: 0; }
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--divider);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.notif-item:hover { background: var(--surface-2); }
+.notif-item.unread { background: var(--green-dim); }
+.notif-item.unread:hover { background: rgba(0,166,81,0.15); }
+.notif-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.notif-dot.read { background: transparent; border: 1.5px solid var(--border); }
+.notif-title { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+.notif-body { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; margin-top: 2px; }
+.notif-time { font-size: 0.68rem; color: var(--text-faint); margin-top: 4px; }
+.notif-empty {
+  padding: var(--space-8) var(--space-5);
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+}
+[data-theme="light"] .notif-item.unread { background: #e8f7ef; }
+[data-theme="light"] .notif-dropdown { box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+
+/* ── BOOKMARK BUTTON ON CARDS ───────────────────────────── */
+.card-bookmark-btn {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  background: var(--surface-3);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+.card-bookmark-btn:hover {
+  background: var(--green-highlight);
+  border-color: var(--green);
+  color: var(--green);
+}
+.card-bookmark-btn.bookmarked {
+  background: var(--green-dim);
+  border-color: var(--green);
+  color: var(--green);
+}
+[data-theme="light"] .card-bookmark-btn { background: #f0f4fa; }
+
+/* ── WATCHLIST / SAVED SEARCHES PANEL ──────────────────── */
+.ws-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 380px;
+  height: 100vh;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  z-index: 600;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: -8px 0 32px rgba(0,0,0,0.2);
+}
+.ws-panel.open { transform: translateX(0); }
+.ws-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border);
+  gap: var(--space-3);
+}
+.ws-panel-title {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--text);
+}
+.ws-panel-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-faint);
+  font-size: 1.1rem;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition);
+}
+.ws-panel-close:hover { color: var(--text); }
+.ws-panel-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+.ws-panel-tab {
+  flex: 1;
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+}
+.ws-panel-tab.active {
+  color: var(--green);
+  border-bottom-color: var(--green);
+}
+.ws-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-5);
+}
+.ws-empty-state {
+  text-align: center;
+  padding: var(--space-10) var(--space-4);
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+.ws-empty-state svg { margin-bottom: var(--space-3); opacity: 0.35; }
+.ws-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--divider);
+}
+.ws-item:last-child { border-bottom: none; }
+.ws-item-content { flex: 1; min-width: 0; }
+.ws-item-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ws-item-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.ws-item-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-faint);
+  font-size: 1rem;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: color var(--transition);
+}
+.ws-item-remove:hover { color: #ef4444; }
+.ws-panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 599;
+  display: none;
+}
+.ws-panel-overlay.open { display: block; }
+@media (max-width: 480px) {
+  .ws-panel { width: 100vw; }
+}
+[data-theme="light"] .ws-panel { background: #fff; box-shadow: -4px 0 20px rgba(0,0,0,0.08); }
+
+/* ── SEARCH SAVE BUTTON ─────────────────────────────────── */
+.save-search-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.save-search-btn:hover {
+  border-color: var(--green);
+  color: var(--green);
+  background: var(--green-highlight);
+}
+.save-search-btn.active {
+  border-color: var(--green);
+  background: var(--green-dim);
+  color: var(--green);
+}
+
+/* ── SETTINGS MODAL ─────────────────────────────────────── */
+.settings-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 700;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+.settings-modal-overlay.open { display: flex; }
+.settings-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+}
+.settings-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--border);
+}
+.settings-modal-title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text);
+}
+.settings-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: var(--text-faint);
+  padding: 4px;
+  transition: color var(--transition);
+}
+.settings-modal-close:hover { color: var(--text); }
+.settings-section {
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--divider);
+}
+.settings-section:last-child { border-bottom: none; }
+.settings-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: var(--space-4);
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  gap: var(--space-3);
+}
+.settings-row:last-child { margin-bottom: 0; }
+.settings-label {
+  font-size: var(--text-sm);
+  color: var(--text);
+  font-weight: 500;
+  flex: 1;
+}
+.settings-sublabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.settings-select {
+  padding: 6px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: border-color var(--transition);
+  min-width: 140px;
+}
+.settings-select:focus { outline: none; border-color: var(--green); }
+.settings-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.settings-chip {
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--border);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-3);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.settings-chip.selected {
+  border-color: var(--green);
+  background: var(--green-dim);
+  color: var(--green);
+}
+.settings-toggle {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+.settings-toggle input { opacity: 0; width: 0; height: 0; }
+.settings-toggle-track {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  background: var(--border);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.settings-toggle input:checked + .settings-toggle-track { background: var(--green); }
+.settings-toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform var(--transition);
+}
+.settings-toggle input:checked + .settings-toggle-track::after { transform: translateX(18px); }
+.settings-save-btn {
+  display: block;
+  width: calc(100% - var(--space-12));
+  margin: var(--space-5) var(--space-6);
+  padding: 10px;
+  border-radius: var(--radius-full);
+  background: var(--green);
+  color: #fff;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.settings-save-btn:hover { background: var(--green-hover); }
+[data-theme="light"] .settings-modal { background: #fff; }
+[data-theme="light"] .settings-select { background: #f4f6fa; }
+[data-theme="light"] .settings-chip { background: #f0f4fa; }
+
+/* ── PERSONALIZED RECOMMENDATIONS STRIP ────────────────── */
+.rec-strip {
+  display: none;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6) 0 var(--space-4);
+  border-bottom: 1px solid var(--divider);
+  margin-bottom: var(--space-5);
+}
+.rec-strip.has-recs { display: flex; }
+.rec-strip-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+.rec-cards {
+  display: flex;
+  gap: var(--space-4);
+  overflow-x: auto;
+  padding-bottom: var(--space-2);
+  scrollbar-width: thin;
+}
+.rec-card {
+  flex-shrink: 0;
+  width: 240px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+}
+.rec-card:hover { border-color: var(--green); background: var(--surface-3); }
+.rec-card-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.rec-card-meta {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.rec-card-why {
+  font-size: 0.68rem;
+  color: var(--green);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* ── TOAST NOTIFICATION ─────────────────────────────────── */
+.ws-toast {
+  position: fixed;
+  bottom: var(--space-6);
+  right: var(--space-6);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--text);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  z-index: 900;
+  transform: translateY(120%);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  max-width: 320px;
+}
+.ws-toast.show { transform: translateY(0); }
+.ws-toast-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+}
+[data-theme="light"] .ws-toast { background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+@media (max-width: 480px) {
+  .ws-toast { bottom: var(--space-4); right: var(--space-4); left: var(--space-4); max-width: none; }
+}
 </style>
 </head>
 <body>
@@ -2653,6 +3268,21 @@ body.page-entering {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         <span class="signout-label" data-en="Sign out" data-ar="تسجيل الخروج">Sign out</span>
       </button>
+      <!-- Notification Bell -->
+      <div style="position:relative;">
+        <button class="notif-btn" id="notifBtn" aria-label="Notifications" title="Notifications">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-badge hidden" id="notifBadge">0</span>
+        </button>
+        <div class="notif-dropdown" id="notifDropdown" role="dialog" aria-label="Notifications">
+          <div class="notif-dropdown-header">
+            <span>Notifications</span>
+            <button class="notif-clear-btn" id="notifClearBtn">Mark all read</button>
+          </div>
+          <ul class="notif-list" id="notifList"></ul>
+        </div>
+      </div>
+
       <button class="hamburger" id="hamburger" aria-label="Open navigation menu" aria-expanded="false">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <path d="M3 6h18M3 12h18M3 18h18"/>
@@ -2663,6 +3293,39 @@ body.page-entering {
 </header>
 
 <main>
+
+<!-- ══ WORKSPACE BAR ══════════════════════════════════════════════ -->
+<div class="ws-bar" id="wsBar" role="banner" aria-label="Your workspace">
+  <div class="ws-greeting">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    <span>Welcome back, <strong id="wsUserName">User</strong></span>
+  </div>
+  <div class="ws-divider" aria-hidden="true"></div>
+  <div class="ws-stat" id="wsWatchlistStat" title="Bookmarked opportunities" style="cursor:pointer;" onclick="WS.openPanel('watchlist')">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+    <strong id="wsWatchlistCount">0</strong> Watchlist
+  </div>
+  <div class="ws-divider" aria-hidden="true"></div>
+  <div class="ws-stat" id="wsSavedStat" title="Saved searches" style="cursor:pointer;" onclick="WS.openPanel('searches')">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <strong id="wsSavedCount">0</strong> Saved Searches
+  </div>
+  <div class="ws-divider" aria-hidden="true"></div>
+  <div class="ws-stat ws-stat--updates" id="wsUpdatesStat" title="New since your last visit">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+    <strong id="wsUpdatesCount">0</strong> New this week
+  </div>
+  <div class="ws-actions">
+    <button class="ws-btn" id="wsOpenPanelBtn" onclick="WS.openPanel('watchlist')" title="Open Watchlist &amp; Saved Searches">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+      My Workspace
+    </button>
+    <button class="ws-btn" id="wsSettingsBtn" onclick="WS.openSettings()" title="Workspace Settings">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </button>
+  </div>
+</div>
 
   <section id="overview" aria-label="Overview">
     <div class="hero-grid">
@@ -2783,6 +3446,16 @@ body.page-entering {
     <p class="section-sub">
       Search and filter structured records across grants, tenders, accelerators, investment programs, fellowships, and ecosystem initiatives. Coverage spans 15 sectors, Saudi Arabia, the GCC, and qualifying global programs.
     </p>
+
+    <!-- PERSONALIZED RECOMMENDATIONS STRIP (shown when user has sector prefs) -->
+    <div class="rec-strip" id="recStrip" aria-label="Recommended opportunities">
+      <div class="rec-strip-label">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Recommended for you
+        <span id="recStripReason" style="font-weight:400;font-size:0.68rem;color:var(--text-muted);text-transform:none;letter-spacing:0;"></span>
+      </div>
+      <div class="rec-cards" id="recCards" role="list"></div>
+    </div>
 
     <!-- DATA PROVENANCE STRIP -->
     <div class="provenance-strip" role="note" aria-label="Data provenance">
@@ -2952,6 +3625,10 @@ body.page-entering {
 
     <div class="results-bar" id="resultsBar" aria-live="polite" aria-atomic="true">
       <span id="resultsCount">Loading&hellip;</span>
+      <button class="save-search-btn" id="saveSearchBtn" title="Save current filters as a saved search">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Search
+      </button>
       <span class="freshness-badge" id="freshnessBadge" title="Dataset freshness">
         <span class="freshness-dot"></span>
         <span id="freshnessText">✓ Last updated: May 11, 2026 &nbsp;|&nbsp; Pipeline: Active</span>
@@ -3309,6 +3986,143 @@ body.page-entering {
     </p>
   </div>
 </footer>
+
+<!-- ══ WORKSPACE PANEL (Watchlist + Saved Searches) ══════════════════ -->
+<div class="ws-panel-overlay" id="wsPanelOverlay"></div>
+<aside class="ws-panel" id="wsPanel" aria-label="My Workspace" role="dialog" tabindex="-1">
+  <div class="ws-panel-header">
+    <span class="ws-panel-title">My Workspace</span>
+    <button class="ws-panel-close" id="wsPanelClose" aria-label="Close workspace panel">&times;</button>
+  </div>
+  <div class="ws-panel-tabs">
+    <button class="ws-panel-tab active" data-wstab="watchlist">Watchlist</button>
+    <button class="ws-panel-tab" data-wstab="searches">Saved Searches</button>
+    <button class="ws-panel-tab" data-wstab="history">Recent</button>
+  </div>
+  <div class="ws-panel-body" id="wsPanelBody">
+    <!-- rendered by WS JS -->
+  </div>
+</aside>
+
+<!-- ══ SETTINGS MODAL ══════════════════════════════════════════════ -->
+<div class="settings-modal-overlay" id="settingsModalOverlay">
+  <div class="settings-modal" role="dialog" aria-label="Workspace Settings" aria-modal="true">
+    <div class="settings-modal-header">
+      <span class="settings-modal-title">Workspace Settings</span>
+      <button class="settings-modal-close" id="settingsModalClose" aria-label="Close settings">&times;</button>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Your Profile</div>
+      <div class="settings-row">
+        <div class="settings-label">
+          Role
+          <div class="settings-sublabel">Used for role-based recommendations</div>
+        </div>
+        <select class="settings-select" id="settingsRole">
+          <option value="">Select role&hellip;</option>
+          <option value="Startup / SME">Startup / SME</option>
+          <option value="Researcher / University">Researcher / University</option>
+          <option value="Government">Government</option>
+          <option value="Investor">Investor</option>
+          <option value="Student">Student</option>
+          <option value="Consultant">Consultant</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <div class="settings-label">
+          Organisation name
+          <div class="settings-sublabel">Displayed in your workspace</div>
+        </div>
+        <input type="text" class="settings-select" id="settingsOrg" placeholder="e.g. KAUST, Aramco&hellip;" style="min-width:160px;" />
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Sector Interests</div>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:var(--space-3);">Select the sectors you want to track. Recommendations and insights will prioritise these.</p>
+      <div class="settings-chips" id="settingsSectorChips">
+        <span class="settings-chip" data-sector="ICT">ICT</span>
+        <span class="settings-chip" data-sector="Energy">Energy</span>
+        <span class="settings-chip" data-sector="Healthcare & Life Sciences">Healthcare</span>
+        <span class="settings-chip" data-sector="Agriculture">Agriculture</span>
+        <span class="settings-chip" data-sector="Financial Services">FinTech</span>
+        <span class="settings-chip" data-sector="Education">Education</span>
+        <span class="settings-chip" data-sector="Tourism">Tourism</span>
+        <span class="settings-chip" data-sector="Manufacturing">Manufacturing</span>
+        <span class="settings-chip" data-sector="Logistics & Transport">Logistics</span>
+        <span class="settings-chip" data-sector="Innovation & Entrepreneurship">Innovation</span>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Alert Preferences</div>
+      <div class="settings-row">
+        <div class="settings-label">
+          New opportunities
+          <div class="settings-sublabel">Show badge when new records match your sectors</div>
+        </div>
+        <label class="settings-toggle" aria-label="New opportunities alerts">
+          <input type="checkbox" id="settingsAlertNew" checked />
+          <span class="settings-toggle-track"></span>
+        </label>
+      </div>
+      <div class="settings-row">
+        <div class="settings-label">
+          Deadline reminders
+          <div class="settings-sublabel">Notify when watchlisted items are closing soon</div>
+        </div>
+        <label class="settings-toggle" aria-label="Deadline reminders">
+          <input type="checkbox" id="settingsAlertDeadline" checked />
+          <span class="settings-toggle-track"></span>
+        </label>
+      </div>
+      <div class="settings-row">
+        <div class="settings-label">
+          Weekly digest
+          <div class="settings-sublabel">Summary of new programs in your tracked sectors</div>
+        </div>
+        <label class="settings-toggle" aria-label="Weekly digest">
+          <input type="checkbox" id="settingsAlertDigest" />
+          <span class="settings-toggle-track"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Display</div>
+      <div class="settings-row">
+        <div class="settings-label">
+          Default view
+          <div class="settings-sublabel">Card layout shown when you arrive</div>
+        </div>
+        <select class="settings-select" id="settingsDefaultView">
+          <option value="detailed">Detailed cards</option>
+          <option value="compact">Compact list</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <div class="settings-label">
+          Default filter
+          <div class="settings-sublabel">Pre-select status on arrival</div>
+        </div>
+        <select class="settings-select" id="settingsDefaultStatus">
+          <option value="">All statuses</option>
+          <option value="Open">Open only</option>
+          <option value="Recurring">Recurring</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="settings-save-btn" id="settingsSaveBtn">Save preferences</button>
+  </div>
+</div>
+
+<!-- ══ TOAST ════════════════════════════════════════════════════════ -->
+<div class="ws-toast" id="wsToast" role="status" aria-live="polite">
+  <span class="ws-toast-dot"></span>
+  <span id="wsToastMsg">Saved</span>
+</div>
 
 <div class="panel-overlay" id="panelOverlay" role="presentation" aria-hidden="true"></div>
 
@@ -4232,6 +5046,9 @@ document.addEventListener('DOMContentLoaded', function () {
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                       ${t('Insights')}
                     </button>
+                    <button class="card-bookmark-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" data-sector="${(item.sectors&&item.sectors[0])||''}" data-type="${item.type||''}" onclick="WS&&WS.toggleBookmark(this)" title="Add to watchlist" aria-label="Bookmark" style="position:static;width:28px;height:28px;flex-shrink:0;">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+                    </button>
                     <a class="occ-apply-btn" href="${applyHref}" ${applyAttrs}>${t('Apply →')}</a>
                   </div>
                 </div>
@@ -4243,7 +5060,8 @@ document.addEventListener('DOMContentLoaded', function () {
       }).join('');
       renderPagination();
       updateCounts(dataSource());
-      if (typeof window.__retranslate === 'function') window.__retranslate(); // async — fires after render
+      if (typeof window.__retranslate === 'function') window.__retranslate();
+      if (window.WS) window.WS.syncBookmarkButtons();
       return;
     }
     tbody.innerHTML = pageItems.map(item => {
@@ -4304,6 +5122,9 @@ document.addEventListener('DOMContentLoaded', function () {
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                       ${t('View Insights')}
                     </button>
+                    <button class="card-bookmark-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" data-sector="${(item.sectors&&item.sectors[0])||''}" data-type="${item.type||''}" onclick="WS&&WS.toggleBookmark(this)" title="Save to Watchlist" aria-label="Save to Watchlist">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+                    </button>
                     <a class="panel-link-btn opp-card-link" href="${item.application_link || '#'}" ${item.application_link ? 'target="_blank" rel="noopener noreferrer"' : ''}>${t('Go to Website')}</a>
                   </div>
                 </div>
@@ -4316,7 +5137,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }).join('');
     renderPagination();
     updateCounts(dataSource());
-    if (typeof window.__retranslate === 'function') window.__retranslate(); // async — fires after render
+    if (typeof window.__retranslate === 'function') window.__retranslate();
+    if (window.WS) window.WS.syncBookmarkButtons();
   }
 
   /* ---- SORT HELPERS ---- */
@@ -6655,6 +7477,655 @@ document.addEventListener('DOMContentLoaded', function () {
     wireMobileLang();
   }
   setTimeout(wireMobileLang, 800);
+
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   PERSONALIZED WORKSPACE
+   ══════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ── STORAGE KEYS ───────────────────────────────────────── */
+  var KEY_PREFS      = 'oh-ws-prefs';       // { role, org, sectors, alerts, view, status }
+  var KEY_WATCHLIST  = 'oh-ws-watchlist';   // [{ id, title, sector, type, savedAt }]
+  var KEY_SEARCHES   = 'oh-ws-searches';   // [{ id, label, query, savedAt }]
+  var KEY_HISTORY    = 'oh-ws-history';    // [{ id, title, sector, type, viewedAt }]
+  var KEY_NOTIFS     = 'oh-ws-notifs';     // [{ id, title, body, time, read }]
+  var KEY_LASTVISIT  = 'oh-ws-lastvisit';  // ISO date string
+
+  /* ── HELPERS ───────────────────────────────────────────── */
+  function load(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch(e) { return fallback; }
+  }
+  function save(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+  }
+  function esc(str) {
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function timeAgo(isoStr) {
+    if (!isoStr) return '';
+    var diff = Date.now() - new Date(isoStr).getTime();
+    var mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    var hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    return Math.floor(hrs / 24) + 'd ago';
+  }
+  function uid() {
+    return Math.random().toString(36).slice(2, 10);
+  }
+
+  /* ── STATE ─────────────────────────────────────────────── */
+  var prefs     = load(KEY_PREFS, {});
+  var watchlist = load(KEY_WATCHLIST, []);
+  var searches  = load(KEY_SEARCHES, []);
+  var history   = load(KEY_HISTORY, []);
+  var notifs    = load(KEY_NOTIFS, []);
+  var lastVisit = localStorage.getItem(KEY_LASTVISIT) || null;
+
+  /* ── PANEL STATE ────────────────────────────────────────── */
+  var activeTab = 'watchlist';
+
+  /* ── TOAST ───────────────────────────────────────────────── */
+  var toastTimer;
+  function showToast(msg) {
+    var el = document.getElementById('wsToast');
+    var msgEl = document.getElementById('wsToastMsg');
+    if (!el || !msgEl) return;
+    clearTimeout(toastTimer);
+    msgEl.textContent = msg;
+    el.classList.add('show');
+    toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2500);
+  }
+
+  /* ── WATCHLIST ──────────────────────────────────────────── */
+  function isBookmarked(id) {
+    return watchlist.some(function(w) { return w.id === id; });
+  }
+
+  function toggleBookmark(btn) {
+    var id    = btn.dataset.id;
+    var title = btn.dataset.title || 'Opportunity';
+    var sector = btn.dataset.sector || '';
+    var type  = btn.dataset.type || '';
+    if (!id) return;
+
+    if (isBookmarked(id)) {
+      watchlist = watchlist.filter(function(w) { return w.id !== id; });
+      save(KEY_WATCHLIST, watchlist);
+      showToast('Removed from watchlist');
+    } else {
+      watchlist.push({ id: id, title: title, sector: sector, type: type, savedAt: new Date().toISOString() });
+      save(KEY_WATCHLIST, watchlist);
+      showToast('Added to watchlist — saved to My Workspace');
+      addNotif('Watchlist updated', '\u201c' + title + '\u201d added to your watchlist.');
+    }
+    syncBookmarkButtons();
+    updateWsBar();
+    if (document.getElementById('wsPanel').classList.contains('open') && activeTab === 'watchlist') {
+      renderPanelBody();
+    }
+  }
+
+  function syncBookmarkButtons() {
+    document.querySelectorAll('.card-bookmark-btn[data-id]').forEach(function(btn) {
+      var bookmarked = isBookmarked(btn.dataset.id);
+      btn.classList.toggle('bookmarked', bookmarked);
+      btn.title = bookmarked ? 'Remove from watchlist' : 'Save to watchlist';
+    });
+  }
+
+  /* ── SAVED SEARCHES ───────────────────────────────────────── */
+  function getCurrentFilters() {
+    var term    = (document.querySelector('[aria-label="Search opportunities"]') || {}).value || '';
+    var sector  = (document.querySelector('[aria-label="Filter by sector"]') || {}).value || '';
+    var region  = (document.querySelector('[aria-label="Filter by country group"]') || {}).value || '';
+    var type    = (document.querySelector('[aria-label="Filter by opportunity type"]') || {}).value || '';
+    var status  = (document.querySelector('[aria-label="Filter by status"]') || {}).value || '';
+    return { term: term, sector: sector, region: region, type: type, status: status };
+  }
+
+  function filtersLabel(q) {
+    var parts = [];
+    if (q.term)   parts.push('\u201c' + q.term + '\u201d');
+    if (q.sector && q.sector !== 'All sectors') parts.push(q.sector);
+    if (q.region && q.region !== 'All regions') parts.push(q.region);
+    if (q.type   && q.type   !== 'All types')   parts.push(q.type);
+    if (q.status && q.status !== 'All statuses') parts.push(q.status);
+    return parts.length ? parts.join(' · ') : 'All opportunities';
+  }
+
+  function saveCurrentSearch() {
+    var q = getCurrentFilters();
+    var label = filtersLabel(q);
+    // Avoid exact duplicates
+    var dupe = searches.find(function(s) { return JSON.stringify(s.query) === JSON.stringify(q); });
+    if (dupe) { showToast('Search already saved'); return; }
+    searches.unshift({ id: uid(), label: label, query: q, savedAt: new Date().toISOString() });
+    if (searches.length > 20) searches = searches.slice(0, 20);
+    save(KEY_SEARCHES, searches);
+    showToast('Search saved — find it in My Workspace');
+    updateWsBar();
+    var btn = document.getElementById('saveSearchBtn');
+    if (btn) { btn.classList.add('active'); setTimeout(function(){ btn.classList.remove('active'); }, 1500); }
+    addNotif('Search saved', '\u201c' + label + '\u201d saved to your searches.');
+  }
+
+  function applySearch(q) {
+    var setVal = function(sel, val) {
+      var el = document.querySelector(sel);
+      if (!el) return;
+      el.value = val || '';
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+    setVal('[aria-label="Search opportunities"]', q.term);
+    setVal('[aria-label="Filter by sector"]', q.sector);
+    setVal('[aria-label="Filter by country group"]', q.region);
+    setVal('[aria-label="Filter by opportunity type"]', q.type);
+    setVal('[aria-label="Filter by status"]', q.status);
+    document.getElementById('opportunities')?.scrollIntoView({ behavior: 'smooth' });
+    closePanel();
+  }
+
+  /* ── RECENT HISTORY ───────────────────────────────────────── */
+  function trackView(id, title, sector, type) {
+    history = history.filter(function(h) { return h.id !== id; });
+    history.unshift({ id: id, title: title, sector: sector, type: type, viewedAt: new Date().toISOString() });
+    if (history.length > 30) history = history.slice(0, 30);
+    save(KEY_HISTORY, history);
+  }
+
+  /* ── NOTIFICATIONS ────────────────────────────────────────── */
+  function addNotif(title, body) {
+    notifs.unshift({ id: uid(), title: title, body: body, time: new Date().toISOString(), read: false });
+    if (notifs.length > 50) notifs = notifs.slice(0, 50);
+    save(KEY_NOTIFS, notifs);
+    updateNotifBadge();
+    renderNotifList();
+  }
+
+  function updateNotifBadge() {
+    var unread = notifs.filter(function(n) { return !n.read; }).length;
+    var badge  = document.getElementById('notifBadge');
+    if (!badge) return;
+    if (unread > 0) {
+      badge.textContent = unread > 9 ? '9+' : String(unread);
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  }
+
+  function renderNotifList() {
+    var list = document.getElementById('notifList');
+    if (!list) return;
+    if (!notifs.length) {
+      list.innerHTML = '<li class="notif-empty">No notifications yet.<br>Bookmark opportunities to get updates.</li>';
+      return;
+    }
+    list.innerHTML = notifs.slice(0, 20).map(function(n) {
+      return '<li class="notif-item' + (n.read ? '' : ' unread') + '" data-nid="' + esc(n.id) + '">' +
+        '<span class="notif-dot' + (n.read ? ' read' : '') + '"></span>' +
+        '<div>' +
+          '<div class="notif-title">' + esc(n.title) + '</div>' +
+          '<div class="notif-body">'  + esc(n.body)  + '</div>' +
+          '<div class="notif-time">'  + timeAgo(n.time) + '</div>' +
+        '</div>' +
+      '</li>';
+    }).join('');
+
+    list.querySelectorAll('.notif-item').forEach(function(li) {
+      li.addEventListener('click', function() {
+        var nid = li.dataset.nid;
+        var n = notifs.find(function(x) { return x.id === nid; });
+        if (n) { n.read = true; save(KEY_NOTIFS, notifs); }
+        li.classList.remove('unread');
+        li.querySelector('.notif-dot')?.classList.add('read');
+        updateNotifBadge();
+      });
+    });
+  }
+
+  function markAllRead() {
+    notifs.forEach(function(n) { n.read = true; });
+    save(KEY_NOTIFS, notifs);
+    updateNotifBadge();
+    renderNotifList();
+  }
+
+  /* ── WORKSPACE BAR ─────────────────────────────────────────── */
+  function updateWsBar() {
+    var wc = document.getElementById('wsWatchlistCount');
+    var sc = document.getElementById('wsSavedCount');
+    var uc = document.getElementById('wsUpdatesCount');
+    var un = document.getElementById('wsUserName');
+    if (wc) wc.textContent = watchlist.length;
+    if (sc) sc.textContent = searches.length;
+
+    // "New this week" = items added in the last 7 days
+    var weekAgo = Date.now() - 7 * 24 * 3600 * 1000;
+    var newCount = 0;
+    // If we have dataset access, count new items since lastVisit
+    if (window._wsDataset && lastVisit) {
+      var lv = new Date(lastVisit).getTime();
+      newCount = window._wsDataset.filter(function(item) {
+        var d = item.created_at || item.last_verified || '';
+        return d && new Date(d).getTime() > lv;
+      }).length;
+    }
+    if (uc) uc.textContent = newCount;
+
+    // User display name from Supabase
+    if (un && window._supabase) {
+      window._supabase.auth.getUser().then(function(res) {
+        var user = res && res.data && res.data.user;
+        if (!user) return;
+        var name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name))
+                || user.email.split('@')[0];
+        // Clean display name
+        name = name.charAt(0).toUpperCase() + name.slice(1);
+        un.textContent = name;
+        // Also update org greeting
+        if (prefs.org) un.title = prefs.org;
+      }).catch(function(){});
+    }
+  }
+
+  /* ── PANEL ────────────────────────────────────────────────── */
+  function openPanel(tab) {
+    activeTab = tab || 'watchlist';
+    var panel   = document.getElementById('wsPanel');
+    var overlay = document.getElementById('wsPanelOverlay');
+    if (!panel) return;
+    // Update tabs
+    document.querySelectorAll('.ws-panel-tab').forEach(function(t) {
+      t.classList.toggle('active', t.dataset.wstab === activeTab);
+    });
+    renderPanelBody();
+    panel.classList.add('open');
+    overlay.classList.add('open');
+    panel.focus();
+  }
+
+  function closePanel() {
+    document.getElementById('wsPanel')?.classList.remove('open');
+    document.getElementById('wsPanelOverlay')?.classList.remove('open');
+  }
+
+  function renderPanelBody() {
+    var body = document.getElementById('wsPanelBody');
+    if (!body) return;
+
+    if (activeTab === 'watchlist') {
+      if (!watchlist.length) {
+        body.innerHTML = '<div class="ws-empty-state">' +
+          '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>' +
+          '<p>Your watchlist is empty.<br>Bookmark opportunities using the <strong>&#128278;</strong> button on any card.</p></div>';
+        return;
+      }
+      body.innerHTML = watchlist.map(function(item) {
+        return '<div class="ws-item">' +
+          '<div class="ws-item-content">' +
+            '<div class="ws-item-title">' + esc(item.title) + '</div>' +
+            '<div class="ws-item-meta">' +
+              (item.sector ? '<span>' + esc(item.sector) + '</span>' : '') +
+              (item.type ? '<span>· ' + esc(item.type) + '</span>' : '') +
+              '<span style="color:var(--text-faint);">' + timeAgo(item.savedAt) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<button class="ws-item-remove" data-id="' + esc(item.id) + '" title="Remove" aria-label="Remove from watchlist">×</button>' +
+        '</div>';
+      }).join('');
+
+      body.querySelectorAll('.ws-item-remove').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var id = btn.dataset.id;
+          watchlist = watchlist.filter(function(w) { return w.id !== id; });
+          save(KEY_WATCHLIST, watchlist);
+          syncBookmarkButtons();
+          updateWsBar();
+          renderPanelBody();
+          showToast('Removed from watchlist');
+        });
+      });
+
+    } else if (activeTab === 'searches') {
+      if (!searches.length) {
+        body.innerHTML = '<div class="ws-empty-state">' +
+          '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>' +
+          '<p>No saved searches yet.<br>Use <strong>Save Search</strong> above the results grid to save your current filters.</p></div>';
+        return;
+      }
+      body.innerHTML = searches.map(function(s) {
+        return '<div class="ws-item">' +
+          '<div class="ws-item-content" style="cursor:pointer;" data-sid="' + esc(s.id) + '">' +
+            '<div class="ws-item-title">' + esc(s.label) + '</div>' +
+            '<div class="ws-item-meta">' +
+              '<span style="color:var(--green);font-weight:600;font-size:0.7rem;">Apply</span>' +
+              '<span style="color:var(--text-faint);">· ' + timeAgo(s.savedAt) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<button class="ws-item-remove" data-sid="' + esc(s.id) + '" title="Delete" aria-label="Delete saved search">×</button>' +
+        '</div>';
+      }).join('');
+
+      body.querySelectorAll('[data-sid]').forEach(function(el) {
+        el.addEventListener('click', function(e) {
+          if (e.target.classList.contains('ws-item-remove')) {
+            var sid = e.target.dataset.sid;
+            searches = searches.filter(function(x) { return x.id !== sid; });
+            save(KEY_SEARCHES, searches);
+            updateWsBar();
+            renderPanelBody();
+            showToast('Search deleted');
+          } else {
+            var sid = el.dataset.sid;
+            var s = searches.find(function(x) { return x.id === sid; });
+            if (s) applySearch(s.query);
+          }
+        });
+      });
+
+    } else if (activeTab === 'history') {
+      if (!history.length) {
+        body.innerHTML = '<div class="ws-empty-state">' +
+          '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+          '<p>No recent activity yet.<br>Opened opportunities will appear here.</p></div>';
+        return;
+      }
+      body.innerHTML = history.slice(0, 20).map(function(item) {
+        return '<div class="ws-item">' +
+          '<div class="ws-item-content">' +
+            '<div class="ws-item-title">' + esc(item.title) + '</div>' +
+            '<div class="ws-item-meta">' +
+              (item.sector ? '<span>' + esc(item.sector) + '</span>' : '') +
+              '<span style="color:var(--text-faint);">Viewed ' + timeAgo(item.viewedAt) + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+  }
+
+  /* ── SETTINGS ─────────────────────────────────────────────── */
+  function openSettings() {
+    // Populate from saved prefs
+    var role = document.getElementById('settingsRole');
+    var org  = document.getElementById('settingsOrg');
+    var view = document.getElementById('settingsDefaultView');
+    var status = document.getElementById('settingsDefaultStatus');
+    var alertNew = document.getElementById('settingsAlertNew');
+    var alertDeadline = document.getElementById('settingsAlertDeadline');
+    var alertDigest = document.getElementById('settingsAlertDigest');
+
+    if (role && prefs.role) role.value = prefs.role;
+    if (org  && prefs.org)  org.value  = prefs.org;
+    if (view && prefs.view) view.value = prefs.view;
+    if (status && prefs.defaultStatus) status.value = prefs.defaultStatus;
+    if (alertNew)      alertNew.checked      = prefs.alertNew      !== false;
+    if (alertDeadline) alertDeadline.checked = prefs.alertDeadline !== false;
+    if (alertDigest)   alertDigest.checked   = prefs.alertDigest   === true;
+
+    // Sector chips
+    document.querySelectorAll('.settings-chip[data-sector]').forEach(function(chip) {
+      var sel = (prefs.sectors || []).includes(chip.dataset.sector);
+      chip.classList.toggle('selected', sel);
+    });
+
+    document.getElementById('settingsModalOverlay').classList.add('open');
+  }
+
+  function saveSettings() {
+    var role = document.getElementById('settingsRole');
+    var org  = document.getElementById('settingsOrg');
+    var view = document.getElementById('settingsDefaultView');
+    var status = document.getElementById('settingsDefaultStatus');
+    var alertNew = document.getElementById('settingsAlertNew');
+    var alertDeadline = document.getElementById('settingsAlertDeadline');
+    var alertDigest = document.getElementById('settingsAlertDigest');
+
+    var selectedSectors = [];
+    document.querySelectorAll('.settings-chip[data-sector].selected').forEach(function(chip) {
+      selectedSectors.push(chip.dataset.sector);
+    });
+
+    prefs = {
+      role:           role?.value || '',
+      org:            org?.value || '',
+      sectors:        selectedSectors,
+      view:           view?.value || 'detailed',
+      defaultStatus:  status?.value || '',
+      alertNew:       alertNew?.checked !== false,
+      alertDeadline:  alertDeadline?.checked !== false,
+      alertDigest:    alertDigest?.checked === true
+    };
+    save(KEY_PREFS, prefs);
+    document.getElementById('settingsModalOverlay').classList.remove('open');
+    showToast('Preferences saved');
+    renderRecommendations();
+    applyDefaultFilters();
+    addNotif('Settings updated', 'Your workspace preferences have been saved.');
+  }
+
+  function applyDefaultFilters() {
+    if (!prefs.defaultStatus) return;
+    var statusSel = document.querySelector('[aria-label="Filter by status"]');
+    if (statusSel && !statusSel.value) {
+      statusSel.value = prefs.defaultStatus;
+      statusSel.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+
+  /* ── RECOMMENDATIONS ────────────────────────────────────────── */
+  function renderRecommendations() {
+    var strip   = document.getElementById('recStrip');
+    var cards   = document.getElementById('recCards');
+    var reason  = document.getElementById('recStripReason');
+    if (!strip || !cards) return;
+
+    var sources = [];
+    // Priority 1: saved sector preferences
+    if (prefs.sectors && prefs.sectors.length > 0) {
+      sources = prefs.sectors;
+    }
+    // Priority 2: sectors from watchlist items
+    else if (watchlist.length > 0) {
+      watchlist.forEach(function(w) { if (w.sector && !sources.includes(w.sector)) sources.push(w.sector); });
+    }
+    // Priority 3: role-based defaults
+    else if (prefs.role) {
+      var roleDefaults = {
+        'Startup / SME':          ['ICT', 'Innovation & Entrepreneurship', 'Financial Services'],
+        'Researcher / University': ['Education', 'Healthcare & Life Sciences', 'Energy'],
+        'Government':             ['ICT', 'Logistics & Transport', 'Energy'],
+        'Investor':               ['Financial Services', 'ICT', 'Innovation & Entrepreneurship'],
+        'Student':                ['Education', 'Innovation & Entrepreneurship']
+      };
+      sources = roleDefaults[prefs.role] || [];
+    }
+
+    if (!sources.length || !window._wsDataset) {
+      strip.classList.remove('has-recs');
+      return;
+    }
+
+    // Find matching open/recurring items not already in watchlist
+    var bookmarkedIds = watchlist.map(function(w) { return w.id; });
+    var matches = window._wsDataset.filter(function(item) {
+      var inSector = item.sectors && item.sectors.some(function(s) {
+        return sources.some(function(src) { return (s||'').toLowerCase().includes((src||'').toLowerCase()); });
+      });
+      var isActive = item.status === 'open' || item.status === 'recurring' || item.status === 'closed_but_recurring';
+      return inSector && isActive && !bookmarkedIds.includes(item.id);
+    }).slice(0, 6);
+
+    if (!matches.length) {
+      strip.classList.remove('has-recs');
+      return;
+    }
+
+    strip.classList.add('has-recs');
+    if (reason) reason.textContent = '— based on your ' + (prefs.sectors && prefs.sectors.length ? 'sector interests' : (watchlist.length ? 'watchlist' : 'role'));
+
+    cards.innerHTML = matches.map(function(item) {
+      var typeStr = item.type ? item.type.replace(/_/g,' ') : 'Program';
+      var sectorStr = (item.sectors && item.sectors[0]) || '';
+      return '<div class="rec-card" role="listitem" data-id="' + esc(item.id) + '">' +
+        '<div class="rec-card-title">' + esc(item.title || '') + '</div>' +
+        '<div class="rec-card-meta">' + esc(typeStr) + (sectorStr ? ' · ' + esc(sectorStr) : '') + '</div>' +
+        '<div class="rec-card-why">Matches your ' + esc(sources[0] || '') + ' interest</div>' +
+      '</div>';
+    }).join('');
+
+    cards.querySelectorAll('.rec-card').forEach(function(card) {
+      card.addEventListener('click', function() {
+        var id = card.dataset.id;
+        var item = window._wsDataset.find(function(d) { return d.id === id; });
+        if (!item) return;
+        // Open the detail panel if available
+        var panelOpen = document.querySelector('[data-id="' + id + '"] .opp-insights-btn');
+        if (panelOpen) panelOpen.click();
+        else document.getElementById('opportunities')?.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  }
+
+  /* ── TRACK VIEW FROM DETAIL PANEL ──────────────────────────── */
+  function hookDetailPanel() {
+    // Watch for detail panel opens
+    var panel = document.getElementById('detailPanel');
+    if (!panel) return;
+    var observer = new MutationObserver(function(muts) {
+      muts.forEach(function(m) {
+        if (m.attributeName === 'aria-hidden' && panel.getAttribute('aria-hidden') === 'false') {
+          var title = document.getElementById('panelTitle');
+          if (title && title.textContent && title.textContent !== 'Opportunity Details') {
+            trackView('panel-' + Date.now(), title.textContent, '', '');
+          }
+        }
+      });
+    });
+    observer.observe(panel, { attributes: true });
+  }
+
+  /* ── INIT ──────────────────────────────────────────────────── */
+  function init() {
+    // Expose on window for onclick handlers
+    window.WS = {
+      toggleBookmark:    toggleBookmark,
+      isBookmarked:      isBookmarked,
+      syncBookmarkButtons: syncBookmarkButtons,
+      openPanel:         openPanel,
+      closePanel:        closePanel,
+      openSettings:      openSettings
+    };
+
+    updateWsBar();
+    updateNotifBadge();
+    renderNotifList();
+    hookDetailPanel();
+
+    // ── Wire notification bell
+    var notifBtn  = document.getElementById('notifBtn');
+    var notifDrop = document.getElementById('notifDropdown');
+    var clearBtn  = document.getElementById('notifClearBtn');
+
+    notifBtn && notifBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      notifDrop.classList.toggle('open');
+    });
+    clearBtn && clearBtn.addEventListener('click', markAllRead);
+    document.addEventListener('click', function(e) {
+      if (!notifBtn?.contains(e.target) && !notifDrop?.contains(e.target)) {
+        notifDrop?.classList.remove('open');
+      }
+    });
+
+    // ── Wire save search button
+    var ssBtn = document.getElementById('saveSearchBtn');
+    ssBtn && ssBtn.addEventListener('click', saveCurrentSearch);
+
+    // ── Wire panel close
+    document.getElementById('wsPanelClose')?.addEventListener('click', closePanel);
+    document.getElementById('wsPanelOverlay')?.addEventListener('click', closePanel);
+
+    // ── Wire panel tabs
+    document.querySelectorAll('.ws-panel-tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        activeTab = tab.dataset.wstab;
+        document.querySelectorAll('.ws-panel-tab').forEach(function(t) {
+          t.classList.toggle('active', t.dataset.wstab === activeTab);
+        });
+        renderPanelBody();
+      });
+    });
+
+    // ── Wire settings modal
+    document.getElementById('settingsModalClose')?.addEventListener('click', function() {
+      document.getElementById('settingsModalOverlay').classList.remove('open');
+    });
+    document.getElementById('settingsModalOverlay')?.addEventListener('click', function(e) {
+      if (e.target === document.getElementById('settingsModalOverlay')) {
+        document.getElementById('settingsModalOverlay').classList.remove('open');
+      }
+    });
+    document.getElementById('settingsSaveBtn')?.addEventListener('click', saveSettings);
+
+    // ── Settings sector chips toggle
+    document.querySelectorAll('.settings-chip[data-sector]').forEach(function(chip) {
+      chip.addEventListener('click', function() { chip.classList.toggle('selected'); });
+    });
+
+    // ── Apply default filters from prefs
+    setTimeout(applyDefaultFilters, 800);
+
+    // ── Wait for dataset, then render recommendations
+    var recInterval = setInterval(function() {
+      // Hook into the dataset rendered by the main script
+      // The main script stores data via window.__ohDataset set after first load
+      var dataset = window.__ohDataset || window.__filteredDataset || null;
+      if (!dataset) {
+        // Try to grab from script.js state via DOM
+        var countEl = document.getElementById('resultsCount');
+        if (countEl && !countEl.textContent.includes('Loading')) {
+          // Dataset loaded — trigger recs via a small delay
+          clearInterval(recInterval);
+          setTimeout(renderRecommendations, 500);
+        }
+        return;
+      }
+      window._wsDataset = dataset;
+      clearInterval(recInterval);
+      renderRecommendations();
+    }, 600);
+
+    // Update last visit time
+    setTimeout(function() {
+      localStorage.setItem(KEY_LASTVISIT, new Date().toISOString());
+    }, 3000);
+
+    // ── First-visit onboarding notification
+    if (!localStorage.getItem('oh-ws-welcomed')) {
+      localStorage.setItem('oh-ws-welcomed', '1');
+      setTimeout(function() {
+        addNotif(
+          'Welcome to your workspace',
+          'Bookmark opportunities, save searches, and set your sector interests in Settings to personalise this hub.'
+        );
+      }, 2000);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 
 })();
 </script>
