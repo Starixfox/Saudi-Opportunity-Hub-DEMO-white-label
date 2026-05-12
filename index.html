@@ -4025,6 +4025,13 @@ body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
       <div class="settings-section-title">Your Profile</div>
       <div class="settings-row">
         <div class="settings-label">
+          Display name
+          <div class="settings-sublabel">Shown in your workspace greeting</div>
+        </div>
+        <input type="text" class="settings-select" id="settingsDisplayName" placeholder="e.g. Ahmed, Sarah…" style="min-width:160px;" />
+      </div>
+      <div class="settings-row">
+        <div class="settings-label">
           Role
           <div class="settings-sublabel">Used for role-based recommendations</div>
         </div>
@@ -5131,14 +5138,14 @@ document.addEventListener('DOMContentLoaded', function () {
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                       ${t('View Insights')}
                     </button>
-                    <button class="card-bookmark-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" data-sector="${(item.sectors&&item.sectors[0])||''}" data-type="${item.type||''}" onclick="WS&&WS.toggleBookmark(this)" title="Save to Watchlist" aria-label="Save to Watchlist">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-                    </button>
                     <a class="panel-link-btn opp-card-link" href="${item.application_link || '#'}" ${item.application_link ? 'target="_blank" rel="noopener noreferrer"' : ''}>${t('Go to Website')}</a>
                   </div>
                 </div>
                 <div class="opp-card-sponsor">${item.sponsor_institution ? `<strong>${t('Sponsor:')}</strong> ${item.sponsor_institution}` : ''}</div>
               </div>
+            <button class="card-bookmark-btn opp-card-bookmark-edge" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" data-sector="${(item.sectors&&item.sectors[0])||''}" data-type="${item.type||''}" onclick="WS&&WS.toggleBookmark(this)" title="Save to Watchlist" aria-label="Save to Watchlist">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+            </button>
             <div class="opp-card-image"><img src="${sectorImg(item)}" alt="" loading="lazy" onerror="this.style.display='none';this.parentNode.classList.add('opp-card-image-fallback');"/></div></article>
           </td>
         </tr>
@@ -5492,6 +5499,47 @@ document.addEventListener('DOMContentLoaded', function () {
       .page-info { font-size: 11px; margin-left: 8px; color: #1e2d40 !important; font-weight: 600; }
       @media (max-width: 900px) { .pagination { gap: 3px; } .page-btn { min-width: 28px; height: 28px; font-size: 11px; border-radius: 7px; } .page-info { width: 100%; margin-left: 0; text-align: center; margin-top: 4px; } }
       .opp-card-sponsor strong { color: rgba(255,255,255,.88); }
+      /* Bookmark button anchored between content and image columns */
+      .opp-card-bookmark-edge {
+        position: absolute;
+        /* Sits right at the border between content (order:1) and image (order:2) */
+        right: 320px; /* same as image width */
+        top: 50%;
+        transform: translate(50%, -50%);
+        z-index: 10;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(15, 25, 40, 0.85);
+        border: 1.5px solid rgba(255,255,255,0.20);
+        backdrop-filter: blur(6px);
+        color: rgba(255,255,255,0.75);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.18s;
+        flex-shrink: 0;
+      }
+      .opp-card-bookmark-edge:hover {
+        background: rgba(0, 108, 53, 0.9);
+        border-color: #00a651;
+        color: #fff;
+        transform: translate(50%, -50%) scale(1.12);
+      }
+      .opp-card-bookmark-edge.bookmarked {
+        background: #006C35;
+        border-color: #00a651;
+        color: #fff;
+      }
+      .opp-card-bookmark-edge.bookmarked:hover {
+        background: #b91c1c;
+        border-color: #ef4444;
+      }
+      /* Hide on mobile where image is hidden */
+      @media (max-width: 640px) {
+        .opp-card-bookmark-edge { display: none; }
+      }
       @media (max-width: 900px) {
         .opp-card-content { padding: 16px; }
         .opp-card-stats { grid-template-columns: 1fr; gap: 18px; }
@@ -7763,9 +7811,11 @@ document.addEventListener('DOMContentLoaded', function () {
       window._supabase.auth.getUser().then(function(res) {
         var user = res && res.data && res.data.user;
         if (!user) return;
-        var name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name))
+        /* Priority: 1) user-set display name in prefs, 2) OAuth full_name, 3) email prefix */
+        var name = prefs.displayName
+                || (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name))
                 || user.email.split('@')[0];
-        // Clean display name
+        /* Capitalise first letter */
         name = name.charAt(0).toUpperCase() + name.slice(1);
         un.textContent = name;
         // Also update org greeting
@@ -7901,6 +7951,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var alertDeadline = document.getElementById('settingsAlertDeadline');
     var alertDigest = document.getElementById('settingsAlertDigest');
 
+    var displayName = document.getElementById('settingsDisplayName');
+    if (displayName && prefs.displayName) displayName.value = prefs.displayName;
     if (role && prefs.role) role.value = prefs.role;
     if (org  && prefs.org)  org.value  = prefs.org;
     if (view && prefs.view) view.value = prefs.view;
@@ -7932,7 +7984,10 @@ document.addEventListener('DOMContentLoaded', function () {
       selectedSectors.push(chip.dataset.sector);
     });
 
+    var displayNameEl = document.getElementById('settingsDisplayName');
+    var newDisplayName = displayNameEl ? displayNameEl.value.trim() : '';
     prefs = {
+      displayName:    newDisplayName,
       role:           role?.value || '',
       org:            org?.value || '',
       sectors:        selectedSectors,
@@ -7945,6 +8000,9 @@ document.addEventListener('DOMContentLoaded', function () {
     save(KEY_PREFS, prefs);
     document.getElementById('settingsModalOverlay').classList.remove('open');
     showToast('Preferences saved');
+    /* Update greeting immediately if display name changed */
+    var un = document.getElementById('wsUserName');
+    if (un && newDisplayName) un.textContent = newDisplayName;
     renderRecommendations();
     applyDefaultFilters();
     addNotif('Settings updated', 'Your workspace preferences have been saved.');
