@@ -8380,6 +8380,93 @@ document.addEventListener('DOMContentLoaded', function () {
   function save(key, val) {
     try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
   }
+
+  /* ── SUPABASE SYNC LAYER ─────────────────────────────────
+     localStorage = instant cache (UI never waits for network)
+     Supabase     = persistent store (synced in background)
+  ─────────────────────────────────────────────────────────── */
+  var _db = window._supabase || null;
+
+  /* Push watchlist to Supabase (upsert all rows for this user) */
+  function dbSaveWatchlist(wl) {
+    if (!_db || !_uid || _uid === 'anon') return;
+    // Delete rows no longer in list, then upsert the rest
+    var ids = wl.map(function(w){ return w.id; });
+    _db.from('user_watchlist').delete().eq('user_id', _uid).not('opp_id', 'in', '(' + (ids.length ? ids.map(function(i){return '"'+i+'"';}).join(',') : '"__none__"') + ')').then(function(){
+      if (!wl.length) return;
+      var rows = wl.map(function(w){
+        return { user_id: _uid, opp_id: w.id, title: w.title||'', sector: w.sector||'', type: w.type||'', saved_at: w.savedAt || new Date().toISOString() };
+      });
+      _db.from('user_watchlist').upsert(rows, { onConflict: 'user_id,opp_id' }).then(function(){});
+    });
+  }
+
+  /* Push prefs to Supabase */
+  function dbSavePrefs(p) {
+    if (!_db || !_uid || _uid === 'anon') return;
+    _db.from('user_prefs').upsert({ user_id: _uid, prefs: p, updated_at: new Date().toISOString() }, { onConflict: 'user_id' }).then(function(){});
+  }
+
+  /* Push searches to Supabase (replace all rows) */
+  function dbSaveSearches(ss) {
+    if (!_db || !_uid || _uid === 'anon') return;
+    _db.from('user_searches').delete().eq('user_id', _uid).then(function(){
+      if (!ss.length) return;
+      var rows = ss.map(function(s){
+        return { user_id: _uid, search_data: s, saved_at: s.savedAt || new Date().toISOString() };
+      });
+      _db.from('user_searches').insert(rows).then(function(){});
+    });
+  }
+
+  /* Pull all user data from Supabase on login and merge into localStorage */
+  function loadFromSupabase() {
+    if (!_db || !_uid || _uid === 'anon') return;
+    /* Watchlist */
+    _db.from('user_watchlist').select('*').eq('user_id', _uid).then(function(res){
+      if (res.error || !res.data || !res.data.length) return;
+      var remote = res.data.map(function(r){
+        return { id: r.opp_id, title: r.title, sector: r.sector, type: r.type, savedAt: r.saved_at };
+      });
+      /* Merge: keep local items too, deduplicate by id */
+      var merged = remote.slice();
+      watchlist.forEach(function(w){
+        if (!merged.some(function(m){ return m.id === w.id; })) merged.push(w);
+      });
+      watchlist = merged;
+      save(KEY_WATCHLIST, watchlist);
+      syncBookmarkButtons();
+      updateWsBar();
+    });
+    /* Prefs */
+    _db.from('user_prefs').select('prefs').eq('user_id', _uid).single().then(function(res){
+      if (res.error || !res.data || !res.data.prefs) return;
+      var remote = res.data.prefs;
+      /* Only overwrite if remote is newer / more complete */
+      var merged = Object.assign({}, remote, prefs);
+      /* If local prefs are effectively empty, fully use remote */
+      if (!prefs.role && !prefs.sectors) merged = remote;
+      prefs = merged;
+      save(KEY_PREFS, prefs);
+      applyDefaultFilters();
+    });
+    /* Searches */
+    _db.from('user_searches').select('search_data').eq('user_id', _uid).order('saved_at', { ascending: false }).then(function(res){
+      if (res.error || !res.data || !res.data.length) return;
+      var remote = res.data.map(function(r){ return r.search_data; });
+      /* Merge deduplicated by query fingerprint */
+      var seen = {};
+      var merged = [];
+      remote.concat(searches).forEach(function(s){
+        var key = JSON.stringify(s.query||s);
+        if (!seen[key]) { seen[key] = true; merged.push(s); }
+      });
+      searches = merged.slice(0, 20);
+      save(KEY_SEARCHES, searches);
+      updateWsBar();
+    });
+  }
+
   function esc(str) {
     return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -8456,10 +8543,12 @@ document.addEventListener('DOMContentLoaded', function () {
     if (isBookmarked(id)) {
       watchlist = watchlist.filter(function(w) { return w.id !== id; });
       save(KEY_WATCHLIST, watchlist);
+      dbSaveWatchlist(watchlist);
       showToast('Removed from watchlist');
     } else {
       watchlist.push({ id: id, title: title, sector: sector, type: type, savedAt: new Date().toISOString() });
       save(KEY_WATCHLIST, watchlist);
+      dbSaveWatchlist(watchlist);
       showToast('Added to watchlist — saved to My Workspace');
       addNotif('Watchlist updated', '\u201c' + title + '\u201d added to your watchlist.');
     }
@@ -8507,6 +8596,7 @@ document.addEventListener('DOMContentLoaded', function () {
     searches.unshift({ id: uid(), label: label, query: q, savedAt: new Date().toISOString() });
     if (searches.length > 20) searches = searches.slice(0, 20);
     save(KEY_SEARCHES, searches);
+    dbSaveSearches(searches);
     showToast('Search saved — find it in My Workspace');
     updateWsBar();
     var btn = document.getElementById('saveSearchBtn');
@@ -8687,6 +8777,7 @@ document.addEventListener('DOMContentLoaded', function () {
           var id = btn.dataset.id;
           watchlist = watchlist.filter(function(w) { return w.id !== id; });
           save(KEY_WATCHLIST, watchlist);
+          dbSaveWatchlist(watchlist);
           syncBookmarkButtons();
           updateWsBar();
           renderPanelBody();
@@ -8720,6 +8811,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var sid = e.target.dataset.sid;
             searches = searches.filter(function(x) { return x.id !== sid; });
             save(KEY_SEARCHES, searches);
+            dbSaveSearches(searches);
             updateWsBar();
             renderPanelBody();
             showToast('Search deleted');
@@ -8818,6 +8910,7 @@ document.addEventListener('DOMContentLoaded', function () {
       alertDigest:    alertDigest?.checked === true
     };
     save(KEY_PREFS, prefs);
+    dbSavePrefs(prefs);
     document.getElementById('settingsModalOverlay').classList.remove('open');
     showToast('Preferences saved');
     /* Update greeting immediately if display name changed */
@@ -8938,13 +9031,17 @@ document.addEventListener('DOMContentLoaded', function () {
       syncBookmarkButtons: syncBookmarkButtons,
       openPanel:         openPanel,
       closePanel:        closePanel,
-      openSettings:      openSettings
+      openSettings:      openSettings,
+      showToast:         showToast,
+      loadFromSupabase:  loadFromSupabase
     };
 
     updateWsBar();
     updateNotifBadge();
     renderNotifList();
     hookDetailPanel();
+    /* Pull persisted data from Supabase on every login */
+    loadFromSupabase();
 
     // ── Wire notification bell
     var notifBtn  = document.getElementById('notifBtn');
