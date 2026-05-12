@@ -2763,7 +2763,10 @@ body.page-entering {
   flex-wrap: wrap;
   padding: 10px var(--space-6);
   background: var(--surface-2);
-  border-bottom: 1px solid var(--border);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin: 10px var(--space-6) 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   font-size: var(--text-sm);
 }
 .ws-greeting {
@@ -2823,9 +2826,9 @@ body.page-entering {
   color: #fff;
 }
 .ws-btn.ws-btn--primary:hover { background: var(--green-hover); border-color: var(--green-hover); }
-[data-theme="light"] .ws-bar { background: #f4f6fa; border-bottom-color: #e0e7ef; }
+[data-theme="light"] .ws-bar { background: #f4f6fa; border-color: #e0e7ef; }
 @media (max-width: 700px) {
-  .ws-bar { padding: 8px var(--space-4); }
+  .ws-bar { padding: 8px var(--space-4); margin: 8px var(--space-4) 0; border-radius: 10px; }
   .ws-actions { margin-left: 0; width: 100%; justify-content: flex-end; }
 }
 
