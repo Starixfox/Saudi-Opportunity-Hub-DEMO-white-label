@@ -3395,6 +3395,23 @@ body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
   font-size: 13px; color: var(--text);
 }
 .ob-cl-item:last-child { border-bottom: none; }
+.ob-cl-actionable {
+  cursor: pointer;
+  border-radius: 6px;
+  padding-left: 6px; padding-right: 6px;
+  margin-left: -6px; margin-right: -6px;
+  transition: background 0.15s;
+}
+.ob-cl-actionable:hover { background: var(--surface-hover, rgba(0,108,53,0.07)); }
+.ob-cl-go {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--green);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
 .ob-cl-check {
   width: 18px; height: 18px; border-radius: 50%;
   border: 2px solid var(--border); flex-shrink: 0;
@@ -8783,6 +8800,62 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /* ── Render checklist tab ───────────────────────────────── */
+  /* Close the workspace side panel */
+  function closeWsPanel() {
+    document.getElementById('wsPanel')?.classList.remove('open');
+    document.getElementById('wsPanelOverlay')?.classList.remove('open');
+    document.body.classList.remove('panel-open');
+  }
+
+  /* Actions for each checklist item — close panel, navigate, highlight */
+  var CL_ACTIONS = {
+    bookmarked: function(ar) {
+      closeWsPanel();
+      setTimeout(function() {
+        var el = document.getElementById('oppsTableWrapper');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        /* Flash a hint toast */
+        var msg = ar ? 'انقر على أيقونة 🔖 في أي بطاقة لحفظها في قائمة المتابعة' : 'Click the bookmark icon on any card to save it to your Watchlist';
+        var el2 = document.getElementById('wsToast'), m = document.getElementById('wsToastMsg');
+        if (el2 && m) { m.textContent = msg; el2.setAttribute('aria-hidden','false'); el2.classList.add('show'); setTimeout(function(){ el2.classList.remove('show'); el2.setAttribute('aria-hidden','true'); }, 4000); }
+      }, 300);
+    },
+    saved: function(ar) {
+      closeWsPanel();
+      setTimeout(function() {
+        var el = document.getElementById('saveSearchBtn');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          /* Briefly pulse the button to draw the eye */
+          el.style.transition = 'box-shadow 0.2s';
+          el.style.boxShadow = '0 0 0 4px var(--green)';
+          setTimeout(function(){ el.style.boxShadow = ''; }, 1800);
+        }
+        var msg = ar ? 'اضبط الفلاتر ثم انقر «حفظ البحث» لحفظ المجموعة' : 'Set your filters then click "Save Search" to save the combination';
+        var el2 = document.getElementById('wsToast'), m = document.getElementById('wsToastMsg');
+        if (el2 && m) { m.textContent = msg; el2.setAttribute('aria-hidden','false'); el2.classList.add('show'); setTimeout(function(){ el2.classList.remove('show'); el2.setAttribute('aria-hidden','true'); }, 4000); }
+      }, 300);
+    },
+    compared: function(ar) {
+      closeWsPanel();
+      setTimeout(function() {
+        var el = document.getElementById('oppsTableWrapper');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        var msg = ar ? 'انقر على أيقونة ✓ في زاوية أي بطاقة لتحديدها، ثم اختر بطاقة ثانية وانقر «مقارنة»' : 'Click the ✓ icon on any card corner to select it, then pick a second card and click Compare';
+        var el2 = document.getElementById('wsToast'), m = document.getElementById('wsToastMsg');
+        if (el2 && m) { m.textContent = msg; el2.setAttribute('aria-hidden','false'); el2.classList.add('show'); setTimeout(function(){ el2.classList.remove('show'); el2.setAttribute('aria-hidden','true'); }, 5000); }
+      }, 300);
+    },
+    settings: function() {
+      closeWsPanel();
+      setTimeout(function() {
+        if (window.WS && window.WS.openSettings) window.WS.openSettings();
+        else document.getElementById('wsSettingsBtn')?.click();
+      }, 300);
+    }
+    /* 'returned' has no action — it happens automatically on 2nd visit */
+  };
+
   function renderChecklist(container) {
     var items = clItems();
     var done  = items.filter(function(i) { return cl[i.key]; }).length;
@@ -8793,9 +8866,12 @@ document.addEventListener('DOMContentLoaded', function () {
     html += '<div class="ob-checklist-title">' + (ar ? 'دليل البدء السريع' : 'Getting Started') + '</div>';
     items.forEach(function(item) {
       var isDone = cl[item.key];
-      html += '<div class="ob-cl-item' + (isDone ? ' done' : '') + '">';
+      var hasAction = !!CL_ACTIONS[item.key];
+      var rowClass = 'ob-cl-item' + (isDone ? ' done' : '') + (hasAction && !isDone ? ' ob-cl-actionable' : '');
+      html += '<div class="' + rowClass + '" data-cl-key="' + item.key + '">';
       html += '<div class="ob-cl-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>';
       html += '<span class="ob-cl-label">' + (ar ? item.ar : item.en) + '</span>';
+      if (hasAction && !isDone) html += '<span class="ob-cl-go">' + (ar ? '← ابدأ' : 'Go →') + '</span>';
       html += '</div>';
     });
     html += '<div class="ob-checklist-progress"><div class="ob-checklist-bar" style="width:' + pct + '%"></div></div>';
@@ -8805,13 +8881,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     container.innerHTML = html;
 
+    /* Wire click actions on actionable rows */
+    container.querySelectorAll('.ob-cl-actionable').forEach(function(row) {
+      row.addEventListener('click', function() {
+        var key = row.dataset.clKey;
+        var action = CL_ACTIONS[key];
+        if (action) action(ar);
+      });
+    });
+
     var restartBtn = container.querySelector('#obRestartFromPanel');
     if (restartBtn) restartBtn.addEventListener('click', function() {
-      // Close panel then start tour
-      var panel = document.getElementById('wsPanel');
-      var overlay = document.getElementById('wsPanelOverlay');
-      if (panel) panel.classList.remove('open');
-      if (overlay) overlay.classList.remove('open');
+      closeWsPanel();
       setTimeout(startTour, 200);
     });
   }
