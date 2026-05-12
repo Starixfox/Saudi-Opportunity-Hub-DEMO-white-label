@@ -8854,12 +8854,15 @@ document.addEventListener('DOMContentLoaded', function () {
     var target  = document.getElementById(current.targetId);
     if (!target) { advanceTour(1); return; }
 
-    /* Scroll target into view */
-    target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    /* Scroll target into view instantly so getBoundingClientRect is accurate */
+    target.scrollIntoView({ behavior: 'instant', block: 'center', inline: 'nearest' });
 
     setTimeout(function() {
       var rect = target.getBoundingClientRect();
       var pad  = 6;
+
+      /* Safety: if element has no size (hidden/collapsed), skip to next step */
+      if (rect.width === 0 && rect.height === 0) { advanceTour(1); return; }
 
       /* Spotlight cutout */
       var c = tourEl.cutout;
@@ -8869,20 +8872,30 @@ document.addEventListener('DOMContentLoaded', function () {
       c.style.height = (rect.height + pad * 2) + 'px';
       c.style.display = 'block';
 
-      /* Tooltip positioning */
+      /* Tooltip positioning — pick whichever side has more room */
       var tt = tourEl.tooltip;
       tt.style.display = 'block';
-      var ttW = 300, ttH = 180;
+      var ttW = 300, ttH = 200;
       var vw  = window.innerWidth, vh = window.innerHeight;
       var top, left;
 
-      if (current.placement === 'bottom' && rect.bottom + ttH + 16 < vh) {
-        top  = rect.bottom + 12;
-        left = Math.min(Math.max(rect.left, 16), vw - ttW - 16);
+      var spaceBelow = vh - rect.bottom;
+      var spaceAbove = rect.top;
+
+      if (spaceBelow >= ttH + 16) {
+        /* Enough room below — preferred */
+        top = rect.bottom + 12;
+      } else if (spaceAbove >= ttH + 16) {
+        /* Place above */
+        top = rect.top - ttH - 12;
       } else {
-        top  = Math.max(rect.top - ttH - 12, 16);
-        left = Math.min(Math.max(rect.left, 16), vw - ttW - 16);
+        /* Not enough room either side — anchor to centre of viewport */
+        top = Math.max((vh - ttH) / 2, 16);
       }
+
+      /* Horizontal: align with element, clamp to viewport */
+      left = Math.min(Math.max(rect.left, 16), vw - ttW - 16);
+
       tt.style.top  = top  + 'px';
       tt.style.left = left + 'px';
 
