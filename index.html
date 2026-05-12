@@ -3192,6 +3192,287 @@ body.page-entering {
 body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
 @media (max-width: 480px) {
   body[dir="rtl"] .ws-toast { left: var(--space-4); right: var(--space-4); }
+
+/* ════════════════════════════════════════════════════════════
+   ONBOARDING SYSTEM — Welcome modal, Tour, Checklist
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Welcome Modal ───────────────────────────────────────── */
+.ob-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.ob-overlay.open { opacity: 1; pointer-events: auto; }
+
+.ob-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  max-width: 500px; width: 100%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.45);
+  overflow: hidden;
+  transform: translateY(24px) scale(0.97);
+  transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
+}
+.ob-overlay.open .ob-modal { transform: none; }
+
+.ob-modal-header {
+  background: linear-gradient(135deg, #006C35 0%, #00a651 100%);
+  padding: 28px 28px 20px;
+  color: #fff;
+  position: relative;
+}
+.ob-modal-logo {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: rgba(255,255,255,0.65);
+  margin-bottom: 8px;
+}
+.ob-modal-title {
+  font-size: clamp(22px, 4vw, 28px);
+  font-weight: 800; line-height: 1.15; margin: 0 0 6px;
+}
+.ob-modal-sub {
+  font-size: 14px; color: rgba(255,255,255,0.80); margin: 0;
+}
+.ob-gold-bar {
+  height: 3px; background: #C9A66B;
+  margin: 0;
+}
+
+.ob-modal-body { padding: 24px 28px 20px; }
+
+.ob-features {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; margin-bottom: 22px;
+}
+.ob-feature {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px; border-radius: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.ob-feature-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--green-dim);
+  color: var(--green);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.ob-feature-text strong { display: block; font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.ob-feature-text span { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+
+.ob-modal-actions {
+  display: flex; gap: 10px; align-items: center;
+  padding: 0 28px 24px;
+}
+.ob-btn-primary {
+  flex: 1; padding: 12px 20px;
+  background: #006C35; color: #fff;
+  border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ob-btn-primary:hover { background: #00a651; }
+.ob-btn-skip {
+  padding: 12px 16px;
+  background: transparent; color: var(--text-muted);
+  border: 1px solid var(--border); border-radius: 10px;
+  font-size: 13px; cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.ob-btn-skip:hover { color: var(--text); border-color: var(--text-muted); }
+
+/* ── Tour Spotlight ──────────────────────────────────────── */
+.ob-tour-backdrop {
+  position: fixed; inset: 0; z-index: 1800;
+  pointer-events: none;
+}
+/* Four dark panels around the spotlight cutout */
+.ob-tour-cutout {
+  position: fixed; z-index: 1801;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.62);
+  border-radius: 10px;
+  pointer-events: none;
+  transition: top 0.35s cubic-bezier(0.22,1,0.36,1),
+              left 0.35s cubic-bezier(0.22,1,0.36,1),
+              width 0.35s cubic-bezier(0.22,1,0.36,1),
+              height 0.35s cubic-bezier(0.22,1,0.36,1);
+  outline: 3px solid rgba(201,166,107,0.80);
+  outline-offset: 3px;
+}
+
+.ob-tour-tooltip {
+  position: fixed; z-index: 1802;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px 16px;
+  max-width: 300px; width: 90vw;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.40);
+  pointer-events: auto;
+  transition: top 0.35s cubic-bezier(0.22,1,0.36,1),
+              left 0.35s cubic-bezier(0.22,1,0.36,1),
+              opacity 0.2s ease;
+}
+.ob-tour-step-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--green);
+  margin-bottom: 6px;
+}
+.ob-tour-title {
+  font-size: 15px; font-weight: 700; color: var(--text);
+  margin: 0 0 6px; line-height: 1.25;
+}
+.ob-tour-body {
+  font-size: 13px; color: var(--text-muted);
+  line-height: 1.55; margin: 0 0 14px;
+}
+.ob-tour-nav {
+  display: flex; align-items: center; gap: 8px;
+}
+.ob-tour-prev {
+  padding: 7px 12px; border-radius: 8px;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text-muted); font-size: 12px; cursor: pointer;
+  transition: color 0.15s;
+}
+.ob-tour-prev:hover { color: var(--text); }
+.ob-tour-next {
+  flex: 1; padding: 8px 14px; border-radius: 8px;
+  background: #006C35; color: #fff;
+  border: none; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: background 0.15s;
+}
+.ob-tour-next:hover { background: #00a651; }
+.ob-tour-end {
+  flex: 1; padding: 8px 14px; border-radius: 8px;
+  background: #C9A66B; color: #fff;
+  border: none; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: background 0.15s;
+}
+.ob-tour-end:hover { background: #b8935a; }
+.ob-tour-dots {
+  display: flex; gap: 5px; align-items: center; margin-left: auto;
+}
+.ob-tour-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--border); transition: background 0.2s;
+}
+.ob-tour-dot.active { background: #006C35; }
+.ob-tour-skip-link {
+  display: block; text-align: center;
+  font-size: 11px; color: var(--text-faint);
+  margin-top: 10px; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.ob-tour-skip-link:hover { color: var(--text-muted); }
+
+/* ── Checklist inside ws-panel ───────────────────────────── */
+.ob-checklist {
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin: 12px 0;
+}
+.ob-checklist-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-muted);
+  margin-bottom: 10px;
+}
+.ob-cl-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px; color: var(--text);
+}
+.ob-cl-item:last-child { border-bottom: none; }
+.ob-cl-check {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid var(--border); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, border-color 0.2s;
+}
+.ob-cl-item.done .ob-cl-check {
+  background: #006C35; border-color: #006C35;
+}
+.ob-cl-item.done .ob-cl-check svg { display: block; }
+.ob-cl-check svg { display: none; }
+.ob-cl-item.done .ob-cl-label { text-decoration: line-through; color: var(--text-faint); }
+.ob-checklist-progress {
+  height: 4px; background: var(--border);
+  border-radius: 99px; margin-top: 12px; overflow: hidden;
+}
+.ob-checklist-bar {
+  height: 100%; background: linear-gradient(90deg, #006C35, #00a651);
+  border-radius: 99px;
+  transition: width 0.5s cubic-bezier(0.22,1,0.36,1);
+}
+.ob-restart-link {
+  display: block; text-align: center; font-size: 12px;
+  color: var(--green); margin-top: 10px; cursor: pointer;
+  font-weight: 600;
+}
+.ob-restart-link:hover { text-decoration: underline; }
+
+/* ── Help button in navbar ───────────────────────────────── */
+.ob-help-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  cursor: pointer; font-size: 13px; font-weight: 700;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+.ob-help-btn:hover {
+  background: var(--green-highlight);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+/* ── Empty state improvements ────────────────────────────── */
+.ob-empty {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 36px 20px; text-align: center;
+  gap: 10px;
+}
+.ob-empty-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: var(--green-dim); color: var(--green);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 4px;
+}
+.ob-empty-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.ob-empty-body  { font-size: 12.5px; color: var(--text-muted); line-height: 1.5; max-width: 220px; }
+.ob-empty-action {
+  margin-top: 6px; padding: 8px 18px; border-radius: 8px;
+  background: #006C35; color: #fff; border: none;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  transition: background 0.15s;
+}
+.ob-empty-action:hover { background: #00a651; }
+
+/* Mobile */
+@media (max-width: 600px) {
+  .ob-features { grid-template-columns: 1fr; }
+  .ob-modal-header { padding: 22px 20px 16px; }
+  .ob-modal-body { padding: 18px 20px 14px; }
+  .ob-modal-actions { padding: 0 20px 20px; flex-direction: column; }
+  .ob-btn-skip { width: 100%; text-align: center; }
+  .ob-tour-tooltip { max-width: calc(100vw - 32px); }
+}
+
 </style>
 </head>
 <body>
@@ -3294,7 +3575,8 @@ body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
         </div>
       </div>
 
-      <button class="hamburger" id="hamburger" aria-label="Open navigation menu" aria-expanded="false">
+      <button class="ob-help-btn" id="obHelpBtn" title="Help &amp; Tour" aria-label="Help and Tour">?</button>
+        <button class="hamburger" id="hamburger" aria-label="Open navigation menu" aria-expanded="false">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <path d="M3 6h18M3 12h18M3 18h18"/>
         </svg>
@@ -4009,6 +4291,7 @@ body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
     <button class="ws-panel-tab active" data-wstab="watchlist">Watchlist</button>
     <button class="ws-panel-tab" data-wstab="searches">Saved Searches</button>
     <button class="ws-panel-tab" data-wstab="history">Recent</button>
+    <button class="ws-panel-tab" data-wstab="checklist">Get Started</button>
   </div>
   <div class="ws-panel-body" id="wsPanelBody">
     <!-- rendered by WS JS -->
@@ -4133,6 +4416,7 @@ body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
     </div>
 
     <button class="settings-save-btn" id="settingsSaveBtn">Save preferences</button>
+    <button class="ob-restart-link" id="settingsRestartTour" style="display:block;margin-top:10px;padding:8px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--green);font-size:12px;font-weight:700;cursor:pointer;width:100%;">↺ Restart product tour</button>
   </div>
 </div>
 
@@ -4543,6 +4827,57 @@ document.addEventListener('DOMContentLoaded', function () {
   </div>
 </div>
 <div id="compareOverlay" class="compare-overlay compare-overlay--hidden"></div>
+
+
+<!-- ══ ONBOARDING WELCOME MODAL ══════════════════════════════════ -->
+<div class="ob-overlay" id="obOverlay" role="dialog" aria-modal="true" aria-label="Welcome to Opportunity Hub">
+  <div class="ob-modal" id="obModal">
+    <div class="ob-modal-header">
+      <div class="ob-modal-logo">Saudi Opportunity Hub · Pilot</div>
+      <h2 class="ob-modal-title" id="obWelcomeTitle">Welcome to your Intelligence Workspace</h2>
+      <p class="ob-modal-sub" id="obWelcomeSub">Your personal hub for tracking Saudi Vision 2030 grants, tenders, and investment programmes.</p>
+    </div>
+    <div class="ob-gold-bar"></div>
+    <div class="ob-modal-body">
+      <div class="ob-features">
+        <div class="ob-feature">
+          <div class="ob-feature-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg></div>
+          <div class="ob-feature-text"><strong id="obF1Title">Watchlist</strong><span id="obF1Body">Save opportunities so you never lose track of a deadline.</span></div>
+        </div>
+        <div class="ob-feature">
+          <div class="ob-feature-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+          <div class="ob-feature-text"><strong id="obF2Title">Saved Searches</strong><span id="obF2Body">Bookmark your filter combinations and re-apply them in one click.</span></div>
+        </div>
+        <div class="ob-feature">
+          <div class="ob-feature-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
+          <div class="ob-feature-text"><strong id="obF3Title">Personalised Feed</strong><span id="obF3Body">Set your sector interests to surface relevant opportunities first.</span></div>
+        </div>
+        <div class="ob-feature">
+          <div class="ob-feature-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+          <div class="ob-feature-text"><strong id="obF4Title">Compare Mode</strong><span id="obF4Body">Select up to 3 opportunities side-by-side to compare details.</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="ob-modal-actions">
+      <button class="ob-btn-primary" id="obStartTourBtn">Take a quick tour →</button>
+      <button class="ob-btn-skip" id="obSkipTourBtn" id="obSkipBtn">Skip for now</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOUR SPOTLIGHT + TOOLTIP ══════════════════════════════════ -->
+<div class="ob-tour-cutout" id="obTourCutout" style="display:none;"></div>
+<div class="ob-tour-tooltip" id="obTourTooltip" style="display:none;">
+  <div class="ob-tour-step-label" id="obTourStepLabel">Step 1 of 7</div>
+  <div class="ob-tour-title" id="obTourTitle"></div>
+  <div class="ob-tour-body" id="obTourBody"></div>
+  <div class="ob-tour-nav">
+    <button class="ob-tour-prev" id="obTourPrev">← Back</button>
+    <button class="ob-tour-next" id="obTourNext">Next →</button>
+    <div class="ob-tour-dots" id="obTourDots"></div>
+  </div>
+  <span class="ob-tour-skip-link" id="obTourSkip">End tour</span>
+</div>
 
 </body>
 </html>
@@ -7938,7 +8273,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!watchlist.length) {
         body.innerHTML = '<div class="ws-empty-state">' +
           '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>' +
-          '<p>Your watchlist is empty.<br>Bookmark opportunities using the <strong>&#128278;</strong> button on any card.</p></div>';
+          '<div class="ob-empty"><div class="ob-empty-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg></div><div class="ob-empty-title">' + (document.body.dir==="rtl" ? "قائمة المتابعة فارغة" : "Your watchlist is empty") + '</div><div class="ob-empty-body">' + (document.body.dir==="rtl" ? "انقر على أيقونة الإشارة المرجعية الذهبية على أي بطاقة فرصة لإضافتها هنا." : "Click the gold bookmark button on any opportunity card to save it here. Track deadlines and revisit saved items any time.") + '</div></div>';
         return;
       }
       body.innerHTML = watchlist.map(function(item) {
@@ -7971,7 +8306,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!searches.length) {
         body.innerHTML = '<div class="ws-empty-state">' +
           '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>' +
-          '<p>No saved searches yet.<br>Use <strong>Save Search</strong> above the results grid to save your current filters.</p></div>';
+          '<div class="ob-empty"><div class="ob-empty-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div><div class="ob-empty-title">' + (document.body.dir==="rtl" ? "لا توجد عمليات بحث محفوظة" : "No saved searches yet") + '</div><div class="ob-empty-body">' + (document.body.dir==="rtl" ? "اضبط الفلاتر ثم انقر زر حفظ البحث فوق النتائج لإعادة تطبيقها لاحقاً." : "Set your filters, then click Save Search above the results. Re-apply any saved combination in one click.") + '</div></div>';
         return;
       }
       body.innerHTML = searches.map(function(s) {
@@ -8004,6 +8339,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       });
 
+    } else if (activeTab === 'checklist') {
+      /* Delegate to onboarding module if loaded */
+      if (window.OB && window.OB.renderChecklist) {
+        window.OB.renderChecklist(body);
+      } else {
+        body.innerHTML = '<div class="ob-empty"><div class="ob-empty-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="ob-empty-title">Getting Started</div><div class="ob-empty-body">Loading checklist…</div></div>';
+      }
+      return;
     } else if (activeTab === 'history') {
       if (!history.length) {
         body.innerHTML = '<div class="ws-empty-state">' +
@@ -8358,4 +8701,430 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 })();
+
+/* ════════════════════════════════════════════════════════════
+   ONBOARDING SYSTEM
+   ════════════════════════════════════════════════════════════ */
+;(function() {
+  'use strict';
+
+  var KEY_OB_DONE     = 'oh-ob-done';      // tour completed
+  var KEY_OB_MODAL    = 'oh-ob-modal';     // welcome modal shown
+  var KEY_OB_CL       = 'oh-ob-checklist'; // { saved, bookmarked, compared, settings, returned }
+
+  /* ── Language helper ────────────────────────────────────── */
+  function isAr() { return document.body && document.body.dir === 'rtl'; }
+
+  /* ── Checklist state ────────────────────────────────────── */
+  var CL_DEFAULTS = { saved: false, bookmarked: false, compared: false, settings: false, returned: false };
+  function loadCL() {
+    try { return Object.assign({}, CL_DEFAULTS, JSON.parse(localStorage.getItem(KEY_OB_CL))); }
+    catch(e) { return Object.assign({}, CL_DEFAULTS); }
+  }
+  function saveCL(cl) { try { localStorage.setItem(KEY_OB_CL, JSON.stringify(cl)); } catch(e) {} }
+
+  var cl = loadCL();
+
+  /* Mark returned as done once they visit again */
+  var visits = parseInt(localStorage.getItem('oh-ob-visits') || '0', 10);
+  visits++;
+  localStorage.setItem('oh-ob-visits', visits);
+  if (visits >= 2) { cl.returned = true; saveCL(cl); }
+
+  /* ── Checklist items definition ─────────────────────────── */
+  function clItems() {
+    return [
+      { key: 'bookmarked', en: 'Save an opportunity to your Watchlist', ar: 'احفظ فرصة في قائمة المتابعة' },
+      { key: 'saved',      en: 'Save a search filter combination',       ar: 'احفظ مجموعة فلاتر بحث' },
+      { key: 'compared',   en: 'Compare two opportunities side-by-side', ar: 'قارن بين فرصتين' },
+      { key: 'settings',   en: 'Set your role and sector interests',     ar: 'حدد دورك والقطاعات التي تهمك' },
+      { key: 'returned',   en: 'Return to the platform a second time',   ar: 'عُد إلى المنصة مرة أخرى' }
+    ];
+  }
+
+  /* ── Render checklist tab ───────────────────────────────── */
+  function renderChecklist(container) {
+    var items = clItems();
+    var done  = items.filter(function(i) { return cl[i.key]; }).length;
+    var pct   = Math.round((done / items.length) * 100);
+    var ar = isAr();
+
+    var html = '<div class="ob-checklist">';
+    html += '<div class="ob-checklist-title">' + (ar ? 'دليل البدء السريع' : 'Getting Started') + '</div>';
+    items.forEach(function(item) {
+      var isDone = cl[item.key];
+      html += '<div class="ob-cl-item' + (isDone ? ' done' : '') + '">';
+      html += '<div class="ob-cl-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>';
+      html += '<span class="ob-cl-label">' + (ar ? item.ar : item.en) + '</span>';
+      html += '</div>';
+    });
+    html += '<div class="ob-checklist-progress"><div class="ob-checklist-bar" style="width:' + pct + '%"></div></div>';
+    html += '<div style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:6px;">' + done + ' / ' + items.length + (ar ? ' مكتمل' : ' completed') + '</div>';
+    html += '</div>';
+    html += '<div class="ob-restart-link" id="obRestartFromPanel">↺ ' + (ar ? 'إعادة تشغيل الجولة التعريفية' : 'Restart product tour') + '</div>';
+
+    container.innerHTML = html;
+
+    var restartBtn = container.querySelector('#obRestartFromPanel');
+    if (restartBtn) restartBtn.addEventListener('click', function() {
+      // Close panel then start tour
+      var panel = document.getElementById('wsPanel');
+      var overlay = document.getElementById('wsPanelOverlay');
+      if (panel) panel.classList.remove('open');
+      if (overlay) overlay.classList.remove('open');
+      setTimeout(startTour, 200);
+    });
+  }
+
+  /* Hook into renderPanelBody for checklist tab */
+  var _origRenderPanelBody = window.WS && window.WS._renderPanelBody;
+  function hookPanel() {
+    if (!window.WS) return;
+    var origOpen = window.WS.openPanel;
+    window.WS.openPanel = function(tab) {
+      origOpen.call(window.WS, tab);
+      if (tab === 'checklist') {
+        setTimeout(function() {
+          var body = document.getElementById('wsPanelBody');
+          if (body) renderChecklist(body);
+        }, 50);
+      }
+    };
+  }
+
+  /* ── Tour steps ─────────────────────────────────────────── */
+  function tourSteps() {
+    var ar = isAr();
+    return [
+      {
+        targetId: 'wsBar',
+        title:    ar ? 'شريط مساحة العمل' : 'Your Workspace Bar',
+        body:     ar ? 'هذا الشريط يُظهر لك إحصائياتك الشخصية — عدد الفرص المحفوظة، عمليات البحث، والجديد منذ زيارتك الأخيرة. يظهر فقط بعد تسجيل الدخول.' : 'This bar shows your personal stats — saved opportunities, searches, and what's new since your last visit. It only appears after you sign in.',
+        placement: 'bottom'
+      },
+      {
+        targetId: 'wsWatchlistStat',
+        title:    ar ? 'قائمة المتابعة' : 'Watchlist',
+        body:     ar ? 'انقر على أيقونة الإشارة المرجعية على أي بطاقة فرصة لحفظها هنا. يمكنك مراجعتها لاحقاً ومتابعة المواعيد النهائية.' : 'Click the bookmark icon on any opportunity card to save it here. Review it later and track deadlines without losing your place.',
+        placement: 'bottom'
+      },
+      {
+        targetId: 'saveSearchBtn',
+        title:    ar ? 'حفظ البحث' : 'Save Your Search',
+        body:     ar ? 'قم بضبط الفلاتر ثم انقر هذا الزر لحفظ مجموعة الفلاتر. في المرة القادمة يمكنك إعادة تطبيقها بنقرة واحدة.' : 'Set your filters, then click this button to save the combination. Next time you can re-apply the exact same filters in one click.',
+        placement: 'bottom'
+      },
+      {
+        targetId: 'notifBtn',
+        title:    ar ? 'مركز الإشعارات' : 'Notifications',
+        body:     ar ? 'تظهر هنا تحديثات قائمة المتابعة وتأكيدات حفظ البحث وتنبيهات المنصة. الشارة الخضراء تُشير إلى إشعارات غير مقروءة.' : 'Watchlist updates, saved search confirmations, and platform alerts appear here. The green badge shows unread count.',
+        placement: 'bottom'
+      },
+      {
+        targetId: 'wsSettingsBtn',
+        title:    ar ? 'تخصيص مساحة العمل' : 'Personalise Your Workspace',
+        body:     ar ? 'حدد دورك والقطاعات التي تهمك حتى تتمكن المنصة من عرض الفرص الأكثر صلة أولاً. يمكنك أيضاً ضبط تفضيلات التنبيهات.' : 'Set your role and sectors so the platform surfaces the most relevant opportunities first. You can also configure alert preferences.',
+        placement: 'bottom'
+      },
+      {
+        targetId: 'oppsTableWrapper',
+        title:    ar ? 'قاعدة بيانات الفرص' : 'The Opportunity Database',
+        body:     ar ? 'أكثر من 1,000 فرصة عبر 15 قطاعاً. استخدم الفلاتر للتضييق، وانقر على أي بطاقة لعرض التفاصيل الكاملة، أو استخدم زر الإشارة المرجعية لإضافتها لقائمتك.' : 'Over 1,000 opportunities across 15 sectors. Use filters to narrow down, click any card for full details, or use the bookmark button to add it to your watchlist.',
+        placement: 'top'
+      },
+      {
+        targetId: 'wsOpenPanelBtn',
+        title:    ar ? 'مساحة العمل الخاصة بك' : 'Your Full Workspace',
+        body:     ar ? 'انقر هنا في أي وقت لفتح قائمة المتابعة وعمليات البحث المحفوظة وسجل النشاط الأخير في لوحة واحدة.' : 'Click here any time to open your Watchlist, Saved Searches, and Recent Activity all in one panel.',
+        placement: 'bottom'
+      }
+    ];
+  }
+
+  var tourActive = false;
+  var tourStep   = 0;
+  var tourEl     = { cutout: null, tooltip: null, next: null, prev: null, skip: null, stepLabel: null, title: null, body: null, dots: null };
+
+  function positionTour(step) {
+    var steps   = tourSteps();
+    var current = steps[step];
+    if (!current) return;
+
+    var target  = document.getElementById(current.targetId);
+    if (!target) { advanceTour(1); return; }
+
+    /* Scroll target into view */
+    target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+
+    setTimeout(function() {
+      var rect = target.getBoundingClientRect();
+      var pad  = 6;
+
+      /* Spotlight cutout */
+      var c = tourEl.cutout;
+      c.style.top    = (rect.top    - pad) + 'px';
+      c.style.left   = (rect.left   - pad) + 'px';
+      c.style.width  = (rect.width  + pad * 2) + 'px';
+      c.style.height = (rect.height + pad * 2) + 'px';
+      c.style.display = 'block';
+
+      /* Tooltip positioning */
+      var tt = tourEl.tooltip;
+      tt.style.display = 'block';
+      var ttW = 300, ttH = 180;
+      var vw  = window.innerWidth, vh = window.innerHeight;
+      var top, left;
+
+      if (current.placement === 'bottom' && rect.bottom + ttH + 16 < vh) {
+        top  = rect.bottom + 12;
+        left = Math.min(Math.max(rect.left, 16), vw - ttW - 16);
+      } else {
+        top  = Math.max(rect.top - ttH - 12, 16);
+        left = Math.min(Math.max(rect.left, 16), vw - ttW - 16);
+      }
+      tt.style.top  = top  + 'px';
+      tt.style.left = left + 'px';
+
+      /* Update content */
+      var ar = isAr();
+      tourEl.stepLabel.textContent = (ar ? 'خطوة ' : 'Step ') + (step + 1) + (ar ? ' من ' : ' of ') + steps.length;
+      tourEl.title.textContent = current.title;
+      tourEl.body.textContent  = current.body;
+
+      /* Dots */
+      tourEl.dots.innerHTML = steps.map(function(_, i) {
+        return '<span class="ob-tour-dot' + (i === step ? ' active' : '') + '"></span>';
+      }).join('');
+
+      /* Prev button */
+      tourEl.prev.style.display = step === 0 ? 'none' : '';
+
+      /* Last step button */
+      var isLast = step === steps.length - 1;
+      tourEl.next.style.display = isLast ? 'none' : '';
+      var endBtn = document.getElementById('obTourEndBtn');
+      if (!endBtn) {
+        endBtn = document.createElement('button');
+        endBtn.id = 'obTourEndBtn';
+        endBtn.className = 'ob-tour-end';
+        endBtn.addEventListener('click', endTour);
+        tourEl.next.parentNode.insertBefore(endBtn, tourEl.next.nextSibling);
+      }
+      endBtn.style.display = isLast ? '' : 'none';
+      endBtn.textContent = ar ? '✓ انتهى' : '✓ Done';
+
+      tourEl.skip.textContent = ar ? 'إنهاء الجولة' : 'End tour';
+    }, 120);
+  }
+
+  function advanceTour(dir) {
+    var steps = tourSteps();
+    tourStep += dir;
+    if (tourStep < 0) tourStep = 0;
+    if (tourStep >= steps.length) { endTour(); return; }
+    positionTour(tourStep);
+  }
+
+  function endTour() {
+    tourActive = false;
+    localStorage.setItem(KEY_OB_DONE, '1');
+    var c = tourEl.cutout, tt = tourEl.tooltip;
+    if (c)  { c.style.display = 'none'; }
+    if (tt) { tt.style.display = 'none'; }
+    /* Restore scroll */
+    document.body.style.overflow = '';
+    showToastOb(isAr() ? 'تم إكمال الجولة التعريفية ✓' : 'Tour complete — you're all set ✓');
+  }
+
+  function startTour() {
+    if (!tourEl.cutout) {
+      tourEl.cutout    = document.getElementById('obTourCutout');
+      tourEl.tooltip   = document.getElementById('obTourTooltip');
+      tourEl.next      = document.getElementById('obTourNext');
+      tourEl.prev      = document.getElementById('obTourPrev');
+      tourEl.skip      = document.getElementById('obTourSkip');
+      tourEl.stepLabel = document.getElementById('obTourStepLabel');
+      tourEl.title     = document.getElementById('obTourTitle');
+      tourEl.body      = document.getElementById('obTourBody');
+      tourEl.dots      = document.getElementById('obTourDots');
+
+      tourEl.next.addEventListener('click', function() { advanceTour(1); });
+      tourEl.prev.addEventListener('click', function() { advanceTour(-1); });
+      tourEl.skip.addEventListener('click', endTour);
+    }
+    tourActive = true;
+    tourStep   = 0;
+    document.body.style.overflow = '';
+    positionTour(0);
+  }
+
+  /* ── Toast helper (independent of WS module timing) ──────── */
+  function showToastOb(msg) {
+    /* Use existing WS toast if available */
+    var el = document.getElementById('wsToast');
+    var msgEl = document.getElementById('wsToastMsg');
+    if (el && msgEl) {
+      msgEl.textContent = msg;
+      el.setAttribute('aria-hidden', 'false');
+      el.classList.add('show');
+      setTimeout(function() { el.classList.remove('show'); el.setAttribute('aria-hidden','true'); }, 3000);
+    }
+  }
+
+  /* ── Update checklist state from external actions ─────────── */
+  /* Listen for WS module events by polling key localStorage changes */
+  function updateCL(key) {
+    if (cl[key]) return;
+    cl[key] = true;
+    saveCL(cl);
+  }
+
+  /* Patch WS when it's ready */
+  function patchWS() {
+    if (!window.WS) return;
+
+    var _tb = window.WS.toggleBookmark;
+    window.WS.toggleBookmark = function(btn) {
+      _tb.call(window.WS, btn);
+      if (window.WS.isBookmarked && window.WS.isBookmarked(btn.dataset.id)) {
+        updateCL('bookmarked');
+      }
+    };
+
+    var _ss = window.WS.saveCurrentSearch || (window.WS._saveCurrentSearch);
+    /* saveCurrentSearch is not exposed on WS directly — hook via saveSearchBtn click */
+  }
+
+  /* Hook saveSearchBtn */
+  function hookSaveSearch() {
+    var btn = document.getElementById('saveSearchBtn');
+    if (btn) {
+      btn.addEventListener('click', function() {
+        setTimeout(function() { updateCL('saved'); }, 300);
+      });
+    }
+  }
+
+  /* Hook settings save */
+  function hookSettings() {
+    var btn = document.getElementById('settingsSaveBtn');
+    if (btn) {
+      btn.addEventListener('click', function() {
+        setTimeout(function() { updateCL('settings'); }, 300);
+      });
+    }
+    /* Restart from settings */
+    var restart = document.getElementById('settingsRestartTour');
+    if (restart) {
+      restart.addEventListener('click', function() {
+        var overlay = document.getElementById('settingsModalOverlay');
+        if (overlay) overlay.classList.remove('open');
+        setTimeout(startTour, 200);
+      });
+    }
+  }
+
+  /* Hook compare */
+  function hookCompare() {
+    var btn = document.getElementById('compareOpenBtn');
+    if (btn) {
+      btn.addEventListener('click', function() {
+        setTimeout(function() { updateCL('compared'); }, 300);
+      });
+    }
+  }
+
+  /* Help button → restart tour */
+  function hookHelp() {
+    var btn = document.getElementById('obHelpBtn');
+    if (btn) {
+      btn.addEventListener('click', function() { startTour(); });
+    }
+  }
+
+  /* ── Welcome Modal ─────────────────────────────────────────── */
+  function translateModal() {
+    if (!isAr()) return;
+    var map = {
+      obWelcomeTitle: 'مرحباً بك في مساحة الاستخبارات',
+      obWelcomeSub:   'مركزك الشخصي لمتابعة منح ومناقصات وبرامج الاستثمار في رؤية 2030',
+      obF1Title: 'قائمة المتابعة',
+      obF1Body:  'احفظ الفرص حتى لا تفوتك أي مواعيد نهائية.',
+      obF2Title: 'عمليات البحث المحفوظة',
+      obF2Body:  'احفظ مجموعات الفلاتر وأعد تطبيقها بنقرة واحدة.',
+      obF3Title: 'تغذية مخصصة',
+      obF3Body:  'حدد اهتماماتك القطاعية لعرض الفرص الأنسب أولاً.',
+      obF4Title: 'وضع المقارنة',
+      obF4Body:  'قارن حتى 3 فرص جنباً إلى جنب.',
+    };
+    Object.keys(map).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = map[id];
+    });
+    var startBtn = document.getElementById('obStartTourBtn');
+    var skipBtn  = document.getElementById('obSkipTourBtn');
+    if (startBtn) startBtn.textContent = 'ابدأ الجولة التعريفية ←';
+    if (skipBtn)  skipBtn.textContent  = 'تخطي الآن';
+  }
+
+  function showWelcomeModal() {
+    var overlay = document.getElementById('obOverlay');
+    if (!overlay) return;
+    translateModal();
+    overlay.classList.add('open');
+
+    document.getElementById('obStartTourBtn').addEventListener('click', function() {
+      overlay.classList.remove('open');
+      setTimeout(startTour, 350);
+    });
+    document.getElementById('obSkipTourBtn').addEventListener('click', function() {
+      overlay.classList.remove('open');
+      localStorage.setItem(KEY_OB_DONE, '1');
+    });
+  }
+
+  /* ── Init ──────────────────────────────────────────────────── */
+  function initOnboarding() {
+    hookHelp();
+    hookSettings();
+    hookSaveSearch();
+    hookCompare();
+
+    /* Small delay so WS module is ready */
+    setTimeout(function() {
+      hookPanel();
+      patchWS();
+    }, 800);
+
+    /* Show welcome modal only once, only when user is logged in */
+    var modalShown = localStorage.getItem(KEY_OB_MODAL);
+    var tourDone   = localStorage.getItem(KEY_OB_DONE);
+
+    /* Wait for session guard to confirm logged-in state */
+    var attempts = 0;
+    var checkLogin = setInterval(function() {
+      attempts++;
+      var wsBar = document.getElementById('wsBar');
+      var isLoggedIn = wsBar && getComputedStyle(wsBar).display !== 'none';
+      if (isLoggedIn && !modalShown) {
+        clearInterval(checkLogin);
+        localStorage.setItem(KEY_OB_MODAL, '1');
+        setTimeout(showWelcomeModal, 1200);
+      } else if (attempts > 30 || (isLoggedIn && modalShown)) {
+        clearInterval(checkLogin);
+      }
+    }, 400);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initOnboarding);
+  } else {
+    initOnboarding();
+  }
+
+  /* Expose for external use */
+  window.OB = { startTour: startTour, renderChecklist: renderChecklist };
+
+})();
+
 </script>
