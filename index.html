@@ -4325,6 +4325,19 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
   display: flex; align-items: center; gap: 4px;
   font-size: 11px; font-weight: 600;
 }
+.app-tb-lang-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: var(--radius-full);
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text-muted); font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all var(--transition); white-space: nowrap;
+  font-family: var(--font-body);
+}
+.app-tb-lang-btn:hover { background: var(--green-highlight); border-color: var(--green); color: var(--green); }
+.app-tb-lang-btn .app-tb-lang-icon { display: flex; align-items: center; }
+.app-tb-lang-btn svg { flex-shrink: 0; }
+/* Active Arabic state */
+html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 .app-tb-user {
   display: flex; align-items: center; gap: 6px;
 }
@@ -4738,12 +4751,16 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
       <button class="app-tb-icon-btn" id="appThemeToggle" aria-label="Toggle theme" title="Toggle theme" type="button">
         <i data-lucide="moon"></i>
       </button>
-      <!-- Language -->
-      <div class="app-tb-lang">
-        <a id="langEn" class="is-lang-btn is-lang-active" href="index.html" lang="en">EN</a>
-        <span class="is-lang-sep">|</span>
-        <a id="langAr" class="is-lang-btn" href="ar.html" lang="ar" dir="rtl">ع</a>
-      </div>
+      <!-- Language toggle -->
+      <button class="app-tb-lang-btn" id="appLangToggle" type="button" aria-label="Switch language" title="Switch to Arabic / English">
+        <span class="app-tb-lang-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </span>
+        <span id="appLangLabel">العربية</span>
+      </button>
+      <!-- Hidden anchors kept for existing JS that reads #langAr / #langEn -->
+      <a id="langEn" class="is-lang-btn is-lang-active" href="index.html" lang="en" style="display:none">EN</a>
+      <a id="langAr" class="is-lang-btn" href="ar.html" lang="ar" dir="rtl" style="display:none">ع</a>
       <div class="app-topbar-divider"></div>
       <!-- User + Logout -->
       <div class="app-tb-user">
@@ -4754,6 +4771,16 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
       </button>
     </div>
   </header>
+
+  <!-- Ghost bridge elements — written by updateWsBar(), read by syncTopbarStats() -->
+  <div id="wsBar" aria-hidden="true" style="display:none!important;position:absolute;pointer-events:none;">
+    <strong id="wsWatchlistCount">0</strong>
+    <strong id="wsSavedCount">0</strong>
+    <strong id="wsUpdatesCount">0</strong>
+    <span id="wsUserName">User</span>
+    <span id="wsGreeting"></span>
+  </div>
+
 
   <!-- Main content area — holds all 5 views -->
   <div class="app-content">
@@ -6587,20 +6614,37 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ─── Sync topbar stats from WS counters ─── */
   function syncTopbarStats() {
-    var wlCount = document.getElementById('wsWatchlistCount');
-    var srCount = document.getElementById('wsSavedCount');
-    var nwCount = document.getElementById('wsUpdatesCount');
-    if (wlCount) set('appTbWatchlistCount', wlCount.textContent || '0');
-    if (srCount) set('appTbSearchesCount', srCount.textContent || '0');
-    if (nwCount) set('appTbNewCount', nwCount.textContent || '0');
-    // Also sync username
-    var wsName = document.getElementById('wsUserName');
-    if (wsName && wsName.textContent && wsName.textContent !== 'User') {
-      set('appTbUsername', wsName.textContent);
+    /* Read counts directly from ghost bridge elements (written by updateWsBar) */
+    var wlEl = document.getElementById('wsWatchlistCount');
+    var srEl = document.getElementById('wsSavedCount');
+    var nwEl = document.getElementById('wsUpdatesCount');
+    var unEl = document.getElementById('wsUserName');
+    var wlVal = wlEl ? (wlEl.textContent || '0').trim() : '0';
+    var srVal = srEl ? (srEl.textContent || '0').trim() : '0';
+    var nwVal = nwEl ? (nwEl.textContent || '0').trim() : '0';
+    var unVal = unEl ? (unEl.textContent || '').trim() : '';
+    /* Also try WS.getWatchlist directly for watchlist count */
+    if (wlVal === '0' && window.WS && window.WS.getWatchlist) {
+      var wl = window.WS.getWatchlist();
+      if (wl && wl.length) wlVal = String(wl.length);
+    }
+    set('appTbWatchlistCount', wlVal);
+    set('appTbSearchesCount', srVal);
+    set('appTbNewCount', nwVal);
+    /* Username — accept any non-empty, non-"User" value */
+    if (unVal && unVal !== 'User') {
+      set('appTbUsername', unVal);
     }
   }
-  setInterval(syncTopbarStats, 2000);
-  setTimeout(syncTopbarStats, 800);
+  /* Poll frequently for the first 20s after load, then settle */
+  (function() {
+    var polls = 0;
+    var iv = setInterval(function() {
+      syncTopbarStats();
+      polls++;
+      if (polls > 20) { clearInterval(iv); setInterval(syncTopbarStats, 5000); }
+    }, 400);
+  })();
 
   /* ─── Theme toggle in topbar ─── */
   var appThemeBtn = document.getElementById('appThemeToggle');
@@ -6617,6 +6661,40 @@ document.addEventListener('DOMContentLoaded', function () {
       if (window.__renderInsightsV2) { setTimeout(function(){ window.__renderInsightsV2(window.opportunitiesData || []); }, 60); }
     });
   }
+
+  /* ─── Arabic language toggle ─── */
+  var langToggleBtn = document.getElementById('appLangToggle');
+  var langLabel = document.getElementById('appLangLabel');
+  function syncLangToggleLabel() {
+    var isAr = (document.documentElement.lang === 'ar' || document.body.dir === 'rtl' ||
+                document.documentElement.getAttribute('dir') === 'rtl');
+    if (langLabel) langLabel.textContent = isAr ? 'English' : 'العربية';
+  }
+  if (langToggleBtn) {
+    langToggleBtn.addEventListener('click', function() {
+      var isAr = (document.documentElement.lang === 'ar' || document.body.dir === 'rtl' ||
+                  document.documentElement.getAttribute('dir') === 'rtl');
+      if (isAr) {
+        /* Switch to English */
+        if (typeof activateEnglish === 'function') activateEnglish();
+        else { document.documentElement.lang = 'en'; document.body.dir = 'ltr'; }
+      } else {
+        /* Switch to Arabic */
+        if (typeof activateArabic === 'function') activateArabic();
+        else { document.documentElement.lang = 'ar'; document.body.dir = 'rtl'; }
+      }
+      setTimeout(syncLangToggleLabel, 100);
+      setTimeout(paintIcons, 150);
+    });
+  }
+  /* Keep label in sync after any external lang switch */
+  window.addEventListener('languagechange', syncLangToggleLabel);
+  /* Observe dir attribute changes on html/body */
+  if ('MutationObserver' in window) {
+    new MutationObserver(syncLangToggleLabel).observe(document.documentElement, { attributes: true, attributeFilter: ['dir', 'lang'] });
+    new MutationObserver(syncLangToggleLabel).observe(document.body, { attributes: true, attributeFilter: ['dir'] });
+  }
+  setTimeout(syncLangToggleLabel, 500);
 
   /* ─── Mobile sidebar toggle ─── */
   var menuBtn = document.getElementById('appMenuBtn');
