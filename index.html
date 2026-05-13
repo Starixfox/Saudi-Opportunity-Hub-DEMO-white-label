@@ -9588,12 +9588,11 @@ document.addEventListener('DOMContentLoaded', function () {
       var spaceBelow = vh - (rect.bottom + pad) - margin;
       var spaceAbove = rect.top - pad - margin;
 
-      /* For tray steps (fixed to bottom): always place above the tray */
+      /* For tray steps (fixed to bottom): pin tooltip in the upper portion of the screen
+         so it is never obscured by the tray regardless of tray height or screen size */
       if (current.showTray) {
-        /* rect.top is the top of the tray — place tooltip above it */
-        top = rect.top - ttH - margin;
-        /* If that's still too high (tray very tall on small screen), centre in upper half */
-        if (top < edgePad) top = edgePad;
+        /* Aim for roughly 1/4 down from top; hard-clamp to stay on screen */
+        top = Math.max(edgePad, Math.round(vh * 0.18));
       } else if (spaceBelow >= ttH + margin) {
         top = rect.bottom + pad + margin;
       } else if (spaceAbove >= ttH + margin) {
