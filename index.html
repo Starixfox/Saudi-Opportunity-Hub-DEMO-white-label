@@ -34,6 +34,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 <style>
 /* =============================================
    Saudi Opportunity Hub — styles.css
@@ -4152,6 +4154,255 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
   .ob-tour-tooltip { max-width: calc(100vw - 32px); width: calc(100vw - 32px); left: 16px !important; }
 }
 
+/* ════════════════════════════════════════════════════════════
+   APP SHELL — sidebar + topbar + main + mobile bottom tabs
+   (appended for multi-view refactor — preserves all existing styles)
+   ════════════════════════════════════════════════════════════ */
+.app-shell {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  grid-template-rows: 56px 1fr;
+  grid-template-areas:
+    "sidebar topbar"
+    "sidebar content";
+  min-height: 100vh;
+  background: var(--bg);
+}
+.app-sidebar {
+  grid-area: sidebar;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 16px 12px;
+  gap: 6px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 50;
+}
+.app-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px 18px;
+  border-bottom: 1px solid var(--divider);
+  margin-bottom: 10px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+}
+.app-sidebar-brand .brand-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 8px var(--green-glow);
+}
+.app-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+  border: none;
+  background: transparent;
+  text-align: left;
+  width: 100%;
+}
+.app-nav-item:hover {
+  background: var(--green-highlight);
+  color: var(--text);
+}
+.app-nav-item.active {
+  background: var(--green-highlight);
+  color: var(--green);
+}
+.app-nav-item svg, .app-nav-item [data-lucide] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.app-sidebar-spacer { flex: 1; }
+.app-sidebar-bottom {
+  border-top: 1px solid var(--divider);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.app-topbar {
+  grid-area: topbar;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  height: 56px;
+}
+.app-topbar-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.app-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.app-content {
+  grid-area: content;
+  overflow-x: hidden;
+  min-width: 0;
+}
+/* Views — only the active one is visible */
+.app-view { display: none; animation: viewFadeIn 240ms cubic-bezier(0.16, 1, 0.3, 1); }
+.app-view.active { display: block; }
+@keyframes viewFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* Dashboard */
+.dash-wrap { padding: 28px 28px 60px; max-width: 1280px; margin: 0 auto; }
+.dash-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+.dash-title { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 700; color: var(--text); }
+.dash-sub { color: var(--text-muted); font-size: var(--text-sm); }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.kpi-label { color: var(--text-muted); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+.kpi-label svg, .kpi-label [data-lucide] { width: 14px; height: 14px; color: var(--green); }
+.kpi-value { font-family: var(--font-display); font-size: 32px; font-weight: 700; color: var(--text); margin-top: 8px; line-height: 1.1; }
+.kpi-hint { font-size: 12px; color: var(--text-faint); margin-top: 4px; }
+.chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px 14px;
+  box-shadow: var(--shadow-sm);
+  min-height: 320px;
+}
+.chart-card h3 { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+.chart-card .chart-canvas-wrap { position: relative; height: 260px; }
+/* Sectors view */
+.sectors-wrap { padding: 28px; max-width: 1280px; margin: 0 auto; }
+.sectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin: 20px 0 28px; }
+.sector-chip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+.sector-chip:hover { border-color: var(--green); color: var(--green); transform: translateY(-1px); }
+.sector-chip.active { background: var(--green-highlight); border-color: var(--green); color: var(--green); }
+.sector-chip .count { color: var(--text-muted); font-size: 12px; font-weight: 600; }
+.sector-chip.active .count { color: var(--green); }
+/* Saved view */
+.saved-wrap { padding: 28px; max-width: 1280px; margin: 0 auto; }
+.saved-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+}
+.saved-empty svg, .saved-empty [data-lucide] { width: 40px; height: 40px; color: var(--text-faint); margin-bottom: 12px; }
+.saved-empty h3 { font-family: var(--font-display); color: var(--text); margin-bottom: 6px; font-size: 18px; }
+/* About view */
+.about-wrap { padding: 28px; max-width: 880px; margin: 0 auto; }
+.about-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+}
+.about-card h2 { font-family: var(--font-display); font-size: var(--text-xl); margin-bottom: 14px; color: var(--text); }
+.about-card p { color: var(--text-muted); line-height: 1.7; margin-bottom: 14px; font-size: var(--text-base); }
+.about-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 8px; padding: 10px 20px;
+  background: var(--green); color: #fff;
+  border-radius: var(--radius-full);
+  text-decoration: none; font-weight: 600; font-size: 14px;
+  transition: background var(--transition);
+}
+.about-cta:hover { background: var(--green-hover); }
+/* Bookmark button inside cards */
+.bookmark-btn {
+  position: absolute; top: 12px; right: 12px;
+  background: transparent; border: 1px solid var(--border);
+  width: 32px; height: 32px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text-muted);
+  transition: all var(--transition); z-index: 5;
+}
+.bookmark-btn:hover { color: var(--green); border-color: var(--green); }
+.bookmark-btn.bookmarked { color: var(--green); border-color: var(--green); background: var(--green-highlight); }
+.bookmark-btn svg, .bookmark-btn [data-lucide] { width: 16px; height: 16px; }
+/* Mobile bottom tabs */
+.app-bottom-tabs { display: none; }
+@media (max-width: 767px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: 56px 1fr;
+    grid-template-areas:
+      "topbar"
+      "content";
+  }
+  .app-sidebar { display: none; }
+  .app-bottom-tabs {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    z-index: 100;
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+  }
+  .app-bottom-tab {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px; padding: 6px 2px;
+    color: var(--text-muted); background: transparent; border: none;
+    font-size: 10px; font-weight: 500; cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition);
+  }
+  .app-bottom-tab svg, .app-bottom-tab [data-lucide] { width: 20px; height: 20px; }
+  .app-bottom-tab.active { color: var(--green); }
+  .app-content { padding-bottom: 70px; }
+  .dash-wrap, .sectors-wrap, .saved-wrap, .about-wrap { padding: 16px 14px 30px; }
+}
+
 </style>
 </head>
 <body>
@@ -4168,6 +4419,106 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
   }
 })();
 </script>
+
+<!-- ══ APP SHELL — multi-view layout (sidebar + topbar + content) ══ -->
+<div class="app-shell">
+  <!-- Left sidebar (desktop) -->
+  <aside class="app-sidebar" aria-label="Primary navigation">
+    <div class="app-sidebar-brand">
+      <span class="brand-dot" aria-hidden="true"></span>
+      <span>Opportunity Hub</span>
+    </div>
+    <button class="app-nav-item" data-view="dashboard" data-route="#dashboard" type="button">
+      <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
+    </button>
+    <button class="app-nav-item" data-view="opportunities" data-route="#opportunities" type="button">
+      <i data-lucide="search"></i><span>Opportunities</span>
+    </button>
+    <button class="app-nav-item" data-view="sectors" data-route="#sectors" type="button">
+      <i data-lucide="layers"></i><span>Sectors</span>
+    </button>
+    <button class="app-nav-item" data-view="saved" data-route="#saved" type="button">
+      <i data-lucide="bookmark"></i><span>Saved</span>
+    </button>
+    <button class="app-nav-item" data-view="about" data-route="#about" type="button">
+      <i data-lucide="info"></i><span>About</span>
+    </button>
+    <div class="app-sidebar-spacer"></div>
+    <div class="app-sidebar-bottom">
+      <button class="app-nav-item" id="appThemeToggle" type="button" aria-label="Toggle theme">
+        <i data-lucide="moon"></i><span id="appThemeToggleLabel">Theme</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Top header bar (56px) -->
+  <header class="app-topbar" role="banner">
+    <div class="app-topbar-title">
+      <i data-lucide="compass"></i>
+      <span id="appTopbarTitle">Dashboard</span>
+    </div>
+    <div class="app-topbar-actions">
+      <span style="color: var(--text-muted); font-size: 12px;">Vision 2030 · Pilot Demo</span>
+    </div>
+  </header>
+
+  <!-- Main content area — holds all 5 views -->
+  <div class="app-content">
+
+    <!-- VIEW: DASHBOARD -->
+    <section class="app-view" id="view-dashboard" aria-labelledby="dashHeading">
+      <div class="dash-wrap">
+        <div class="dash-header">
+          <div>
+            <h2 class="dash-title" id="dashHeading">Dashboard</h2>
+            <p class="dash-sub">Live snapshot of opportunities across sectors, regions, and types.</p>
+          </div>
+        </div>
+        <div class="kpi-grid" id="kpiGrid">
+          <div class="kpi-card">
+            <div class="kpi-label"><i data-lucide="database"></i>Total opportunities</div>
+            <div class="kpi-value" id="kpiTotal">—</div>
+            <div class="kpi-hint" id="kpiTotalHint">All programs in the dataset</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label"><i data-lucide="circle-dot"></i>Open now</div>
+            <div class="kpi-value" id="kpiOpen">—</div>
+            <div class="kpi-hint">Currently accepting applications</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label"><i data-lucide="layers"></i>Sectors covered</div>
+            <div class="kpi-value" id="kpiSectors">—</div>
+            <div class="kpi-hint">Distinct sectors represented</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label"><i data-lucide="globe"></i>Countries / regions</div>
+            <div class="kpi-value" id="kpiCountries">—</div>
+            <div class="kpi-hint">Geographies covered</div>
+          </div>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card">
+            <h3>Opportunities by sector</h3>
+            <div class="chart-canvas-wrap"><canvas id="chartSectors"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Opportunities by type</h3>
+            <div class="chart-canvas-wrap"><canvas id="chartTypes"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Status breakdown</h3>
+            <div class="chart-canvas-wrap"><canvas id="chartStatus"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Top countries / regions</h3>
+            <div class="chart-canvas-wrap"><canvas id="chartCountries"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW: OPPORTUNITIES — wraps ALL existing cards, filters, header, main, footer -->
+    <section class="app-view" id="view-opportunities" aria-label="Opportunities">
 
 <!-- IS TOP UTILITY BAR -->
 <div class="is-top-bar">
@@ -4923,6 +5274,73 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
   </div>
 </footer>
 
+    </section>
+    <!-- /VIEW: OPPORTUNITIES -->
+
+    <!-- VIEW: SECTORS — sector chip grid filtering cards -->
+    <section class="app-view" id="view-sectors" aria-label="Sectors">
+      <div class="sectors-wrap">
+        <h2 class="dash-title" style="margin-bottom: 8px;">Browse by sector</h2>
+        <p class="dash-sub">Tap a sector to filter the dataset. Open the Opportunities view to see filtered results.</p>
+        <div class="sectors-grid" id="sectorsGrid" role="list">
+          <!-- Sector chips injected by JS -->
+        </div>
+        <div id="sectorsHint" class="dash-sub" style="margin-top: 12px;">Loading sectors…</div>
+      </div>
+    </section>
+
+    <!-- VIEW: SAVED — bookmarked cards (in-memory Set) -->
+    <section class="app-view" id="view-saved" aria-label="Saved">
+      <div class="saved-wrap">
+        <h2 class="dash-title" style="margin-bottom: 8px;">Saved opportunities</h2>
+        <p class="dash-sub">Bookmarks are kept in memory for this session.</p>
+        <div id="savedList" style="margin-top: 20px;">
+          <div class="saved-empty" id="savedEmpty">
+            <i data-lucide="bookmark"></i>
+            <h3>No saved opportunities yet</h3>
+            <p>Bookmark any opportunity card to see it here.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW: ABOUT — platform description + contact CTA -->
+    <section class="app-view" id="view-about" aria-label="About">
+      <div class="about-wrap">
+        <div class="about-card">
+          <h2>About the Opportunity Hub</h2>
+          <p>The Saudi Opportunity Hub is a structured intelligence platform that surfaces grants, tenders, accelerators, fellowships, and investment programs across Saudi Arabia, the GCC, and global initiatives open to Saudi-based organizations.</p>
+          <p>Built as a pilot for Vision 2030 alignment, it consolidates fragmented funding signals into a single, searchable workspace — covering 15 strategic sectors including Energy, ICT, Healthcare, Agriculture, and Tourism.</p>
+          <p>This is a private, white-label demo for internal evaluation. Data is continuously updated and verified against sponsoring organizations.</p>
+          <a class="about-cta" href="mailto:jblancoapodaca@gmail.com">
+            <i data-lucide="mail"></i> Contact the team
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /.app-content -->
+
+  <!-- Mobile bottom tab bar (under 768px) -->
+  <nav class="app-bottom-tabs" aria-label="Mobile navigation">
+    <button class="app-bottom-tab" data-view="dashboard" data-route="#dashboard" type="button">
+      <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
+    </button>
+    <button class="app-bottom-tab" data-view="opportunities" data-route="#opportunities" type="button">
+      <i data-lucide="search"></i><span>Opportunities</span>
+    </button>
+    <button class="app-bottom-tab" data-view="sectors" data-route="#sectors" type="button">
+      <i data-lucide="layers"></i><span>Sectors</span>
+    </button>
+    <button class="app-bottom-tab" data-view="saved" data-route="#saved" type="button">
+      <i data-lucide="bookmark"></i><span>Saved</span>
+    </button>
+    <button class="app-bottom-tab" data-view="about" data-route="#about" type="button">
+      <i data-lucide="info"></i><span>About</span>
+    </button>
+  </nav>
+</div><!-- /.app-shell -->
+
 <!-- ══ WORKSPACE PANEL (Watchlist + Saved Searches) ══════════════════ -->
 <div class="ws-panel-overlay" id="wsPanelOverlay"></div>
 <aside class="ws-panel" id="wsPanel" aria-label="My Workspace" role="dialog" tabindex="-1">
@@ -5523,6 +5941,353 @@ document.addEventListener('DOMContentLoaded', function () {
   </div>
   <span class="ob-tour-skip-link" id="obTourSkip">End tour</span>
 </div>
+
+<!-- ══ APP SHELL CONTROLLER — routing, dashboard charts, sectors, saved, bookmarks ══ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------- Lucide icons ---------------- */
+  function paintIcons() {
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      try { window.lucide.createIcons(); } catch (e) {}
+    }
+  }
+  paintIcons();
+
+  /* ---------------- View routing ---------------- */
+  var VIEWS = ['dashboard', 'opportunities', 'sectors', 'saved', 'about'];
+  var TITLES = {
+    dashboard: 'Dashboard',
+    opportunities: 'Opportunities',
+    sectors: 'Sectors',
+    saved: 'Saved',
+    about: 'About'
+  };
+  var DEFAULT_VIEW = 'dashboard';
+  var chartsInitialized = false;
+
+  function getViewFromHash() {
+    var raw = (window.location.hash || '').replace(/^#/, '').toLowerCase();
+    return VIEWS.indexOf(raw) !== -1 ? raw : DEFAULT_VIEW;
+  }
+
+  function showView(view) {
+    if (VIEWS.indexOf(view) === -1) view = DEFAULT_VIEW;
+    VIEWS.forEach(function (v) {
+      var el = document.getElementById('view-' + v);
+      if (el) el.classList.toggle('active', v === view);
+    });
+    document.querySelectorAll('[data-view]').forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-view') === view);
+    });
+    var titleEl = document.getElementById('appTopbarTitle');
+    if (titleEl) titleEl.textContent = TITLES[view] || 'Opportunity Hub';
+    if (view === 'dashboard' && !chartsInitialized) initDashboard();
+    if (view === 'sectors') renderSectorChips();
+    if (view === 'saved') renderSavedList();
+    paintIcons();
+    try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch (e) { window.scrollTo(0, 0); }
+  }
+
+  function setRoute(view, replace) {
+    var hash = '#' + view;
+    if (window.location.hash === hash) {
+      showView(view);
+      return;
+    }
+    if (replace && window.history && window.history.replaceState) {
+      window.history.replaceState(null, '', hash);
+      showView(view);
+    } else {
+      window.location.hash = hash; /* triggers hashchange */
+    }
+  }
+
+  /* Click handlers on every nav item / bottom tab */
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-route]');
+    if (!t) return;
+    var view = t.getAttribute('data-view');
+    if (!view) return;
+    e.preventDefault();
+    setRoute(view);
+  });
+
+  /* Back/forward */
+  window.addEventListener('hashchange', function () { showView(getViewFromHash()); });
+
+  /* Initial route — default to #dashboard if none */
+  if (!window.location.hash || VIEWS.indexOf(window.location.hash.replace(/^#/, '').toLowerCase()) === -1) {
+    setRoute(DEFAULT_VIEW, true);
+  } else {
+    showView(getViewFromHash());
+  }
+
+  /* ---------------- Theme toggle (sidebar bottom) ---------------- */
+  var themeBtn = document.getElementById('appThemeToggle');
+  var themeLabel = document.getElementById('appThemeToggleLabel');
+  function syncThemeLabel() {
+    var t = document.documentElement.getAttribute('data-theme') || 'light';
+    if (themeLabel) themeLabel.textContent = t === 'dark' ? 'Light mode' : 'Dark mode';
+    if (themeBtn) {
+      var icon = themeBtn.querySelector('[data-lucide]');
+      if (icon) icon.setAttribute('data-lucide', t === 'dark' ? 'sun' : 'moon');
+      paintIcons();
+    }
+  }
+  if (themeBtn) {
+    themeBtn.addEventListener('click', function () {
+      var cur = document.documentElement.getAttribute('data-theme') || 'light';
+      document.documentElement.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+      syncThemeLabel();
+      if (chartsInitialized) rebuildCharts();
+    });
+  }
+  syncThemeLabel();
+
+  /* ---------------- Data access ---------------- */
+  function getData() {
+    return (window.opportunitiesData && window.opportunitiesData.length ? window.opportunitiesData
+         : (window.allOpportunities || [])) || [];
+  }
+  function waitForData(cb, tries) {
+    tries = tries || 0;
+    var d = getData();
+    if (d && d.length) return cb(d);
+    if (tries > 80) return cb([]); /* ~16s max */
+    setTimeout(function () { waitForData(cb, tries + 1); }, 200);
+  }
+
+  /* ---------------- Dashboard / KPIs / Charts ---------------- */
+  var chartRefs = {};
+  var GREEN = '#00a651';
+  var PALETTE = ['#00a651', '#4f9cf9', '#f5a623', '#b071f9', '#34d97b', '#f6b384', '#7c89ab', '#ef9090', '#1d6fbc', '#c89efb', '#f5c842', '#80b8fb'];
+
+  function tally(arr, key) {
+    var m = {};
+    arr.forEach(function (item) {
+      var v = item[key];
+      if (Array.isArray(v)) {
+        v.forEach(function (x) { if (x) m[x] = (m[x] || 0) + 1; });
+      } else if (v) {
+        m[v] = (m[v] || 0) + 1;
+      }
+    });
+    return m;
+  }
+  function topN(map, n) {
+    var arr = Object.keys(map).map(function (k) { return [k, map[k]]; });
+    arr.sort(function (a, b) { return b[1] - a[1]; });
+    return arr.slice(0, n);
+  }
+  function textColor() {
+    return getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#7c89ab';
+  }
+  function gridColor() {
+    return getComputedStyle(document.documentElement).getPropertyValue('--divider').trim() || '#1e2840';
+  }
+
+  function makeChart(id, type, data, options) {
+    var canvas = document.getElementById(id);
+    if (!canvas || !window.Chart) return null;
+    if (chartRefs[id]) { try { chartRefs[id].destroy(); } catch (e) {} }
+    chartRefs[id] = new window.Chart(canvas.getContext('2d'), { type: type, data: data, options: options });
+    return chartRefs[id];
+  }
+
+  function initDashboard() {
+    waitForData(function (data) {
+      chartsInitialized = true;
+      // KPIs
+      var sectorMap = tally(data, 'sectors');
+      var countryMap = tally(data, 'country');
+      var openCount = data.filter(function (d) {
+        var s = String(d.status || '').toLowerCase();
+        return s.indexOf('open') !== -1 || s.indexOf('recurring') !== -1 || s.indexOf('rolling') !== -1;
+      }).length;
+      set('kpiTotal', data.length.toLocaleString());
+      set('kpiOpen', openCount.toLocaleString());
+      set('kpiSectors', Object.keys(sectorMap).length.toLocaleString());
+      set('kpiCountries', Object.keys(countryMap).length.toLocaleString());
+      rebuildCharts();
+    });
+  }
+
+  function set(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
+
+  function rebuildCharts() {
+    var data = getData();
+    var tc = textColor(), gc = gridColor();
+    var baseOpts = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: tc, font: { size: 11 } } }
+      },
+      scales: {
+        x: { ticks: { color: tc, font: { size: 10 } }, grid: { color: gc } },
+        y: { ticks: { color: tc, font: { size: 10 } }, grid: { color: gc }, beginAtZero: true }
+      }
+    };
+
+    // Sectors (bar, top 10)
+    var sectorTop = topN(tally(data, 'sectors'), 10);
+    makeChart('chartSectors', 'bar', {
+      labels: sectorTop.map(function (x) { return x[0]; }),
+      datasets: [{ label: 'Opportunities', data: sectorTop.map(function (x) { return x[1]; }), backgroundColor: GREEN, borderRadius: 6 }]
+    }, Object.assign({}, baseOpts, { plugins: { legend: { display: false } }, indexAxis: 'y' }));
+
+    // Types (doughnut)
+    var typeMap = tally(data, 'type');
+    var typeLabels = Object.keys(typeMap);
+    makeChart('chartTypes', 'doughnut', {
+      labels: typeLabels,
+      datasets: [{ data: typeLabels.map(function (k) { return typeMap[k]; }), backgroundColor: PALETTE, borderWidth: 0 }]
+    }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: tc, font: { size: 11 } } } } });
+
+    // Status (pie)
+    var statusMap = tally(data, 'status');
+    var statusLabels = Object.keys(statusMap);
+    makeChart('chartStatus', 'pie', {
+      labels: statusLabels,
+      datasets: [{ data: statusLabels.map(function (k) { return statusMap[k]; }), backgroundColor: PALETTE, borderWidth: 0 }]
+    }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: tc, font: { size: 11 } } } } });
+
+    // Countries (bar, top 8)
+    var countryTop = topN(tally(data, 'country'), 8);
+    makeChart('chartCountries', 'bar', {
+      labels: countryTop.map(function (x) { return x[0]; }),
+      datasets: [{ label: 'Opportunities', data: countryTop.map(function (x) { return x[1]; }), backgroundColor: '#4f9cf9', borderRadius: 6 }]
+    }, Object.assign({}, baseOpts, { plugins: { legend: { display: false } } }));
+  }
+
+  /* ---------------- Sectors view ---------------- */
+  function renderSectorChips() {
+    var grid = document.getElementById('sectorsGrid');
+    var hint = document.getElementById('sectorsHint');
+    if (!grid) return;
+    waitForData(function (data) {
+      var sectorMap = tally(data, 'sectors');
+      var entries = Object.keys(sectorMap).map(function (k) { return [k, sectorMap[k]]; });
+      entries.sort(function (a, b) { return b[1] - a[1]; });
+      grid.innerHTML = '';
+      if (!entries.length) { if (hint) hint.textContent = 'No sectors found.'; return; }
+      entries.forEach(function (e) {
+        var btn = document.createElement('button');
+        btn.className = 'sector-chip';
+        btn.type = 'button';
+        btn.setAttribute('data-sector', e[0]);
+        btn.innerHTML = '<span>' + e[0] + '</span><span class="count">' + e[1] + '</span>';
+        btn.addEventListener('click', function () {
+          /* Toggle active visually */
+          grid.querySelectorAll('.sector-chip').forEach(function (c) { c.classList.remove('active'); });
+          btn.classList.add('active');
+          /* Try to apply existing sector filter, then route to opportunities */
+          var sel = document.querySelector('#sectorFilter, select[name="sector"], #sector-filter');
+          if (sel) {
+            var opt = Array.from(sel.options || []).find(function (o) { return String(o.value).toLowerCase() === String(e[0]).toLowerCase() || String(o.textContent).toLowerCase() === String(e[0]).toLowerCase(); });
+            if (opt) { sel.value = opt.value; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+          }
+          setRoute('opportunities');
+        });
+        grid.appendChild(btn);
+      });
+      if (hint) hint.textContent = entries.length + ' sectors · ' + data.length + ' opportunities total.';
+      paintIcons();
+    });
+  }
+
+  /* ---------------- Saved (in-memory Set) ---------------- */
+  var savedIds = new Set();
+  window.__savedIds = savedIds; /* exposed for debug only — not persisted */
+
+  function toggleSaved(id) {
+    if (savedIds.has(id)) savedIds.delete(id); else savedIds.add(id);
+    /* Update all bookmark buttons on the page for this id */
+    document.querySelectorAll('.bookmark-btn[data-bookmark-id="' + CSS.escape(String(id)) + '"]').forEach(function (b) {
+      b.classList.toggle('bookmarked', savedIds.has(id));
+    });
+  }
+
+  /* Inject a bookmark button into every opportunity card */
+  function injectBookmarkButtons() {
+    waitForData(function (data) {
+      var byId = {};
+      data.forEach(function (d, i) { byId[String(d.id || i)] = d; });
+      var cards = document.querySelectorAll('#view-opportunities .opportunity-card, #view-opportunities [data-opp-id], #view-opportunities .card');
+      cards.forEach(function (card, i) {
+        if (card.querySelector('.bookmark-btn')) return;
+        var id = card.getAttribute('data-opp-id') || card.getAttribute('data-id') || (card.dataset && card.dataset.id) || String(i);
+        if (getComputedStyle(card).position === 'static') card.style.position = 'relative';
+        var btn = document.createElement('button');
+        btn.className = 'bookmark-btn';
+        btn.type = 'button';
+        btn.setAttribute('aria-label', 'Bookmark opportunity');
+        btn.setAttribute('data-bookmark-id', String(id));
+        btn.innerHTML = '<i data-lucide="bookmark"></i>';
+        if (savedIds.has(id)) btn.classList.add('bookmarked');
+        btn.addEventListener('click', function (e) {
+          e.preventDefault(); e.stopPropagation();
+          toggleSaved(id);
+        });
+        card.appendChild(btn);
+      });
+      paintIcons();
+    });
+  }
+
+  function renderSavedList() {
+    var wrap = document.getElementById('savedList');
+    var empty = document.getElementById('savedEmpty');
+    if (!wrap) return;
+    /* Clear previously cloned items but keep the empty-state node */
+    Array.from(wrap.children).forEach(function (c) { if (c !== empty) wrap.removeChild(c); });
+    if (!savedIds.size) {
+      if (empty) empty.style.display = '';
+      return;
+    }
+    if (empty) empty.style.display = 'none';
+    /* Clone each saved card from the opportunities view (read-only snapshots) */
+    savedIds.forEach(function (id) {
+      var src = document.querySelector('#view-opportunities .bookmark-btn[data-bookmark-id="' + CSS.escape(String(id)) + '"]');
+      if (!src) return;
+      var card = src.closest('.opportunity-card, [data-opp-id], .card');
+      if (!card) return;
+      var clone = card.cloneNode(true);
+      clone.style.marginBottom = '14px';
+      /* Wire the bookmark button on the clone */
+      var cb = clone.querySelector('.bookmark-btn');
+      if (cb) {
+        cb.classList.add('bookmarked');
+        cb.addEventListener('click', function (e) {
+          e.preventDefault(); e.stopPropagation();
+          toggleSaved(id);
+          renderSavedList();
+        });
+      }
+      wrap.appendChild(clone);
+    });
+    paintIcons();
+  }
+
+  /* Inject bookmark buttons whenever cards appear/change */
+  var injectTimer = null;
+  function scheduleInject() {
+    clearTimeout(injectTimer);
+    injectTimer = setTimeout(injectBookmarkButtons, 300);
+  }
+  scheduleInject();
+  var oppView = document.getElementById('view-opportunities');
+  if (oppView && 'MutationObserver' in window) {
+    new MutationObserver(scheduleInject).observe(oppView, { childList: true, subtree: true });
+  }
+
+  /* Re-paint icons after any view change */
+  setTimeout(paintIcons, 300);
+  setTimeout(paintIcons, 1500);
+})();
+</script>
 
 </body>
 </html>
