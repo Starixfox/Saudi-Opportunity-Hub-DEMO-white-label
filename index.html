@@ -9172,13 +9172,17 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   function timeAgo(isoStr) {
     if (!isoStr) return '';
+    var ar = document.body.dir === 'rtl';
     var diff = Date.now() - new Date(isoStr).getTime();
     var mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'just now';
-    if (mins < 60) return mins + 'm ago';
+    if (mins < 1) return ar ? 'للتو' : 'just now';
+    if (mins < 60) return ar ? ('منذ ' + mins + ' د') : (mins + 'm ago');
     var hrs = Math.floor(mins / 60);
-    if (hrs < 24) return hrs + 'h ago';
-    return Math.floor(hrs / 24) + 'd ago';
+    if (hrs < 24) return ar ? ('منذ ' + hrs + ' س') : (hrs + 'h ago');
+    var days = Math.floor(hrs / 24);
+    if (days < 30) return ar ? ('منذ ' + days + ' ي') : (days + 'd ago');
+    var months = Math.floor(days / 30);
+    return ar ? ('منذ ' + months + ' شهر') : (months + 'mo ago');
   }
   function uid() {
     return Math.random().toString(36).slice(2, 10);
@@ -9469,8 +9473,8 @@ document.addEventListener('DOMContentLoaded', function () {
           '<div class="ws-item-content">' +
             '<div class="ws-item-title">' + esc(item.title) + '</div>' +
             '<div class="ws-item-meta">' +
-              (item.sector ? '<span>' + esc(item.sector) + '</span>' : '') +
-              (item.type ? '<span>· ' + esc(item.type) + '</span>' : '') +
+              (item.sector ? '<span>' + esc(item.sector.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();})) + '</span>' : '') +
+              (item.type ? '<span>· ' + esc(item.type.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();})) + '</span>' : '') +
               '<span style="color:var(--text-faint);">' + timeAgo(item.savedAt) + '</span>' +
             '</div>' +
             (hasNote
