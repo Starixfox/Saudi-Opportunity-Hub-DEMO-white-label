@@ -9494,14 +9494,13 @@ document.addEventListener('DOMContentLoaded', function () {
         /* 7 — Compare button on a card */
         targetId: '__firstCompareBtn',
         title:    ar ? 'أضف إلى المقارنة' : 'Add to Comparison',
-        body:     ar ? 'انقر زر "+" على أي بطاقة فرصة لإضافتها إلى المقارنة. يمكنك اختيار حتى 3 فرص.' : 'Click the "+" button on any opportunity card to add it to a comparison. You can select up to 3 at once.',
+        body:     ar ? 'انقر على مربع الاختيار في الزاوية العلوية من أي بطاقة لإضافتها للمقارنة. يمكنك تحديد حتى 3 فرص.' : 'Click the checkbox in the top corner of any opportunity card to select it for comparison. Pick up to 3.',
         placement: 'top',
         spotlightPad: 14,
         showArrow: true,
         resolveTarget: function() {
-          /* First try Latest Additions + btn, then fall back to main card opp-select-btn */
-          return document.querySelector('[data-cmpid]') ||
-                 document.querySelector('.opp-select-btn');
+          /* Target the checkbox in the top-right corner of the first main opportunity card */
+          return document.querySelector('.opp-select-btn');
         }
       },
       {
