@@ -2877,6 +2877,188 @@ body[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
 .insight-sector-link:hover { gap: 7px; opacity: 0.85; }
 .insight-sector-link:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: var(--radius-sm); }
 
+/* ── LANDSCAPE INSIGHTS V2 ───────────────────────────────────── */
+
+/* KPI row */
+.liv2-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+.liv2-kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6) var(--space-4) var(--space-5);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--transition), box-shadow var(--transition);
+  /* count-up animation start */
+  opacity: 0;
+  transform: translateY(20px);
+}
+.liv2-kpi.liv2-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.liv2-kpi:nth-child(2).liv2-visible { transition-delay: 0.08s; }
+.liv2-kpi:nth-child(3).liv2-visible { transition-delay: 0.16s; }
+.liv2-kpi:nth-child(4).liv2-visible { transition-delay: 0.24s; }
+.liv2-kpi::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--green-highlight) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.liv2-kpi:hover { transform: translateY(-3px); box-shadow: var(--shadow-green); }
+.liv2-kpi:hover::before { opacity: 1; }
+.liv2-kpi__icon {
+  font-size: 1.1rem;
+  color: var(--green);
+  margin-bottom: var(--space-2);
+  opacity: 0.75;
+}
+.liv2-kpi__value {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.5rem);
+  font-weight: 700;
+  color: var(--green);
+  line-height: 1;
+  margin-bottom: var(--space-2);
+  letter-spacing: -0.02em;
+}
+.liv2-kpi__label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+[data-kpi="open"] .liv2-kpi__value  { color: var(--status-open-text); }
+[data-kpi="new"]  .liv2-kpi__value  { color: var(--gold); }
+
+/* Chart row */
+.liv2-chart-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  gap: var(--space-5);
+  margin-bottom: var(--space-8);
+  align-items: start;
+}
+.liv2-chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  opacity: 0;
+  transform: translateY(18px);
+}
+.liv2-chart-card.liv2-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.liv2-chart-card:nth-child(2).liv2-visible { transition-delay: 0.10s; }
+.liv2-chart-card:nth-child(3).liv2-visible { transition-delay: 0.20s; }
+.liv2-chart-card__header { margin-bottom: var(--space-4); }
+.liv2-chart-card__title {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+.liv2-chart-card__sub {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+.liv2-chart-wrap { position: relative; }
+.liv2-chart-wrap--bar  { height: 260px; }
+.liv2-chart-wrap--donut { height: 220px; }
+.liv2-chart-wrap canvas { display: block; width: 100% !important; }
+
+/* Insight strip */
+.liv2-insight-strip {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5) var(--space-6);
+  margin-bottom: var(--space-8);
+  opacity: 0;
+  transform: translateY(14px);
+  align-items: center;
+}
+.liv2-insight-strip.liv2-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.55s ease 0.25s, transform 0.55s ease 0.25s;
+}
+.liv2-insight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: 0 var(--space-4);
+}
+.liv2-insight-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  margin-top: 6px;
+}
+.liv2-insight-text {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.liv2-insight-text strong { color: var(--text); font-weight: 600; }
+.liv2-insight-sep {
+  width: 1px;
+  min-height: 40px;
+  background: var(--border);
+  align-self: stretch;
+}
+
+/* Light theme overrides */
+[data-theme="light"] .liv2-kpi,
+[data-theme="light"] .liv2-chart-card,
+[data-theme="light"] .liv2-insight-strip {
+  background: var(--surface);
+  border-color: var(--border);
+}
+[data-theme="light"] .liv2-kpi__value  { color: var(--green); }
+[data-theme="light"] [data-kpi="open"] .liv2-kpi__value  { color: var(--status-open-text); }
+[data-theme="light"] [data-kpi="new"]  .liv2-kpi__value  { color: var(--gold); }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .liv2-chart-row { grid-template-columns: 1fr 1fr; }
+  .liv2-chart-row .liv2-chart-card:first-child { grid-column: 1 / -1; }
+  .liv2-chart-wrap--bar { height: 220px; }
+}
+@media (max-width: 640px) {
+  .liv2-kpi-row { grid-template-columns: repeat(2, 1fr); gap: var(--space-3); }
+  .liv2-chart-row { grid-template-columns: 1fr; }
+  .liv2-chart-wrap--bar { height: 200px; }
+  .liv2-insight-strip {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  .liv2-insight-sep { width: 100%; min-height: 1px; height: 1px; }
+  .liv2-insight-item { padding: 0; }
+}
+
+/* ── END LANDSCAPE INSIGHTS V2 ──────────────────────────────── */
+
 
 /* ── MOBILE HAMBURGER FIXES ──────────────────────────────────── */
 @media (max-width: 768px) {
@@ -4462,177 +4644,90 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
     <p class="section-sub">
       Program-type distribution, regional breakdown, and status summary across all sectors and geographies. Use these charts to orient your research before drilling into individual records.
     </p>
-    <div class="insights-grid">
 
-      <!-- CARD 1: ICT & Digital Economy -->
-      <div class="insight-card">
-        <div class="insight-card-title">ICT &amp; Digital Economy</div>
-        <div class="insight-card-sub">Saudi Arabia is the largest and fastest-growing tech market in MENA</div>
-        <div class="market-stat-grid">
-          <div class="market-stat">
-            <div class="market-stat__value">$44.7B</div>
-            <div class="market-stat__label">ICT market size (2024)</div>
-          </div>
-          <div class="market-stat">
-            <div class="market-stat__value">$107B</div>
-            <div class="market-stat__label">Projected by 2034</div>
-          </div>
-          <div class="market-stat">
-            <div class="market-stat__value">9.1%</div>
-            <div class="market-stat__label">CAGR 2025&ndash;2034</div>
-          </div>
-          <div class="market-stat">
-            <div class="market-stat__value">15%</div>
-            <div class="market-stat__label">GDP contribution (digital economy)</div>
-          </div>
+    <!-- ── KPI CARDS ROW ──────────────────────────────────────── -->
+    <div class="liv2-kpi-row" id="liv2KpiRow">
+      <div class="liv2-kpi" data-kpi="total">
+        <div class="liv2-kpi__icon" aria-hidden="true">&#9776;</div>
+        <div class="liv2-kpi__value" id="liv2KpiTotal">—</div>
+        <div class="liv2-kpi__label" data-en="Total Opportunities" data-ar="إجمالي الفرص">Total Opportunities</div>
+      </div>
+      <div class="liv2-kpi" data-kpi="open">
+        <div class="liv2-kpi__icon" aria-hidden="true">&#10003;</div>
+        <div class="liv2-kpi__value" id="liv2KpiOpen">—</div>
+        <div class="liv2-kpi__label" data-en="Currently Open" data-ar="مفتوحة حالياً">Currently Open</div>
+      </div>
+      <div class="liv2-kpi" data-kpi="sectors">
+        <div class="liv2-kpi__icon" aria-hidden="true">&#11042;</div>
+        <div class="liv2-kpi__value" id="liv2KpiSectors">—</div>
+        <div class="liv2-kpi__label" data-en="Sectors Covered" data-ar="القطاعات المغطاة">Sectors Covered</div>
+      </div>
+      <div class="liv2-kpi" data-kpi="new">
+        <div class="liv2-kpi__icon" aria-hidden="true">&#9733;</div>
+        <div class="liv2-kpi__value" id="liv2KpiNew">—</div>
+        <div class="liv2-kpi__label" data-en="Added This Week" data-ar="أضيفت هذا الأسبوع">Added This Week</div>
+      </div>
+    </div>
+
+    <!-- ── CHART ROW ──────────────────────────────────────────── -->
+    <div class="liv2-chart-row">
+
+      <!-- Funding by Sector (horizontal bar) -->
+      <div class="liv2-chart-card">
+        <div class="liv2-chart-card__header">
+          <div class="liv2-chart-card__title" data-en="Funding by Sector" data-ar="التمويل حسب القطاع">Funding by Sector</div>
+          <div class="liv2-chart-card__sub" data-en="Programmes with known funding ranges" data-ar="البرامج ذات نطاقات تمويل معروفة">Programmes with known funding ranges</div>
         </div>
-        <div class="market-tags">
-          <span class="market-tag">AI &amp; IoT</span>
-          <span class="market-tag">Cloud</span>
-          <span class="market-tag">Smart Cities</span>
-          <span class="market-tag">Cybersecurity</span>
+        <div class="liv2-chart-wrap liv2-chart-wrap--bar">
+          <canvas id="liv2FundingChart" aria-label="Funding by sector chart"></canvas>
         </div>
-        <div class="market-footnote">Vision 2030 target: reduce oil dependency via digital transformation. Gov't ICT spending grew 20% YoY in 2023.</div>
-        <a class="insight-sector-link" href="#opportunities" data-sector-filter="ict" aria-label="Browse ICT programs">Browse ICT programs →</a>
       </div>
 
-      <!-- CARD 2: Energy & Renewables -->
-      <div class="insight-card">
-        <div class="insight-card-title">Energy &amp; Renewables</div>
-        <div class="insight-card-sub">Saudi Arabia is targeting 50% renewable power by 2030</div>
-        <div class="market-stat-grid">
-          <div class="market-stat">
-            <div class="market-stat__value">130 GW</div>
-            <div class="market-stat__label">Renewable capacity target by 2030</div>
-          </div>
-          <div class="market-stat">
-            <div class="market-stat__value">$32B</div>
-            <div class="market-stat__label">Green energy investment pipeline 2025&ndash;2030</div>
-          </div>
-          <div class="market-stat">
-            <div class="market-stat__value">50%</div>
-            <div class="market-stat__label">Power from renewables by 2030</div>
-          </div>
-          <div class="market-stat">
-            <div class="market-stat__value">$25B</div>
-            <div class="market-stat__label">Annual green energy export target</div>
-          </div>
+      <!-- Opportunity Count by Sector (donut) -->
+      <div class="liv2-chart-card">
+        <div class="liv2-chart-card__header">
+          <div class="liv2-chart-card__title" data-en="Opportunities by Sector" data-ar="الفرص حسب القطاع">Opportunities by Sector</div>
+          <div class="liv2-chart-card__sub" data-en="Count of programmes per sector (top 8)" data-ar="عدد البرامج لكل قطاع (أعلى 8)">Count of programmes per sector (top 8)</div>
         </div>
-        <div class="market-tags">
-          <span class="market-tag">Solar</span>
-          <span class="market-tag">Wind</span>
-          <span class="market-tag">Hydrogen</span>
-          <span class="market-tag">NEOM</span>
+        <div class="liv2-chart-wrap liv2-chart-wrap--donut">
+          <canvas id="liv2SectorChart" aria-label="Opportunities by sector chart"></canvas>
         </div>
-        <div class="market-footnote">NEOM and ACWA Power are anchor investors. Electricity cost target: &minus;40% by 2030.</div>
-        <a class="insight-sector-link" href="#opportunities" data-sector-filter="energy" aria-label="Browse Energy programs">Browse Energy programs →</a>
       </div>
 
-      <!-- CARD 3: Healthcare -->
-      <div class="insight-card">
-        <div class="insight-card-title">Healthcare &amp; Life Sciences</div>
-        <div class="insight-card-sub">Rapid privatisation opening the sector to foreign investment</div>
-        <div class="market-stat-grid">
-          <div class="market-stat">
-            <div class="market-stat__value">$28.7B</div>
-            <div class="market-stat__label">Hospital services market (2024)</div>
-          </div>
-          <div class="market-stat">
-            <div class="market-stat__value">$36.9B</div>
-            <div class="market-stat__label">Projected by 2030</div>
-          </div>
-          <div class="market-stat">
-            <div class="market-stat__value">65%</div>
-            <div class="market-stat__label">Private sector share target by 2030</div>
-          </div>
-          <div class="market-stat">
-            <div class="market-stat__value">$69B</div>
-            <div class="market-stat__label">Government health &amp; social budget (2025)</div>
-          </div>
+      <!-- Status Breakdown (donut) -->
+      <div class="liv2-chart-card">
+        <div class="liv2-chart-card__header">
+          <div class="liv2-chart-card__title" data-en="Status Breakdown" data-ar="توزيع الحالات">Status Breakdown</div>
+          <div class="liv2-chart-card__sub" data-en="Current programme status distribution" data-ar="توزيع حالات البرامج الحالية">Current programme status distribution</div>
         </div>
-        <div class="market-tags">
-          <span class="market-tag">Digital Health</span>
-          <span class="market-tag">MedTech</span>
-          <span class="market-tag">Pharma</span>
-          <span class="market-tag">Telemedicine</span>
+        <div class="liv2-chart-wrap liv2-chart-wrap--donut">
+          <canvas id="liv2StatusChart" aria-label="Status breakdown chart"></canvas>
         </div>
-        <div class="market-footnote">Digital health sub-market: $4.4B (2025) growing at 22.6% CAGR to $18.3B by 2032.</div>
-        <a class="insight-sector-link" href="#opportunities" data-sector-filter="healthcare" aria-label="Browse Healthcare programs">Browse Healthcare programs →</a>
-      </div>
-
-      <!-- CARD 4: Space Economy -->
-      <div class="insight-card">
-        <div class="insight-card-title">Space Economy</div>
-        <div class="insight-card-sub">One of the fastest-growing space markets globally</div>
-        <div class="market-stat-grid">
-          <div class="market-stat">
-            <div class="market-stat__value">$8.7B</div>
-            <div class="market-stat__label">National space economy (2024)</div>
-          </div>
-          <div class="market-stat">
-            <div class="market-stat__value">$31.6B</div>
-            <div class="market-stat__label">Projected by 2035</div>
-          </div>
-          <div class="market-stat">
-            <div class="market-stat__value">$2B</div>
-            <div class="market-stat__label">Government space program budget by 2030</div>
-          </div>
-          <div class="market-stat">
-            <div class="market-stat__value">SR 1.81</div>
-            <div class="market-stat__label">ROI per riyal invested</div>
-          </div>
-        </div>
-        <div class="market-tags">
-          <span class="market-tag">Satellites</span>
-          <span class="market-tag">Earth Observation</span>
-          <span class="market-tag">Launch Services</span>
-          <span class="market-tag">Space Tourism</span>
-        </div>
-        <div class="market-footnote">Commercial market growing from $1.9B (2024) to $5.6B by 2035. Downstream sector to account for &gt;50% of annual market value.</div>
-        <a class="insight-sector-link" href="#opportunities" data-sector-filter="space" aria-label="Browse Space programs">Browse Space programs →</a>
-      </div>
-
-      <!-- CARD 5: Fintech + Vision 2030 KPIs (full width) -->
-      <div class="insight-card insight-card--wide">
-        <div class="insight-card-title">Fintech &amp; Vision 2030 — Key Benchmarks</div>
-        <div class="insight-card-sub">Financial services transformation and top-line program KPIs from the hub</div>
-        <div class="market-wide-grid">
-          <div class="market-wide-col">
-            <div class="market-wide-col__title">Fintech Market</div>
-            <div class="market-stat-grid market-stat-grid--sm">
-              <div class="market-stat">
-                <div class="market-stat__value">$2.85B</div>
-                <div class="market-stat__label">Market size (2025)</div>
-              </div>
-              <div class="market-stat">
-                <div class="market-stat__value">$5.28B</div>
-                <div class="market-stat__label">Projected by 2030</div>
-              </div>
-              <div class="market-stat">
-                <div class="market-stat__value">13.1%</div>
-                <div class="market-stat__label">CAGR</div>
-              </div>
-              <div class="market-stat">
-                <div class="market-stat__value">67.8%</div>
-                <div class="market-stat__label">Mobile payments share</div>
-              </div>
-            </div>
-            <div class="market-tags" style="margin-top:var(--space-3)">
-              <span class="market-tag">Neobanking</span>
-              <span class="market-tag">Digital Payments</span>
-              <span class="market-tag">RegTech</span>
-            </div>
-          </div>
-          <div class="market-wide-divider"></div>
-          <div class="market-wide-col">
-            <div class="market-wide-col__title">Hub Snapshot</div>
-            <div id="insights-snapshot" class="chart-container"></div>
-          </div>
-        </div>
-        <a class="insight-sector-link" href="#opportunities" data-sector-filter="financial" aria-label="Browse Fintech programs">Browse Fintech programs →</a>
       </div>
 
     </div>
+
+    <!-- ── INSIGHT STRIP ─────────────────────────────────────── -->
+    <div class="liv2-insight-strip" id="liv2InsightStrip">
+      <div class="liv2-insight-item" id="liv2Insight1">
+        <span class="liv2-insight-dot"></span>
+        <span class="liv2-insight-text">Loading insights…</span>
+      </div>
+      <div class="liv2-insight-sep" aria-hidden="true"></div>
+      <div class="liv2-insight-item" id="liv2Insight2">
+        <span class="liv2-insight-dot"></span>
+        <span class="liv2-insight-text"></span>
+      </div>
+      <div class="liv2-insight-sep" aria-hidden="true"></div>
+      <div class="liv2-insight-item" id="liv2Insight3">
+        <span class="liv2-insight-dot"></span>
+        <span class="liv2-insight-text"></span>
+      </div>
+    </div>
+
+    <!-- Legacy snapshot kept for renderSnapshot() compatibility -->
+    <div id="insights-snapshot" style="display:none"></div>
+
   </section>
 
   <section id="about" aria-label="About this hub">
@@ -8414,6 +8509,463 @@ document.addEventListener('DOMContentLoaded', function () {
   window.__openDetailPanel = openPanel;
 
 })();
+</script>
+<script>
+/* ── LANDSCAPE INSIGHTS V2 ─────────────────────────────────────
+   Data-driven KPI cards + Chart.js charts + insight strip
+   driven from window.opportunitiesData (async Supabase feed)
+   — supports dark/light mode, EN/AR bilingual, IntersectionObserver
+──────────────────────────────────────────────────── */
+(function() {
+  'use strict';
+
+  /* —— sector display names (EN / AR) —————————————————————— */
+  var SECTOR_NAMES_EN = {
+    agriculture: 'Agriculture', construction: 'Construction',
+    culture_tourism: 'Culture & Tourism', education: 'Education',
+    energy: 'Energy', environment: 'Environment',
+    financial: 'Financial', healthcare: 'Healthcare',
+    ict: 'ICT', industry: 'Industry',
+    logistics: 'Logistics', realestate: 'Real Estate',
+    space: 'Space', sports: 'Sports',
+    water: 'Water', other: 'Other'
+  };
+  var SECTOR_NAMES_AR = {
+    agriculture: '\u0627\u0644\u0632\u0631\u0627\u0639\u0629',
+    construction: '\u0627\u0644\u0628\u0646\u0627\u0621',
+    culture_tourism: '\u0627\u0644\u062b\u0642\u0627\u0641\u0629 \u0648\u0627\u0644\u0633\u064a\u0627\u062d\u0629',
+    education: '\u0627\u0644\u062a\u0639\u0644\u064a\u0645',
+    energy: '\u0627\u0644\u0637\u0627\u0642\u0629',
+    environment: '\u0627\u0644\u0628\u064a\u0626\u0629',
+    financial: '\u0627\u0644\u0645\u0627\u0644\u064a\u0629',
+    healthcare: '\u0627\u0644\u0631\u0639\u0627\u064a\u0629 \u0627\u0644\u0635\u062d\u064a\u0629',
+    ict: '\u062a\u0642\u0646\u064a\u0629 \u0627\u0644\u0645\u0639\u0644\u0648\u0645\u0627\u062a',
+    industry: '\u0627\u0644\u0635\u0646\u0627\u0639\u0629',
+    logistics: '\u0627\u0644\u0644\u0648\u062c\u0633\u062a\u064a\u0643',
+    realestate: '\u0627\u0644\u0639\u0642\u0627\u0631\u0627\u062a',
+    space: '\u0627\u0644\u0641\u0636\u0627\u0621',
+    sports: '\u0627\u0644\u0631\u064a\u0627\u0636\u0629',
+    water: '\u0627\u0644\u0645\u064a\u0627\u0647',
+    other: '\u0623\u062e\u0631\u0649'
+  };
+
+  /* funding_size string -> numeric mid-value in USD millions */
+  function parseFunding(str) {
+    if (!str || str === 'Not specified' || str === 'Varies') return 0;
+    var s = String(str).toLowerCase().replace(/,/g, '');
+    var mul = 1;
+    if (/billion|\bb\b/.test(s)) mul = 1000;
+    else if (/million|\bm\b/.test(s)) mul = 1;
+    else if (/thousand|\bk\b/.test(s)) mul = 0.001;
+    var nums = s.match(/([\d.]+)/g);
+    if (!nums) return 0;
+    if (nums.length >= 2) {
+      return ((parseFloat(nums[0]) + parseFloat(nums[1])) / 2) * mul;
+    }
+    return parseFloat(nums[0]) * mul;
+  }
+
+  /* resolve CSS variable value at runtime */
+  function cssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  /* pick chart text colour from current theme */
+  function chartTextColor() {
+    var theme = document.documentElement.getAttribute('data-theme') || 'dark';
+    return theme === 'light' ? '#1a1f36' : '#7c89ab';
+  }
+  function chartGridColor() {
+    var theme = document.documentElement.getAttribute('data-theme') || 'dark';
+    return theme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)';
+  }
+
+  /* —— count-up animation ——————————————————————————————— */
+  function countUp(el, target, duration) {
+    if (!el) return;
+    var start = 0;
+    var startTime = null;
+    function step(ts) {
+      if (!startTime) startTime = ts;
+      var progress = Math.min((ts - startTime) / duration, 1);
+      var ease = 1 - Math.pow(1 - progress, 3); /* ease-out cubic */
+      el.textContent = Math.round(ease * target).toLocaleString();
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* —— chart instances (kept for theme re-render) ———————————— */
+  var fundingChart = null;
+  var sectorChart  = null;
+  var statusChart  = null;
+
+  /* —— data processing —————————————————————————————————— */
+  function processData(data) {
+    var ar = document.body.dir === 'rtl';
+    var NAMES = ar ? SECTOR_NAMES_AR : SECTOR_NAMES_EN;
+
+    /* KPI values */
+    var total = data.length;
+    var open  = data.filter(function(r) { return r.status === 'open'; }).length;
+    var cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    var newCount = data.filter(function(r) {
+      return r.isNew === true && r.last_verified && new Date(r.last_verified).getTime() >= cutoff;
+    }).length;
+
+    /* sectors covered */
+    var sectorSet = {};
+    data.forEach(function(r) {
+      (r.sectors || []).forEach(function(s) { if (s) sectorSet[s] = true; });
+    });
+    var sectorCount = Object.keys(sectorSet).length;
+
+    /* sector counts (for donut) */
+    var sectorCounts = {};
+    data.forEach(function(r) {
+      (r.sectors || []).forEach(function(s) {
+        if (s) sectorCounts[s] = (sectorCounts[s] || 0) + 1;
+      });
+    });
+    var sectorEntries = Object.keys(sectorCounts).map(function(k) {
+      return { key: k, label: NAMES[k] || k, count: sectorCounts[k] };
+    });
+    sectorEntries.sort(function(a, b) { return b.count - a.count; });
+    var topSectors = sectorEntries.slice(0, 8);
+
+    /* funding by sector (horizontal bar) — aggregate mid-value per sector */
+    var fundingBySector = {};
+    data.forEach(function(r) {
+      var val = parseFunding(r.funding_size);
+      if (val <= 0) return;
+      (r.sectors || ['other']).forEach(function(s) {
+        fundingBySector[s] = (fundingBySector[s] || 0) + val;
+      });
+    });
+    var fundingEntries = Object.keys(fundingBySector).map(function(k) {
+      return { key: k, label: NAMES[k] || k, value: fundingBySector[k] };
+    });
+    fundingEntries.sort(function(a, b) { return b.value - a.value; });
+    var topFunding = fundingEntries.slice(0, 8);
+
+    /* status counts */
+    var statusMap = {};
+    data.forEach(function(r) {
+      var s = r.status || 'unknown';
+      if (s === 'closed_but_recurring') s = 'recurring';
+      statusMap[s] = (statusMap[s] || 0) + 1;
+    });
+
+    return {
+      total: total, open: open, newCount: newCount, sectorCount: sectorCount,
+      topSectors: topSectors, topFunding: topFunding, statusMap: statusMap
+    };
+  }
+
+  /* —— colour palette for charts —————————————————————————— */
+  var CHART_COLORS = [
+    '#00a651', '#4f9cf9', '#f5a623', '#b071f9',
+    '#f6b384', '#34d97b', '#ef9090', '#5dd3d3'
+  ];
+
+  /* —— render / re-render all charts ——————————————————————— */
+  function renderInsightsV2(data) {
+    var d = processData(data);
+    var ar = document.body.dir === 'rtl';
+    var NAMES = ar ? SECTOR_NAMES_AR : SECTOR_NAMES_EN;
+
+    /* --- KPI fill --- */
+    var elTotal   = document.getElementById('liv2KpiTotal');
+    var elOpen    = document.getElementById('liv2KpiOpen');
+    var elSectors = document.getElementById('liv2KpiSectors');
+    var elNew     = document.getElementById('liv2KpiNew');
+
+    countUp(elTotal,   d.total,       900);
+    countUp(elOpen,    d.open,        750);
+    countUp(elSectors, d.sectorCount, 600);
+    countUp(elNew,     d.newCount,    500);
+
+    /* --- KPI labels bilingual --- */
+    document.querySelectorAll('.liv2-kpi__label').forEach(function(el) {
+      var key = ar ? 'ar' : 'en';
+      if (el.dataset[key]) el.textContent = el.dataset[key];
+    });
+    /* --- Chart card labels bilingual --- */
+    document.querySelectorAll('.liv2-chart-card__title, .liv2-chart-card__sub').forEach(function(el) {
+      var key = ar ? 'ar' : 'en';
+      if (el.dataset[key]) el.textContent = el.dataset[key];
+    });
+
+    var textColor = chartTextColor();
+    var gridColor = chartGridColor();
+    var green     = cssVar('--green') || '#00a651';
+
+    /* --- Funding by Sector (horizontal bar) --- */
+    var fCanvas = document.getElementById('liv2FundingChart');
+    if (fCanvas) {
+      if (fundingChart) { fundingChart.destroy(); fundingChart = null; }
+      var fLabels = d.topFunding.map(function(e) { return e.label; });
+      var fValues = d.topFunding.map(function(e) { return Math.round(e.value); });
+      var fCtx = fCanvas.getContext('2d');
+      fundingChart = new Chart(fCtx, {
+        type: 'bar',
+        data: {
+          labels: fLabels,
+          datasets: [{
+            label: ar ? '\u0627\u0644\u062a\u0645\u0648\u064a\u0644 (\u0645\u0644\u064a\u0648\u0646 $)' : 'Funding (USD M)',
+            data: fValues,
+            backgroundColor: d.topFunding.map(function(_, i) {
+              return CHART_COLORS[i % CHART_COLORS.length] + '99';
+            }),
+            borderColor: d.topFunding.map(function(_, i) {
+              return CHART_COLORS[i % CHART_COLORS.length];
+            }),
+            borderWidth: 1,
+            borderRadius: 4,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ' $' + ctx.parsed.x.toLocaleString() + 'M';
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: gridColor },
+              ticks: { color: textColor, font: { size: 11 },
+                callback: function(v) { return '$' + v + 'M'; } }
+            },
+            y: {
+              grid: { display: false },
+              ticks: { color: textColor, font: { size: 11 } }
+            }
+          }
+        }
+      });
+    }
+
+    /* --- Opportunities by Sector (donut) --- */
+    var sCanvas = document.getElementById('liv2SectorChart');
+    if (sCanvas) {
+      if (sectorChart) { sectorChart.destroy(); sectorChart = null; }
+      var sLabels = d.topSectors.map(function(e) { return e.label; });
+      var sValues = d.topSectors.map(function(e) { return e.count; });
+      var sCtx = sCanvas.getContext('2d');
+      sectorChart = new Chart(sCtx, {
+        type: 'doughnut',
+        data: {
+          labels: sLabels,
+          datasets: [{
+            data: sValues,
+            backgroundColor: CHART_COLORS.map(function(c) { return c + 'cc'; }),
+            borderColor: CHART_COLORS,
+            borderWidth: 1.5,
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '62%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: textColor,
+                font: { size: 10 },
+                boxWidth: 10,
+                padding: 8
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ' ' + ctx.label + ': ' + ctx.parsed;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    /* --- Status Breakdown (donut) --- */
+    var stCanvas = document.getElementById('liv2StatusChart');
+    if (stCanvas) {
+      if (statusChart) { statusChart.destroy(); statusChart = null; }
+      var statusLabelsMap = {
+        open:       ar ? '\u0645\u0641\u062a\u0648\u062d' : 'Open',
+        recurring:  ar ? '\u062f\u0648\u0631\u064a' : 'Recurring',
+        closed:     ar ? '\u0645\u063a\u0644\u0642' : 'Closed',
+        unknown:    ar ? '\u063a\u064a\u0631 \u0645\u062d\u062f\u062f' : 'Unknown'
+      };
+      var statusColorMap = {
+        open:      '#00a651',
+        recurring: '#f5a623',
+        closed:    '#ef9090',
+        unknown:   '#7c89ab'
+      };
+      var stKeys = Object.keys(d.statusMap);
+      var stLabels = stKeys.map(function(k) { return statusLabelsMap[k] || k; });
+      var stValues = stKeys.map(function(k) { return d.statusMap[k]; });
+      var stColors = stKeys.map(function(k) { return statusColorMap[k] || '#9da6bf'; });
+      var stCtx = stCanvas.getContext('2d');
+      statusChart = new Chart(stCtx, {
+        type: 'doughnut',
+        data: {
+          labels: stLabels,
+          datasets: [{
+            data: stValues,
+            backgroundColor: stColors.map(function(c) { return c + 'cc'; }),
+            borderColor: stColors,
+            borderWidth: 1.5,
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '62%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: textColor,
+                font: { size: 10 },
+                boxWidth: 10,
+                padding: 8
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ' ' + ctx.label + ': ' + ctx.parsed;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    /* --- Insight strip --- */
+    var sm = d.statusMap;
+    var openPct   = d.total > 0 ? Math.round((d.open / d.total) * 100) : 0;
+    /* top sector */
+    var topSec    = d.topSectors.length > 0 ? d.topSectors[0] : null;
+    /* top funding sector */
+    var topFundSec = d.topFunding.length > 0 ? d.topFunding[0] : null;
+
+    var i1, i2, i3;
+    if (ar) {
+      i1 = topSec
+        ? '<strong>' + topSec.label + '</strong> \u0647\u0648 \u0627\u0644\u0642\u0637\u0627\u0639 \u0627\u0644\u0623\u0643\u062b\u0631 \u062a\u0645\u062b\u064a\u0644\u0627\u064b \u0628\u2060<strong>' + topSec.count.toLocaleString() + '</strong>\u2060 \u0628\u0631\u0646\u0627\u0645\u062c\u0627\u064b.'
+        : '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0645\u062a\u0627\u062d.';
+      i2 = '<strong>' + openPct + '%</strong> \u0645\u0646 \u0627\u0644\u0628\u0631\u0627\u0645\u062c (<strong>' + d.open.toLocaleString() + '</strong>) \u0645\u0641\u062a\u0648\u062d\u0629 \u062d\u0627\u0644\u064a\u0627\u064b \u0644\u0644\u062a\u0642\u062f\u064a\u0645.';
+      i3 = topFundSec
+        ? '\u0642\u0637\u0627\u0639 <strong>' + topFundSec.label + '</strong> \u064a\u062c\u0645\u0639 \u0623\u0643\u0628\u0631 \u062d\u062c\u0645 \u062a\u0645\u0648\u064a\u0644 \u0645\u0639\u0631\u0648\u0641 \u0641\u064a \u0642\u0627\u0639\u062f\u0629 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a.'
+        : '\u062a\u063a\u0637\u064a \u0627\u0644\u0645\u0646\u0635\u0629 ' + d.sectorCount + ' \u0642\u0637\u0627\u0639\u0627\u064b \u0641\u064a \u062c\u0645\u064a\u0639 \u0623\u0646\u062d\u0627\u0621 \u0627\u0644\u0645\u0645\u0644\u0643\u0629.';
+    } else {
+      i1 = topSec
+        ? '<strong>' + topSec.label + '</strong> is the most-covered sector with <strong>' + topSec.count.toLocaleString() + '</strong> programmes in the database.'
+        : 'Data insights are ready.';
+      i2 = '<strong>' + openPct + '%</strong> of all programmes (<strong>' + d.open.toLocaleString() + '</strong>) are currently open for applications.';
+      i3 = topFundSec
+        ? '<strong>' + topFundSec.label + '</strong> aggregates the largest known funding pool among all sectors in the dataset.'
+        : 'The hub covers <strong>' + d.sectorCount + '</strong> distinct sectors across all regions.';
+    }
+
+    function setInsight(id, html) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      var span = el.querySelector('.liv2-insight-text');
+      if (span) span.innerHTML = html;
+    }
+    setInsight('liv2Insight1', i1);
+    setInsight('liv2Insight2', i2);
+    setInsight('liv2Insight3', i3);
+  }
+
+  /* —— IntersectionObserver ————————————————————————————— */
+  var rendered = false;
+
+  function onInsightsVisible() {
+    var data = window.opportunitiesData;
+    if (!Array.isArray(data) || data.length === 0) return;
+    if (rendered) return;
+    rendered = true;
+
+    /* animate KPI cards + charts + strip into view */
+    document.querySelectorAll('.liv2-kpi, .liv2-chart-card, .liv2-insight-strip').forEach(function(el) {
+      el.classList.add('liv2-visible');
+    });
+    renderInsightsV2(data);
+  }
+
+  var section = document.getElementById('insights');
+  if (section && typeof IntersectionObserver !== 'undefined') {
+    var obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          onInsightsVisible();
+          obs.disconnect();
+        }
+      });
+    }, { threshold: 0.08 });
+    obs.observe(section);
+  }
+
+  /* —— wait for data if section already visible on load ———————— */
+  var bootAttempts = 0;
+  var bootInterval = setInterval(function() {
+    bootAttempts++;
+    if (Array.isArray(window.opportunitiesData) && window.opportunitiesData.length > 0) {
+      clearInterval(bootInterval);
+      /* If observer already fired, re-render now */
+      if (rendered) { renderInsightsV2(window.opportunitiesData); return; }
+      /* Else let observer handle it; but also try if section in viewport */
+      if (section) {
+        var rect = section.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          onInsightsVisible();
+        }
+      }
+    } else if (bootAttempts > 200) {
+      clearInterval(bootInterval);
+    }
+  }, 150);
+
+  /* —— theme change re-render ———————————————————————————— */
+  var themeObs = new MutationObserver(function() {
+    if (rendered && Array.isArray(window.opportunitiesData)) {
+      renderInsightsV2(window.opportunitiesData);
+    }
+  });
+  themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  /* —— language switch re-render ————————————————————————— */
+  var dirObs = new MutationObserver(function() {
+    if (rendered && Array.isArray(window.opportunitiesData)) {
+      renderInsightsV2(window.opportunitiesData);
+    }
+  });
+  dirObs.observe(document.body, { attributes: true, attributeFilter: ['dir'] });
+
+  /* expose for external calls if needed */
+  window.__renderInsightsV2 = renderInsightsV2;
+
+})();
+/* ── END LANDSCAPE INSIGHTS V2 ────────────────────────────────── */
 </script>
 <script>
 /* In-page Arabic toggle for index.html — translates UI + sets RTL on demand. */
