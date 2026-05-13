@@ -4260,8 +4260,88 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
 .app-topbar-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
+.app-topbar-divider {
+  width: 1px; height: 20px;
+  background: var(--border);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+.app-topbar-menu-btn {
+  display: none;
+  width: 32px; height: 32px;
+  align-items: center; justify-content: center;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.app-topbar-menu-btn:hover { background: var(--surface-3); color: var(--text); }
+@media (max-width: 767px) { .app-topbar-menu-btn { display: flex; } }
+.app-topbar-ws {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.app-tb-stat {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.app-tb-stat:hover { background: var(--surface-3); color: var(--text); border-color: var(--border-light); }
+.app-tb-stat [data-lucide] { width: 13px; height: 13px; }
+.app-tb-stat--new { color: var(--green); border-color: var(--green-dim); background: var(--green-highlight); }
+.app-tb-stat--new:hover { background: var(--green-dim); }
+.app-tb-label { font-weight: 400; color: var(--text-muted); }
+.app-tb-icon-btn {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.app-tb-icon-btn:hover { background: var(--surface-3); color: var(--text); border-color: var(--border-light); }
+.app-tb-icon-btn [data-lucide] { width: 15px; height: 15px; }
+.app-tb-logout:hover { color: #ef4444; border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.05); }
+.app-tb-lang {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 600;
+}
+.app-tb-user {
+  display: flex; align-items: center; gap: 6px;
+}
+.app-tb-username {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+@media (max-width: 900px) { .app-topbar-ws { display: none; } }
+@media (max-width: 640px) { .app-tb-lang, .app-tb-user, .app-tb-username, .app-topbar-divider { display: none; } }
+/* opp view wrap — adds padding to the opportunities view content */
+.opp-view-wrap { height: 100%; }
+.opp-view-wrap > section { padding: 28px 28px 60px; max-width: 1280px; margin: 0 auto; }
+/* Fix about view scroll */
+.about-wrap--full { max-width: 100%; padding: 0; }
+.about-scroll-inner { max-width: 1100px; margin: 0 auto; padding: 28px 28px 60px; }
+.about-scroll-inner section { border-bottom: 1px solid var(--divider); }
+.about-scroll-inner section:last-of-type { border-bottom: none; }
 .app-content {
   grid-area: content;
   overflow-x: hidden;
@@ -4367,6 +4447,21 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
 .bookmark-btn:hover { color: var(--green); border-color: var(--green); }
 .bookmark-btn.bookmarked { color: var(--green); border-color: var(--green); background: var(--green-highlight); }
 .bookmark-btn svg, .bookmark-btn [data-lucide] { width: 16px; height: 16px; }
+/* Mobile sidebar open state */
+.app-sidebar.mobile-open {
+  display: flex !important;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 200;
+  box-shadow: var(--shadow-lg);
+}
+/* Logout nav item */
+.app-nav-item--logout:hover { background: rgba(239,68,68,0.08) !important; color: #ef4444 !important; }
+/* Saved card items */
+.saved-card-title { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.saved-card-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.saved-card-status { font-size: 11px; color: var(--text-muted); background: var(--surface-2); padding: 2px 8px; border-radius: var(--radius-full); }
+.saved-card-country { font-size: 11px; color: var(--text-faint); }
 /* Mobile bottom tabs */
 .app-bottom-tabs { display: none; }
 @media (max-width: 767px) {
@@ -4443,10 +4538,16 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
     <button class="app-nav-item" data-view="about" data-route="#about" type="button">
       <i data-lucide="info"></i><span>About</span>
     </button>
+    <button class="app-nav-item" id="sidebarWorkspace" type="button" onclick="WS.openPanel('watchlist')">
+      <i data-lucide="layout-panel-left"></i><span>My Workspace</span>
+    </button>
     <div class="app-sidebar-spacer"></div>
     <div class="app-sidebar-bottom">
-      <button class="app-nav-item" id="appThemeToggle" type="button" aria-label="Toggle theme">
-        <i data-lucide="moon"></i><span id="appThemeToggleLabel">Theme</span>
+      <button class="app-nav-item" id="appSidebarSettings" type="button" aria-label="Settings" onclick="WS.openSettings()">
+        <i data-lucide="settings"></i><span>Settings</span>
+      </button>
+      <button class="app-nav-item app-nav-item--logout" id="sidebarLogout" type="button" aria-label="Sign out">
+        <i data-lucide="log-out"></i><span>Sign out</span>
       </button>
     </div>
   </aside>
@@ -4454,11 +4555,66 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
   <!-- Top header bar (56px) -->
   <header class="app-topbar" role="banner">
     <div class="app-topbar-title">
+      <button class="app-topbar-menu-btn" id="appMenuBtn" aria-label="Toggle sidebar" type="button">
+        <i data-lucide="menu"></i>
+      </button>
       <i data-lucide="compass"></i>
       <span id="appTopbarTitle">Dashboard</span>
     </div>
     <div class="app-topbar-actions">
-      <span style="color: var(--text-muted); font-size: 12px;">Vision 2030 · Pilot Demo</span>
+      <!-- Workspace stats inline -->
+      <div class="app-topbar-ws" id="appTopbarWs">
+        <button class="app-tb-stat" id="appTbWatchlist" onclick="WS.openPanel('watchlist')" title="My Watchlist" type="button">
+          <i data-lucide="bookmark"></i>
+          <span id="appTbWatchlistCount">0</span>
+        </button>
+        <button class="app-tb-stat" id="appTbSearches" onclick="WS.openPanel('searches')" title="Saved Searches" type="button">
+          <i data-lucide="search"></i>
+          <span id="appTbSearchesCount">0</span>
+        </button>
+        <button class="app-tb-stat app-tb-stat--new" id="appTbNew" title="New this week" type="button">
+          <i data-lucide="sparkles"></i>
+          <span id="appTbNewCount">0</span>
+          <span class="app-tb-label">new</span>
+        </button>
+      </div>
+      <div class="app-topbar-divider"></div>
+      <!-- Notifications -->
+      <div style="position:relative;">
+        <button class="notif-btn app-tb-icon-btn" id="notifBtn" aria-label="Notifications" title="Notifications" type="button">
+          <i data-lucide="bell"></i>
+          <span class="notif-badge hidden" id="notifBadge">0</span>
+        </button>
+        <div class="notif-dropdown" id="notifDropdown" role="dialog" aria-label="Notifications">
+          <div class="notif-dropdown-header">
+            <span data-en="Notifications" data-ar="الإشعارات">Notifications</span>
+            <button class="notif-clear-btn" id="notifClearBtn" data-en="Mark all read" data-ar="تحديد الكل كمقروء">Mark all read</button>
+          </div>
+          <ul class="notif-list" id="notifList"></ul>
+        </div>
+      </div>
+      <!-- Settings -->
+      <button class="app-tb-icon-btn" id="appTbSettings" onclick="WS.openSettings()" title="Settings" type="button" aria-label="Settings">
+        <i data-lucide="settings"></i>
+      </button>
+      <!-- Theme -->
+      <button class="app-tb-icon-btn" id="appThemeToggle" aria-label="Toggle theme" title="Toggle theme" type="button">
+        <i data-lucide="moon"></i>
+      </button>
+      <!-- Language -->
+      <div class="app-tb-lang">
+        <a id="langEn" class="is-lang-btn is-lang-active" href="index.html" lang="en">EN</a>
+        <span class="is-lang-sep">|</span>
+        <a id="langAr" class="is-lang-btn" href="#" lang="ar" dir="rtl">ع</a>
+      </div>
+      <div class="app-topbar-divider"></div>
+      <!-- User + Logout -->
+      <div class="app-tb-user">
+        <span class="app-tb-username" id="appTbUsername">User</span>
+      </div>
+      <button class="app-tb-icon-btn app-tb-logout" id="signout-btn" aria-label="Sign out" title="Sign out" type="button">
+        <i data-lucide="log-out"></i>
+      </button>
     </div>
   </header>
 
@@ -4514,299 +4670,112 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
             <div class="chart-canvas-wrap"><canvas id="chartCountries"></canvas></div>
           </div>
         </div>
+
+
+  <section id="insights" aria-label="Data insights and analytics">
+    <div class="section-label">Analytics</div>
+    <div class="liv2-heading-row">
+      <h2 class="section-heading">Landscape Overview</h2>
+      <span class="liv2-personal-chip" id="liv2PersonalChip" style="display:none" role="status">
+        <span class="liv2-personal-chip__dot"></span>
+        <span class="liv2-personal-chip__text" id="liv2ChipText">Personalised for you</span>
+        <button class="liv2-personal-chip__reset" id="liv2ChipReset" aria-label="Show global view">&#10005;</button>
+      </span>
+    </div>
+    <p class="section-sub">
+      Program-type distribution, regional breakdown, and status summary across all sectors and geographies. Use these charts to orient your research before drilling into individual records.
+    </p>
+
+    <!-- ── KPI CARDS ROW ──────────────────────────────────────── -->
+    <div class="liv2-kpi-row" id="liv2KpiRow">
+      <div class="liv2-kpi" data-kpi="total">
+        <div class="liv2-kpi__icon" aria-hidden="true">&#9776;</div>
+        <div class="liv2-kpi__value" id="liv2KpiTotal">—</div>
+        <div class="liv2-kpi__label" data-en="Total Opportunities" data-ar="إجمالي الفرص">Total Opportunities</div>
+      </div>
+      <div class="liv2-kpi" data-kpi="open">
+        <div class="liv2-kpi__icon" aria-hidden="true">&#10003;</div>
+        <div class="liv2-kpi__value" id="liv2KpiOpen">—</div>
+        <div class="liv2-kpi__label" data-en="Currently Open" data-ar="مفتوحة حالياً">Currently Open</div>
+      </div>
+      <div class="liv2-kpi" data-kpi="sectors">
+        <div class="liv2-kpi__icon" aria-hidden="true">&#11042;</div>
+        <div class="liv2-kpi__value" id="liv2KpiSectors">—</div>
+        <div class="liv2-kpi__label" data-en="Sectors Covered" data-ar="القطاعات المغطاة">Sectors Covered</div>
+      </div>
+      <div class="liv2-kpi" data-kpi="new">
+        <div class="liv2-kpi__icon" aria-hidden="true">&#9733;</div>
+        <div class="liv2-kpi__value" id="liv2KpiNew">—</div>
+        <div class="liv2-kpi__label" data-en="Added This Week" data-ar="أضيفت هذا الأسبوع">Added This Week</div>
+      </div>
+    </div>
+
+    <!-- ── CHART ROW ──────────────────────────────────────────── -->
+    <div class="liv2-chart-row">
+
+      <!-- Funding by Sector (horizontal bar) -->
+      <div class="liv2-chart-card">
+        <div class="liv2-chart-card__header">
+          <div class="liv2-chart-card__title" data-en="Programmes with Disclosed Funding" data-ar="برامج بتمويل محدد">Programmes with Disclosed Funding</div>
+          <div class="liv2-chart-card__sub" data-en="Count per sector with known funding amounts" data-ar="عدد البرامج ذات مبالغ تمويل معلنة لكل قطاع">Count per sector with known funding amounts</div>
+        </div>
+        <div class="liv2-chart-wrap liv2-chart-wrap--bar">
+          <canvas id="liv2FundingChart" aria-label="Funding by sector chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Opportunity Count by Sector (donut) -->
+      <div class="liv2-chart-card">
+        <div class="liv2-chart-card__header">
+          <div class="liv2-chart-card__title" data-en="Opportunities by Sector" data-ar="الفرص حسب القطاع">Opportunities by Sector</div>
+          <div class="liv2-chart-card__sub" data-en="Count of programmes per sector (top 8)" data-ar="عدد البرامج لكل قطاع (أعلى 8)">Count of programmes per sector (top 8)</div>
+        </div>
+        <div class="liv2-chart-wrap liv2-chart-wrap--donut">
+          <canvas id="liv2SectorChart" aria-label="Opportunities by sector chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Status Breakdown (donut) -->
+      <div class="liv2-chart-card">
+        <div class="liv2-chart-card__header">
+          <div class="liv2-chart-card__title" data-en="Status Breakdown" data-ar="توزيع الحالات">Status Breakdown</div>
+          <div class="liv2-chart-card__sub" data-en="Current programme status distribution" data-ar="توزيع حالات البرامج الحالية">Current programme status distribution</div>
+        </div>
+        <div class="liv2-chart-wrap liv2-chart-wrap--donut">
+          <canvas id="liv2StatusChart" aria-label="Status breakdown chart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── INSIGHT STRIP ─────────────────────────────────────── -->
+    <div class="liv2-insight-strip" id="liv2InsightStrip">
+      <div class="liv2-insight-item" id="liv2Insight1">
+        <span class="liv2-insight-dot"></span>
+        <span class="liv2-insight-text">Loading insights…</span>
+      </div>
+      <div class="liv2-insight-sep" aria-hidden="true"></div>
+      <div class="liv2-insight-item" id="liv2Insight2">
+        <span class="liv2-insight-dot"></span>
+        <span class="liv2-insight-text"></span>
+      </div>
+      <div class="liv2-insight-sep" aria-hidden="true"></div>
+      <div class="liv2-insight-item" id="liv2Insight3">
+        <span class="liv2-insight-dot"></span>
+        <span class="liv2-insight-text"></span>
+      </div>
+    </div>
+
+    <!-- Legacy snapshot kept for renderSnapshot() compatibility -->
+    <div id="insights-snapshot" style="display:none"></div>
+
+  </section>
       </div>
     </section>
 
     <!-- VIEW: OPPORTUNITIES — wraps ALL existing cards, filters, header, main, footer -->
     <section class="app-view" id="view-opportunities" aria-label="Opportunities">
-
-<!-- IS TOP UTILITY BAR -->
-<div class="is-top-bar">
-  <div class="is-top-bar-left">
-    <span>&#x1F1F8;&#x1F1E6; Kingdom of Saudi Arabia</span>
-    <span>Vision 2030 Investment Platform</span>
-  </div>
-  <div class="is-top-bar-right">
-        <a id="langAr" class="is-lang-btn" href="#" lang="ar" dir="rtl">العربية</a>
-        <span class="is-lang-sep">|</span>
-        <a id="langEn" class="is-lang-btn is-lang-active" href="index.html" lang="en">English</a>
-      </div>
-    </div>
-<!-- IS PILOT DEMO BANNER -->
-<div class="is-pilot-banner" role="note" aria-label="Demo notice">
-  <span class="is-pilot-badge">&#9679; Pilot Demo</span>
-  <span class="is-pilot-banner-text">This is a white-label demo view of the Opportunity Hub — <strong>not for public use</strong>. For evaluation purposes only.</span>
-</div>
-<header>
-  <nav class="navbar" role="navigation" aria-label="Main navigation">
-    <!-- IS LOGO BLOCK -->
-    <a href="#overview" class="is-logo-block" aria-label="Opportunity Hub Home">
-      <div class="is-logo-rect" aria-hidden="true">
-        <div class="is-logo-rect-inner">
-          <span class="is-logo-name">Opportunity Hub</span>
-          <span class="is-logo-tagline">Saudi Vision 2030</span>
-        </div>
-      </div>
-
-    </a>
-
-    <a href="#overview" class="nav-logo" aria-label="Saudi Opportunity Hub Home">
-      <div class="nav-logo-icon">
-        <svg width="34" height="34" viewBox="0 0 36 36" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="18" cy="18" r="17" stroke="#00a651" stroke-width="1.5" opacity="0.3"/>
-          <ellipse cx="18" cy="18" rx="17" ry="6.5" stroke="#00a651" stroke-width="1.5" opacity="0.6" transform="rotate(-25 18 18)"/>
-          <circle cx="18" cy="18" r="3.5" fill="#00a651"/>
-          <circle cx="28.5" cy="10" r="1.8" fill="#00a651" opacity="0.8"/>
-          <circle cx="9" cy="26" r="1.2" fill="#00a651" opacity="0.5"/>
-        </svg>
-      </div>
-      <span class="nav-logo-text"><span>Saudi</span> Opportunity Hub</span>
-    </a>
-
-    <ul class="navbar-links" id="navLinks" role="list">
-      <li><a href="#overview" class="active">Overview</a></li>
-      <li><a href="#opportunities">Opportunities</a></li>
-      <li><a href="#insights">Insights</a></li>
-      <li><a href="#about">About</a></li>
-      <li><a href="#feedback">Feedback</a></li>
-      <!-- Language toggle — visible in mobile menu only -->
-      <li class="mobile-lang-row" style="display:none; padding: 10px 16px; border-top: 1px solid var(--border); gap: 8px; align-items:center;">
-        <a id="langArMobile" class="is-lang-btn" href="#" lang="ar" dir="rtl" style="padding:6px 14px;">&#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;</a>
-        <a id="langEnMobile" class="is-lang-btn is-lang-active" href="#" lang="en" style="padding:6px 14px;">English</a>
-      </li>
-    </ul>
-
-    <div class="nav-actions">
-      <!-- Sign-out button -->
-      <button
-        id="signout-btn"
-        aria-label="Sign out"
-        title="Sign out"
-        style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:transparent;border:1.5px solid var(--border,#ddd);border-radius:999px;font-size:13px;font-weight:500;color:var(--text-muted,#555);cursor:pointer;transition:background .15s,border-color .15s,color .15s;"
-        onmouseover="this.style.background='var(--green-highlight,#e8f5ed)';this.style.borderColor='var(--green,#006C35)';this.style.color='var(--green,#006C35)';"
-        onmouseout="this.style.background='transparent';this.style.borderColor='var(--border,#ddd)';this.style.color='var(--text-muted,#555)';"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        <span class="signout-label" data-en="Sign out" data-ar="تسجيل الخروج">Sign out</span>
-      </button>
-      <!-- Notification Bell -->
-      <div style="position:relative;">
-        <button class="notif-btn" id="notifBtn" aria-label="Notifications" title="Notifications">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <span class="notif-badge hidden" id="notifBadge">0</span>
-        </button>
-        <div class="notif-dropdown" id="notifDropdown" role="dialog" aria-label="Notifications">
-          <div class="notif-dropdown-header">
-            <span data-en="Notifications" data-ar="الإشعارات">Notifications</span>
-            <button class="notif-clear-btn" id="notifClearBtn" data-en="Mark all read" data-ar="تحديد الكل كمقروء">Mark all read</button>
-          </div>
-          <ul class="notif-list" id="notifList"></ul>
-        </div>
-      </div>
-
-      <button class="ob-help-btn" id="obHelpBtn" title="Help &amp; Tour" aria-label="Help and Tour">?</button>
-        <button class="hamburger" id="hamburger" aria-label="Open navigation menu" aria-expanded="false">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M3 6h18M3 12h18M3 18h18"/>
-        </svg>
-      </button>
-    </div>
-  </nav>
-</header>
-
-<main>
-
-<!-- ══ WORKSPACE BAR ══════════════════════════════════════════════ -->
-<div class="ws-bar" id="wsBar" role="banner" aria-label="Your workspace">
-  <div class="ws-greeting">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-    <span><span data-en="Welcome back," data-ar="مرحباً بعودتك،">Welcome back,</span> <strong id="wsUserName">User</strong></span>
-  </div>
-  <div class="ws-divider" aria-hidden="true"></div>
-  <div class="ws-stat" id="wsWatchlistStat" title="Bookmarked opportunities" style="cursor:pointer;" onclick="WS.openPanel('watchlist')">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-    <strong id="wsWatchlistCount">0</strong> <span class="ws-label" data-en="Watchlist" data-ar="قائمة المتابعة">Watchlist</span>
-  </div>
-  <div class="ws-divider" aria-hidden="true"></div>
-  <div class="ws-stat" id="wsSavedStat" title="Saved searches" style="cursor:pointer;" onclick="WS.openPanel('searches')">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <strong id="wsSavedCount">0</strong> <span class="ws-label" data-en="Saved Searches" data-ar="البحوث المحفوظة">Saved Searches</span>
-  </div>
-  <div class="ws-divider" aria-hidden="true"></div>
-  <div class="ws-stat ws-stat--updates" id="wsUpdatesStat" title="New since your last visit">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-    <strong id="wsUpdatesCount">0</strong> <span class="ws-label" data-en="New this week" data-ar="جديد هذا الأسبوع">New this week</span>
-  </div>
-  <div class="ws-actions">
-    <button class="ws-btn" id="wsOpenPanelBtn" onclick="WS.openPanel('watchlist')" title="Open Watchlist &amp; Saved Searches">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-      <span class="ws-label" data-en="My Workspace" data-ar="مساحتي">My Workspace</span>
-    </button>
-    <button class="ws-btn" id="wsSettingsBtn" onclick="WS.openSettings()" title="Workspace Settings">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <span class="ws-label" data-en="Settings" data-ar="الإعدادات">Settings</span>
-    </button>
-  </div>
-</div>
-
-  <section id="overview" aria-label="Overview">
-    <div class="hero-grid">
-      <div class="hero-text">
-        <div class="hero-badge">Pilot Demo</div>
-        <h1 class="hero-title">
-          Funding Opportunities<br><span class="accent">Saudi Arabia to Global</span>
-        </h1>
-        <p class="hero-desc">
-          A structured dataset of grants, tenders, accelerators, fellowships, and investment programs across 15 sectors — covering Saudi Arabia, the GCC, and global initiatives open to Saudi-based organizations. This is a pilot release; data reflects a live, continuously updated dataset.
-        </p>
-        <div class="hero-ctas">
-          <a href="#opportunities" class="btn-primary">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            Browse the Database
-          </a>
-          <a href="mailto:jblancoapodaca@gmail.com?subject=Dataset%20Suggestion" class="btn-secondary">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg>
-            Submit a Correction
-          </a>
-        </div>
-      </div>
-
-      <div class="kpi-grid">
-        <div class="kpi-card saudi" data-tooltip="Programs issued or led by Saudi institutions — CST, RDIA, Monsha'at, KAUST, KACST, PIF-backed entities, and other KSA government bodies. Classified by programme origin, not applicant eligibility.">
-          <div class="kpi-icon saudi">&#x1F1F8;&#x1F1E6;</div>
-          <div class="kpi-body">
-            <div class="kpi-value" id="kpiSaudi" data-loading="true"><span class="sr-only">Loading…</span></div>
-            <div class="kpi-label">Saudi-Issued</div>
-            <div class="kpi-note">Programmes from Saudi institutions &amp; government bodies</div>
-          </div>
-        </div>
-        <div class="kpi-card gcc" data-tooltip="Programmes led by UAE, Oman, Qatar, Bahrain, Kuwait, and other GCC partners — excluding Saudi Arabia. Classified by programme origin.">
-          <div class="kpi-icon gcc">&#x1F310;</div>
-          <div class="kpi-body">
-            <div class="kpi-value" id="kpiGcc" data-loading="true"><span class="sr-only">Loading…</span></div>
-            <div class="kpi-label">GCC-Issued</div>
-            <div class="kpi-note">From UAE, Oman, Qatar &amp; regional partners (excl. KSA)</div>
-          </div>
-        </div>
-        <div class="kpi-card global" data-tooltip="Programmes issued by international organisations, global accelerators, and companies outside the GCC — many of which are open or accessible to Saudi-based applicants.">
-          <div class="kpi-icon global">&#x1F30D;</div>
-          <div class="kpi-body">
-            <div class="kpi-value" id="kpiGlobal" data-loading="true"><span class="sr-only">Loading…</span></div>
-            <div class="kpi-label">Internationally Issued</div>
-            <div class="kpi-note">Global programmes, many accessible to Saudi applicants</div>
-          </div>
-        </div>
-        <div class="kpi-card" style="border-left: 3px solid var(--green);" data-tooltip="Total records in the dataset — Saudi-issued + GCC-issued + Internationally-issued programmes combined.">
-          <div class="kpi-icon">&#x2726;</div>
-          <div class="kpi-body">
-            <div class="kpi-value" id="kpiTotal" data-loading="true"><span class="sr-only">Loading…</span></div>
-            <div class="kpi-label">Total Records</div>
-            <div class="kpi-note">All three origin tiers combined</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="who-strip" role="list">
-      <div class="who-item" role="listitem">
-        <div class="who-role">Startups & SMEs</div>
-        <div class="who-desc">Find accelerators, seed funds, and government grant programs relevant to your sector and stage. Filter by region and program type to surface the most applicable opportunities.</div>
-      </div>
-      <div class="who-item" role="listitem">
-        <div class="who-role">Researchers & Universities</div>
-        <div class="who-desc">Identify fellowship programs, research grants, and institutional funding across Saudi Arabia, the GCC, and international bodies. Search by sector or funding source to support grant applications.</div>
-      </div>
-      <div class="who-item" role="listitem">
-        <div class="who-role">Government & Public Sector</div>
-        <div class="who-desc">Map the funding landscape across sectors and regions to inform program design, gap analysis, or policy review. Access structured data on program types, eligibility, and regional distribution.</div>
-      </div>
-      <div class="who-item" role="listitem">
-        <div class="who-role">Investors & Ecosystem</div>
-        <div class="who-desc">Understand co-investment programs, government-backed venture initiatives, and ecosystem support structures across the GCC. Use the database to identify strategic alignment opportunities.</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══════════════════════════════════════════
-       HOW IT WORKS
-  ════════════════════════════════════════════ -->
-  <section id="how-it-works" aria-label="How it works" style="padding-inline: var(--space-4);">
-    <div class="hiw-section">
-      <div class="hiw-label">The Pipeline</div>
-      <h2 class="hiw-title">From raw data to structured opportunity intelligence</h2>
-      <div class="hiw-pipeline">
-
-        <div class="hiw-step">
-          <div class="hiw-num">1</div>
-          <div class="hiw-step-title">Automated weekly research</div>
-          <div class="hiw-step-desc">AI pipelines continuously scan government portals, national tender boards, investment platforms, and accelerator programs across Saudi Arabia, the GCC, and global sources to surface new opportunities.</div>
-        </div>
-
-        <div class="hiw-connector" aria-hidden="true">&rarr;</div>
-
-        <div class="hiw-step">
-          <div class="hiw-num">2</div>
-          <div class="hiw-step-title">Verified &amp; structured data</div>
-          <div class="hiw-step-desc">Each record is human-reviewed and enriched with sector tags, deadlines, funding size, eligibility criteria, and source links — then normalised into a consistent schema across all 1,074+ entries.</div>
-        </div>
-
-        <div class="hiw-connector" aria-hidden="true">&rarr;</div>
-
-        <div class="hiw-step">
-          <div class="hiw-num">3</div>
-          <div class="hiw-step-title">Delivered via API &amp; white-label dashboard</div>
-          <div class="hiw-step-desc">Access the full dataset through a REST API for seamless integration into your own tools, or deploy a branded white-label portal for your institution, accelerator, or investment platform.</div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- DATA FRESHNESS PANEL -->
-  <div id="dataFreshnessPanel" aria-label="Data freshness and platform status">
-    <div class="dfp-inner">
-      <!-- Left brand column -->
-      <div class="dfp-brand">
-        <span class="dfp-brand-label" id="dfpPanelLabel">Platform Status</span>
-        <span class="dfp-brand-status">
-          <span class="dfp-brand-dot"></span>
-          <span id="dfpPipelineStatus">Pipeline Active</span>
-        </span>
-      </div>
-      <!-- Stats -->
-      <div class="dfp-stats">
-        <div class="dfp-stat">
-          <span class="dfp-stat-value" id="dfpTotalRecords">&mdash;</span>
-          <span class="dfp-stat-label" id="dfpTotalLabel">Total Records</span>
-        </div>
-        <div class="dfp-stat dfp-stat--green">
-          <span class="dfp-stat-value" id="dfpAddedWeek">&mdash;</span>
-          <span class="dfp-stat-label" id="dfpAddedLabel">Added This Week</span>
-        </div>
-        <div class="dfp-stat dfp-stat--gold">
-          <span class="dfp-stat-value" id="dfpUpdatedWeek">&mdash;</span>
-          <span class="dfp-stat-label" id="dfpUpdatedLabel">Updated This Week</span>
-        </div>
-        <div class="dfp-stat">
-          <span class="dfp-stat-value" id="dfpLastVerified">&mdash;</span>
-          <span class="dfp-stat-label" id="dfpVerifiedLabel">Last Verified</span>
-        </div>
-        <div class="dfp-stat">
-          <span class="dfp-stat-value" id="dfpApiStatus">
-            <span style="color:var(--green);">&#x2714;</span> Live
-          </span>
-          <span class="dfp-stat-label" id="dfpApiLabel">API Status</span>
-        </div>
-        <div class="dfp-stat">
-          <span class="dfp-stat-value" id="dfpVerifStatus">
-            <span style="color:var(--green);">&#x2714;</span> Verified
-          </span>
-          <span class="dfp-stat-label" id="dfpVerifLabel">Human Review</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
+<div class="opp-view-wrap">
   <section id="opportunities" aria-label="Opportunities database">
     <div class="section-label">Database</div>
     <h2 class="section-heading">Funding Database</h2>
@@ -5041,106 +5010,54 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
     </div>
   </section>
 
-  <section id="insights" aria-label="Data insights and analytics">
-    <div class="section-label">Analytics</div>
-    <div class="liv2-heading-row">
-      <h2 class="section-heading">Landscape Overview</h2>
-      <span class="liv2-personal-chip" id="liv2PersonalChip" style="display:none" role="status">
-        <span class="liv2-personal-chip__dot"></span>
-        <span class="liv2-personal-chip__text" id="liv2ChipText">Personalised for you</span>
-        <button class="liv2-personal-chip__reset" id="liv2ChipReset" aria-label="Show global view">&#10005;</button>
-      </span>
-    </div>
-    <p class="section-sub">
-      Program-type distribution, regional breakdown, and status summary across all sectors and geographies. Use these charts to orient your research before drilling into individual records.
-    </p>
 
-    <!-- ── KPI CARDS ROW ──────────────────────────────────────── -->
-    <div class="liv2-kpi-row" id="liv2KpiRow">
-      <div class="liv2-kpi" data-kpi="total">
-        <div class="liv2-kpi__icon" aria-hidden="true">&#9776;</div>
-        <div class="liv2-kpi__value" id="liv2KpiTotal">—</div>
-        <div class="liv2-kpi__label" data-en="Total Opportunities" data-ar="إجمالي الفرص">Total Opportunities</div>
-      </div>
-      <div class="liv2-kpi" data-kpi="open">
-        <div class="liv2-kpi__icon" aria-hidden="true">&#10003;</div>
-        <div class="liv2-kpi__value" id="liv2KpiOpen">—</div>
-        <div class="liv2-kpi__label" data-en="Currently Open" data-ar="مفتوحة حالياً">Currently Open</div>
-      </div>
-      <div class="liv2-kpi" data-kpi="sectors">
-        <div class="liv2-kpi__icon" aria-hidden="true">&#11042;</div>
-        <div class="liv2-kpi__value" id="liv2KpiSectors">—</div>
-        <div class="liv2-kpi__label" data-en="Sectors Covered" data-ar="القطاعات المغطاة">Sectors Covered</div>
-      </div>
-      <div class="liv2-kpi" data-kpi="new">
-        <div class="liv2-kpi__icon" aria-hidden="true">&#9733;</div>
-        <div class="liv2-kpi__value" id="liv2KpiNew">—</div>
-        <div class="liv2-kpi__label" data-en="Added This Week" data-ar="أضيفت هذا الأسبوع">Added This Week</div>
-      </div>
-    </div>
+</main>
+</div><!-- /opp-view-wrap -->
+    </section>
+    <!-- /VIEW: OPPORTUNITIES -->
 
-    <!-- ── CHART ROW ──────────────────────────────────────────── -->
-    <div class="liv2-chart-row">
-
-      <!-- Funding by Sector (horizontal bar) -->
-      <div class="liv2-chart-card">
-        <div class="liv2-chart-card__header">
-          <div class="liv2-chart-card__title" data-en="Programmes with Disclosed Funding" data-ar="برامج بتمويل محدد">Programmes with Disclosed Funding</div>
-          <div class="liv2-chart-card__sub" data-en="Count per sector with known funding amounts" data-ar="عدد البرامج ذات مبالغ تمويل معلنة لكل قطاع">Count per sector with known funding amounts</div>
+    <!-- VIEW: SECTORS — sector chip grid filtering cards -->
+    <section class="app-view" id="view-sectors" aria-label="Sectors">
+      <div class="sectors-wrap">
+        <h2 class="dash-title" style="margin-bottom: 8px;">Browse by sector</h2>
+        <p class="dash-sub">Tap a sector to filter the dataset. Open the Opportunities view to see filtered results.</p>
+        <div class="sectors-grid" id="sectorsGrid" role="list">
+          <!-- Sector chips injected by JS -->
         </div>
-        <div class="liv2-chart-wrap liv2-chart-wrap--bar">
-          <canvas id="liv2FundingChart" aria-label="Funding by sector chart"></canvas>
+        <div id="sectorsHint" class="dash-sub" style="margin-top: 12px;">Loading sectors…</div>
+      </div>
+    </section>
+
+    <!-- VIEW: SAVED — connected to WS watchlist -->
+    <section class="app-view" id="view-saved" aria-label="Saved">
+      <div class="saved-wrap">
+        <div class="dash-header">
+          <div>
+            <h2 class="dash-title" style="margin-bottom: 4px;">My Watchlist</h2>
+            <p class="dash-sub">Opportunities you have saved. Synced to your account.</p>
+          </div>
+          <button class="app-tb-icon-btn" style="padding: 8px 16px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; display:flex;align-items:center;gap:6px;" onclick="WS.openPanel('watchlist')" type="button">
+            <i data-lucide="external-link"></i> Open full workspace
+          </button>
+        </div>
+        <div id="savedViewList" style="margin-top: 16px;">
+          <div class="saved-empty" id="savedEmpty">
+            <i data-lucide="bookmark"></i>
+            <h3>No saved opportunities yet</h3>
+            <p>Click the bookmark icon on any opportunity card to save it here.</p>
+            <button class="about-cta" style="margin-top:12px;" onclick="setRoute('opportunities')" type="button">
+              <i data-lucide="search"></i> Browse opportunities
+            </button>
+          </div>
         </div>
       </div>
+    </section>
 
-      <!-- Opportunity Count by Sector (donut) -->
-      <div class="liv2-chart-card">
-        <div class="liv2-chart-card__header">
-          <div class="liv2-chart-card__title" data-en="Opportunities by Sector" data-ar="الفرص حسب القطاع">Opportunities by Sector</div>
-          <div class="liv2-chart-card__sub" data-en="Count of programmes per sector (top 8)" data-ar="عدد البرامج لكل قطاع (أعلى 8)">Count of programmes per sector (top 8)</div>
-        </div>
-        <div class="liv2-chart-wrap liv2-chart-wrap--donut">
-          <canvas id="liv2SectorChart" aria-label="Opportunities by sector chart"></canvas>
-        </div>
-      </div>
-
-      <!-- Status Breakdown (donut) -->
-      <div class="liv2-chart-card">
-        <div class="liv2-chart-card__header">
-          <div class="liv2-chart-card__title" data-en="Status Breakdown" data-ar="توزيع الحالات">Status Breakdown</div>
-          <div class="liv2-chart-card__sub" data-en="Current programme status distribution" data-ar="توزيع حالات البرامج الحالية">Current programme status distribution</div>
-        </div>
-        <div class="liv2-chart-wrap liv2-chart-wrap--donut">
-          <canvas id="liv2StatusChart" aria-label="Status breakdown chart"></canvas>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ── INSIGHT STRIP ─────────────────────────────────────── -->
-    <div class="liv2-insight-strip" id="liv2InsightStrip">
-      <div class="liv2-insight-item" id="liv2Insight1">
-        <span class="liv2-insight-dot"></span>
-        <span class="liv2-insight-text">Loading insights…</span>
-      </div>
-      <div class="liv2-insight-sep" aria-hidden="true"></div>
-      <div class="liv2-insight-item" id="liv2Insight2">
-        <span class="liv2-insight-dot"></span>
-        <span class="liv2-insight-text"></span>
-      </div>
-      <div class="liv2-insight-sep" aria-hidden="true"></div>
-      <div class="liv2-insight-item" id="liv2Insight3">
-        <span class="liv2-insight-dot"></span>
-        <span class="liv2-insight-text"></span>
-      </div>
-    </div>
-
-    <!-- Legacy snapshot kept for renderSnapshot() compatibility -->
-    <div id="insights-snapshot" style="display:none"></div>
-
-  </section>
-
-  <section id="about" aria-label="About this hub">
+    <!-- VIEW: ABOUT — full about + feedback sections -->
+    <section class="app-view" id="view-about" aria-label="About">
+      <div class="about-wrap about-wrap--full">
+        <div class="about-scroll-inner">
+<section id="about" aria-label="About this hub">
     <div class="section-label">About</div>
     <h2 class="section-heading">About This Hub</h2>
     <div class="about-grid">
@@ -5246,75 +5163,6 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
   </section>
 
 </main>
-
-<footer>
-  <div class="footer-inner">
-    <a href="#overview" class="footer-logo" aria-label="Saudi Opportunity Hub">
-      <svg width="28" height="28" viewBox="0 0 36 36" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="18" cy="18" r="17" stroke="#C9A66B" stroke-width="1.5" opacity="0.5"/>
-        <ellipse cx="18" cy="18" rx="17" ry="6.5" stroke="#C9A66B" stroke-width="1.5" opacity="0.7" transform="rotate(-25 18 18)"/>
-        <circle cx="18" cy="18" r="3.5" fill="#C9A66B"/>
-      </svg>
-      <span class="footer-logo-text">Opportunity Hub</span>
-    </a>
-    <ul class="footer-links" role="list">
-      <li><a href="#overview">Overview</a></li>
-      <li><a href="#opportunities">Opportunities</a></li>
-      <li><a href="#insights">Insights</a></li>
-      <li><a href="#about">About</a></li>
-      <li><a href="#feedback">Feedback</a></li>
-      <li><a href="api.html">API Access</a></li>
-      <li><a href="mailto:jblancoapodaca@gmail.com">Contact</a></li>
-    </ul>
-    <div class="footer-attribution">
-    </div>
-    <p class="footer-disclaimer">
-      This is a private demo build for internal evaluation only. Not for public distribution. All program information is provided for awareness and research purposes only. Verify all details directly with sponsoring organizations. Last updated: <span id="footerLastUpdated">—</span>.
-    </p>
-  </div>
-</footer>
-
-    </section>
-    <!-- /VIEW: OPPORTUNITIES -->
-
-    <!-- VIEW: SECTORS — sector chip grid filtering cards -->
-    <section class="app-view" id="view-sectors" aria-label="Sectors">
-      <div class="sectors-wrap">
-        <h2 class="dash-title" style="margin-bottom: 8px;">Browse by sector</h2>
-        <p class="dash-sub">Tap a sector to filter the dataset. Open the Opportunities view to see filtered results.</p>
-        <div class="sectors-grid" id="sectorsGrid" role="list">
-          <!-- Sector chips injected by JS -->
-        </div>
-        <div id="sectorsHint" class="dash-sub" style="margin-top: 12px;">Loading sectors…</div>
-      </div>
-    </section>
-
-    <!-- VIEW: SAVED — bookmarked cards (in-memory Set) -->
-    <section class="app-view" id="view-saved" aria-label="Saved">
-      <div class="saved-wrap">
-        <h2 class="dash-title" style="margin-bottom: 8px;">Saved opportunities</h2>
-        <p class="dash-sub">Bookmarks are kept in memory for this session.</p>
-        <div id="savedList" style="margin-top: 20px;">
-          <div class="saved-empty" id="savedEmpty">
-            <i data-lucide="bookmark"></i>
-            <h3>No saved opportunities yet</h3>
-            <p>Bookmark any opportunity card to see it here.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- VIEW: ABOUT — platform description + contact CTA -->
-    <section class="app-view" id="view-about" aria-label="About">
-      <div class="about-wrap">
-        <div class="about-card">
-          <h2>About the Opportunity Hub</h2>
-          <p>The Saudi Opportunity Hub is a structured intelligence platform that surfaces grants, tenders, accelerators, fellowships, and investment programs across Saudi Arabia, the GCC, and global initiatives open to Saudi-based organizations.</p>
-          <p>Built as a pilot for Vision 2030 alignment, it consolidates fragmented funding signals into a single, searchable workspace — covering 15 strategic sectors including Energy, ICT, Healthcare, Agriculture, and Tourism.</p>
-          <p>This is a private, white-label demo for internal evaluation. Data is continuously updated and verified against sponsoring organizations.</p>
-          <a class="about-cta" href="mailto:jblancoapodaca@gmail.com">
-            <i data-lucide="mail"></i> Contact the team
-          </a>
         </div>
       </div>
     </section>
@@ -6006,10 +5854,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* Click handlers on every nav item / bottom tab */
   document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-route]');
+    var t = e.target.closest('[data-view]');
     if (!t) return;
     var view = t.getAttribute('data-view');
     if (!view) return;
+    /* Only intercept elements that are navigation items (not other data-view users) */
+    if (!t.classList.contains('app-nav-item') && !t.classList.contains('app-bottom-tab')) return;
     e.preventDefault();
     setRoute(view);
   });
@@ -6025,26 +5875,25 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /* ---------------- Theme toggle (sidebar bottom) ---------------- */
-  var themeBtn = document.getElementById('appThemeToggle');
+  /* ─── Wire sidebar logout to same handler as topbar ─── */
+  document.addEventListener('click', function(e) {
+    var t = e.target.closest('#sidebarLogout');
+    if (!t) return;
+    var signoutBtn = document.getElementById('signout-btn');
+    if (signoutBtn) signoutBtn.click();
+  });
+
+  var themeBtn = document.getElementById('appSidebarTheme');
   var themeLabel = document.getElementById('appThemeToggleLabel');
   function syncThemeLabel() {
     var t = document.documentElement.getAttribute('data-theme') || 'light';
-    if (themeLabel) themeLabel.textContent = t === 'dark' ? 'Light mode' : 'Dark mode';
     if (themeBtn) {
       var icon = themeBtn.querySelector('[data-lucide]');
       if (icon) icon.setAttribute('data-lucide', t === 'dark' ? 'sun' : 'moon');
       paintIcons();
     }
   }
-  if (themeBtn) {
-    themeBtn.addEventListener('click', function () {
-      var cur = document.documentElement.getAttribute('data-theme') || 'light';
-      document.documentElement.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
-      syncThemeLabel();
-      if (chartsInitialized) rebuildCharts();
-    });
-  }
-  syncThemeLabel();
+  syncThemeLabel();  /* themeBtn is null — handled by topbar appThemeToggle */
 
   /* ---------------- Data access ---------------- */
   function getData() {
@@ -6183,13 +6032,28 @@ document.addEventListener('DOMContentLoaded', function () {
           /* Toggle active visually */
           grid.querySelectorAll('.sector-chip').forEach(function (c) { c.classList.remove('active'); });
           btn.classList.add('active');
-          /* Try to apply existing sector filter, then route to opportunities */
-          var sel = document.querySelector('#sectorFilter, select[name="sector"], #sector-filter');
-          if (sel) {
-            var opt = Array.from(sel.options || []).find(function (o) { return String(o.value).toLowerCase() === String(e[0]).toLowerCase() || String(o.textContent).toLowerCase() === String(e[0]).toLowerCase(); });
-            if (opt) { sel.value = opt.value; sel.dispatchEvent(new Event('change', { bubbles: true })); }
-          }
+          /* Apply sector filter and navigate to opportunities */
+          var sectorVal = e[0];
           setRoute('opportunities');
+          /* Wait for view to render then apply filter */
+          setTimeout(function() {
+            var sel = document.getElementById('sectorFilter');
+            if (sel) {
+              /* Find matching option by value or text */
+              var matched = false;
+              Array.from(sel.options).forEach(function(opt) {
+                if (opt.value.toLowerCase() === sectorVal.toLowerCase() ||
+                    opt.textContent.trim().toLowerCase() === sectorVal.toLowerCase()) {
+                  sel.value = opt.value;
+                  matched = true;
+                }
+              });
+              if (matched) {
+                sel.dispatchEvent(new Event('change', { bubbles: true }));
+                sel.dispatchEvent(new Event('input', { bubbles: true }));
+              }
+            }
+          }, 150);
         });
         grid.appendChild(btn);
       });
@@ -6286,6 +6150,117 @@ document.addEventListener('DOMContentLoaded', function () {
   /* Re-paint icons after any view change */
   setTimeout(paintIcons, 300);
   setTimeout(paintIcons, 1500);
+
+  /* ─── Sync topbar stats from WS counters ─── */
+  function syncTopbarStats() {
+    var wlCount = document.getElementById('wsWatchlistCount');
+    var srCount = document.getElementById('wsSavedCount');
+    var nwCount = document.getElementById('wsUpdatesCount');
+    if (wlCount) set('appTbWatchlistCount', wlCount.textContent || '0');
+    if (srCount) set('appTbSearchesCount', srCount.textContent || '0');
+    if (nwCount) set('appTbNewCount', nwCount.textContent || '0');
+    // Also sync username
+    var wsName = document.getElementById('wsUserName');
+    if (wsName && wsName.textContent && wsName.textContent !== 'User') {
+      set('appTbUsername', wsName.textContent);
+    }
+  }
+  setInterval(syncTopbarStats, 2000);
+  setTimeout(syncTopbarStats, 800);
+
+  /* ─── Theme toggle in topbar ─── */
+  var appThemeBtn = document.getElementById('appThemeToggle');
+  if (appThemeBtn) {
+    appThemeBtn.addEventListener('click', function() {
+      var cur = document.documentElement.getAttribute('data-theme') || 'light';
+      var next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('oh-theme', next); } catch(e){}
+      var icon = appThemeBtn.querySelector('[data-lucide]');
+      if (icon) { icon.setAttribute('data-lucide', next === 'dark' ? 'sun' : 'moon'); paintIcons(); }
+      syncThemeLabel();
+      if (chartsInitialized) { setTimeout(rebuildCharts, 50); }
+      if (window.__renderInsightsV2) { setTimeout(function(){ window.__renderInsightsV2(window.opportunitiesData || []); }, 60); }
+    });
+  }
+
+  /* ─── Mobile sidebar toggle ─── */
+  var menuBtn = document.getElementById('appMenuBtn');
+  var sidebar = document.querySelector('.app-sidebar');
+  if (menuBtn && sidebar) {
+    menuBtn.addEventListener('click', function() {
+      sidebar.classList.toggle('mobile-open');
+    });
+  }
+
+  /* ─── Saved view: render from WS watchlist ─── */
+  function renderSavedViewFromWatchlist() {
+    var list = document.getElementById('savedViewList');
+    var empty = document.getElementById('savedEmpty');
+    if (!list) return;
+    /* Read watchlist from WS IIFE */
+    var watchlist = (window.__ws && window.__ws.watchlist) ? window.__ws.watchlist : [];
+    /* Also try the wsWatchlistCount approach — read rendered cards from WS panel */
+    var wsPanelCards = document.querySelectorAll('.wl-card-item, .wl-item, [data-wl-id]');
+    /* Clear non-empty items */
+    Array.from(list.children).forEach(function(c) { if (c !== empty) list.removeChild(c); });
+    if (!watchlist.length && !wsPanelCards.length) {
+      if (empty) empty.style.display = '';
+      return;
+    }
+    if (empty) empty.style.display = 'none';
+    /* If we have watchlist data, render compact cards */
+    if (watchlist.length) {
+      waitForData(function(data) {
+        var byId = {};
+        data.forEach(function(d) { byId[String(d.id)] = d; });
+        watchlist.forEach(function(item) {
+          var id = String(item.opportunity_id || item.id || '');
+          var opp = byId[id] || item;
+          if (!opp || (!opp.title && !item.title)) return;
+          var card = document.createElement('div');
+          card.className = 'saved-card-item';
+          var title = opp.title || item.title || 'Untitled';
+          var type = opp.type || '';
+          var status = opp.status || '';
+          var country = opp.country || '';
+          card.innerHTML = '<div class="saved-card-title">' + title + '</div>' +
+            '<div class="saved-card-meta">' +
+              (type ? '<span class="pill pill--' + type.replace(/[^a-z]/gi,'').toLowerCase() + '">' + type + '</span>' : '') +
+              (status ? '<span class="saved-card-status">' + status + '</span>' : '') +
+              (country ? '<span class="saved-card-country">' + country + '</span>' : '') +
+            '</div>';
+          card.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:all var(--transition);';
+          card.addEventListener('mouseenter', function() { card.style.borderColor = 'var(--green)'; });
+          card.addEventListener('mouseleave', function() { card.style.borderColor = 'var(--border)'; });
+          card.addEventListener('click', function() {
+            if (window.__openDetailPanel && opp.id) window.__openDetailPanel(opp);
+          });
+          list.appendChild(card);
+        });
+        paintIcons();
+      });
+    }
+  }
+
+  /* Override renderSavedList to also update the saved view */
+  var _origRenderSavedList = renderSavedList;
+  renderSavedList = function() {
+    _origRenderSavedList();
+    renderSavedViewFromWatchlist();
+  };
+
+  /* Render saved view when navigating to it */
+  var _origShowView = showView;
+  showView = function(view) {
+    _origShowView(view);
+    if (view === 'saved') {
+      setTimeout(renderSavedViewFromWatchlist, 200);
+    }
+    syncTopbarStats();
+    paintIcons();
+  };
+
 })();
 </script>
 
