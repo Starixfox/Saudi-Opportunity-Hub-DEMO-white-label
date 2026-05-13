@@ -4791,8 +4791,15 @@ body { top: 0 !important; }
       <button class="app-tb-icon-btn" id="appTbSettings" onclick="WS.openSettings()" title="Settings" type="button" aria-label="Settings">
         <i data-lucide="settings"></i>
       </button>
-      <!-- Google Translate Widget -->
-      <div id="google_translate_element"></div>
+      <!-- Language toggle button -->
+      <button class="app-tb-lang-btn" id="appLangToggle" type="button" aria-label="Switch language" title="Switch to Arabic / English" onclick="toggleGoogleTranslate()">
+        <span class="app-tb-lang-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </span>
+        <span id="appLangLabel">العربية</span>
+      </button>
+      <!-- Google Translate Widget (hidden — driven by button above) -->
+      <div id="google_translate_element" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden;"></div>
       <!-- Hidden anchors kept for existing JS compatibility -->
       <a id="langEn" class="is-lang-btn is-lang-active" href="index.html" lang="en" style="display:none">EN</a>
       <a id="langAr" class="is-lang-btn" href="ar.html" lang="ar" dir="rtl" style="display:none">ع</a>
@@ -9909,16 +9916,37 @@ body { top: 0 !important; }
 /* ── END LANDSCAPE INSIGHTS V2 ────────────────────────────────── */
 </script>
 <script>
-/* Arabic/English translation now handled by Google Translate widget.
-   Keeping window.activateArabic / activateEnglish as no-ops for
-   compatibility with any remaining callers (mobile menu, etc.). */
+/* Arabic/English translation handled by Google Translate widget. */
+
+function toggleGoogleTranslate() {
+  var sel = document.querySelector('select.goog-te-combo');
+  var label = document.getElementById('appLangLabel');
+  if (!sel) return;
+  var isAr = sel.value === 'ar';
+  if (isAr) {
+    /* Switch back to English */
+    sel.value = '';
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+    if (label) label.textContent = 'العربية';
+  } else {
+    /* Switch to Arabic */
+    sel.value = 'ar';
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+    if (label) label.textContent = 'English';
+  }
+}
+
 window.activateArabic  = function() {
   var sel = document.querySelector('select.goog-te-combo');
+  var label = document.getElementById('appLangLabel');
   if (sel) { sel.value = 'ar'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+  if (label) label.textContent = 'English';
 };
 window.activateEnglish = function() {
   var sel = document.querySelector('select.goog-te-combo');
+  var label = document.getElementById('appLangLabel');
   if (sel) { sel.value = ''; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+  if (label) label.textContent = 'العربية';
 };
 </script>
 
