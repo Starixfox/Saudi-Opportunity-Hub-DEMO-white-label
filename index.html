@@ -5267,42 +5267,43 @@ document.addEventListener('DOMContentLoaded', function () {
 </html>
 </body>
 <script>
-// Supabase config — loads opportunities directly from the database.
-// Anon key is safe to expose; reads are gated by the table's RLS policy.
-window.SUPABASE_URL = 'https://dshrbbnjahjcwxzvzygh.supabase.co';
-window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzaHJiYm5qYWhqY3d4enZ6eWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE3OTgsImV4cCI6MjA5NDA1Nzc5OH0.OpUGgfL91m7STsZpE6fnX281KN_Ge8oytR-2lM-3qTo';
-
+// Load opportunities from the Supabase `opportunities` table.
+// Reuses the existing window._supabase client initialized at the top of the
+// page (which already handles auth + the anon key).
 (async function loadOpportunitiesFromSupabase() {
-  const PAGE = 1000; // PostgREST default max
+  // Wait for the Supabase client to be ready (it's set up synchronously near
+  // the top of <head>, but be defensive in case load order changes).
+  for (let i = 0; i < 50 && !window._supabase; i++) {
+    await new Promise(r => setTimeout(r, 100));
+  }
+  if (!window._supabase) {
+    console.error('Supabase client not initialized; cannot load opportunities');
+    return;
+  }
+
   try {
+    const PAGE = 1000;
     let all = [];
     let from = 0;
     while (true) {
-      const url = `${window.SUPABASE_URL}/rest/v1/opportunities` +
-        `?select=id,title,description_short,type,sponsor_institution,country,` +
-        `eligibility_region,eligibility_entities,funding_amount,funding_type,` +
-        `application_link,deadline_date,status,language,notes,last_verified,` +
-        `profiles,sectors,isNew` +
-        `&order=id.asc`;
-      const res = await fetch(url, {
-        headers: {
-          apikey: window.SUPABASE_ANON_KEY,
-          Authorization: 'Bearer ' + window.SUPABASE_ANON_KEY,
-          Range: `${from}-${from + PAGE - 1}`,
-          'Range-Unit': 'items',
-          Prefer: 'count=exact'
-        }
-      });
-      if (!res.ok) throw new Error('Supabase HTTP ' + res.status + ': ' + await res.text());
-      const batch = await res.json();
-      all = all.concat(batch);
-      const contentRange = res.headers.get('Content-Range') || '';
-      const total = parseInt(contentRange.split('/')[1], 10);
-      if (!batch.length || isNaN(total) || all.length >= total) break;
+      const { data, error, count } = await window._supabase
+        .from('opportunities')
+        .select(
+          'id,title,description_short,type,sponsor_institution,country,' +
+          'eligibility_region,eligibility_entities,funding_amount,funding_type,' +
+          'application_link,deadline_date,status,language,notes,last_verified,' +
+          'profiles,sectors,isNew',
+          { count: 'exact' }
+        )
+        .order('id', { ascending: true })
+        .range(from, from + PAGE - 1);
+      if (error) throw error;
+      all = all.concat(data || []);
+      if (!data || !data.length || (typeof count === 'number' && all.length >= count)) break;
       from += PAGE;
     }
     window.opportunitiesData = all;
-    console.log('Loaded', all.length, 'opportunities from Supabase');
+    console.log('Loaded ' + all.length + ' opportunities from Supabase');
   } catch (e) {
     console.error('Failed to load opportunities from Supabase:', e);
     const el = document.getElementById('resultsCount');
