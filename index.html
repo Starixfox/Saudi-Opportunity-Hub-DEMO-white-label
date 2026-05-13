@@ -3702,7 +3702,7 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
   .ob-modal-body { padding: 18px 20px 14px; }
   .ob-modal-actions { padding: 0 20px 20px; flex-direction: column; }
   .ob-btn-skip { width: 100%; text-align: center; }
-  .ob-tour-tooltip { max-width: calc(100vw - 32px); }
+  .ob-tour-tooltip { max-width: calc(100vw - 32px); width: calc(100vw - 32px); left: 16px !important; }
 }
 
 </style>
@@ -9571,29 +9571,53 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
 
-      /* Tooltip positioning — pick whichever side has more room */
+      /* Tooltip positioning — measure actual size then place */
       var tt = tourEl.tooltip;
+      /* Reset position off-screen first so we can measure its real height */
+      tt.style.top  = '-9999px';
+      tt.style.left = '16px';
       tt.style.display = 'block';
-      var ttW = 300, ttH = 200;
+      var ttRect = tt.getBoundingClientRect();
+      var ttW = ttRect.width  || 300;
+      var ttH = ttRect.height || 160;
       var vw  = window.innerWidth, vh = window.innerHeight;
       var top, left;
+      var margin = 12;
+      var edgePad = 16;
 
-      var spaceBelow = vh - rect.bottom;
-      var spaceAbove = rect.top;
+      var spaceBelow = vh - (rect.bottom + pad) - margin;
+      var spaceAbove = rect.top - pad - margin;
 
-      if (spaceBelow >= ttH + 16) {
-        /* Enough room below — preferred */
-        top = rect.bottom + 12;
-      } else if (spaceAbove >= ttH + 16) {
-        /* Place above */
-        top = rect.top - ttH - 12;
+      /* For tray steps (fixed to bottom): always place above the tray */
+      if (current.showTray) {
+        /* rect.top is the top of the tray — place tooltip above it */
+        top = rect.top - ttH - margin;
+        /* If that's still too high (tray very tall on small screen), centre in upper half */
+        if (top < edgePad) top = edgePad;
+      } else if (spaceBelow >= ttH + margin) {
+        top = rect.bottom + pad + margin;
+      } else if (spaceAbove >= ttH + margin) {
+        top = rect.top - pad - ttH - margin;
       } else {
-        /* Not enough room either side — anchor to centre of viewport */
-        top = Math.max((vh - ttH) / 2, 16);
+        /* Not enough room either side — pick whichever half has more space */
+        if (spaceBelow >= spaceAbove) {
+          top = Math.min(rect.bottom + pad + margin, vh - ttH - edgePad);
+        } else {
+          top = Math.max(rect.top - pad - ttH - margin, edgePad);
+        }
       }
 
-      /* Horizontal: align with element, clamp to viewport */
-      left = Math.min(Math.max(rect.left, 16), vw - ttW - 16);
+      /* Clamp vertical so tooltip is never off-screen */
+      top = Math.max(edgePad, Math.min(top, vh - ttH - edgePad));
+
+      /* Horizontal: centre on element, clamp to viewport edges.
+         On narrow screens CSS overrides left to 16px so this is just a fallback. */
+      if (vw <= 600) {
+        left = edgePad;
+      } else {
+        left = rect.left + rect.width / 2 - ttW / 2;
+        left = Math.max(edgePad, Math.min(left, vw - ttW - edgePad));
+      }
 
       tt.style.top  = top  + 'px';
       tt.style.left = left + 'px';
