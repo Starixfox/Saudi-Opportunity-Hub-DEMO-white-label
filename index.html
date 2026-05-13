@@ -3224,6 +3224,75 @@ body.page-entering {
   transition: color var(--transition);
 }
 .ws-item-remove:hover { color: #ef4444; }
+.ws-item-note-row {
+  margin-top: 6px;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.ws-item-note-preview {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  cursor: pointer;
+}
+.ws-item-note-preview:hover { color: var(--text); }
+.ws-note-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-faint);
+  padding: 2px 3px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: color var(--transition);
+  line-height: 1;
+}
+.ws-note-btn:hover { color: var(--green); }
+.ws-item-note-area {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  width: 100%;
+}
+.ws-item-note-area.open { display: flex; }
+.ws-item-note-textarea {
+  width: 100%;
+  min-height: 60px;
+  background: var(--surface);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 0.78rem;
+  padding: 6px 8px;
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color var(--transition);
+}
+.ws-item-note-textarea:focus {
+  outline: none;
+  border-color: var(--green);
+}
+.ws-item-note-save {
+  align-self: flex-end;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity var(--transition);
+}
+.ws-item-note-save:hover { opacity: 0.85; }
 .ws-panel-overlay {
   position: fixed;
   inset: 0;
@@ -8892,7 +8961,7 @@ document.addEventListener('DOMContentLoaded', function () {
     _db.from('user_watchlist').delete().eq('user_id', _uid).not('opp_id', 'in', '(' + (ids.length ? ids.map(function(i){return '"'+i+'"';}).join(',') : '"__none__"') + ')').then(function(){
       if (!wl.length) return;
       var rows = wl.map(function(w){
-        return { user_id: _uid, opp_id: w.id, title: w.title||'', sector: w.sector||'', type: w.type||'', saved_at: w.savedAt || new Date().toISOString() };
+        return { user_id: _uid, opp_id: w.id, title: w.title||'', sector: w.sector||'', type: w.type||'', notes: w.notes||'', saved_at: w.savedAt || new Date().toISOString() };
       });
       _db.from('user_watchlist').upsert(rows, { onConflict: 'user_id,opp_id' }).then(function(){});
     });
@@ -8923,7 +8992,7 @@ document.addEventListener('DOMContentLoaded', function () {
     _db.from('user_watchlist').select('*').eq('user_id', _uid).then(function(res){
       if (res.error || !res.data || !res.data.length) return;
       var remote = res.data.map(function(r){
-        return { id: r.opp_id, title: r.title, sector: r.sector, type: r.type, savedAt: r.saved_at };
+        return { id: r.opp_id, title: r.title, sector: r.sector, type: r.type, notes: r.notes||'', savedAt: r.saved_at };
       });
       /* Merge: keep local items too, deduplicate by id */
       var merged = remote.slice();
@@ -9256,8 +9325,13 @@ document.addEventListener('DOMContentLoaded', function () {
           '<div class="ob-empty"><div class="ob-empty-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg></div><div class="ob-empty-title">' + (document.body.dir==="rtl" ? "قائمة المتابعة فارغة" : "Your watchlist is empty") + '</div><div class="ob-empty-body">' + (document.body.dir==="rtl" ? "انقر على أيقونة الإشارة المرجعية الذهبية على أي بطاقة فرصة لإضافتها هنا." : "Click the gold bookmark button on any opportunity card to save it here. Track deadlines and revisit saved items any time.") + '</div></div>';
         return;
       }
+      var ar = document.body.dir === 'rtl';
       body.innerHTML = watchlist.map(function(item) {
-        return '<div class="ws-item">' +
+        var noteLabel    = ar ? 'إضافة ملاحظة' : 'Add note';
+        var notePlaceholder = ar ? 'اكتب ملاحظتك هنا...' : 'Write your note here…';
+        var saveLabel    = ar ? 'حفظ' : 'Save';
+        var hasNote = item.notes && item.notes.trim();
+        return '<div class="ws-item" data-id="' + esc(item.id) + '">' +
           '<div class="ws-item-content">' +
             '<div class="ws-item-title">' + esc(item.title) + '</div>' +
             '<div class="ws-item-meta">' +
@@ -9265,11 +9339,24 @@ document.addEventListener('DOMContentLoaded', function () {
               (item.type ? '<span>· ' + esc(item.type) + '</span>' : '') +
               '<span style="color:var(--text-faint);">' + timeAgo(item.savedAt) + '</span>' +
             '</div>' +
+            (hasNote
+              ? '<div class="ws-item-note-preview" data-noteid="' + esc(item.id) + '" title="' + (ar ? 'انقر لتعديل الملاحظة' : 'Click to edit note') + '">✏️ ' + esc(item.notes) + '</div>'
+              : '') +
+            '<div class="ws-item-note-area" id="note-area-' + esc(item.id) + '">' +
+              '<textarea class="ws-item-note-textarea" data-noteid="' + esc(item.id) + '" placeholder="' + notePlaceholder + '" rows="3">' + esc(item.notes||'') + '</textarea>' +
+              '<button class="ws-item-note-save" data-noteid="' + esc(item.id) + '">' + saveLabel + '</button>' +
+            '</div>' +
           '</div>' +
-          '<button class="ws-item-remove" data-id="' + esc(item.id) + '" title="Remove" aria-label="Remove from watchlist">×</button>' +
+          '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">' +
+            '<button class="ws-item-remove" data-id="' + esc(item.id) + '" title="' + (ar ? 'إزالة' : 'Remove') + '" aria-label="Remove from watchlist">×</button>' +
+            '<button class="ws-note-btn" data-noteid="' + esc(item.id) + '" title="' + noteLabel + '" aria-label="' + noteLabel + '">' +
+              '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
+            '</button>' +
+          '</div>' +
         '</div>';
       }).join('');
 
+      /* Remove button */
       body.querySelectorAll('.ws-item-remove').forEach(function(btn) {
         btn.addEventListener('click', function() {
           var id = btn.dataset.id;
@@ -9279,7 +9366,69 @@ document.addEventListener('DOMContentLoaded', function () {
           syncBookmarkButtons();
           updateWsBar();
           renderPanelBody();
-          showToast('Removed from watchlist');
+          showToast(ar ? 'تمت الإزالة من قائمة المتابعة' : 'Removed from watchlist');
+        });
+      });
+
+      /* Pencil button — toggle note area */
+      body.querySelectorAll('.ws-note-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var id = btn.dataset.noteid;
+          var area = document.getElementById('note-area-' + id);
+          if (!area) return;
+          var isOpen = area.classList.toggle('open');
+          if (isOpen) {
+            var ta = area.querySelector('.ws-item-note-textarea');
+            if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+            btn.style.color = 'var(--green)';
+          } else {
+            btn.style.color = '';
+          }
+        });
+      });
+
+      /* Click existing note preview to open editor */
+      body.querySelectorAll('.ws-item-note-preview').forEach(function(el) {
+        el.addEventListener('click', function() {
+          var id = el.dataset.noteid;
+          var area = document.getElementById('note-area-' + id);
+          if (area && !area.classList.contains('open')) {
+            area.classList.add('open');
+            var ta = area.querySelector('.ws-item-note-textarea');
+            if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+            var pencil = body.querySelector('.ws-note-btn[data-noteid="' + id + '"]');
+            if (pencil) pencil.style.color = 'var(--green)';
+          }
+        });
+      });
+
+      /* Save button — persist note */
+      body.querySelectorAll('.ws-item-note-save').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var id = btn.dataset.noteid;
+          var area = document.getElementById('note-area-' + id);
+          var ta = area ? area.querySelector('.ws-item-note-textarea') : null;
+          if (!ta) return;
+          var noteText = ta.value.trim();
+          /* Update in-memory watchlist */
+          watchlist.forEach(function(w) {
+            if (w.id === id) w.notes = noteText;
+          });
+          save(KEY_WATCHLIST, watchlist);
+          /* Persist to Supabase — just update this one row */
+          if (_db && _uid && _uid !== 'anon') {
+            _db.from('user_watchlist')
+              .update({ notes: noteText })
+              .eq('user_id', _uid)
+              .eq('opp_id', id)
+              .then(function(){});
+          }
+          area.classList.remove('open');
+          var pencil = body.querySelector('.ws-note-btn[data-noteid="' + id + '"]');
+          if (pencil) pencil.style.color = '';
+          showToast(ar ? 'تم حفظ الملاحظة' : 'Note saved');
+          /* Re-render to update preview */
+          renderPanelBody();
         });
       });
 
