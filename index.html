@@ -4646,6 +4646,50 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 }
 
 </style>
+
+<!-- Google Translate Widget -->
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'en',
+    includedLanguages: 'ar,en',
+    layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+    autoDisplay: false
+  }, 'google_translate_element');
+}
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<style>
+/* ── Google Translate Widget Topbar Styling ──────────────────── */
+#google_translate_element { display: inline-flex; align-items: center; }
+#google_translate_element .goog-te-gadget { font-family: inherit !important; font-size: 0 !important; color: transparent !important; }
+#google_translate_element .goog-te-gadget > span > a { display: none !important; }
+#google_translate_element select.goog-te-combo {
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-2);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s, color 0.15s;
+  height: 30px;
+  min-width: 90px;
+}
+#google_translate_element select.goog-te-combo:hover,
+#google_translate_element select.goog-te-combo:focus {
+  border-color: var(--green);
+  color: var(--text);
+}
+/* Hide the Google Translate top banner bar */
+.goog-te-banner-frame, #goog-gt-tt, .goog-tooltip, .goog-tooltip:hover { display: none !important; }
+body { top: 0 !important; }
+.skiptranslate { display: none !important; }
+</style>
 </head>
 <body>
 
@@ -4747,14 +4791,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       <button class="app-tb-icon-btn" id="appTbSettings" onclick="WS.openSettings()" title="Settings" type="button" aria-label="Settings">
         <i data-lucide="settings"></i>
       </button>
-      <!-- Language toggle -->
-      <button class="app-tb-lang-btn" id="appLangToggle" type="button" aria-label="Switch language" title="Switch to Arabic / English">
-        <span class="app-tb-lang-icon">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        </span>
-        <span id="appLangLabel">العربية</span>
-      </button>
-      <!-- Hidden anchors kept for existing JS that reads #langAr / #langEn -->
+      <!-- Google Translate Widget -->
+      <div id="google_translate_element"></div>
+      <!-- Hidden anchors kept for existing JS compatibility -->
       <a id="langEn" class="is-lang-btn is-lang-active" href="index.html" lang="en" style="display:none">EN</a>
       <a id="langAr" class="is-lang-btn" href="ar.html" lang="ar" dir="rtl" style="display:none">ع</a>
       <div class="app-topbar-divider"></div>
@@ -5643,318 +5682,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
 /* ── 2. LANGUAGE SWITCHER ─────────────────────────────────── */
 
-// All translatable strings keyed by element selector or ID
-const TRANSLATIONS = {
-  en: {
-    // Page title
-    pageTitle: 'Opportunity Hub (Pilot Demo)',
-    // Top bar
-    topBarCountry: 'Kingdom of Saudi Arabia',
-    topBarVision:  'Vision 2030 Investment Platform',
-    // Pilot banner
-    pilotBannerText: 'This is a <strong>private demo build</strong> of the Opportunity Hub — for internal evaluation and authorised stakeholder review only. Not for public distribution.',
-    // Nav links
-    navOverview:      'Overview',
-    navOpportunities: 'Opportunities',
-    navInsights:      'Insights',
-    navAbout:         'About',
-    navContribute:    'Feedback',
-    // Hero
-    heroBadge:    'Pilot Demo',
-    heroTitle:    'Funding Opportunities<br><span class="accent">Saudi Arabia to Global</span>',
-    heroDesc:     'A structured dataset of grants, tenders, accelerators, fellowships, and investment programs across <strong>15 sectors</strong> — covering Saudi Arabia, the GCC, and global initiatives open to Saudi-based organizations. This is a pilot release; data reflects a working snapshot as of March 2026.',
-    heroCta1:     'Browse the Database',
-    heroCta2:     'Submit a Correction',
-    // KPI cards
-    kpiSaudiLabel:  'Saudi Arabia',
-    kpiSaudiNote:   'Programs issued in or led by Saudi institutions',
-    kpiGccLabel:    'GCC (excl. KSA)',
-    kpiGccNote:     'Led by UAE, Oman, Qatar and regional partners',
-    kpiGlobalLabel: 'Global / Open to Saudi',
-    kpiGlobalNote:  'International programs',
-    kpiTotalLabel:  'Total Records',
-    kpiTotalNote:   'Across all regions and program types',
-    // Who strip
-    who1Role: 'Startups & SMEs',
-    who1Desc: 'Find grants, accelerators, and investors aligned to your stage and sector — from Agriculture to ICT.',
-    who2Role: 'Researchers & Universities',
-    who2Desc: 'Discover fellowships, research calls, and international collaboration tracks across all key sectors.',
-    who3Role: 'Government & Public Sector',
-    who3Desc: 'Scan tenders, ecosystem initiatives, and capacity-building programs relevant to public-sector priorities.',
-    who4Role: 'Investors & Ecosystem',
-    who4Desc: 'Map active programs in Saudi, GCC, and globally to identify deal-flow and co-investment opportunities.',
-    // Stats strip
-    stat1: '1,074 verified records',
-    stat2: '15 sectors covered',
-    stat3: 'Data snapshot: Live',
-    stat4: 'Available for API integration',
-    // Section labels & headings
-    sectionLabelOpps:     'Database',
-    sectionHeadingOpps:   'Funding Database',
-    sectionSubOpps:       'Search and filter structured records across grants, tenders, accelerators, investment programs, fellowships, and ecosystem initiatives. Coverage spans 15 sectors, Saudi Arabia, the GCC, and qualifying global programs.',
-    sectionLabelInsights: 'Analytics',
-    sectionHeadingInsights: 'Landscape Overview',
-    sectionSubInsights:   'Program-type distribution, regional breakdown, and status summary across all sectors and geographies. Use these charts to orient your research before drilling into individual records.',
-    sectionLabelAbout:    'About',
-    sectionHeadingAbout:  'About This Hub',
-    sectionLabelContrib:  'Feedback',
-    sectionHeadingContrib:'Submit Feedback or Corrections',
-    // Filter labels
-    filterSearch:   'Search by title or sponsor',
-    filterSector:   'Sector',
-    filterCountry:  'Country group',
-    filterType:     'Type',
-    filterStatus:   'Status',
-    filterProfile:  'Profile',
-    resetBtn:       'Reset filters',
-    // Table headers
-    thTitle:       'Title & Sponsor',
-    thType:        'Type',
-    thRegion:      'Region',
-    thEligibility: 'Eligibility',
-    thFunding:     'Funding',
-    thStatus:      'Status',
-    thDeadline:    'Deadline',
-    // Theme toggle
-    themeToggleTip: 'Toggle theme',
-    // Footer
-    footerDisclaimer: 'This is a private demo build for internal evaluation only. Not for public distribution. All program information is provided for awareness and research purposes only. Verify all details directly with sponsoring organizations. Last updated: <span id="footerLastUpdated">—</span>.',
-    // IS logo hub text
-    logoHubText: 'Opportunity <span>Hub</span>',
-    dir: 'ltr',
-    lang: 'en',
-  },
-  ar: {
-    pageTitle: 'استثمر في السعودية – مركز الفرص (نسخة تجريبية)',
-    topBarCountry: 'المملكة العربية السعودية',
-    topBarVision:  'منصة استثمار رؤية 2030',
-    pilotBannerText: 'هذا <strong>إصدار تجريبي خاص</strong> لمنصة فرص "استثمر في السعودية" — مخصص للتقييم الداخلي ومراجعة أصحاب المصلحة المعتمدين فقط. غير مخصص للتوزيع العام.',
-    navOverview:      'نظرة عامة',
-    navOpportunities: 'الفرص',
-    navInsights:      'التحليلات',
-    navAbout:         'عن المنصة',
-    navContribute:    'ملاحظات',
-    heroBadge:    'نسخة تجريبية · منصة استثمر في السعودية',
-    heroTitle:    'استثمر في السعودية –<br><span class="accent">مركز الفرص</span>',
-    heroDesc:     'عرض تجريبي: <strong>فرص التمويل المتاحة للمستثمرين والشركاء السعوديين</strong> — منح وعطاءات ومسرّعات وزمالات وبرامج استثمارية عبر <strong>15 قطاعاً</strong> تشمل الطاقة وتقنية المعلومات والرعاية الصحية والزراعة وغيرها، في <strong>المملكة العربية السعودية ودول الخليج والبرامج الدولية</strong> المفتوحة للكيانات السعودية.',
-    heroCta1:     'استعرض الفرص',
-    heroCta2:     'اقترح إدخالاً',
-    kpiSaudiLabel:  'الفرص السعودية',
-    kpiSaudiNote:   'برامج صادرة عن أو تقودها مؤسسات سعودية',
-    kpiGccLabel:    'دول مجلس التعاون الخليجي',
-    kpiGccNote:     'تقودها الإمارات وعُمان وقطر وشركاء إقليميون',
-    kpiGlobalLabel: 'عالمي (مؤهل سعودي)',
-    kpiGlobalNote:  'برامج دولية مفتوحة للكيانات السعودية',
-    kpiTotalLabel:  'إجمالي الفرص',
-    kpiTotalNote:   'عبر جميع المناطق وأنواع البرامج',
-    who1Role: 'الشركات الناشئة والمتوسطة',
-    who1Desc: 'ابحث عن المنح ومسرّعات الأعمال والمستثمرين المناسبين لقطاعك ومرحلتك من الزراعة إلى تقنية المعلومات.',
-    who2Role: 'الباحثون والجامعات',
-    who2Desc: 'اكتشف الزمالات والنداءات البحثية ومسارات التعاون الدولي عبر جميع القطاعات الرئيسية.',
-    who3Role: 'الحكومة والقطاع العام',
-    who3Desc: 'تابع العطاءات ومبادرات النظام البيئي وبرامج بناء القدرات ذات الصلة بأولويات القطاع العام.',
-    who4Role: 'المستثمرون والنظام البيئي',
-    who4Desc: 'رسم خريطة البرامج الاستثمارية النشطة في السعودية ودول الخليج وعالمياً لتحديد فرص الاستثمار المشترك.',
-    stat1: '1,074 سجلاً مدققاً',
-    stat2: '15 قطاعاً ذا صلة بالكيانات السعودية',
-    stat3: 'لقطة بيانات: مباشر',
-    stat4: 'تكامل API متاح لمنصات استثمر في السعودية',
-    sectionLabelOpps:     'قاعدة البيانات',
-    sectionHeadingOpps:   'استثمر في السعودية – الفرص',
-    sectionSubOpps:       'ابحث وصفّ السجلات المنظمة للمنح والعطاءات ومسرّعات الأعمال وبرامج الاستثمار والزمالات ومبادرات النظام البيئي — مُعدّة خصيصاً للمستثمرين والشركاء السعوديين عبر 15 قطاعاً رئيسياً في المملكة ودول الخليج والعالم.',
-    sectionLabelInsights: 'التحليلات',
-    sectionHeadingInsights: 'رؤى وتحليلات',
-    sectionSubInsights:   'نظرة شاملة على المشهد — أنواع البرامج والتوزيع الإقليمي وحالة البرامج عبر جميع القطاعات والمناطق.',
-    sectionLabelAbout:    'عن المنصة',
-    sectionHeadingAbout:  'عن مركز الفرص',
-    sectionLabelContrib:  'ملاحظات',
-    sectionHeadingContrib:'ملاحظات العرض التجريبي',
-    filterSearch:   'ابحث بالعنوان أو الجهة الراعية',
-    filterSector:   'القطاع',
-    filterCountry:  'المجموعة الجغرافية',
-    filterType:     'النوع',
-    filterStatus:   'الحالة',
-    filterProfile:  'الملف الشخصي',
-    resetBtn:       'إعادة تعيين',
-    thTitle:        'العنوان والجهة الراعية',
-    thType:         'النوع',
-    thRegion:       'المنطقة',
-    thEligibility:  'الأهلية',
-    thFunding:      'التمويل',
-    thStatus:       'الحالة',
-    thDeadline:     'الموعد النهائي',
-    themeToggleTip: 'تبديل المظهر',
-    footerDisclaimer: 'هذا إصدار تجريبي خاص للتقييم الداخلي فقط، وليس للتوزيع العام. جميع المعلومات المقدمة لأغراض التوعية والبحث فقط. يُرجى التحقق من جميع التفاصيل مباشرة مع المنظمات الراعية. آخر تحديث: <span id="footerLastUpdated">—</span>.',
-    logoHubText: 'مركز <span>الفرص</span>',
-    dir: 'rtl',
-    lang: 'ar',
-  }
-};
-
-// Elements we can translate by selector
-function translatePage(lang) {
-  const t = TRANSLATIONS[lang];
-  if (!t) return;
-  const html = document.documentElement;
-
-  // Direction & lang attribute
-  // Note: dir is managed exclusively by script 5 (activateArabic/activateEnglish).
-  // Removing html.dir here prevents scroll-reset on language switch.
-  html.setAttribute('lang', t.lang);
-  document.title = t.pageTitle;
-
-  // Helper: set innerHTML safely
-  function set(sel, val) {
-    const el = document.querySelector(sel);
-    if (el) el.innerHTML = val;
-  }
-  function setText(sel, val) {
-    const el = document.querySelector(sel);
-    if (el) el.textContent = val;
-  }
-
-  // Top bar
-  const tbLeft = document.querySelector('.is-top-bar-left');
-  if (tbLeft) {
-    const spans = tbLeft.querySelectorAll('span');
-    if (spans[0]) spans[0].textContent = t.topBarCountry;
-    if (spans[1]) spans[1].textContent = t.topBarVision;
-  }
-
-  // Pilot banner text
-  set('.is-pilot-banner-text', t.pilotBannerText);
-
-  // Nav links
-  const navLinks = document.querySelectorAll('#navLinks a');
-  const navTexts = [t.navOverview, t.navOpportunities, t.navInsights, t.navAbout, t.navContribute];
-  navLinks.forEach((a, i) => { if (navTexts[i]) a.textContent = navTexts[i]; });
-
-  // IS logo hub text
-  const logoHub = document.querySelector('.is-logo-hub-text');
-  if (logoHub) logoHub.innerHTML = t.logoHubText;
-
-  // Hero badge
-  set('.hero-badge', t.heroBadge);
-
-  // Hero title
-  set('.hero-title', t.heroTitle);
-
-  // Hero description
-  set('.hero-desc', t.heroDesc);
-
-  // Hero CTAs
-  const ctas = document.querySelectorAll('.hero-ctas a');
-  if (ctas[0]) {
-    const svg = ctas[0].querySelector('svg');
-    ctas[0].innerHTML = (svg ? svg.outerHTML : '') + ' ' + t.heroCta1;
-  }
-  if (ctas[1]) {
-    const svg = ctas[1].querySelector('svg');
-    ctas[1].innerHTML = (svg ? svg.outerHTML : '') + ' ' + t.heroCta2;
-  }
-
-  // KPI cards
-  const kpiLabels = document.querySelectorAll('.kpi-label');
-  const kpiNotes  = document.querySelectorAll('.kpi-note');
-  const kpiLabelTexts = [t.kpiSaudiLabel, t.kpiGccLabel, t.kpiGlobalLabel, t.kpiTotalLabel];
-  const kpiNoteTexts  = [t.kpiSaudiNote,  t.kpiGccNote,  t.kpiGlobalNote,  t.kpiTotalNote];
-  kpiLabels.forEach((el, i) => { if (kpiLabelTexts[i]) el.textContent = kpiLabelTexts[i]; });
-  kpiNotes.forEach((el, i)  => { if (kpiNoteTexts[i])  el.textContent = kpiNoteTexts[i]; });
-
-  // Who strip
-  const whoRoles = document.querySelectorAll('.who-role');
-  const whoDescs = document.querySelectorAll('.who-desc');
-  const whoRoleTexts = [t.who1Role, t.who2Role, t.who3Role, t.who4Role];
-  const whoDescTexts = [t.who1Desc, t.who2Desc, t.who3Desc, t.who4Desc];
-  whoRoles.forEach((el, i) => { if (whoRoleTexts[i]) el.textContent = whoRoleTexts[i]; });
-  whoDescs.forEach((el, i)  => { if (whoDescTexts[i])  el.textContent = whoDescTexts[i]; });
-
-  // Stats strip
-  const statItems = document.querySelectorAll('.is-stat-item');
-  const statTexts = [t.stat1, t.stat2, t.stat3, t.stat4];
-  statItems.forEach((el, i) => { if (statTexts[i]) el.textContent = statTexts[i]; });
-
-  // Section labels & headings
-  const sectionLabels   = document.querySelectorAll('.section-label');
-  const sectionHeadings = document.querySelectorAll('.section-heading');
-  const sectionSubs     = document.querySelectorAll('.section-sub');
-
-  const labelTexts   = [t.sectionLabelOpps, t.sectionLabelInsights, t.sectionLabelAbout, t.sectionLabelContrib];
-  const headingTexts = [t.sectionHeadingOpps, t.sectionHeadingInsights, t.sectionHeadingAbout, t.sectionHeadingContrib];
-  sectionLabels.forEach((el, i)   => { if (labelTexts[i])   el.textContent = labelTexts[i]; });
-  sectionHeadings.forEach((el, i) => { if (headingTexts[i]) el.textContent = headingTexts[i]; });
-  if (sectionSubs[0]) sectionSubs[0].textContent = t.sectionSubOpps;
-  if (sectionSubs[1]) sectionSubs[1].textContent = t.sectionSubInsights;
-
-  // Filter labels
-  const filterLabels = document.querySelectorAll('.filter-label');
-  // They contain SVG + text — update only the text node
-  function setLabelText(el, text) {
-    if (!el) return;
-    // Get child nodes, find the text node and update it
-    el.childNodes.forEach(node => {
-      if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
-        node.textContent = ' ' + text + ' ';
-      }
-    });
-    // Fallback: if no text node found, check for last text content
-    const allText = [...el.childNodes].filter(n => n.nodeType === Node.TEXT_NODE);
-    if (allText.length === 0) {
-      // Label has only SVG, append text
-      el.appendChild(document.createTextNode(' ' + text));
-    }
-  }
-  if (filterLabels[0]) setLabelText(filterLabels[0], t.filterSearch);
-  if (filterLabels[1]) setLabelText(filterLabels[1], t.filterSector);
-  if (filterLabels[2]) setLabelText(filterLabels[2], t.filterCountry);
-  if (filterLabels[3]) setLabelText(filterLabels[3], t.filterType);
-  if (filterLabels[4]) setLabelText(filterLabels[4], t.filterStatus);
-  if (filterLabels[5]) setLabelText(filterLabels[5], t.filterProfile);
-
-  // Search input placeholder
-  const searchInput = document.getElementById('searchInput');
-  if (searchInput) searchInput.placeholder = lang === 'ar' ? 'مثال: KAUST، طاقة، رعاية صحية…' : 'e.g. KAUST, Energy, Healthcare, Agriculture…';
-
-  // Reset button
-  const resetBtn = document.getElementById('resetFilters');
-  if (resetBtn) resetBtn.textContent = t.resetBtn;
-
-  // Table headers
-  const thTexts = [t.thTitle, t.thType, t.thRegion, t.thEligibility, t.thFunding, t.thStatus, t.thDeadline];
-  const ths = document.querySelectorAll('.occ-row-header th, .occ-header th, .table-header th, thead th');
-  ths.forEach((th, i) => { if (thTexts[i]) th.textContent = thTexts[i]; });
-
-  // Theme toggle title
-  const themeBtn = document.querySelector('[data-theme-toggle]');
-  if (themeBtn) themeBtn.setAttribute('title', t.themeToggleTip);
-
-  // Footer disclaimer
-  set('.footer-disclaimer', t.footerDisclaimer);
-
-  // Update active language button states
-  document.getElementById('langAr').classList.toggle('is-lang-active', lang === 'ar');
-  document.getElementById('langEn').classList.toggle('is-lang-active', lang === 'en');
-
-  // Persist
-  localStorage.setItem('is-demo-lang', lang);
-}
-
-// Public function called by onclick
-function setLang(lang) {
-  if (lang === 'ar') {
-    localStorage.setItem('is-demo-lang', 'ar');
-    window.location.href = 'ar.html';
-    return;
-  }
-  localStorage.setItem('is-demo-lang', 'en');
-  window.location.href = 'index.html';
-}
-
-// Apply saved language on load
-document.addEventListener('DOMContentLoaded', function () {
-  localStorage.setItem('is-demo-lang', 'en');
-  translatePage('en');
-});
+/* Translation handled by Google Translate widget — see googleTranslateElementInit() in <head> */
 
 
 </script>
@@ -6633,39 +6361,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* Theme toggle removed — platform is fixed to light mode */
 
-  /* ─── Arabic language toggle ─── */
-  var langToggleBtn = document.getElementById('appLangToggle');
-  var langLabel = document.getElementById('appLangLabel');
-  function syncLangToggleLabel() {
-    var isAr = (document.documentElement.lang === 'ar' || document.body.dir === 'rtl' ||
-                document.documentElement.getAttribute('dir') === 'rtl');
-    if (langLabel) langLabel.textContent = isAr ? 'English' : 'العربية';
-  }
-  if (langToggleBtn) {
-    langToggleBtn.addEventListener('click', function() {
-      var isAr = (document.documentElement.lang === 'ar' || document.body.dir === 'rtl' ||
-                  document.documentElement.getAttribute('dir') === 'rtl');
-      if (isAr) {
-        /* Switch to English */
-        if (typeof activateEnglish === 'function') activateEnglish();
-        else { document.documentElement.lang = 'en'; document.body.dir = 'ltr'; }
-      } else {
-        /* Switch to Arabic */
-        if (typeof activateArabic === 'function') activateArabic();
-        else { document.documentElement.lang = 'ar'; document.body.dir = 'rtl'; }
-      }
-      setTimeout(syncLangToggleLabel, 100);
-      setTimeout(paintIcons, 150);
-    });
-  }
-  /* Keep label in sync after any external lang switch */
-  window.addEventListener('languagechange', syncLangToggleLabel);
-  /* Observe dir attribute changes on html/body */
-  if ('MutationObserver' in window) {
-    new MutationObserver(syncLangToggleLabel).observe(document.documentElement, { attributes: true, attributeFilter: ['dir', 'lang'] });
-    new MutationObserver(syncLangToggleLabel).observe(document.body, { attributes: true, attributeFilter: ['dir'] });
-  }
-  setTimeout(syncLangToggleLabel, 500);
+  /* ─── Language toggle — handled by Google Translate widget in topbar ─── */
 
   /* ─── Mobile sidebar toggle ─── */
   var menuBtn = document.getElementById('appMenuBtn');
@@ -10213,417 +9909,17 @@ document.addEventListener('DOMContentLoaded', function () {
 /* ── END LANDSCAPE INSIGHTS V2 ────────────────────────────────── */
 </script>
 <script>
-/* In-page Arabic toggle for index.html — translates UI + sets RTL on demand. */
-(function(){
-  const HTML = document.documentElement;
-  const CACHE_KEY = 'isDemoArCacheV1';
-  const SKIP_TAGS = new Set(['SCRIPT','STYLE','NOSCRIPT','IFRAME','SVG','PATH','CODE','PRE','CANVAS']);
-  const ATTRS = ['placeholder','title','aria-label','data-tooltip'];
-  const AR_RE = /[\u0600-\u06FF]/;
-  const EN_RE = /[A-Za-z]/;
-  let CACHE = {};
-  try { CACHE = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}') || {}; } catch(e) { CACHE = {}; }
-  function saveCache(){ try { localStorage.setItem(CACHE_KEY, JSON.stringify(CACHE)); } catch(e){} }
-  function norm(s){ return (s||'').replace(/\s+/g,' ').trim(); }
-  function needs(s){ s = norm(s); if (!s) return false; if (!EN_RE.test(s)) return false; if (AR_RE.test(s)) return false; return true; }
-  async function translateOne(text){
-    const k = norm(text); if (!needs(k)) return text;
-    if (CACHE[k]) return CACHE[k];
-    try {
-      const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ar&dt=t&q=' + encodeURIComponent(k);
-      const r = await fetch(url); const d = await r.json();
-      const t = Array.isArray(d?.[0]) ? d[0].map(x=>x[0]).join('').trim() : k;
-      CACHE[k] = t || k; saveCache(); return CACHE[k];
-    } catch(e){ CACHE[k] = k; return k; }
-  }
-  async function translateMany(items){
-    const list = Array.from(new Set(items.map(norm).filter(needs)));
-    for (let i=0;i<list.length;i+=8){ const chunk = list.slice(i,i+8); await Promise.all(chunk.map(translateOne)); }
-    return items.map(s => CACHE[norm(s)] || s);
-  }
-  function getTextNodes(root){
-    const out = [];
-    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode(n){
-      if (!n || !n.nodeValue) return NodeFilter.FILTER_REJECT;
-      const p = n.parentElement; if (!p) return NodeFilter.FILTER_REJECT;
-      if (SKIP_TAGS.has(p.tagName)) return NodeFilter.FILTER_REJECT;
-      if (p.closest('script,style,noscript,svg,code,pre,canvas')) return NodeFilter.FILTER_REJECT;
-      if (p.closest('#langAr,#langEn,.is-lang-btn')) return NodeFilter.FILTER_REJECT;
-      if (!needs(norm(n.nodeValue))) return NodeFilter.FILTER_REJECT;
-      return NodeFilter.FILTER_ACCEPT;
-    }});
-    let n; while ((n = w.nextNode())) out.push(n);
-    return out;
-  }
-  async function translateNodes(root){
-    const nodes = getTextNodes(root); if (!nodes.length) return;
-    const orig = nodes.map(n => norm(n.nodeValue));
-    const tr = await translateMany(orig);
-    nodes.forEach((n,i) => { if (!n.__originalEn) n.__originalEn = n.nodeValue; const s = norm(n.nodeValue); if (tr[i] && tr[i] !== s) n.nodeValue = n.nodeValue.replace(s, tr[i]); });
-  }
-  async function translateAttrs(root){
-    const els = [root, ...root.querySelectorAll('*')];
-    const work = [];
-    els.forEach(el => ATTRS.forEach(a => {
-      // Skip placeholder on elements that are managed manually by swapSelectOptions
-      if (a === 'placeholder' && el.hasAttribute && el.hasAttribute('data-notranslate-placeholder')) return;
-      const v = el.getAttribute && el.getAttribute(a); if (needs(v)) work.push({el,a,v:norm(v)});
-    }));
-    if (!work.length) return;
-    const tr = await translateMany(work.map(x => x.v));
-    work.forEach((it,i) => {
-      // dataset keys cannot contain hyphens — sanitise attr name (e.g. aria-label -> ariaLabel)
-      const safeKey = 'en_' + it.a.replace(/-([a-z])/g, (_,c) => c.toUpperCase());
-      if (!it.el.dataset[safeKey]) it.el.dataset[safeKey] = it.v;
-      if (tr[i] && tr[i] !== it.v) it.el.setAttribute(it.a, tr[i]);
-    });
-  }
-  async function translateOptions(root){
-    const opts = Array.from(root.querySelectorAll('option'));
-    if (!opts.length) return;
-    const orig = opts.map(o => norm(o.textContent));
-    const tr = await translateMany(orig);
-    opts.forEach((o,i) => { if (!o.dataset.en) o.dataset.en = orig[i]; if (tr[i] && tr[i] !== orig[i]) o.textContent = tr[i]; });
-  }
-  async function translateAll(root){ root = root || document.body; await translateNodes(root); await translateAttrs(root); await translateOptions(root); }
-  // Expose for panel: translate a specific element immediately
-  window.__translateMany = async function(items) { return translateMany(items); };
-  window.__translateOne  = async function(text)  { return translateOne(text); };
-  window.__translatePanel = async function(el) {
-    if (!el) return;
-    // Apply RTL direction to panel
-    el.setAttribute('dir', 'rtl');
-    await translateNodes(el);
-    await translateAttrs(el);
-  };
-  // Called after every renderCards() when Arabic is active.
-  // Runs translateAll on just the cards container so titles, descriptions,
-  // sponsor names and all data-driven text get translated via the cached API.
-  // t() already handles fixed UI strings; this covers the dynamic data strings.
-  window.__retranslate = async function() {
-    if (window.__lang !== 'ar') return;
-    swapSelectOptions(true);
-    var container = document.getElementById('oppsTableBody');
-    if (!container) return;
-    // Skeleton on the cards container while data-driven strings are translated.
-    // CSS ::after/.occ-row::after + .opp-card-content::before cover all card text.
-    document.body.classList.add('is-translating');
-    var minDelay = new Promise(function(res){ setTimeout(res, 1200); });
-    try {
-      await Promise.all([translateAll(container), minDelay]);
-    } finally {
-      document.body.classList.remove('is-translating');
-    }
-  };
-  // Update static compare tray strings when Arabic activates
-  window.__updateTrayLang = function(isAr) {
-    var trayLabel = document.getElementById('compareTrayLabel');
-    var compareBtn = document.getElementById('compareOpenBtn');
-    var clearBtn   = document.getElementById('compareClearBtn');
-    var modalTitle = document.getElementById('compareModalTitle');
-    if (trayLabel) trayLabel.textContent = isAr ? 'محدد للمقارنة' : 'selected for comparison';
-    if (compareBtn) compareBtn.textContent = isAr ? 'قارن' : 'Compare';
-    if (clearBtn)   clearBtn.textContent   = isAr ? 'مسح الكل' : 'Clear all';
-    if (modalTitle) modalTitle.textContent = isAr ? 'مقارنة الفرص' : 'Compare Opportunities';
-  };
-  function restoreEnglish(){
-    // Skip the cards container — it will be cleanly re-rendered by window.__renderCards()
-    const cardBody = document.getElementById('oppsTableBody');
-    function walk(node){
-      if (node === cardBody) return; // skip cards — re-rendered by __renderCards
-      if (node.nodeType === 3 && node.__originalEn) { node.nodeValue = node.__originalEn; return; }
-      if (node.nodeType === 1) { for (const a of ATTRS) { const k = 'en_' + a.replace(/-([a-z])/g, (_,c) => c.toUpperCase()); if (node.dataset && node.dataset[k]) node.setAttribute(a, node.dataset[k]); } if (node.tagName === 'OPTION' && node.dataset.en) node.textContent = node.dataset.en; }
-      node.childNodes && node.childNodes.forEach(walk);
-    }
-    walk(document.body);
-  }
-  /* Swap <option> text using data-ar / data-en attributes */
-  function swapSelectOptions(isAr) {
-    document.querySelectorAll('select option[data-ar]').forEach(function(opt) {
-      if (!opt.dataset.en) opt.dataset.en = opt.textContent;
-      opt.textContent = isAr ? opt.dataset.ar : opt.dataset.en;
-    });
-    // Also translate view toggle button labels
-    var btnD = document.getElementById('viewBtnDetailed');
-    var btnC = document.getElementById('viewBtnCompact');
-    if (btnD) { var spanD = btnD.querySelector('span'); if (spanD) spanD.textContent = isAr ? 'تفصيلي' : 'Detailed'; }
-    if (btnC) { var spanC = btnC.querySelector('span'); if (spanC) spanC.textContent = isAr ? 'مضغوط' : 'Compact'; }
-    // Translate preset chips
-    var presetMap = {
-      'open-grants': ['منح مفتوحة', 'Open Grants'],
-      'saudi-only':  ['سعودي فقط',    'Saudi Only'],
-      'ict-tech':    ['تقنية المعلومات',   'ICT & Tech'],
-      'startup-friendly': ['صديق للناشئة', 'Startup-Friendly'],
-      'energy-green': ['الطاقة والبيئة', 'Energy & Green'],
-      'healthcare':  ['الرعاية الصحية', 'Healthcare'],
-      'global-programs': ['برامج عالمية', 'Global Programs'],
-      'investment-ready': ['جاهز للاستثمار', 'Investment Ready']
-    };
-    document.querySelectorAll('.preset-chip[data-preset]').forEach(function(chip) {
-      var key = chip.dataset.preset;
-      if (presetMap[key]) chip.textContent = isAr ? presetMap[key][0] : presetMap[key][1];
-    });
-    // Translate preset label
-    var presetLbl = document.querySelector('.preset-label');
-    if (presetLbl) presetLbl.textContent = isAr ? 'فلاتر سريعة:' : 'Quick filters:';
-    // Translate profile chips
-    var profileMap = {
-      'all':        ['جميع الملفات',   'All profiles'],
-      'startup':    ['ناشئة / متوسطة', 'Startup / SME'],
-      'researcher': ['باحث / جامعة',   'Researcher / University'],
-      'government': ['حكومة',            'Government'],
-      'investor':   ['مستثمر',          'Investor'],
-      'student':    ['طالب',            'Student'],
-      'new':        ['جديد',              'NEW']
-    };
-    document.querySelectorAll('.profile-chip[data-profile]').forEach(function(chip) {
-      var key = chip.dataset.profile;
-      if (profileMap[key]) {
-        // Preserve the icon span
-        var icon = chip.querySelector('.chip-icon');
-        var iconHtml = icon ? icon.outerHTML : '';
-        chip.innerHTML = iconHtml + ' ' + (isAr ? profileMap[key][0] : profileMap[key][1]);
-      }
-    });
-    // Translate sort label
-    var sortLbl = document.querySelector('.sort-label');
-    if (sortLbl) sortLbl.textContent = isAr ? 'ترتيب' : 'Sort';
-    // Translate reset filters button
-    var resetFiltersBtn = document.getElementById('resetFilters');
-    if (resetFiltersBtn) resetFiltersBtn.textContent = isAr ? 'إعادة تعيين' : 'Reset filters';
-    // Translate latest additions widget title
-    var widgetTitle = document.getElementById('latestAdditionsTitle');
-    if (widgetTitle) {
-      var badge = widgetTitle.querySelector('.widget-badge');
-      var badgeHtml = badge ? badge.outerHTML : '';
-      widgetTitle.innerHTML = (isAr ? 'أحدث الإضافات' : 'Latest Additions') + ' ' + badgeHtml;
-    }
-    // Re-render latest additions in new language
-    if (typeof renderRecentlyAdded === 'function') renderRecentlyAdded();
-    // ── Placeholders ──────────────────────────────────────────────────────────
-    var searchInput = document.getElementById('searchInput');
-    if (searchInput) searchInput.placeholder = isAr
-      ? 'مثال: KAUST، طاقة، رعاية صحية…'
-      : 'e.g. KAUST, Energy, Healthcare, Agriculture…';
-    var feedbackText = document.getElementById('feedbackText');
-    if (feedbackText) feedbackText.placeholder = isAr
-      ? 'مثال: تم تحديث موعد SA-005 إلى مارس 2026، أو فرصة جديدة من KAUST…'
-      : "e.g. SA-005 deadline updated to March 2026, or 'New call from KAUST for satellite research grants…'";
-    var feedbackContact = document.getElementById('feedbackContact');
-    if (feedbackContact) feedbackContact.placeholder = isAr ? 'بريدك@المثال.كوم' : 'your@email.com';
-    // ── title attributes ──────────────────────────────────────────────────────
-    var themeBtn = document.getElementById('themeToggle');
-    if (themeBtn) themeBtn.title = isAr ? 'تبديل السمة' : 'Toggle theme';
-    var newOnlyBtn = document.getElementById('newOnlyToggle');
-    if (newOnlyBtn) newOnlyBtn.title = isAr ? 'عرض الفرص المضافة حديثاً فقط' : 'Show only newly added opportunities';
-    var btnDetailed = document.getElementById('viewBtnDetailed');
-    if (btnDetailed) btnDetailed.title = isAr ? 'عرض تفصيلي' : 'Detailed view';
-    var btnCompact = document.getElementById('viewBtnCompact');
-    if (btnCompact) btnCompact.title = isAr ? 'عرض مضغوط' : 'Compact view';
-    // ── KPI card data-tooltip ─────────────────────────────────────────────────
-    var kpiTooltipMap = [
-      { sel: '.kpi-card.saudi',  ar: 'برامج صادرة عن مؤسسات سعودية — CST وRDIA ومنشآت وKAUST وKACST وجهات حكومية سعودية أخرى، مصنفة حسب مصدر البرنامج لا أهلية المتقدم.',           en: "Programs issued or led by Saudi institutions — CST, RDIA, Monsha'at, KAUST, KACST, PIF-backed entities, and other KSA government bodies. Classified by programme origin, not applicant eligibility." },
-      { sel: '.kpi-card.gcc',    ar: 'برامج من دول الخليج — الإمارات وعُمان وقطر والبحرين والكويت وشركاء خليجيون آخرون — باستثناء المملكة العربية السعودية.',                                                                                                     en: 'Programmes led by UAE, Oman, Qatar, Bahrain, Kuwait, and other GCC partners — excluding Saudi Arabia. Classified by programme origin.' },
-      { sel: '.kpi-card.global', ar: 'برامج من منظمات دولية ومسرّعات عالمية وشركات خارج منطقة الخليج — كثير منها متاح للمتقدمين من السعودية.',                                                                                                                                            en: 'Programmes issued by international organisations, global accelerators, and companies outside the GCC — many of which are open or accessible to Saudi-based applicants.' },
-      { sel: '.kpi-card.total',  ar: 'إجمالي السجلات في قاعدة البيانات — برامج سعودية + خليجية + دولية مجتمعة.',                                                                                                                                                                                                                      en: 'Total records in the dataset — Saudi-issued + GCC-issued + Internationally-issued programmes combined.' }
-    ];
-    kpiTooltipMap.forEach(function(entry) {
-      var el = document.querySelector(entry.sel);
-      if (el) el.setAttribute('data-tooltip', isAr ? entry.ar : entry.en);
-    });
-    // ── Section aria-labels ───────────────────────────────────────────────────
-    var sectionAriaMap = [
-      { id: 'overview',     ar: 'نظرة عامة' },
-      { id: 'opportunities',ar: 'قاعدة بيانات الفرص' },
-      { id: 'insights',     ar: 'إحصاءات وتحليلات البيانات' },
-      { id: 'about',        ar: 'حول هذه المنصة' },
-      { id: 'feedback',     ar: 'المساهمة في المنصة' }
-    ];
-    sectionAriaMap.forEach(function(entry) {
-      var el = document.getElementById(entry.id);
-      if (el) el.setAttribute('aria-label', isAr ? entry.ar : entry.id);
-    });
-  }
-
-  /* Observer watches ONLY the detail panel — never document.body.
-     All card/UI re-translation on view toggle is handled by t() at render time.
-     translateAll(body) is called once on activateArabic() for static HTML only. */
-  let scheduled = false;
-  function schedulePanel(panelEl){
-    if (scheduled) return; scheduled = true;
-    requestAnimationFrame(async () => {
-      scheduled = false;
-      if (window.__lang === 'ar' && panelEl && panelEl.isConnected) {
-        await translateNodes(panelEl);
-        await translateAttrs(panelEl);
-      }
-    });
-  }
-  let observer = null;
-  function startObserver(){
-    if (observer) return;
-    const panelEl = document.getElementById('detailPanel');
-    if (!panelEl) return;
-    observer = new MutationObserver(function() {
-      if (window.__lang !== 'ar') return;
-      panelEl.setAttribute('dir','rtl');
-      schedulePanel(panelEl);
-    });
-    observer.observe(panelEl, { childList: true, subtree: true, characterData: true });
-  }
-  function stopObserver(){ if (observer) { observer.disconnect(); observer = null; } }
-  window.__pauseObserver = function() { /* no-op: observer only watches panel now */ };
-  /* ── swapWsLabels: flip all data-en/data-ar elements in workspace UI ── */
-  function swapWsLabels(ar) {
-    /* All elements with data-en + data-ar: spans, buttons, divs, options */
-    document.querySelectorAll('[data-en][data-ar]').forEach(function(el) {
-      var val = ar ? el.getAttribute('data-ar') : el.getAttribute('data-en');
-      if (!val) return;
-      /* For <option> elements set .text; for everything else set textContent */
-      if (el.tagName === 'OPTION') {
-        el.text = val;
-      } else if (!el.children.length) {
-        /* Leaf element — safe to replace all text */
-        el.textContent = val;
-      } else {
-        /* Has children (e.g. settings-label with sublabel inside) — only swap first text node */
-        var firstText = Array.from(el.childNodes).find(function(n){ return n.nodeType === 3 && n.nodeValue.trim(); });
-        if (firstText) firstText.nodeValue = val + ' ';
-      }
-    });
-    /* WS bar greeting word separately (contains a <strong> child we preserve) */
-    var greetWord = document.querySelector('.ws-greeting [data-en]');
-    if (greetWord) greetWord.textContent = ar ? 'مرحباً بعودتك،' : 'Welcome back,';
-  }
-
-  async function activateArabic(){
-    // Save scroll position before any DOM changes that might cause a browser
-    // scroll-to-top (body.dir flip is known to reset scroll in some engines).
-    var savedScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
-    // Disable smooth-scroll so any browser-native scroll-reset goes to 0 instantly
-    // (instead of animating), making our restore unnoticeable.
-    document.documentElement.style.scrollBehavior = 'auto';
-    window.__lang = 'ar';
-    HTML.setAttribute('lang','ar');
-    document.body.dir = 'rtl';
-    // Immediately restore scroll position after the dir flip.
-    window.scrollTo({ top: savedScrollY, left: 0, behavior: 'instant' });
-    // Re-enable smooth scroll on the next frame (after browser has settled).
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        document.documentElement.style.scrollBehavior = '';
-      });
-    });
-    const ar = document.getElementById('langAr'); const en = document.getElementById('langEn');
-    if (ar) { ar.classList.add('is-lang-active'); ar.setAttribute('aria-current','page'); }
-    if (en) { en.classList.remove('is-lang-active'); en.removeAttribute('aria-current'); }
-    try { localStorage.setItem('is-demo-lang','ar'); } catch(e){}
-    // Skeleton: body.is-translating triggers CSS ::after shimmer on insight/KPI cards.
-    // Promise.all with 1500ms min ensures shimmer is always visible for at least
-    // one full shimmer sweep even when translation comes back instantly from cache.
-    // No DOM text nodes touched — translateAll works unaffected.
-    document.body.classList.add('is-translating');
-    var minDelay = new Promise(function(res){ setTimeout(res, 1500); });
-    try {
-      await Promise.all([translateAll(document.body), minDelay]);
-    } finally {
-      document.body.classList.remove('is-translating');
-    }
-    // Re-render cards using t() so they output Arabic directly — no translateAll needed
-    if (typeof window.__renderCards === 'function') window.__renderCards();
-    if (typeof window.__updateTrayLang === 'function') window.__updateTrayLang(true);
-    swapSelectOptions(true);
-    // swapSelectOptions runs after translateAll, but translateAttrs may have cached
-    // bad entries for placeholders. Force-set them again on the next frame to win.
-    requestAnimationFrame(function() { swapSelectOptions(true); });
-    // Re-populate Data Freshness panel in Arabic
-    if (typeof window.__populateDfp === 'function') window.__populateDfp();
-    // Set sign-out label to Arabic (covers runtime switch, not just page-load)
-    var signoutLabelAr = document.querySelector('.signout-label');
-    if (signoutLabelAr) signoutLabelAr.textContent = signoutLabelAr.getAttribute('data-ar') || 'تسجيل الخروج';
-    // Set WS panel direction to RTL
-    var wsPanelAr = document.getElementById('wsPanel');
-    if (wsPanelAr) wsPanelAr.setAttribute('dir', 'rtl');
-    // Re-render WS panel body if panel is currently open
-    var wsPanelEl = document.getElementById('wsPanel');
-    if (wsPanelEl && wsPanelEl.classList.contains('open') && window.WS && window.WS.openPanel) {
-      setTimeout(function() { if (window.WS && window.WS.openPanel) window.WS.openPanel(); }, 50);
-    }
-    // ── Swap all workspace labels to Arabic ──
-    swapWsLabels(true);
-    startObserver();
-  }
-  function activateEnglish(){
-    window.__lang = 'en';
-    HTML.setAttribute('lang','en'); /* dir set on body only — avoids scroll reset */
-    document.body.dir = 'ltr';
-    const ar = document.getElementById('langAr'); const en = document.getElementById('langEn');
-    if (en) { en.classList.add('is-lang-active'); en.setAttribute('aria-current','page'); }
-    if (ar) { ar.classList.remove('is-lang-active'); ar.removeAttribute('aria-current'); }
-    try { localStorage.setItem('is-demo-lang','en'); } catch(e){}
-    stopObserver();
-    restoreEnglish();
-    // Re-render cards using t() so they output English directly
-    if (typeof window.__renderCards === 'function') window.__renderCards();
-    if (typeof window.__updateTrayLang === 'function') window.__updateTrayLang(false);
-    swapSelectOptions(false);
-    // Reset panel direction to LTR
-    const pnl = document.getElementById('detailPanel');
-    if (pnl) pnl.setAttribute('dir', 'ltr');
-    // Re-populate Data Freshness panel in English
-    if (typeof window.__populateDfp === 'function') window.__populateDfp();
-    // Reset sign-out label to English
-    var signoutLabel = document.querySelector('.signout-label');
-    if (signoutLabel) signoutLabel.textContent = signoutLabel.getAttribute('data-en') || 'Sign out';
-    // Reset WS panel static tab/title labels to English
-    var wsPanelTitle = document.querySelector('.ws-panel-title');
-    if (wsPanelTitle) wsPanelTitle.textContent = 'My Workspace';
-    var wsPanelDir = document.getElementById('wsPanel');
-    if (wsPanelDir) wsPanelDir.setAttribute('dir', 'ltr');
-    // ── Swap all workspace labels to English ──
-    swapWsLabels(false);
-    // Re-render WS panel body if panel is currently open (keeps content in sync)
-    var wsPanel = document.getElementById('wsPanel');
-    if (wsPanel && wsPanel.classList.contains('open') && window.WS && window.WS.openPanel) {
-      // Re-render panel body in English by triggering renderPanelBody via openPanel
-      setTimeout(function() { if (window.WS && window.WS.openPanel) window.WS.openPanel(); }, 50);
-    }
-    // Reset welcome modal strings to English (in case translateModal() rewrote them)
-    var obModalMap = {
-      obWelcomeTitle: 'Welcome to the Intelligence Hub',
-      obWelcomeSub:   'Your personal centre for Vision 2030 grants, tenders, and investment programmes',
-      obF1Title: 'Watchlist',
-      obF1Body:  'Save opportunities so you never lose track of a deadline.',
-      obF2Title: 'Saved Searches',
-      obF2Body:  'Save filter combinations and re-apply them in one click.',
-      obF3Title: 'Personalised Feed',
-      obF3Body:  'Set your sector interests to surface the most relevant opportunities first.',
-      obF4Title: 'Compare Mode',
-      obF4Body:  'Compare up to 3 opportunities side by side.'
-    };
-    Object.keys(obModalMap).forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.textContent = obModalMap[id];
-    });
-    var obStartBtn = document.getElementById('obStartTourBtn');
-    var obSkipBtn  = document.getElementById('obSkipTourBtn');
-    if (obStartBtn) obStartBtn.textContent = 'Start product tour →';
-    if (obSkipBtn)  obSkipBtn.textContent  = 'Skip for now';
-  }
-  // Expose so mobile menu handler (separate IIFE) can call these
-  window.activateArabic  = activateArabic;
-  window.activateEnglish = activateEnglish;
-
-  function wire(){
-    const ar = document.getElementById('langAr'); const en = document.getElementById('langEn');
-    if (ar && !ar.__wired) { ar.__wired = true; ar.removeAttribute('href'); ar.style.cursor='pointer'; ar.addEventListener('click', e => { e.preventDefault(); activateArabic(); }); }
-    if (en && !en.__wired) { en.__wired = true; en.removeAttribute('href'); en.style.cursor='pointer'; en.addEventListener('click', e => { e.preventDefault(); activateEnglish(); }); }
-  }
-  function init(){ wire(); if (localStorage.getItem('is-demo-lang') === 'ar') { setTimeout(activateArabic, 400); } }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-  window.addEventListener('load', wire);
-  setTimeout(wire, 600); setTimeout(wire, 2000);
-})();
+/* Arabic/English translation now handled by Google Translate widget.
+   Keeping window.activateArabic / activateEnglish as no-ops for
+   compatibility with any remaining callers (mobile menu, etc.). */
+window.activateArabic  = function() {
+  var sel = document.querySelector('select.goog-te-combo');
+  if (sel) { sel.value = 'ar'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+};
+window.activateEnglish = function() {
+  var sel = document.querySelector('select.goog-te-combo');
+  if (sel) { sel.value = ''; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+};
 </script>
 
 <!-- Sign-out + hamburger + mobile lang handler -->
