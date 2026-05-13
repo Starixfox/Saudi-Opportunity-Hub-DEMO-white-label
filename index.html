@@ -8729,6 +8729,77 @@ document.addEventListener('DOMContentLoaded', function () {
     if (wsPanelEl && wsPanelEl.classList.contains('open') && window.WS && window.WS.openPanel) {
       setTimeout(function() { if (window.WS && window.WS.openPanel) window.WS.openPanel(); }, 50);
     }
+    // ── Workspace bar Arabic labels ──
+    var wsBarAr = document.getElementById('wsBar');
+    if (wsBarAr) {
+      var wbGreetAr = wsBarAr.querySelector('.ws-greeting span');
+      if (wbGreetAr) {
+        var uname = document.getElementById('wsUserName');
+        var nm = uname ? uname.textContent : '';
+        wbGreetAr.innerHTML = 'مرحباً بعودتك، <strong id="wsUserName">' + nm + '</strong>';
+      }
+      var wbWlAr = document.getElementById('wsWatchlistStat');
+      if (wbWlAr) { var wbWlTxt = wbWlAr.lastChild; if (wbWlTxt && wbWlTxt.nodeType===3) wbWlTxt.nodeValue = ' قائمة المتابعة'; }
+      var wbSrAr = document.getElementById('wsSavedStat');
+      if (wbSrAr) { var wbSrTxt = wbSrAr.lastChild; if (wbSrTxt && wbSrTxt.nodeType===3) wbSrTxt.nodeValue = ' البحوث المحفوظة'; }
+      var wbUpAr = document.getElementById('wsUpdatesStat');
+      if (wbUpAr) { var wbUpTxt = wbUpAr.lastChild; if (wbUpTxt && wbUpTxt.nodeType===3) wbUpTxt.nodeValue = ' جديد هذا الأسبوع'; }
+      var wbOpenAr = document.getElementById('wsOpenPanelBtn');
+      if (wbOpenAr) { var wbOpenTxt = wbOpenAr.lastChild; if (wbOpenTxt && wbOpenTxt.nodeType===3) wbOpenTxt.nodeValue = ' مساحتي'; }
+      var wbSetAr = document.getElementById('wsSettingsBtn');
+      if (wbSetAr) { var wbSetTxt = wbSetAr.lastChild; if (wbSetTxt && wbSetTxt.nodeType===3) wbSetTxt.nodeValue = ' الإعدادات'; }
+    }
+    // ── Notifications dropdown Arabic ──
+    var notifHdrAr = document.querySelector('.notif-dropdown-header span');
+    if (notifHdrAr) notifHdrAr.textContent = 'الإشعارات';
+    var notifClearAr = document.getElementById('notifClearBtn');
+    if (notifClearAr) notifClearAr.textContent = 'تحديد الكل كمقروء';
+    // ── WS Panel header + tabs Arabic ──
+    var wsPanelTitleAr = document.querySelector('.ws-panel-title');
+    if (wsPanelTitleAr) wsPanelTitleAr.textContent = 'مساحتي';
+    var wsTabs = document.querySelectorAll('.ws-panel-tab');
+    var wsTabLabelsAr = ['قائمة المتابعة', 'البحوث المحفوظة', 'الأخيرة', 'ابدأ'];
+    wsTabs.forEach(function(t, i) { if (wsTabLabelsAr[i]) t.textContent = wsTabLabelsAr[i]; });
+    // ── Settings modal Arabic ──
+    var smTitleAr = document.querySelector('.settings-modal-title');
+    if (smTitleAr) smTitleAr.textContent = 'إعدادات مساحة العمل';
+    var smLabels = document.querySelectorAll('.settings-label');
+    var smSublabels = document.querySelectorAll('.settings-sublabel');
+    var smSecTitles = document.querySelectorAll('.settings-section-title');
+    var smArLabels = [
+      'الاسم المعروض', 'الدور', 'اسم المؤسسة',
+      'الفرص الجديدة', 'تذكيرات المواعيد', 'الملخص الأسبوعي',
+      'طريقة العرض الافتراضية', 'الفلتر الافتراضي'
+    ];
+    var smArSublabels = [
+      'يظهر في تحية مساحتك', 'يُستخدم للتوصيات حسب الدور', 'يظهر في مساحة عملك',
+      'إظهار شارة عند مطابقة سجلات جديدة لقطاعاتك', 'إشعار عند اقتراب مواعيد العناصر المحفوظة', 'ملخص البرامج الجديدة في قطاعاتك',
+      'تخطيط البطاقات عند الوصول', 'تحديد الحالة مسبقاً عند الوصول'
+    ];
+    var smArSecTitles = ['ملفك الشخصي', 'اهتمامات القطاع', 'تفضيلات التنبيهات', 'العرض'];
+    smLabels.forEach(function(el, i) {
+      var sub = el.querySelector('.settings-sublabel');
+      var lbl = el.childNodes[0];
+      if (lbl && lbl.nodeType === 3 && smArLabels[i]) lbl.nodeValue = smArLabels[i];
+      if (sub && smArSublabels[i]) sub.textContent = smArSublabels[i];
+    });
+    smSecTitles.forEach(function(el, i) { if (smArSecTitles[i]) el.textContent = smArSecTitles[i]; });
+    var smSectorSub = document.querySelector('.settings-chips')?.previousElementSibling;
+    if (smSectorSub && smSectorSub.tagName === 'P') smSectorSub.textContent = 'اختر القطاعات التي تريد تتبعها. ستُعطي التوصيات والرؤى الأولوية لها.';
+    // Settings selects
+    var smRole = document.getElementById('settingsRole');
+    if (smRole) {
+      var roleMapAr = {'': 'اختر الدور…', 'Startup / SME': 'شركة ناشئة / م.ص.م', 'Researcher / University': 'باحث / جامعة', 'Government': 'جهة حكومية', 'Investor': 'مستثمر', 'Student': 'طالب', 'Consultant': 'مستشار'};
+      Array.from(smRole.options).forEach(function(opt) { if (roleMapAr[opt.value] !== undefined) opt.text = roleMapAr[opt.value]; });
+    }
+    var smView = document.getElementById('settingsDefaultView');
+    if (smView) { Array.from(smView.options).forEach(function(opt) { if (opt.value==='detailed') opt.text='بطاقات تفصيلية'; if (opt.value==='compact') opt.text='قائمة مختصرة'; }); }
+    var smStatus = document.getElementById('settingsDefaultStatus');
+    if (smStatus) { Array.from(smStatus.options).forEach(function(opt) { if (opt.value==='') opt.text='جميع الحالات'; if (opt.value==='Open') opt.text='المفتوحة فقط'; if (opt.value==='Recurring') opt.text='المتكررة'; }); }
+    var smSaveBtn = document.getElementById('settingsSaveBtn');
+    if (smSaveBtn) smSaveBtn.textContent = 'حفظ التفضيلات';
+    var smRestartBtn = document.getElementById('settingsRestartTour');
+    if (smRestartBtn) smRestartBtn.textContent = '↺ إعادة تشغيل الجولة التعريفية';
     startObserver();
   }
   function activateEnglish(){
@@ -8758,6 +8829,69 @@ document.addEventListener('DOMContentLoaded', function () {
     if (wsPanelTitle) wsPanelTitle.textContent = 'My Workspace';
     var wsPanelDir = document.getElementById('wsPanel');
     if (wsPanelDir) wsPanelDir.setAttribute('dir', 'ltr');
+    // ── Workspace bar English reset ──
+    var wsBarEn = document.getElementById('wsBar');
+    if (wsBarEn) {
+      var wbGreetEn = wsBarEn.querySelector('.ws-greeting span');
+      if (wbGreetEn) {
+        var unameEn = document.getElementById('wsUserName');
+        var nmEn = unameEn ? unameEn.textContent : '';
+        wbGreetEn.innerHTML = 'Welcome back, <strong id="wsUserName">' + nmEn + '</strong>';
+      }
+      var wbWlEn = document.getElementById('wsWatchlistStat');
+      if (wbWlEn) { var wbWlTxtEn = wbWlEn.lastChild; if (wbWlTxtEn && wbWlTxtEn.nodeType===3) wbWlTxtEn.nodeValue = ' Watchlist'; }
+      var wbSrEn = document.getElementById('wsSavedStat');
+      if (wbSrEn) { var wbSrTxtEn = wbSrEn.lastChild; if (wbSrTxtEn && wbSrTxtEn.nodeType===3) wbSrTxtEn.nodeValue = ' Saved Searches'; }
+      var wbUpEn = document.getElementById('wsUpdatesStat');
+      if (wbUpEn) { var wbUpTxtEn = wbUpEn.lastChild; if (wbUpTxtEn && wbUpTxtEn.nodeType===3) wbUpTxtEn.nodeValue = ' New this week'; }
+      var wbOpenEn = document.getElementById('wsOpenPanelBtn');
+      if (wbOpenEn) { var wbOpenTxtEn = wbOpenEn.lastChild; if (wbOpenTxtEn && wbOpenTxtEn.nodeType===3) wbOpenTxtEn.nodeValue = ' My Workspace'; }
+      var wbSetEn = document.getElementById('wsSettingsBtn');
+      if (wbSetEn) { var wbSetTxtEn = wbSetEn.lastChild; if (wbSetTxtEn && wbSetTxtEn.nodeType===3) wbSetTxtEn.nodeValue = ' Settings'; }
+    }
+    // ── Notifications dropdown English reset ──
+    var notifHdrEn = document.querySelector('.notif-dropdown-header span');
+    if (notifHdrEn) notifHdrEn.textContent = 'Notifications';
+    var notifClearEn = document.getElementById('notifClearBtn');
+    if (notifClearEn) notifClearEn.textContent = 'Mark all read';
+    // ── WS Panel tabs English reset ──
+    var wsTabsEn = document.querySelectorAll('.ws-panel-tab');
+    var wsTabLabelsEn = ['Watchlist', 'Saved Searches', 'Recent', 'Get Started'];
+    wsTabsEn.forEach(function(t, i) { if (wsTabLabelsEn[i]) t.textContent = wsTabLabelsEn[i]; });
+    // ── Settings modal English reset ──
+    var smTitleEn = document.querySelector('.settings-modal-title');
+    if (smTitleEn) smTitleEn.textContent = 'Workspace Settings';
+    var smLabelsEn = document.querySelectorAll('.settings-label');
+    var smSecTitlesEn = document.querySelectorAll('.settings-section-title');
+    var smEnLabels = ['Display name', 'Role', 'Organisation name', 'New opportunities', 'Deadline reminders', 'Weekly digest', 'Default view', 'Default filter'];
+    var smEnSublabels = [
+      'Shown in your workspace greeting', 'Used for role-based recommendations', 'Displayed in your workspace',
+      'Show badge when new records match your sectors', 'Notify when watchlisted items are closing soon', 'Summary of new programs in your tracked sectors',
+      'Card layout shown when you arrive', 'Pre-select status on arrival'
+    ];
+    var smEnSecTitles = ['Your Profile', 'Sector Interests', 'Alert Preferences', 'Display'];
+    smLabelsEn.forEach(function(el, i) {
+      var sub = el.querySelector('.settings-sublabel');
+      var lbl = el.childNodes[0];
+      if (lbl && lbl.nodeType === 3 && smEnLabels[i]) lbl.nodeValue = smEnLabels[i];
+      if (sub && smEnSublabels[i]) sub.textContent = smEnSublabels[i];
+    });
+    smSecTitlesEn.forEach(function(el, i) { if (smEnSecTitles[i]) el.textContent = smEnSecTitles[i]; });
+    var smSectorSubEn = document.querySelector('.settings-chips')?.previousElementSibling;
+    if (smSectorSubEn && smSectorSubEn.tagName === 'P') smSectorSubEn.textContent = 'Select the sectors you want to track. Recommendations and insights will prioritise these.';
+    var smRoleEn = document.getElementById('settingsRole');
+    if (smRoleEn) {
+      var roleMapEn = {'': 'Select role…', 'Startup / SME': 'Startup / SME', 'Researcher / University': 'Researcher / University', 'Government': 'Government', 'Investor': 'Investor', 'Student': 'Student', 'Consultant': 'Consultant'};
+      Array.from(smRoleEn.options).forEach(function(opt) { if (roleMapEn[opt.value] !== undefined) opt.text = roleMapEn[opt.value]; });
+    }
+    var smViewEn = document.getElementById('settingsDefaultView');
+    if (smViewEn) { Array.from(smViewEn.options).forEach(function(opt) { if (opt.value==='detailed') opt.text='Detailed cards'; if (opt.value==='compact') opt.text='Compact list'; }); }
+    var smStatusEn = document.getElementById('settingsDefaultStatus');
+    if (smStatusEn) { Array.from(smStatusEn.options).forEach(function(opt) { if (opt.value==='') opt.text='All statuses'; if (opt.value==='Open') opt.text='Open only'; if (opt.value==='Recurring') opt.text='Recurring'; }); }
+    var smSaveBtnEn = document.getElementById('settingsSaveBtn');
+    if (smSaveBtnEn) smSaveBtnEn.textContent = 'Save preferences';
+    var smRestartBtnEn = document.getElementById('settingsRestartTour');
+    if (smRestartBtnEn) smRestartBtnEn.textContent = '↺ Restart product tour';
     // Re-render WS panel body if panel is currently open (keeps content in sync)
     var wsPanel = document.getElementById('wsPanel');
     if (wsPanel && wsPanel.classList.contains('open') && window.WS && window.WS.openPanel) {
@@ -9444,11 +9578,11 @@ document.addEventListener('DOMContentLoaded', function () {
           '<div class="ws-item-content" style="cursor:pointer;" data-sid="' + esc(s.id) + '">' +
             '<div class="ws-item-title">' + esc(s.label) + '</div>' +
             '<div class="ws-item-meta">' +
-              '<span style="color:var(--green);font-weight:600;font-size:0.7rem;">Apply</span>' +
+              '<span style="color:var(--green);font-weight:600;font-size:0.7rem;">' + (document.body.dir==='rtl' ? 'تطبيق' : 'Apply') + '</span>' +
               '<span style="color:var(--text-faint);">· ' + timeAgo(s.savedAt) + '</span>' +
             '</div>' +
           '</div>' +
-          '<button class="ws-item-remove" data-sid="' + esc(s.id) + '" title="Delete" aria-label="Delete saved search">×</button>' +
+          '<button class="ws-item-remove" data-sid="' + esc(s.id) + '" title="' + (document.body.dir==='rtl' ? 'حذف' : 'Delete') + '" aria-label="Delete saved search">×</button>' +
         '</div>';
       }).join('');
 
@@ -9461,7 +9595,7 @@ document.addEventListener('DOMContentLoaded', function () {
             dbSaveSearches(searches);
             updateWsBar();
             renderPanelBody();
-            showToast('Search deleted');
+            showToast(document.body.dir==='rtl' ? 'تم حذف البحث' : 'Search deleted');
           } else {
             var sid = el.dataset.sid;
             var s = searches.find(function(x) { return x.id === sid; });
@@ -9475,14 +9609,15 @@ document.addEventListener('DOMContentLoaded', function () {
       if (window.OB && window.OB.renderChecklist) {
         window.OB.renderChecklist(body);
       } else {
-        body.innerHTML = '<div class="ob-empty"><div class="ob-empty-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="ob-empty-title">Getting Started</div><div class="ob-empty-body">Loading checklist…</div></div>';
+        var _cbAr = document.body.dir==='rtl';
+        body.innerHTML = '<div class="ob-empty"><div class="ob-empty-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="ob-empty-title">' + (_cbAr ? 'ابدأ' : 'Getting Started') + '</div><div class="ob-empty-body">' + (_cbAr ? 'جارٍ تحميل القائمة…' : 'Loading checklist…') + '</div></div>';
       }
       return;
     } else if (activeTab === 'history') {
       if (!history.length) {
         body.innerHTML = '<div class="ws-empty-state">' +
           '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
-          '<p>No recent activity yet.<br>Opened opportunities will appear here.</p></div>';
+          '<p>' + (document.body.dir==='rtl' ? 'لا يوجد نشاط حديث بعد.<br>ستظهر الفرص التي فتحتها هنا.' : 'No recent activity yet.<br>Opened opportunities will appear here.') + '</p></div>';
         return;
       }
       body.innerHTML = history.slice(0, 20).map(function(item) {
@@ -9491,7 +9626,7 @@ document.addEventListener('DOMContentLoaded', function () {
             '<div class="ws-item-title">' + esc(item.title) + '</div>' +
             '<div class="ws-item-meta">' +
               (item.sector ? '<span>' + esc(item.sector) + '</span>' : '') +
-              '<span style="color:var(--text-faint);">Viewed ' + timeAgo(item.viewedAt) + '</span>' +
+              '<span style="color:var(--text-faint);">' + (document.body.dir==='rtl' ? 'عُرض ' : 'Viewed ') + timeAgo(item.viewedAt) + '</span>' +
             '</div>' +
           '</div>' +
         '</div>';
