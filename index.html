@@ -8521,48 +8521,76 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* —— sector display names (EN / AR) —————————————————————— */
   var SECTOR_NAMES_EN = {
-    agriculture: 'Agriculture', construction: 'Construction',
-    culture_tourism: 'Culture & Tourism', education: 'Education',
-    energy: 'Energy', environment: 'Environment',
-    financial: 'Financial', healthcare: 'Healthcare',
-    ict: 'ICT', industry: 'Industry',
-    logistics: 'Logistics', realestate: 'Real Estate',
-    space: 'Space', sports: 'Sports',
-    water: 'Water', other: 'Other'
+    agriculture:  'Agriculture',  chemicals:  'Chemicals',
+    defense:      'Defense',      education:  'Education',
+    energy:       'Energy',       environment:'Environment',
+    financial:    'Financial',    gaming:     'Gaming',
+    healthcare:   'Healthcare',   ict:        'ICT',
+    industrial:   'Industrial',   innovation: 'Innovation',
+    media:        'Media',        mining:     'Mining',
+    pharma:       'Pharma',       realestate: 'Real Estate',
+    space:        'Space',        sports:     'Sports',
+    technology:   'Technology',   tourism:    'Tourism',
+    transport:    'Transport',    other:      'Other'
   };
   var SECTOR_NAMES_AR = {
-    agriculture: '\u0627\u0644\u0632\u0631\u0627\u0639\u0629',
-    construction: '\u0627\u0644\u0628\u0646\u0627\u0621',
-    culture_tourism: '\u0627\u0644\u062b\u0642\u0627\u0641\u0629 \u0648\u0627\u0644\u0633\u064a\u0627\u062d\u0629',
-    education: '\u0627\u0644\u062a\u0639\u0644\u064a\u0645',
-    energy: '\u0627\u0644\u0637\u0627\u0642\u0629',
-    environment: '\u0627\u0644\u0628\u064a\u0626\u0629',
-    financial: '\u0627\u0644\u0645\u0627\u0644\u064a\u0629',
-    healthcare: '\u0627\u0644\u0631\u0639\u0627\u064a\u0629 \u0627\u0644\u0635\u062d\u064a\u0629',
-    ict: '\u062a\u0642\u0646\u064a\u0629 \u0627\u0644\u0645\u0639\u0644\u0648\u0645\u0627\u062a',
-    industry: '\u0627\u0644\u0635\u0646\u0627\u0639\u0629',
-    logistics: '\u0627\u0644\u0644\u0648\u062c\u0633\u062a\u064a\u0643',
-    realestate: '\u0627\u0644\u0639\u0642\u0627\u0631\u0627\u062a',
-    space: '\u0627\u0644\u0641\u0636\u0627\u0621',
-    sports: '\u0627\u0644\u0631\u064a\u0627\u0636\u0629',
-    water: '\u0627\u0644\u0645\u064a\u0627\u0647',
-    other: '\u0623\u062e\u0631\u0649'
+    agriculture:  '\u0627\u0644\u0632\u0631\u0627\u0639\u0629',
+    chemicals:    '\u0627\u0644\u0643\u064a\u0645\u064a\u0627\u0621',
+    defense:      '\u0627\u0644\u062f\u0641\u0627\u0639',
+    education:    '\u0627\u0644\u062a\u0639\u0644\u064a\u0645',
+    energy:       '\u0627\u0644\u0637\u0627\u0642\u0629',
+    environment:  '\u0627\u0644\u0628\u064a\u0626\u0629',
+    financial:    '\u0627\u0644\u0645\u0627\u0644\u064a\u0629',
+    gaming:       '\u0627\u0644\u0623\u0644\u0639\u0627\u0628',
+    healthcare:   '\u0627\u0644\u0631\u0639\u0627\u064a\u0629 \u0627\u0644\u0635\u062d\u064a\u0629',
+    ict:          '\u062a\u0642\u0646\u064a\u0629 \u0627\u0644\u0645\u0639\u0644\u0648\u0645\u0627\u062a',
+    industrial:   '\u0627\u0644\u0635\u0646\u0627\u0639\u0629',
+    innovation:   '\u0627\u0644\u0627\u0628\u062a\u0643\u0627\u0631',
+    media:        '\u0627\u0644\u0625\u0639\u0644\u0627\u0645',
+    mining:       '\u0627\u0644\u062a\u0639\u062f\u064a\u0646',
+    pharma:       '\u0627\u0644\u0635\u064a\u062f\u0644\u0629',
+    realestate:   '\u0627\u0644\u0639\u0642\u0627\u0631\u0627\u062a',
+    space:        '\u0627\u0644\u0641\u0636\u0627\u0621',
+    sports:       '\u0627\u0644\u0631\u064a\u0627\u0636\u0629',
+    technology:   '\u0627\u0644\u062a\u0643\u0646\u0648\u0644\u0648\u062c\u064a\u0627',
+    tourism:      '\u0627\u0644\u0633\u064a\u0627\u062d\u0629',
+    transport:    '\u0627\u0644\u0646\u0642\u0644',
+    other:        '\u0623\u062e\u0631\u0649'
   };
 
-  /* funding_size string -> numeric mid-value in USD millions */
+  /* funding_amount string -> numeric mid-value in USD millions
+     Handles: "USD 500K-USD 5M", "Up to EUR 60K", "$2M-$20M",
+              "SAR 100000", "AED 250000", numeric bare values, etc. */
   function parseFunding(str) {
-    if (!str || str === 'Not specified' || str === 'Varies') return 0;
+    if (!str) return 0;
     var s = String(str).toLowerCase().replace(/,/g, '');
-    var mul = 1;
-    if (/billion|\bb\b/.test(s)) mul = 1000;
-    else if (/million|\bm\b/.test(s)) mul = 1;
-    else if (/thousand|\bk\b/.test(s)) mul = 0.001;
-    var nums = s.match(/([\d.]+)/g);
-    if (!nums) return 0;
-    if (nums.length >= 2) {
-      return ((parseFloat(nums[0]) + parseFloat(nums[1])) / 2) * mul;
+    /* skip clearly non-numeric strings */
+    if (/not specified|varies|n\/a|undisclosed|variable|advisory|non-financial|in-kind|fully funded|commercial|regulatory|supply|certification|concession|licensing|facilitation|partnership|investment facilitation|data partnership|market pricing|technical assistance|subsidized/i.test(s)) return 0;
+    /* extract all numeric tokens */
+    var nums = [];
+    /* regex: number optionally followed by currency/unit suffix */
+    var re = /([\d]+(?:\.\d+)?)/g;
+    var m;
+    while ((m = re.exec(s)) !== null) {
+      var n = parseFloat(m[1]);
+      /* look ahead for unit suffix within 5 chars after the number */
+      var after = s.slice(m.index + m[0].length, m.index + m[0].length + 6);
+      if (/b(illion)?/.test(after)) n *= 1000;
+      else if (/m(illion)?/.test(after)) n *= 1;   /* already in M */
+      else if (/k/.test(after)) n *= 0.001;         /* K -> M */
+      else {
+        /* bare number: if >= 100000 treat as units (SAR/AED/USD), convert to M */
+        if (n >= 1000000)      n = n / 1000000;     /* e.g. 5000000 -> 5 M */
+        else if (n >= 100000)  n = n / 1000000;     /* e.g. 500000 -> 0.5 M */
+        else if (n >= 1000)    n = n / 1000;        /* e.g. 2000 -> 2 M (already K-ish) */
+        /* else n is already a small numeric (e.g. "7%" -> 7) — skip below */
+        else if (n < 100) continue;                 /* skip % values etc. */
+      }
+      if (n > 0) nums.push(n);
     }
-    return parseFloat(nums[0]) * mul;
+    if (!nums.length) return 0;
+    if (nums.length >= 2) return (nums[0] + nums[nums.length - 1]) / 2; /* mid of range */
+    return nums[0];
   }
 
   /* resolve CSS variable value at runtime */
@@ -8636,7 +8664,7 @@ document.addEventListener('DOMContentLoaded', function () {
     /* funding by sector (horizontal bar) — aggregate mid-value per sector */
     var fundingBySector = {};
     data.forEach(function(r) {
-      var val = parseFunding(r.funding_size);
+      var val = parseFunding(r.funding_amount);
       if (val <= 0) return;
       (r.sectors || ['other']).forEach(function(s) {
         fundingBySector[s] = (fundingBySector[s] || 0) + val;
@@ -8734,7 +8762,9 @@ document.addEventListener('DOMContentLoaded', function () {
             tooltip: {
               callbacks: {
                 label: function(ctx) {
-                  return ' $' + ctx.parsed.x.toLocaleString() + 'M';
+                  var v = ctx.parsed.x;
+                  if (v >= 1000) return ' $' + (v / 1000).toFixed(1) + 'B';
+                  return ' $' + v.toLocaleString() + 'M';
                 }
               }
             }
@@ -8743,7 +8773,11 @@ document.addEventListener('DOMContentLoaded', function () {
             x: {
               grid: { color: gridColor },
               ticks: { color: textColor, font: { size: 11 },
-                callback: function(v) { return '$' + v + 'M'; } }
+                callback: function(v) {
+                  if (v >= 1000) return '$' + (v / 1000).toFixed(0) + 'B';
+                  return '$' + v + 'M';
+                }
+              }
             },
             y: {
               grid: { display: false },
