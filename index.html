@@ -4647,49 +4647,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
 </style>
 
-<!-- Google Translate Widget -->
-<script type="text/javascript">
-function googleTranslateElementInit() {
-  new google.translate.TranslateElement({
-    pageLanguage: 'en',
-    includedLanguages: 'ar,en',
-    layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-    autoDisplay: false
-  }, 'google_translate_element');
-}
-</script>
-<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
-<style>
-/* ── Google Translate Widget Topbar Styling ──────────────────── */
-#google_translate_element { display: inline-flex; align-items: center; }
-#google_translate_element .goog-te-gadget { font-family: inherit !important; font-size: 0 !important; color: transparent !important; }
-#google_translate_element .goog-te-gadget > span > a { display: none !important; }
-#google_translate_element select.goog-te-combo {
-  font-family: inherit;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--text-2);
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 4px 8px;
-  cursor: pointer;
-  outline: none;
-  transition: border-color 0.15s, color 0.15s;
-  height: 30px;
-  min-width: 90px;
-}
-#google_translate_element select.goog-te-combo:hover,
-#google_translate_element select.goog-te-combo:focus {
-  border-color: var(--green);
-  color: var(--text);
-}
-/* Hide the Google Translate top banner bar */
-.goog-te-banner-frame, #goog-gt-tt, .goog-tooltip, .goog-tooltip:hover { display: none !important; }
-body { top: 0 !important; }
-.skiptranslate { display: none !important; }
-</style>
 </head>
 <body>
 
@@ -4791,15 +4748,13 @@ body { top: 0 !important; }
       <button class="app-tb-icon-btn" id="appTbSettings" onclick="WS.openSettings()" title="Settings" type="button" aria-label="Settings">
         <i data-lucide="settings"></i>
       </button>
-      <!-- Language toggle button -->
-      <button class="app-tb-lang-btn" id="appLangToggle" type="button" aria-label="Switch language" title="Switch to Arabic / English" onclick="toggleGoogleTranslate()">
+      <!-- Language toggle — links to full Arabic version -->
+      <a class="app-tb-lang-btn" href="ar.html" aria-label="Switch to Arabic" title="Switch to Arabic / العربية">
         <span class="app-tb-lang-icon">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         </span>
-        <span id="appLangLabel">العربية</span>
-      </button>
-      <!-- Google Translate Widget (hidden — driven by button above) -->
-      <div id="google_translate_element" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden;"></div>
+        <span>العربية</span>
+      </a>
       <!-- Hidden anchors kept for existing JS compatibility -->
       <a id="langEn" class="is-lang-btn is-lang-active" href="index.html" lang="en" style="display:none">EN</a>
       <a id="langAr" class="is-lang-btn" href="ar.html" lang="ar" dir="rtl" style="display:none">ع</a>
@@ -9916,38 +9871,9 @@ body { top: 0 !important; }
 /* ── END LANDSCAPE INSIGHTS V2 ────────────────────────────────── */
 </script>
 <script>
-/* Arabic/English translation handled by Google Translate widget. */
-
-function toggleGoogleTranslate() {
-  var sel = document.querySelector('select.goog-te-combo');
-  var label = document.getElementById('appLangLabel');
-  if (!sel) return;
-  var isAr = sel.value === 'ar';
-  if (isAr) {
-    /* Switch back to English */
-    sel.value = '';
-    sel.dispatchEvent(new Event('change', { bubbles: true }));
-    if (label) label.textContent = 'العربية';
-  } else {
-    /* Switch to Arabic */
-    sel.value = 'ar';
-    sel.dispatchEvent(new Event('change', { bubbles: true }));
-    if (label) label.textContent = 'English';
-  }
-}
-
-window.activateArabic  = function() {
-  var sel = document.querySelector('select.goog-te-combo');
-  var label = document.getElementById('appLangLabel');
-  if (sel) { sel.value = 'ar'; sel.dispatchEvent(new Event('change', { bubbles: true })); }
-  if (label) label.textContent = 'English';
-};
-window.activateEnglish = function() {
-  var sel = document.querySelector('select.goog-te-combo');
-  var label = document.getElementById('appLangLabel');
-  if (sel) { sel.value = ''; sel.dispatchEvent(new Event('change', { bubbles: true })); }
-  if (label) label.textContent = 'العربية';
-};
+/* Language switching: EN → ar.html (Arabic page), AR → index.html (English page) */
+window.activateArabic  = function() { window.location.href = 'ar.html'; };
+window.activateEnglish = function() { window.location.href = 'index.html'; };
 </script>
 
 <!-- Sign-out + hamburger + mobile lang handler -->
