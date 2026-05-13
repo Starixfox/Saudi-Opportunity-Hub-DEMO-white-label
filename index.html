@@ -7745,28 +7745,25 @@ document.addEventListener('DOMContentLoaded', function () {
     var dow  = (now.getDay() + 6) % 7; // 0=Mon…6=Sun
     var weekStart = new Date(now); weekStart.setHours(0,0,0,0); weekStart.setDate(now.getDate() - dow);
 
+    /* Rolling 7-day window — more reliable than Mon-Sun week
+       because created_at reflects Supabase insert time (all rows
+       inserted in one batch share the same date), not publish date.
+       We use last_verified as the data-currency signal instead:
+       - addedWeek  = isNew===true AND last_verified within 7 days
+       - updatedWeek = last_verified within 7 days (any row) */
+    var sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     var addedWeek = 0, updatedWeek = 0, latestVerified = null;
-    var isNewCount = 0;
     data.forEach(function(item) {
-      /* Track isNew flag — used as fallback for addedWeek */
-      if (item.isNew) isNewCount++;
-      /* created_at / last_verified treated as "added" / "updated" */
-      var createdStr  = item.created_at  || '';
       var verifiedStr = item.last_verified || '';
-      if (createdStr) {
-        var d = new Date(createdStr);
-        if (!isNaN(d) && d >= weekStart) addedWeek++;
-      }
-      if (verifiedStr) {
-        var dv = new Date(verifiedStr);
-        if (!isNaN(dv)) {
-          if (dv >= weekStart) updatedWeek++;
-          if (!latestVerified || dv > latestVerified) latestVerified = dv;
-        }
+      if (!verifiedStr) return;
+      var dv = new Date(verifiedStr);
+      if (isNaN(dv)) return;
+      if (dv > latestVerified || !latestVerified) latestVerified = dv;
+      if (dv >= sevenDaysAgo) {
+        updatedWeek++;
+        if (item.isNew) addedWeek++;
       }
     });
-    /* If created_at wasn't in the dataset, fall back to isNew count */
-    if (addedWeek === 0 && isNewCount > 0) addedWeek = isNewCount;
 
     /* Format the most-recent verified date compactly */
     var verifiedDisplay = latestVerified
@@ -9083,11 +9080,17 @@ document.addEventListener('DOMContentLoaded', function () {
     if (wc) wc.textContent = watchlist.length;
     if (sc) sc.textContent = searches.length;
 
-    // "New this week" = items flagged isNew in the dataset
+    // "New this week" = isNew flag AND last_verified within the last 7 days
     var newCount = 0;
     var _dataset = window.opportunitiesData || window.allOpportunities || window._wsDataset || null;
     if (_dataset) {
-      newCount = _dataset.filter(function(item) { return !!item.isNew; }).length;
+      var _sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      newCount = _dataset.filter(function(item) {
+        if (!item.isNew) return false;
+        if (!item.last_verified) return false;
+        var d = new Date(item.last_verified);
+        return !isNaN(d) && d >= _sevenDaysAgo;
+      }).length;
     }
     if (uc) uc.textContent = newCount;
 
