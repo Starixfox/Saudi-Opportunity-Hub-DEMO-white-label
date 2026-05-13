@@ -421,23 +421,24 @@
       font-family: var(--font-mono);
     }
 
-    /* ── AUTH SECTION ────────────────────────────── */
-    .auth-box {
+    /* ── INFO BOX ────────────────────────────────── */
+    .info-box {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-left: 3px solid var(--gold);
+      border-left: 3px solid var(--green);
       border-radius: var(--radius-lg);
       padding: var(--space-6);
       margin-bottom: var(--space-6);
     }
-    .auth-box h3 {
+    .info-box h3 {
       font-family: var(--font-display);
       font-size: var(--text-base);
       font-weight: 700;
       color: var(--text);
       margin-bottom: var(--space-3);
     }
-    .auth-box p { font-size: var(--text-sm); color: var(--text-muted); line-height: 1.65; margin-bottom: var(--space-4); }
+    .info-box p { font-size: var(--text-sm); color: var(--text-muted); line-height: 1.65; margin-bottom: var(--space-4); }
+    .info-box p:last-child { margin-bottom: 0; }
 
     /* ── RATE LIMITS TABLE ───────────────────────── */
     .limits-grid {
@@ -600,10 +601,10 @@
   <div class="api-hero">
     <div class="api-badge">&#9679;&nbsp; REST API — v1</div>
     <h1>Opportunity Hub <span class="accent">API</span></h1>
-    <p>Programmatic access to <strong>1,034+ curated Saudi funding opportunities</strong> — grants, tenders, accelerators, fellowships, and investment programs across 15 sectors, updated weekly.</p>
+    <p>Programmatic access to <strong>1,074+ curated Saudi funding opportunities</strong> — grants, tenders, accelerators, fellowships, and investment programs across 15 sectors, updated weekly.</p>
     <div class="base-url-box">
       <span class="base-url-label">Base URL</span>
-      <span class="base-url-value">https://saudi-opportunity-hub-demo-white-label-production.up.railway.app</span>
+      <span class="base-url-value">https://dshrbbnjahjcwxzvzygh.supabase.co/rest/v1</span>
     </div>
   </div>
 
@@ -612,16 +613,17 @@
     <div class="section-label">Security</div>
     <h2>Authentication</h2>
 
-    <div class="auth-box">
-      <h3>API Key — Header Authentication</h3>
-      <p>All API requests require a valid API key passed as a request header. Keys are issued per organisation and tied to your access tier. Contact us to request a key.</p>
-      <pre class="code-block"><span class="tok-hdr">X-API-Key</span><span class="tok-op">: </span><span class="tok-str">oh_live_xxxxxxxxxxxxxxxxxxxx</span></pre>
-      <p style="margin-bottom:0;font-size:0.8rem;color:var(--text-faint);">&#9888;&nbsp; Keep your key private. Requests without a valid key return <code style="font-family:var(--font-mono);font-size:0.78rem;">401 Unauthorized</code>.</p>
+    <div class="info-box">
+      <h3>Public Read — API Key Header</h3>
+      <p>The opportunities dataset is publicly readable. All requests require the <code style="font-family:var(--font-mono);font-size:0.78rem;">apikey</code> header set to the platform's public anon key. No private credentials are needed for read access — the key carries read-only permissions enforced by Row Level Security.</p>
+      <p>Write operations (insert, update, delete) are blocked for the anon key. Contact us for a service-role key if you need write access.</p>
+      <pre class="code-block"><span class="tok-hdr">apikey</span><span class="tok-op">: </span><span class="tok-str">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzaHJiYm5qYWhqY3d4enZ6eWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE3OTgsImV4cCI6MjA5NDA1Nzc5OH0.OpUGgfL91m7STsZpE6fnX281KN_Ge8oytR-2lM-3qTo</span>
+<span class="tok-hdr">Authorization</span><span class="tok-op">: </span><span class="tok-str">Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</span></pre>
     </div>
 
-    <pre class="code-block"><span class="tok-cmt"># Example authenticated request</span>
-<span class="tok-kw">curl</span> <span class="tok-url">https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/opportunities</span> \
-  <span class="tok-kw">-H</span> <span class="tok-str">"X-API-Key: oh_live_xxxxxxxxxxxxxxxxxxxx"</span> \
+    <pre class="code-block"><span class="tok-cmt"># Minimal authenticated request</span>
+<span class="tok-kw">curl</span> <span class="tok-url">https://dshrbbnjahjcwxzvzygh.supabase.co/rest/v1/opportunities?select=id,title,type,status&amp;limit=5</span> \
+  <span class="tok-kw">-H</span> <span class="tok-str">"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzaHJiYm5qYWhqY3d4enZ6eWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE3OTgsImV4cCI6MjA5NDA1Nzc5OH0.OpUGgfL91m7STsZpE6fnX281KN_Ge8oytR-2lM-3qTo"</span> \
   <span class="tok-kw">-H</span> <span class="tok-str">"Accept: application/json"</span></pre>
   </section>
 
@@ -630,243 +632,184 @@
     <div class="section-label">Reference</div>
     <h2>Endpoints</h2>
 
-    <!-- 1. GET /api/opportunities -->
+    <!-- 1. GET /opportunities -->
     <div class="endpoint-card">
       <div class="endpoint-header">
         <span class="method-badge">GET</span>
-        <span class="endpoint-path">/api/opportunities</span>
+        <span class="endpoint-path">/opportunities</span>
         <span class="endpoint-summary">List all opportunities</span>
       </div>
       <div class="endpoint-body">
-        <p class="endpoint-desc">Returns the full paginated list of opportunities. Use query parameters to filter by sector, status, type, region, or funding range. Results are sorted by publication date (newest first) by default.</p>
+        <p class="endpoint-desc">Returns a paginated list of opportunities. Use PostgREST query parameters to filter by sector, status, type, or region. Use <code style="font-family:var(--font-mono);font-size:0.78rem;">select=</code> to specify which columns to return. Use <code style="font-family:var(--font-mono);font-size:0.78rem;">Prefer: count=exact</code> to get the total row count in the <code style="font-family:var(--font-mono);font-size:0.78rem;">Content-Range</code> response header.</p>
 
-        <div class="params-label">Query Parameters</div>
+        <div class="params-label">Key Query Parameters</div>
         <table class="params-table">
           <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
           <tbody>
             <tr>
-              <td>sector</td>
+              <td>select</td>
               <td><span class="param-type">string</span></td>
               <td><span class="param-optional">optional</span></td>
-              <td>Filter by sector slug. E.g. <code style="font-family:var(--font-mono);font-size:0.78rem;">ict</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">energy</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">health</code></td>
+              <td>Comma-separated column names. Defaults to <code style="font-family:var(--font-mono);font-size:0.78rem;">*</code> (all columns).</td>
             </tr>
             <tr>
-              <td>status</td>
+              <td>sectors=cs.{value}</td>
               <td><span class="param-type">string</span></td>
               <td><span class="param-optional">optional</span></td>
-              <td><code style="font-family:var(--font-mono);font-size:0.78rem;">open</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">closed</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">rolling</code></td>
+              <td>Filter by sector (array contains). E.g. <code style="font-family:var(--font-mono);font-size:0.78rem;">sectors=cs.{ict}</code></td>
             </tr>
             <tr>
-              <td>type</td>
+              <td>status=eq.value</td>
               <td><span class="param-type">string</span></td>
               <td><span class="param-optional">optional</span></td>
-              <td><code style="font-family:var(--font-mono);font-size:0.78rem;">grant</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">tender</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">accelerator</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">fellowship</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">investment</code></td>
+              <td><code style="font-family:var(--font-mono);font-size:0.78rem;">open</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">closed_but_recurring</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">recurring</code></td>
             </tr>
             <tr>
-              <td>origin</td>
+              <td>type=eq.value</td>
               <td><span class="param-type">string</span></td>
               <td><span class="param-optional">optional</span></td>
-              <td><code style="font-family:var(--font-mono);font-size:0.78rem;">saudi</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">gcc</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">global</code></td>
+              <td><code style="font-family:var(--font-mono);font-size:0.78rem;">grant</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">tender</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">accelerator</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">fellowship</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">investment_program</code></td>
             </tr>
             <tr>
-              <td>page</td>
-              <td><span class="param-type">integer</span></td>
+              <td>eligibility_region=eq.value</td>
+              <td><span class="param-type">string</span></td>
               <td><span class="param-optional">optional</span></td>
-              <td>Page number (default: <code style="font-family:var(--font-mono);font-size:0.78rem;">1</code>)</td>
+              <td><code style="font-family:var(--font-mono);font-size:0.78rem;">Saudi_only</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">GCC</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">Global</code> | <code style="font-family:var(--font-mono);font-size:0.78rem;">Global_including_Saudi</code></td>
+            </tr>
+            <tr>
+              <td>order</td>
+              <td><span class="param-type">string</span></td>
+              <td><span class="param-optional">optional</span></td>
+              <td>E.g. <code style="font-family:var(--font-mono);font-size:0.78rem;">order=last_verified.desc</code></td>
             </tr>
             <tr>
               <td>limit</td>
               <td><span class="param-type">integer</span></td>
               <td><span class="param-optional">optional</span></td>
-              <td>Results per page, max 100 (default: <code style="font-family:var(--font-mono);font-size:0.78rem;">20</code>)</td>
+              <td>Results per page, max 1000 (default: 100)</td>
+            </tr>
+            <tr>
+              <td>offset</td>
+              <td><span class="param-type">integer</span></td>
+              <td><span class="param-optional">optional</span></td>
+              <td>Row offset for pagination (default: 0)</td>
             </tr>
           </tbody>
         </table>
 
         <div class="params-label">Example Request</div>
-        <pre class="code-block"><span class="tok-kw">curl</span> <span class="tok-url">https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/opportunities?sector=ict&amp;status=open&amp;limit=5</span> \
-  <span class="tok-kw">-H</span> <span class="tok-str">"X-API-Key: oh_live_xxxxxxxxxxxxxxxxxxxx"</span></pre>
+        <pre class="code-block"><span class="tok-kw">curl</span> <span class="tok-url">"https://dshrbbnjahjcwxzvzygh.supabase.co/rest/v1/opportunities?select=id,title,type,status,sectors,eligibility_region&amp;sectors=cs.%7Bict%7D&amp;status=eq.open&amp;limit=5"</span> \
+  <span class="tok-kw">-H</span> <span class="tok-str">"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</span> \
+  <span class="tok-kw">-H</span> <span class="tok-str">"Prefer: count=exact"</span></pre>
 
         <div class="response-meta">
           <span class="status-200">200 OK</span>
           <span class="content-type-label">application/json</span>
         </div>
-        <pre class="code-block"><span class="tok-op">{</span>
-  <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"ok"</span><span class="tok-op">,</span>
-  <span class="tok-key">"total"</span><span class="tok-op">:</span> <span class="tok-num">87</span><span class="tok-op">,</span>
-  <span class="tok-key">"page"</span><span class="tok-op">:</span> <span class="tok-num">1</span><span class="tok-op">,</span>
-  <span class="tok-key">"limit"</span><span class="tok-op">:</span> <span class="tok-num">5</span><span class="tok-op">,</span>
-  <span class="tok-key">"data"</span><span class="tok-op">: [</span>
-    <span class="tok-op">{</span>
-      <span class="tok-key">"id"</span><span class="tok-op">:</span> <span class="tok-str">"SA-042"</span><span class="tok-op">,</span>
-      <span class="tok-key">"title"</span><span class="tok-op">:</span> <span class="tok-str">"SDAIA AI Innovation Fund — Round 3"</span><span class="tok-op">,</span>
-      <span class="tok-key">"type"</span><span class="tok-op">:</span> <span class="tok-str">"Grant"</span><span class="tok-op">,</span>
-      <span class="tok-key">"sector"</span><span class="tok-op">:</span> <span class="tok-str">"ICT"</span><span class="tok-op">,</span>
-      <span class="tok-key">"origin"</span><span class="tok-op">:</span> <span class="tok-str">"Saudi"</span><span class="tok-op">,</span>
-      <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"Open"</span><span class="tok-op">,</span>
-      <span class="tok-key">"funding_amount"</span><span class="tok-op">:</span> <span class="tok-str">"SAR 500,000 – 2,000,000"</span><span class="tok-op">,</span>
-      <span class="tok-key">"deadline"</span><span class="tok-op">:</span> <span class="tok-str">"2026-08-15"</span><span class="tok-op">,</span>
-      <span class="tok-key">"issuer"</span><span class="tok-op">:</span> <span class="tok-str">"Saudi Data and AI Authority (SDAIA)"</span><span class="tok-op">,</span>
-      <span class="tok-key">"eligibility"</span><span class="tok-op">:</span> <span class="tok-str">"Saudi-registered companies, max 5 years old"</span><span class="tok-op">,</span>
-      <span class="tok-key">"source_url"</span><span class="tok-op">:</span> <span class="tok-str">"https://sdaia.gov.sa/programs/ai-fund"</span><span class="tok-op">,</span>
-      <span class="tok-key">"last_verified"</span><span class="tok-op">:</span> <span class="tok-str">"2026-05-01"</span>
-    <span class="tok-op">},</span>
-    <span class="tok-cmt">// ... 4 more records</span>
-  <span class="tok-op">]</span>
-<span class="tok-op">}</span></pre>
+        <pre class="code-block"><span class="tok-op">[</span>
+  <span class="tok-op">{</span>
+    <span class="tok-key">"id"</span><span class="tok-op">:</span> <span class="tok-str">"SA-042"</span><span class="tok-op">,</span>
+    <span class="tok-key">"title"</span><span class="tok-op">:</span> <span class="tok-str">"SDAIA AI Innovation Fund — Round 3"</span><span class="tok-op">,</span>
+    <span class="tok-key">"type"</span><span class="tok-op">:</span> <span class="tok-str">"grant"</span><span class="tok-op">,</span>
+    <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"open"</span><span class="tok-op">,</span>
+    <span class="tok-key">"sectors"</span><span class="tok-op">: [</span><span class="tok-str">"ict"</span><span class="tok-op">,</span> <span class="tok-str">"innovation"</span><span class="tok-op">],</span>
+    <span class="tok-key">"eligibility_region"</span><span class="tok-op">:</span> <span class="tok-str">"Saudi_only"</span>
+  <span class="tok-op">},</span>
+  <span class="tok-cmt">// ... 4 more records</span>
+<span class="tok-op">]</span></pre>
       </div>
     </div>
 
-    <!-- 2. GET /api/opportunities/{id} -->
+    <!-- 2. GET /opportunities?id=eq.SA-001 -->
     <div class="endpoint-card">
       <div class="endpoint-header">
         <span class="method-badge">GET</span>
-        <span class="endpoint-path">/api/opportunities/<span style="color:var(--gold);">{id}</span></span>
+        <span class="endpoint-path">/opportunities?id=eq.<span style="color:var(--gold);">{id}</span></span>
         <span class="endpoint-summary">Get a single opportunity</span>
       </div>
       <div class="endpoint-body">
-        <p class="endpoint-desc">Retrieve the full record for a single opportunity by its unique ID (e.g. <code style="font-family:var(--font-mono);font-size:0.78rem;">SA-001</code>). Returns all available fields including enriched metadata, tags, and source links.</p>
-
-        <div class="params-label">Path Parameters</div>
-        <table class="params-table">
-          <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-          <tbody>
-            <tr>
-              <td>id</td>
-              <td><span class="param-type">string</span></td>
-              <td><span class="param-required">required</span></td>
-              <td>The unique opportunity ID. Format: <code style="font-family:var(--font-mono);font-size:0.78rem;">SA-001</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">GCC-015</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">INT-103</code></td>
-            </tr>
-          </tbody>
-        </table>
+        <p class="endpoint-desc">Retrieve the full record for a single opportunity by its unique ID (e.g. <code style="font-family:var(--font-mono);font-size:0.78rem;">SA-001</code>). PostgREST returns an array — add <code style="font-family:var(--font-mono);font-size:0.78rem;">Accept: application/vnd.pgrst.object+json</code> to receive a single object instead.</p>
 
         <div class="params-label">Example Request</div>
-        <pre class="code-block"><span class="tok-kw">curl</span> <span class="tok-url">https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/opportunities/SA-001</span> \
-  <span class="tok-kw">-H</span> <span class="tok-str">"X-API-Key: oh_live_xxxxxxxxxxxxxxxxxxxx"</span></pre>
+        <pre class="code-block"><span class="tok-kw">curl</span> <span class="tok-url">"https://dshrbbnjahjcwxzvzygh.supabase.co/rest/v1/opportunities?id=eq.SA-001&amp;select=*"</span> \
+  <span class="tok-kw">-H</span> <span class="tok-str">"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</span> \
+  <span class="tok-kw">-H</span> <span class="tok-str">"Accept: application/vnd.pgrst.object+json"</span></pre>
 
         <div class="response-meta">
           <span class="status-200">200 OK</span>
           <span class="content-type-label">application/json</span>
         </div>
         <pre class="code-block"><span class="tok-op">{</span>
-  <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"ok"</span><span class="tok-op">,</span>
-  <span class="tok-key">"data"</span><span class="tok-op">: {</span>
-    <span class="tok-key">"id"</span><span class="tok-op">:</span> <span class="tok-str">"SA-001"</span><span class="tok-op">,</span>
-    <span class="tok-key">"title"</span><span class="tok-op">:</span> <span class="tok-str">"Monsha'at SME Growth Fund"</span><span class="tok-op">,</span>
-    <span class="tok-key">"type"</span><span class="tok-op">:</span> <span class="tok-str">"Grant"</span><span class="tok-op">,</span>
-    <span class="tok-key">"sector"</span><span class="tok-op">:</span> <span class="tok-str">"Cross-Sector"</span><span class="tok-op">,</span>
-    <span class="tok-key">"origin"</span><span class="tok-op">:</span> <span class="tok-str">"Saudi"</span><span class="tok-op">,</span>
-    <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"Open"</span><span class="tok-op">,</span>
-    <span class="tok-key">"funding_amount"</span><span class="tok-op">:</span> <span class="tok-str">"SAR 100,000 – 500,000"</span><span class="tok-op">,</span>
-    <span class="tok-key">"deadline"</span><span class="tok-op">:</span> <span class="tok-str">"Rolling"</span><span class="tok-op">,</span>
-    <span class="tok-key">"issuer"</span><span class="tok-op">:</span> <span class="tok-str">"Monsha'at — Small &amp; Medium Enterprises General Authority"</span><span class="tok-op">,</span>
-    <span class="tok-key">"eligibility"</span><span class="tok-op">:</span> <span class="tok-str">"Saudi-registered SMEs, &lt;250 employees"</span><span class="tok-op">,</span>
-    <span class="tok-key">"description"</span><span class="tok-op">:</span> <span class="tok-str">"Non-repayable growth grants for Saudi SMEs across all sectors..."</span><span class="tok-op">,</span>
-    <span class="tok-key">"tags"</span><span class="tok-op">: [</span><span class="tok-str">"SME"</span><span class="tok-op">,</span> <span class="tok-str">"Growth"</span><span class="tok-op">,</span> <span class="tok-str">"Vision 2030"</span><span class="tok-op">],</span>
-    <span class="tok-key">"source_url"</span><span class="tok-op">:</span> <span class="tok-str">"https://monshaat.gov.sa/grants"</span><span class="tok-op">,</span>
-    <span class="tok-key">"last_verified"</span><span class="tok-op">:</span> <span class="tok-str">"2026-05-01"</span><span class="tok-op">,</span>
-    <span class="tok-key">"created_at"</span><span class="tok-op">:</span> <span class="tok-str">"2025-09-12"</span>
-  <span class="tok-op">}</span>
+  <span class="tok-key">"id"</span><span class="tok-op">:</span> <span class="tok-str">"SA-001"</span><span class="tok-op">,</span>
+  <span class="tok-key">"title"</span><span class="tok-op">:</span> <span class="tok-str">"Monsha'at SME Growth Fund"</span><span class="tok-op">,</span>
+  <span class="tok-key">"type"</span><span class="tok-op">:</span> <span class="tok-str">"grant"</span><span class="tok-op">,</span>
+  <span class="tok-key">"sponsor_institution"</span><span class="tok-op">:</span> <span class="tok-str">"Monsha'at"</span><span class="tok-op">,</span>
+  <span class="tok-key">"eligibility_region"</span><span class="tok-op">:</span> <span class="tok-str">"Saudi_only"</span><span class="tok-op">,</span>
+  <span class="tok-key">"funding_amount"</span><span class="tok-op">:</span> <span class="tok-str">"SAR 100,000 – 500,000"</span><span class="tok-op">,</span>
+  <span class="tok-key">"deadline_date"</span><span class="tok-op">:</span> <span class="tok-str">"rolling"</span><span class="tok-op">,</span>
+  <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"open"</span><span class="tok-op">,</span>
+  <span class="tok-key">"sectors"</span><span class="tok-op">: [</span><span class="tok-str">"financial"</span><span class="tok-op">,</span> <span class="tok-str">"innovation"</span><span class="tok-op">],</span>
+  <span class="tok-key">"profiles"</span><span class="tok-op">: [</span><span class="tok-str">"startup"</span><span class="tok-op">,</span> <span class="tok-str">"corporate"</span><span class="tok-op">],</span>
+  <span class="tok-key">"application_link"</span><span class="tok-op">:</span> <span class="tok-str">"https://monshaat.gov.sa"</span><span class="tok-op">,</span>
+  <span class="tok-key">"last_verified"</span><span class="tok-op">:</span> <span class="tok-str">"2026-05-13"</span><span class="tok-op">,</span>
+  <span class="tok-key">"created_at"</span><span class="tok-op">:</span> <span class="tok-str">"2026-05-13T11:21:47+00:00"</span>
 <span class="tok-op">}</span></pre>
       </div>
     </div>
 
-    <!-- 3. GET /api/opportunities?sector=ict -->
+    <!-- 3. Filter by sector -->
     <div class="endpoint-card">
       <div class="endpoint-header">
         <span class="method-badge">GET</span>
-        <span class="endpoint-path">/api/opportunities?sector=<span style="color:var(--gold);">ict</span></span>
+        <span class="endpoint-path">/opportunities?sectors=cs.<span style="color:var(--gold);">{ict}</span></span>
         <span class="endpoint-summary">Filter by sector</span>
       </div>
       <div class="endpoint-body">
-        <p class="endpoint-desc">Filter opportunities to a specific sector. Combine with <code style="font-family:var(--font-mono);font-size:0.78rem;">status=open</code> to surface only currently active programs. Available sectors include <code style="font-family:var(--font-mono);font-size:0.78rem;">ict</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">energy</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">health</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">fintech</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">agri</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">tourism</code>, and more — see <a href="#meta" style="color:var(--green);">/api/meta</a> for the full list.</p>
+        <p class="endpoint-desc">Filter opportunities to a specific sector using PostgREST's array-contains operator <code style="font-family:var(--font-mono);font-size:0.78rem;">cs.{value}</code>. Combine with <code style="font-family:var(--font-mono);font-size:0.78rem;">status=eq.open</code> to surface only currently active programs. Available sectors: <code style="font-family:var(--font-mono);font-size:0.78rem;">ict</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">energy</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">financial</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">innovation</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">healthcare</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">industrial</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">education</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">space</code>, and more.</p>
 
         <div class="params-label">Example Request</div>
-        <pre class="code-block"><span class="tok-kw">curl</span> <span class="tok-url">https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/opportunities?sector=ict&amp;status=open</span> \
-  <span class="tok-kw">-H</span> <span class="tok-str">"X-API-Key: oh_live_xxxxxxxxxxxxxxxxxxxx"</span></pre>
+        <pre class="code-block"><span class="tok-kw">curl</span> <span class="tok-url">"https://dshrbbnjahjcwxzvzygh.supabase.co/rest/v1/opportunities?sectors=cs.%7Bict%7D&amp;status=eq.open&amp;select=id,title,funding_amount,deadline_date"</span> \
+  <span class="tok-kw">-H</span> <span class="tok-str">"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</span> \
+  <span class="tok-kw">-H</span> <span class="tok-str">"Prefer: count=exact"</span></pre>
 
         <div class="response-meta">
           <span class="status-200">200 OK</span>
-          <span class="content-type-label">application/json</span>
+          <span class="content-type-label">application/json · Content-Range: 0-19/87</span>
         </div>
-        <pre class="code-block"><span class="tok-op">{</span>
-  <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"ok"</span><span class="tok-op">,</span>
-  <span class="tok-key">"total"</span><span class="tok-op">:</span> <span class="tok-num">87</span><span class="tok-op">,</span>
-  <span class="tok-key">"filters_applied"</span><span class="tok-op">: {</span>
-    <span class="tok-key">"sector"</span><span class="tok-op">:</span> <span class="tok-str">"ict"</span><span class="tok-op">,</span>
-    <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"open"</span>
+        <pre class="code-block"><span class="tok-op">[</span>
+  <span class="tok-op">{</span>
+    <span class="tok-key">"id"</span><span class="tok-op">:</span> <span class="tok-str">"SA-042"</span><span class="tok-op">,</span>
+    <span class="tok-key">"title"</span><span class="tok-op">:</span> <span class="tok-str">"SDAIA AI Innovation Fund"</span><span class="tok-op">,</span>
+    <span class="tok-key">"funding_amount"</span><span class="tok-op">:</span> <span class="tok-str">"SAR 500,000 – 2,000,000"</span><span class="tok-op">,</span>
+    <span class="tok-key">"deadline_date"</span><span class="tok-op">:</span> <span class="tok-str">"2026-08-15"</span>
   <span class="tok-op">},</span>
-  <span class="tok-key">"data"</span><span class="tok-op">: [ </span><span class="tok-cmt">/* array of matching records */</span> <span class="tok-op">]</span>
-<span class="tok-op">}</span></pre>
+  <span class="tok-cmt">// ... more records</span>
+<span class="tok-op">]</span></pre>
       </div>
     </div>
 
-    <!-- 4. GET /api/stats -->
-    <div class="endpoint-card">
-      <div class="endpoint-header">
-        <span class="method-badge">GET</span>
-        <span class="endpoint-path">/api/stats</span>
-        <span class="endpoint-summary">Dataset statistics</span>
-      </div>
-      <div class="endpoint-body">
-        <p class="endpoint-desc">Returns high-level statistics about the current dataset — total records, breakdown by origin, status distribution, and top sectors by count.</p>
-
-        <div class="params-label">Example Request</div>
-        <pre class="code-block"><span class="tok-kw">curl</span> <span class="tok-url">https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/stats</span> \
-  <span class="tok-kw">-H</span> <span class="tok-str">"X-API-Key: oh_live_xxxxxxxxxxxxxxxxxxxx"</span></pre>
-
-        <div class="response-meta">
-          <span class="status-200">200 OK</span>
-          <span class="content-type-label">application/json</span>
-        </div>
-        <pre class="code-block"><span class="tok-op">{</span>
-  <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"ok"</span><span class="tok-op">,</span>
-  <span class="tok-key">"total_records"</span><span class="tok-op">:</span> <span class="tok-num">1034</span><span class="tok-op">,</span>
-  <span class="tok-key">"by_origin"</span><span class="tok-op">: {</span>
-    <span class="tok-key">"saudi"</span><span class="tok-op">:</span> <span class="tok-num">612</span><span class="tok-op">,</span>
-    <span class="tok-key">"gcc"</span><span class="tok-op">:</span> <span class="tok-num">198</span><span class="tok-op">,</span>
-    <span class="tok-key">"global"</span><span class="tok-op">:</span> <span class="tok-num">224</span>
-  <span class="tok-op">},</span>
-  <span class="tok-key">"by_status"</span><span class="tok-op">: {</span>
-    <span class="tok-key">"open"</span><span class="tok-op">:</span> <span class="tok-num">341</span><span class="tok-op">,</span>
-    <span class="tok-key">"rolling"</span><span class="tok-op">:</span> <span class="tok-num">89</span><span class="tok-op">,</span>
-    <span class="tok-key">"closed"</span><span class="tok-op">:</span> <span class="tok-num">604</span>
-  <span class="tok-op">},</span>
-  <span class="tok-key">"top_sectors"</span><span class="tok-op">: [</span>
-    <span class="tok-op">{</span> <span class="tok-key">"sector"</span><span class="tok-op">:</span> <span class="tok-str">"ICT"</span><span class="tok-op">,</span> <span class="tok-key">"count"</span><span class="tok-op">:</span> <span class="tok-num">87</span> <span class="tok-op">},</span>
-    <span class="tok-op">{</span> <span class="tok-key">"sector"</span><span class="tok-op">:</span> <span class="tok-str">"Energy"</span><span class="tok-op">,</span> <span class="tok-key">"count"</span><span class="tok-op">:</span> <span class="tok-num">74</span> <span class="tok-op">},</span>
-    <span class="tok-op">{</span> <span class="tok-key">"sector"</span><span class="tok-op">:</span> <span class="tok-str">"Health"</span><span class="tok-op">,</span> <span class="tok-key">"count"</span><span class="tok-op">:</span> <span class="tok-num">68</span> <span class="tok-op">}</span>
-  <span class="tok-op">],</span>
-  <span class="tok-key">"last_updated"</span><span class="tok-op">:</span> <span class="tok-str">"2026-05-11"</span>
-<span class="tok-op">}</span></pre>
-      </div>
-    </div>
-
-    <!-- 5. GET /api/meta -->
+    <!-- 4. Freshness / stats via aggregation -->
     <div class="endpoint-card" id="meta">
       <div class="endpoint-header">
         <span class="method-badge">GET</span>
-        <span class="endpoint-path">/api/meta</span>
-        <span class="endpoint-summary">Filter options &amp; enum values</span>
+        <span class="endpoint-path">/opportunities?select=last_verified&amp;order=last_verified.desc&amp;limit=1</span>
+        <span class="endpoint-summary">Dataset freshness</span>
       </div>
       <div class="endpoint-body">
-        <p class="endpoint-desc">Returns all valid filter values (sectors, types, origins, statuses) for use in query parameters. Use this to build dynamic filter UIs or validate inputs.</p>
+        <p class="endpoint-desc">PostgREST exposes the raw table directly — use <code style="font-family:var(--font-mono);font-size:0.78rem;">Prefer: count=exact</code> to get the total row count and sort by <code style="font-family:var(--font-mono);font-size:0.78rem;">last_verified</code> to check the most recent pipeline run. There is no separate <code style="font-family:var(--font-mono);font-size:0.78rem;">/stats</code> endpoint — query the table directly.</p>
 
-        <div class="params-label">Example Request</div>
-        <pre class="code-block"><span class="tok-kw">curl</span> <span class="tok-url">https://saudi-opportunity-hub-demo-white-label-production.up.railway.app/api/meta</span> \
-  <span class="tok-kw">-H</span> <span class="tok-str">"X-API-Key: oh_live_xxxxxxxxxxxxxxxxxxxx"</span></pre>
+        <div class="params-label">Example — Total count + latest verification date</div>
+        <pre class="code-block"><span class="tok-cmt"># Total record count (read Content-Range header)</span>
+<span class="tok-kw">curl</span> <span class="tok-url">"https://dshrbbnjahjcwxzvzygh.supabase.co/rest/v1/opportunities?select=id&amp;limit=1"</span> \
+  <span class="tok-kw">-H</span> <span class="tok-str">"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</span> \
+  <span class="tok-kw">-H</span> <span class="tok-str">"Prefer: count=exact"</span> \
+  <span class="tok-kw">-I</span>
+<span class="tok-cmt"># → Content-Range: 0-0/1074</span>
 
-        <div class="response-meta">
-          <span class="status-200">200 OK</span>
-          <span class="content-type-label">application/json</span>
-        </div>
-        <pre class="code-block"><span class="tok-op">{</span>
-  <span class="tok-key">"sectors"</span><span class="tok-op">: [</span><span class="tok-str">"ict"</span><span class="tok-op">,</span> <span class="tok-str">"energy"</span><span class="tok-op">,</span> <span class="tok-str">"health"</span><span class="tok-op">,</span> <span class="tok-str">"fintech"</span><span class="tok-op">,</span> <span class="tok-str">"agri"</span><span class="tok-op">,</span> <span class="tok-str">"tourism"</span><span class="tok-op">,</span>
-             <span class="tok-str">"logistics"</span><span class="tok-op">,</span> <span class="tok-str">"education"</span><span class="tok-op">,</span> <span class="tok-str">"manufacturing"</span><span class="tok-op">,</span> <span class="tok-str">"space"</span><span class="tok-op">, ...</span><span class="tok-op">],</span>
-  <span class="tok-key">"types"</span><span class="tok-op">: [</span><span class="tok-str">"grant"</span><span class="tok-op">,</span> <span class="tok-str">"tender"</span><span class="tok-op">,</span> <span class="tok-str">"accelerator"</span><span class="tok-op">,</span> <span class="tok-str">"fellowship"</span><span class="tok-op">,</span> <span class="tok-str">"investment"</span><span class="tok-op">],</span>
-  <span class="tok-key">"origins"</span><span class="tok-op">: [</span><span class="tok-str">"saudi"</span><span class="tok-op">,</span> <span class="tok-str">"gcc"</span><span class="tok-op">,</span> <span class="tok-str">"global"</span><span class="tok-op">],</span>
-  <span class="tok-key">"statuses"</span><span class="tok-op">: [</span><span class="tok-str">"open"</span><span class="tok-op">,</span> <span class="tok-str">"closed"</span><span class="tok-op">,</span> <span class="tok-str">"rolling"</span><span class="tok-op">]</span>
-<span class="tok-op">}</span></pre>
+<span class="tok-cmt"># Most recent pipeline run</span>
+<span class="tok-kw">curl</span> <span class="tok-url">"https://dshrbbnjahjcwxzvzygh.supabase.co/rest/v1/opportunities?select=last_verified&amp;order=last_verified.desc&amp;limit=1"</span> \
+  <span class="tok-kw">-H</span> <span class="tok-str">"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</span>
+<span class="tok-cmt"># → [{"last_verified":"2026-05-13"}]</span></pre>
       </div>
     </div>
   </section>
@@ -892,7 +835,7 @@
         <div class="limit-desc">custom SLA</div>
       </div>
     </div>
-    <p style="font-size:var(--text-sm);color:var(--text-muted);">Rate limit headers are included in every response: <code style="font-family:var(--font-mono);font-size:0.78rem;">X-RateLimit-Limit</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">X-RateLimit-Remaining</code>, <code style="font-family:var(--font-mono);font-size:0.78rem;">X-RateLimit-Reset</code>. Exceeding your limit returns <code style="font-family:var(--font-mono);font-size:0.78rem;">429 Too Many Requests</code>.</p>
+    <p style="font-size:var(--text-sm);color:var(--text-muted);">Supabase enforces its own rate limits on the anon key. For high-volume integration, contact us to arrange a dedicated service-role key or a white-labelled Supabase project.</p>
   </section>
 
   <!-- ERROR CODES -->
@@ -902,25 +845,26 @@
     <table class="params-table">
       <thead><tr><th>Code</th><th>Meaning</th><th>Common cause</th></tr></thead>
       <tbody>
-        <tr><td>400</td><td>Bad Request</td><td>Invalid query parameter value</td></tr>
-        <tr><td>401</td><td>Unauthorized</td><td>Missing or invalid <code style="font-family:var(--font-mono);font-size:0.78rem;">X-API-Key</code></td></tr>
-        <tr><td>404</td><td>Not Found</td><td>Opportunity ID does not exist</td></tr>
-        <tr><td>429</td><td>Too Many Requests</td><td>Rate limit exceeded</td></tr>
-        <tr><td>500</td><td>Internal Server Error</td><td>Server-side issue — contact support</td></tr>
+        <tr><td>400</td><td>Bad Request</td><td>Invalid filter syntax or unknown column name</td></tr>
+        <tr><td>401</td><td>Unauthorized</td><td>Missing or invalid <code style="font-family:var(--font-mono);font-size:0.78rem;">apikey</code> header</td></tr>
+        <tr><td>404</td><td>Not Found</td><td>Table or row does not exist</td></tr>
+        <tr><td>406</td><td>Not Acceptable</td><td><code style="font-family:var(--font-mono);font-size:0.78rem;">vnd.pgrst.object</code> requested but 0 or 2+ rows matched</td></tr>
+        <tr><td>429</td><td>Too Many Requests</td><td>Supabase anon key rate limit exceeded</td></tr>
       </tbody>
     </table>
-    <pre class="code-block"><span class="tok-cmt">// Error response shape</span>
+    <pre class="code-block"><span class="tok-cmt">// PostgREST error response shape</span>
 <span class="tok-op">{</span>
-  <span class="tok-key">"status"</span><span class="tok-op">:</span> <span class="tok-str">"error"</span><span class="tok-op">,</span>
-  <span class="tok-key">"code"</span><span class="tok-op">:</span> <span class="tok-num">401</span><span class="tok-op">,</span>
-  <span class="tok-key">"message"</span><span class="tok-op">:</span> <span class="tok-str">"Unauthorized — invalid or missing API key"</span>
+  <span class="tok-key">"code"</span><span class="tok-op">:</span> <span class="tok-str">"PGRST116"</span><span class="tok-op">,</span>
+  <span class="tok-key">"details"</span><span class="tok-op">:</span> <span class="tok-str">"The result contains 0 rows"</span><span class="tok-op">,</span>
+  <span class="tok-key">"hint"</span><span class="tok-op">:</span> <span class="tok-bool">null</span><span class="tok-op">,</span>
+  <span class="tok-key">"message"</span><span class="tok-op">:</span> <span class="tok-str">"JSON object requested, multiple (or no) rows returned"</span>
 <span class="tok-op">}</span></pre>
   </section>
 
   <!-- CTA -->
   <div class="cta-box">
     <h2>Ready to integrate?</h2>
-    <p>Request API access and we'll issue your key, share the full schema reference, and help you get connected.</p>
+    <p>Get in touch and we'll share the full schema reference, walk you through the filter options, and help you connect to the live dataset.</p>
     <a href="contact.html" class="btn-cta">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg>
       Request API Access
