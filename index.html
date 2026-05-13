@@ -4012,8 +4012,8 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
         </button>
         <div class="notif-dropdown" id="notifDropdown" role="dialog" aria-label="Notifications">
           <div class="notif-dropdown-header">
-            <span>Notifications</span>
-            <button class="notif-clear-btn" id="notifClearBtn">Mark all read</button>
+            <span data-en="Notifications" data-ar="الإشعارات">Notifications</span>
+            <button class="notif-clear-btn" id="notifClearBtn" data-en="Mark all read" data-ar="تحديد الكل كمقروء">Mark all read</button>
           </div>
           <ul class="notif-list" id="notifList"></ul>
         </div>
@@ -4035,31 +4035,31 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
 <div class="ws-bar" id="wsBar" role="banner" aria-label="Your workspace">
   <div class="ws-greeting">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-    <span>Welcome back, <strong id="wsUserName">User</strong></span>
+    <span><span data-en="Welcome back," data-ar="مرحباً بعودتك،">Welcome back,</span> <strong id="wsUserName">User</strong></span>
   </div>
   <div class="ws-divider" aria-hidden="true"></div>
   <div class="ws-stat" id="wsWatchlistStat" title="Bookmarked opportunities" style="cursor:pointer;" onclick="WS.openPanel('watchlist')">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-    <strong id="wsWatchlistCount">0</strong> Watchlist
+    <strong id="wsWatchlistCount">0</strong> <span class="ws-label" data-en="Watchlist" data-ar="قائمة المتابعة">Watchlist</span>
   </div>
   <div class="ws-divider" aria-hidden="true"></div>
   <div class="ws-stat" id="wsSavedStat" title="Saved searches" style="cursor:pointer;" onclick="WS.openPanel('searches')">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <strong id="wsSavedCount">0</strong> Saved Searches
+    <strong id="wsSavedCount">0</strong> <span class="ws-label" data-en="Saved Searches" data-ar="البحوث المحفوظة">Saved Searches</span>
   </div>
   <div class="ws-divider" aria-hidden="true"></div>
   <div class="ws-stat ws-stat--updates" id="wsUpdatesStat" title="New since your last visit">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-    <strong id="wsUpdatesCount">0</strong> New this week
+    <strong id="wsUpdatesCount">0</strong> <span class="ws-label" data-en="New this week" data-ar="جديد هذا الأسبوع">New this week</span>
   </div>
   <div class="ws-actions">
     <button class="ws-btn" id="wsOpenPanelBtn" onclick="WS.openPanel('watchlist')" title="Open Watchlist &amp; Saved Searches">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-      My Workspace
+      <span class="ws-label" data-en="My Workspace" data-ar="مساحتي">My Workspace</span>
     </button>
     <button class="ws-btn" id="wsSettingsBtn" onclick="WS.openSettings()" title="Workspace Settings">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Settings
+      <span class="ws-label" data-en="Settings" data-ar="الإعدادات">Settings</span>
     </button>
   </div>
 </div>
@@ -4773,14 +4773,14 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
 <div class="ws-panel-overlay" id="wsPanelOverlay"></div>
 <aside class="ws-panel" id="wsPanel" aria-label="My Workspace" role="dialog" tabindex="-1">
   <div class="ws-panel-header">
-    <span class="ws-panel-title">My Workspace</span>
+    <span class="ws-panel-title" data-en="My Workspace" data-ar="مساحتي">My Workspace</span>
     <button class="ws-panel-close" id="wsPanelClose" aria-label="Close workspace panel">&times;</button>
   </div>
   <div class="ws-panel-tabs">
-    <button class="ws-panel-tab active" data-wstab="watchlist">Watchlist</button>
-    <button class="ws-panel-tab" data-wstab="searches">Saved Searches</button>
-    <button class="ws-panel-tab" data-wstab="history">Recent</button>
-    <button class="ws-panel-tab" data-wstab="checklist">Get Started</button>
+    <button class="ws-panel-tab active" data-wstab="watchlist" data-en="Watchlist" data-ar="قائمة المتابعة">Watchlist</button>
+    <button class="ws-panel-tab" data-wstab="searches" data-en="Saved Searches" data-ar="البحوث المحفوظة">Saved Searches</button>
+    <button class="ws-panel-tab" data-wstab="history" data-en="Recent" data-ar="الأخيرة">Recent</button>
+    <button class="ws-panel-tab" data-wstab="checklist" data-en="Get Started" data-ar="ابدأ">Get Started</button>
   </div>
   <div class="ws-panel-body" id="wsPanelBody">
     <!-- rendered by WS JS -->
@@ -4791,46 +4791,46 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
 <div class="settings-modal-overlay" id="settingsModalOverlay">
   <div class="settings-modal" role="dialog" aria-label="Workspace Settings" aria-modal="true">
     <div class="settings-modal-header">
-      <span class="settings-modal-title">Workspace Settings</span>
+      <span class="settings-modal-title" data-en="Workspace Settings" data-ar="إعدادات مساحة العمل">Workspace Settings</span>
       <button class="settings-modal-close" id="settingsModalClose" aria-label="Close settings">&times;</button>
     </div>
 
     <div class="settings-section">
-      <div class="settings-section-title">Your Profile</div>
+      <div class="settings-section-title" data-en="Your Profile" data-ar="ملفك الشخصي">Your Profile</div>
       <div class="settings-row">
         <div class="settings-label">
-          Display name
-          <div class="settings-sublabel">Shown in your workspace greeting</div>
+          <span data-en="Display name" data-ar="الاسم المعروض">Display name</span>
+          <div class="settings-sublabel" data-en="Shown in your workspace greeting" data-ar="يظهر في تحية مساحتك">Shown in your workspace greeting</div>
         </div>
         <input type="text" class="settings-select" id="settingsDisplayName" placeholder="e.g. Ahmed, Sarah…" style="min-width:160px;" />
       </div>
       <div class="settings-row">
         <div class="settings-label">
-          Role
-          <div class="settings-sublabel">Used for role-based recommendations</div>
+          <span data-en="Role" data-ar="الدور">Role</span>
+          <div class="settings-sublabel" data-en="Used for role-based recommendations" data-ar="يُستخدم للتوصيات حسب الدور">Used for role-based recommendations</div>
         </div>
         <select class="settings-select" id="settingsRole">
-          <option value="">Select role&hellip;</option>
-          <option value="Startup / SME">Startup / SME</option>
-          <option value="Researcher / University">Researcher / University</option>
-          <option value="Government">Government</option>
-          <option value="Investor">Investor</option>
-          <option value="Student">Student</option>
-          <option value="Consultant">Consultant</option>
+          <option value="" data-en="Select role…" data-ar="اختر الدور…">Select role&hellip;</option>
+          <option value="Startup / SME" data-en="Startup / SME" data-ar="شركة ناشئة / م.ص.م">Startup / SME</option>
+          <option value="Researcher / University" data-en="Researcher / University" data-ar="باحث / جامعة">Researcher / University</option>
+          <option value="Government" data-en="Government" data-ar="جهة حكومية">Government</option>
+          <option value="Investor" data-en="Investor" data-ar="مستثمر">Investor</option>
+          <option value="Student" data-en="Student" data-ar="طالب">Student</option>
+          <option value="Consultant" data-en="Consultant" data-ar="مستشار">Consultant</option>
         </select>
       </div>
       <div class="settings-row">
         <div class="settings-label">
-          Organisation name
-          <div class="settings-sublabel">Displayed in your workspace</div>
+          <span data-en="Organisation name" data-ar="اسم المؤسسة">Organisation name</span>
+          <div class="settings-sublabel" data-en="Displayed in your workspace" data-ar="يظهر في مساحة عملك">Displayed in your workspace</div>
         </div>
         <input type="text" class="settings-select" id="settingsOrg" placeholder="e.g. KAUST, Aramco&hellip;" style="min-width:160px;" />
       </div>
     </div>
 
     <div class="settings-section">
-      <div class="settings-section-title">Sector Interests</div>
-      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:var(--space-3);">Select the sectors you want to track. Recommendations and insights will prioritise these.</p>
+      <div class="settings-section-title" data-en="Sector Interests" data-ar="اهتمامات القطاع">Sector Interests</div>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:var(--space-3);" data-en="Select the sectors you want to track. Recommendations and insights will prioritise these." data-ar="اختر القطاعات التي تريد تتبعها. ستُعطي التوصيات والرؤى الأولوية لها.">Select the sectors you want to track. Recommendations and insights will prioritise these.</p>
       <div class="settings-chips" id="settingsSectorChips">
         <span class="settings-chip" data-sector="ICT">ICT</span>
         <span class="settings-chip" data-sector="Energy">Energy</span>
@@ -4846,11 +4846,11 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
     </div>
 
     <div class="settings-section">
-      <div class="settings-section-title">Alert Preferences</div>
+      <div class="settings-section-title" data-en="Alert Preferences" data-ar="تفضيلات التنبيهات">Alert Preferences</div>
       <div class="settings-row">
         <div class="settings-label">
-          New opportunities
-          <div class="settings-sublabel">Show badge when new records match your sectors</div>
+          <span data-en="New opportunities" data-ar="الفرص الجديدة">New opportunities</span>
+          <div class="settings-sublabel" data-en="Show badge when new records match your sectors" data-ar="إظهار شارة عند مطابقة سجلات جديدة لقطاعاتك">Show badge when new records match your sectors</div>
         </div>
         <label class="settings-toggle" aria-label="New opportunities alerts">
           <input type="checkbox" id="settingsAlertNew" checked />
@@ -4859,8 +4859,8 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
       </div>
       <div class="settings-row">
         <div class="settings-label">
-          Deadline reminders
-          <div class="settings-sublabel">Notify when watchlisted items are closing soon</div>
+          <span data-en="Deadline reminders" data-ar="تذكيرات المواعيد">Deadline reminders</span>
+          <div class="settings-sublabel" data-en="Notify when watchlisted items are closing soon" data-ar="إشعار عند اقتراب مواعيد العناصر المحفوظة">Notify when watchlisted items are closing soon</div>
         </div>
         <label class="settings-toggle" aria-label="Deadline reminders">
           <input type="checkbox" id="settingsAlertDeadline" checked />
@@ -4869,8 +4869,8 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
       </div>
       <div class="settings-row">
         <div class="settings-label">
-          Weekly digest
-          <div class="settings-sublabel">Summary of new programs in your tracked sectors</div>
+          <span data-en="Weekly digest" data-ar="الملخص الأسبوعي">Weekly digest</span>
+          <div class="settings-sublabel" data-en="Summary of new programs in your tracked sectors" data-ar="ملخص البرامج الجديدة في قطاعاتك">Summary of new programs in your tracked sectors</div>
         </div>
         <label class="settings-toggle" aria-label="Weekly digest">
           <input type="checkbox" id="settingsAlertDigest" />
@@ -4880,32 +4880,32 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
     </div>
 
     <div class="settings-section">
-      <div class="settings-section-title">Display</div>
+      <div class="settings-section-title" data-en="Display" data-ar="العرض">Display</div>
       <div class="settings-row">
         <div class="settings-label">
-          Default view
-          <div class="settings-sublabel">Card layout shown when you arrive</div>
+          <span data-en="Default view" data-ar="طريقة العرض الافتراضية">Default view</span>
+          <div class="settings-sublabel" data-en="Card layout shown when you arrive" data-ar="تخطيط البطاقات عند الوصول">Card layout shown when you arrive</div>
         </div>
         <select class="settings-select" id="settingsDefaultView">
-          <option value="detailed">Detailed cards</option>
-          <option value="compact">Compact list</option>
+          <option value="detailed" data-en="Detailed cards" data-ar="بطاقات تفصيلية">Detailed cards</option>
+          <option value="compact" data-en="Compact list" data-ar="قائمة مختصرة">Compact list</option>
         </select>
       </div>
       <div class="settings-row">
         <div class="settings-label">
-          Default filter
-          <div class="settings-sublabel">Pre-select status on arrival</div>
+          <span data-en="Default filter" data-ar="الفلتر الافتراضي">Default filter</span>
+          <div class="settings-sublabel" data-en="Pre-select status on arrival" data-ar="تحديد الحالة مسبقاً عند الوصول">Pre-select status on arrival</div>
         </div>
         <select class="settings-select" id="settingsDefaultStatus">
-          <option value="">All statuses</option>
-          <option value="Open">Open only</option>
-          <option value="Recurring">Recurring</option>
+          <option value="" data-en="All statuses" data-ar="جميع الحالات">All statuses</option>
+          <option value="Open" data-en="Open only" data-ar="المفتوحة فقط">Open only</option>
+          <option value="Recurring" data-en="Recurring" data-ar="المتكررة">Recurring</option>
         </select>
       </div>
     </div>
 
-    <button class="settings-save-btn" id="settingsSaveBtn">Save preferences</button>
-    <button class="ob-restart-link" id="settingsRestartTour" style="display:block;margin-top:10px;padding:8px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--green);font-size:12px;font-weight:700;cursor:pointer;width:100%;">↺ Restart product tour</button>
+    <button class="settings-save-btn" id="settingsSaveBtn" data-en="Save preferences" data-ar="حفظ التفضيلات">Save preferences</button>
+    <button class="ob-restart-link" id="settingsRestartTour" data-en="↺ Restart product tour" data-ar="↺ إعادة تشغيل الجولة التعريفية" style="display:block;margin-top:10px;padding:8px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--green);font-size:12px;font-weight:700;cursor:pointer;width:100%;">↺ Restart product tour</button>
   </div>
 </div>
 
@@ -8676,6 +8676,29 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   function stopObserver(){ if (observer) { observer.disconnect(); observer = null; } }
   window.__pauseObserver = function() { /* no-op: observer only watches panel now */ };
+  /* ── swapWsLabels: flip all data-en/data-ar elements in workspace UI ── */
+  function swapWsLabels(ar) {
+    /* All elements with data-en + data-ar: spans, buttons, divs, options */
+    document.querySelectorAll('[data-en][data-ar]').forEach(function(el) {
+      var val = ar ? el.getAttribute('data-ar') : el.getAttribute('data-en');
+      if (!val) return;
+      /* For <option> elements set .text; for everything else set textContent */
+      if (el.tagName === 'OPTION') {
+        el.text = val;
+      } else if (!el.children.length) {
+        /* Leaf element — safe to replace all text */
+        el.textContent = val;
+      } else {
+        /* Has children (e.g. settings-label with sublabel inside) — only swap first text node */
+        var firstText = Array.from(el.childNodes).find(function(n){ return n.nodeType === 3 && n.nodeValue.trim(); });
+        if (firstText) firstText.nodeValue = val + ' ';
+      }
+    });
+    /* WS bar greeting word separately (contains a <strong> child we preserve) */
+    var greetWord = document.querySelector('.ws-greeting [data-en]');
+    if (greetWord) greetWord.textContent = ar ? 'مرحباً بعودتك،' : 'Welcome back,';
+  }
+
   async function activateArabic(){
     // Save scroll position before any DOM changes that might cause a browser
     // scroll-to-top (body.dir flip is known to reset scroll in some engines).
@@ -8729,77 +8752,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (wsPanelEl && wsPanelEl.classList.contains('open') && window.WS && window.WS.openPanel) {
       setTimeout(function() { if (window.WS && window.WS.openPanel) window.WS.openPanel(); }, 50);
     }
-    // ── Workspace bar Arabic labels ──
-    var wsBarAr = document.getElementById('wsBar');
-    if (wsBarAr) {
-      var wbGreetAr = wsBarAr.querySelector('.ws-greeting span');
-      if (wbGreetAr) {
-        var uname = document.getElementById('wsUserName');
-        var nm = uname ? uname.textContent : '';
-        wbGreetAr.innerHTML = 'مرحباً بعودتك، <strong id="wsUserName">' + nm + '</strong>';
-      }
-      var wbWlAr = document.getElementById('wsWatchlistStat');
-      if (wbWlAr) { var wbWlTxt = wbWlAr.lastChild; if (wbWlTxt && wbWlTxt.nodeType===3) wbWlTxt.nodeValue = ' قائمة المتابعة'; }
-      var wbSrAr = document.getElementById('wsSavedStat');
-      if (wbSrAr) { var wbSrTxt = wbSrAr.lastChild; if (wbSrTxt && wbSrTxt.nodeType===3) wbSrTxt.nodeValue = ' البحوث المحفوظة'; }
-      var wbUpAr = document.getElementById('wsUpdatesStat');
-      if (wbUpAr) { var wbUpTxt = wbUpAr.lastChild; if (wbUpTxt && wbUpTxt.nodeType===3) wbUpTxt.nodeValue = ' جديد هذا الأسبوع'; }
-      var wbOpenAr = document.getElementById('wsOpenPanelBtn');
-      if (wbOpenAr) { var wbOpenTxt = wbOpenAr.lastChild; if (wbOpenTxt && wbOpenTxt.nodeType===3) wbOpenTxt.nodeValue = ' مساحتي'; }
-      var wbSetAr = document.getElementById('wsSettingsBtn');
-      if (wbSetAr) { var wbSetTxt = wbSetAr.lastChild; if (wbSetTxt && wbSetTxt.nodeType===3) wbSetTxt.nodeValue = ' الإعدادات'; }
-    }
-    // ── Notifications dropdown Arabic ──
-    var notifHdrAr = document.querySelector('.notif-dropdown-header span');
-    if (notifHdrAr) notifHdrAr.textContent = 'الإشعارات';
-    var notifClearAr = document.getElementById('notifClearBtn');
-    if (notifClearAr) notifClearAr.textContent = 'تحديد الكل كمقروء';
-    // ── WS Panel header + tabs Arabic ──
-    var wsPanelTitleAr = document.querySelector('.ws-panel-title');
-    if (wsPanelTitleAr) wsPanelTitleAr.textContent = 'مساحتي';
-    var wsTabs = document.querySelectorAll('.ws-panel-tab');
-    var wsTabLabelsAr = ['قائمة المتابعة', 'البحوث المحفوظة', 'الأخيرة', 'ابدأ'];
-    wsTabs.forEach(function(t, i) { if (wsTabLabelsAr[i]) t.textContent = wsTabLabelsAr[i]; });
-    // ── Settings modal Arabic ──
-    var smTitleAr = document.querySelector('.settings-modal-title');
-    if (smTitleAr) smTitleAr.textContent = 'إعدادات مساحة العمل';
-    var smLabels = document.querySelectorAll('.settings-label');
-    var smSublabels = document.querySelectorAll('.settings-sublabel');
-    var smSecTitles = document.querySelectorAll('.settings-section-title');
-    var smArLabels = [
-      'الاسم المعروض', 'الدور', 'اسم المؤسسة',
-      'الفرص الجديدة', 'تذكيرات المواعيد', 'الملخص الأسبوعي',
-      'طريقة العرض الافتراضية', 'الفلتر الافتراضي'
-    ];
-    var smArSublabels = [
-      'يظهر في تحية مساحتك', 'يُستخدم للتوصيات حسب الدور', 'يظهر في مساحة عملك',
-      'إظهار شارة عند مطابقة سجلات جديدة لقطاعاتك', 'إشعار عند اقتراب مواعيد العناصر المحفوظة', 'ملخص البرامج الجديدة في قطاعاتك',
-      'تخطيط البطاقات عند الوصول', 'تحديد الحالة مسبقاً عند الوصول'
-    ];
-    var smArSecTitles = ['ملفك الشخصي', 'اهتمامات القطاع', 'تفضيلات التنبيهات', 'العرض'];
-    smLabels.forEach(function(el, i) {
-      var sub = el.querySelector('.settings-sublabel');
-      var lbl = el.childNodes[0];
-      if (lbl && lbl.nodeType === 3 && smArLabels[i]) lbl.nodeValue = smArLabels[i];
-      if (sub && smArSublabels[i]) sub.textContent = smArSublabels[i];
-    });
-    smSecTitles.forEach(function(el, i) { if (smArSecTitles[i]) el.textContent = smArSecTitles[i]; });
-    var smSectorSub = document.querySelector('.settings-chips')?.previousElementSibling;
-    if (smSectorSub && smSectorSub.tagName === 'P') smSectorSub.textContent = 'اختر القطاعات التي تريد تتبعها. ستُعطي التوصيات والرؤى الأولوية لها.';
-    // Settings selects
-    var smRole = document.getElementById('settingsRole');
-    if (smRole) {
-      var roleMapAr = {'': 'اختر الدور…', 'Startup / SME': 'شركة ناشئة / م.ص.م', 'Researcher / University': 'باحث / جامعة', 'Government': 'جهة حكومية', 'Investor': 'مستثمر', 'Student': 'طالب', 'Consultant': 'مستشار'};
-      Array.from(smRole.options).forEach(function(opt) { if (roleMapAr[opt.value] !== undefined) opt.text = roleMapAr[opt.value]; });
-    }
-    var smView = document.getElementById('settingsDefaultView');
-    if (smView) { Array.from(smView.options).forEach(function(opt) { if (opt.value==='detailed') opt.text='بطاقات تفصيلية'; if (opt.value==='compact') opt.text='قائمة مختصرة'; }); }
-    var smStatus = document.getElementById('settingsDefaultStatus');
-    if (smStatus) { Array.from(smStatus.options).forEach(function(opt) { if (opt.value==='') opt.text='جميع الحالات'; if (opt.value==='Open') opt.text='المفتوحة فقط'; if (opt.value==='Recurring') opt.text='المتكررة'; }); }
-    var smSaveBtn = document.getElementById('settingsSaveBtn');
-    if (smSaveBtn) smSaveBtn.textContent = 'حفظ التفضيلات';
-    var smRestartBtn = document.getElementById('settingsRestartTour');
-    if (smRestartBtn) smRestartBtn.textContent = '↺ إعادة تشغيل الجولة التعريفية';
+    // ── Swap all workspace labels to Arabic ──
+    swapWsLabels(true);
     startObserver();
   }
   function activateEnglish(){
@@ -8829,69 +8783,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (wsPanelTitle) wsPanelTitle.textContent = 'My Workspace';
     var wsPanelDir = document.getElementById('wsPanel');
     if (wsPanelDir) wsPanelDir.setAttribute('dir', 'ltr');
-    // ── Workspace bar English reset ──
-    var wsBarEn = document.getElementById('wsBar');
-    if (wsBarEn) {
-      var wbGreetEn = wsBarEn.querySelector('.ws-greeting span');
-      if (wbGreetEn) {
-        var unameEn = document.getElementById('wsUserName');
-        var nmEn = unameEn ? unameEn.textContent : '';
-        wbGreetEn.innerHTML = 'Welcome back, <strong id="wsUserName">' + nmEn + '</strong>';
-      }
-      var wbWlEn = document.getElementById('wsWatchlistStat');
-      if (wbWlEn) { var wbWlTxtEn = wbWlEn.lastChild; if (wbWlTxtEn && wbWlTxtEn.nodeType===3) wbWlTxtEn.nodeValue = ' Watchlist'; }
-      var wbSrEn = document.getElementById('wsSavedStat');
-      if (wbSrEn) { var wbSrTxtEn = wbSrEn.lastChild; if (wbSrTxtEn && wbSrTxtEn.nodeType===3) wbSrTxtEn.nodeValue = ' Saved Searches'; }
-      var wbUpEn = document.getElementById('wsUpdatesStat');
-      if (wbUpEn) { var wbUpTxtEn = wbUpEn.lastChild; if (wbUpTxtEn && wbUpTxtEn.nodeType===3) wbUpTxtEn.nodeValue = ' New this week'; }
-      var wbOpenEn = document.getElementById('wsOpenPanelBtn');
-      if (wbOpenEn) { var wbOpenTxtEn = wbOpenEn.lastChild; if (wbOpenTxtEn && wbOpenTxtEn.nodeType===3) wbOpenTxtEn.nodeValue = ' My Workspace'; }
-      var wbSetEn = document.getElementById('wsSettingsBtn');
-      if (wbSetEn) { var wbSetTxtEn = wbSetEn.lastChild; if (wbSetTxtEn && wbSetTxtEn.nodeType===3) wbSetTxtEn.nodeValue = ' Settings'; }
-    }
-    // ── Notifications dropdown English reset ──
-    var notifHdrEn = document.querySelector('.notif-dropdown-header span');
-    if (notifHdrEn) notifHdrEn.textContent = 'Notifications';
-    var notifClearEn = document.getElementById('notifClearBtn');
-    if (notifClearEn) notifClearEn.textContent = 'Mark all read';
-    // ── WS Panel tabs English reset ──
-    var wsTabsEn = document.querySelectorAll('.ws-panel-tab');
-    var wsTabLabelsEn = ['Watchlist', 'Saved Searches', 'Recent', 'Get Started'];
-    wsTabsEn.forEach(function(t, i) { if (wsTabLabelsEn[i]) t.textContent = wsTabLabelsEn[i]; });
-    // ── Settings modal English reset ──
-    var smTitleEn = document.querySelector('.settings-modal-title');
-    if (smTitleEn) smTitleEn.textContent = 'Workspace Settings';
-    var smLabelsEn = document.querySelectorAll('.settings-label');
-    var smSecTitlesEn = document.querySelectorAll('.settings-section-title');
-    var smEnLabels = ['Display name', 'Role', 'Organisation name', 'New opportunities', 'Deadline reminders', 'Weekly digest', 'Default view', 'Default filter'];
-    var smEnSublabels = [
-      'Shown in your workspace greeting', 'Used for role-based recommendations', 'Displayed in your workspace',
-      'Show badge when new records match your sectors', 'Notify when watchlisted items are closing soon', 'Summary of new programs in your tracked sectors',
-      'Card layout shown when you arrive', 'Pre-select status on arrival'
-    ];
-    var smEnSecTitles = ['Your Profile', 'Sector Interests', 'Alert Preferences', 'Display'];
-    smLabelsEn.forEach(function(el, i) {
-      var sub = el.querySelector('.settings-sublabel');
-      var lbl = el.childNodes[0];
-      if (lbl && lbl.nodeType === 3 && smEnLabels[i]) lbl.nodeValue = smEnLabels[i];
-      if (sub && smEnSublabels[i]) sub.textContent = smEnSublabels[i];
-    });
-    smSecTitlesEn.forEach(function(el, i) { if (smEnSecTitles[i]) el.textContent = smEnSecTitles[i]; });
-    var smSectorSubEn = document.querySelector('.settings-chips')?.previousElementSibling;
-    if (smSectorSubEn && smSectorSubEn.tagName === 'P') smSectorSubEn.textContent = 'Select the sectors you want to track. Recommendations and insights will prioritise these.';
-    var smRoleEn = document.getElementById('settingsRole');
-    if (smRoleEn) {
-      var roleMapEn = {'': 'Select role…', 'Startup / SME': 'Startup / SME', 'Researcher / University': 'Researcher / University', 'Government': 'Government', 'Investor': 'Investor', 'Student': 'Student', 'Consultant': 'Consultant'};
-      Array.from(smRoleEn.options).forEach(function(opt) { if (roleMapEn[opt.value] !== undefined) opt.text = roleMapEn[opt.value]; });
-    }
-    var smViewEn = document.getElementById('settingsDefaultView');
-    if (smViewEn) { Array.from(smViewEn.options).forEach(function(opt) { if (opt.value==='detailed') opt.text='Detailed cards'; if (opt.value==='compact') opt.text='Compact list'; }); }
-    var smStatusEn = document.getElementById('settingsDefaultStatus');
-    if (smStatusEn) { Array.from(smStatusEn.options).forEach(function(opt) { if (opt.value==='') opt.text='All statuses'; if (opt.value==='Open') opt.text='Open only'; if (opt.value==='Recurring') opt.text='Recurring'; }); }
-    var smSaveBtnEn = document.getElementById('settingsSaveBtn');
-    if (smSaveBtnEn) smSaveBtnEn.textContent = 'Save preferences';
-    var smRestartBtnEn = document.getElementById('settingsRestartTour');
-    if (smRestartBtnEn) smRestartBtnEn.textContent = '↺ Restart product tour';
+    // ── Swap all workspace labels to English ──
+    swapWsLabels(false);
     // Re-render WS panel body if panel is currently open (keeps content in sync)
     var wsPanel = document.getElementById('wsPanel');
     if (wsPanel && wsPanel.classList.contains('open') && window.WS && window.WS.openPanel) {
@@ -9254,7 +9147,7 @@ document.addEventListener('DOMContentLoaded', function () {
       save(KEY_WATCHLIST, watchlist);
       dbSaveWatchlist(watchlist);
       showToast('Added to watchlist — saved to My Workspace');
-      addNotif('Watchlist updated', '\u201c' + title + '\u201d added to your watchlist.');
+      addNotif(document.body.dir==='rtl' ? 'تحديث قائمة المتابعة' : 'Watchlist updated', document.body.dir==='rtl' ? ('\u201c' + title + '\u201d تمت إضافتها إلى قائمة متابعتك.') : ('\u201c' + title + '\u201d added to your watchlist.'));
     }
     syncBookmarkButtons();
     updateWsBar();
@@ -9305,7 +9198,7 @@ document.addEventListener('DOMContentLoaded', function () {
     updateWsBar();
     var btn = document.getElementById('saveSearchBtn');
     if (btn) { btn.classList.add('active'); setTimeout(function(){ btn.classList.remove('active'); }, 1500); }
-    addNotif('Search saved', '\u201c' + label + '\u201d saved to your searches.');
+    addNotif(document.body.dir==='rtl' ? 'تم حفظ البحث' : 'Search saved', document.body.dir==='rtl' ? ('\u201c' + label + '\u201d تم حفظه في بحوثك.') : ('\u201c' + label + '\u201d saved to your searches.'));
   }
 
   function applySearch(q) {
@@ -9357,7 +9250,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var list = document.getElementById('notifList');
     if (!list) return;
     if (!notifs.length) {
-      list.innerHTML = '<li class="notif-empty">No notifications yet.<br>Bookmark opportunities to get updates.</li>';
+      var _nAr = document.body.dir === 'rtl';
+      list.innerHTML = '<li class="notif-empty">' + (_nAr ? 'لا إشعارات بعد.<br>احفظ الفرص للحصول على تحديثات.' : 'No notifications yet.<br>Bookmark opportunities to get updates.') + '</li>';
       return;
     }
     list.innerHTML = notifs.slice(0, 20).map(function(n) {
@@ -9704,7 +9598,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (un && newDisplayName) un.textContent = newDisplayName;
     renderRecommendations();
     applyDefaultFilters();
-    addNotif('Settings updated', 'Your workspace preferences have been saved.');
+    addNotif(document.body.dir==='rtl' ? 'تم تحديث الإعدادات' : 'Settings updated', document.body.dir==='rtl' ? 'تم حفظ تفضيلات مساحة عملك.' : 'Your workspace preferences have been saved.');
   }
 
   function applyDefaultFilters() {
@@ -9921,9 +9815,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!localStorage.getItem('oh-ws-welcomed:' + _uid)) {
       localStorage.setItem('oh-ws-welcomed:' + _uid, '1');
       setTimeout(function() {
+        var _wAr = document.body.dir === 'rtl';
         addNotif(
-          'Welcome to your workspace',
-          'Bookmark opportunities, save searches, and set your sector interests in Settings to personalise this hub.'
+          _wAr ? 'مرحباً بك في مساحتك' : 'Welcome to your workspace',
+          _wAr ? 'احفظ الفرص، خزّن عمليات البحث، وحدد اهتماماتك القطاعية في الإعدادات لتخصيص المنصة.' : 'Bookmark opportunities, save searches, and set your sector interests in Settings to personalise this hub.'
         );
       }, 2000);
     }
