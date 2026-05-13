@@ -4334,6 +4334,113 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
 }
 @media (max-width: 900px) { .app-topbar-ws { display: none; } }
 @media (max-width: 640px) { .app-tb-lang, .app-tb-user, .app-tb-username, .app-topbar-divider { display: none; } }
+/* ── HOME VIEW ───────────────────────────────── */
+.home-wrap { padding: 32px 28px 60px; max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+.home-greeting-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.home-greeting-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--green); background: var(--green-highlight);
+  border: 1px solid rgba(0,166,81,0.2); border-radius: var(--radius-full);
+  padding: 4px 12px; margin-bottom: 10px;
+}
+.home-title { font-family: var(--font-display); font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; color: var(--text); letter-spacing: -0.02em; margin-bottom: 6px; }
+.home-title span { color: var(--green); }
+.home-sub { color: var(--text-muted); font-size: var(--text-sm); }
+.home-quick-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding-top: 4px; }
+.home-qa-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px; border-radius: var(--radius-md);
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text-muted); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all var(--transition); white-space: nowrap;
+}
+.home-qa-btn:hover { background: var(--surface-3); color: var(--text); border-color: var(--border-light); }
+.home-qa-btn--primary { background: var(--green); color: #fff; border-color: var(--green); }
+.home-qa-btn--primary:hover { background: var(--green-hover); color: #fff; border-color: var(--green-hover); }
+.home-qa-btn [data-lucide] { width: 14px; height: 14px; }
+/* Stats row */
+.home-stats-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;
+}
+.home-stat {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 16px 18px;
+  border-left: 3px solid var(--border);
+  transition: box-shadow var(--transition);
+}
+.home-stat--green { border-left-color: var(--green); }
+.home-stat--gold  { border-left-color: var(--gold); }
+.home-stat:hover  { box-shadow: var(--shadow-sm); }
+.home-stat-val { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--text); line-height: 1.1; margin-bottom: 4px; }
+.home-stat-lbl { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+/* Two-col layout */
+.home-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+/* Home cards */
+.home-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-xl); overflow: hidden;
+}
+.home-card-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px 12px; border-bottom: 1px solid var(--divider);
+}
+.home-card-hdr-left { display: flex; align-items: center; gap: 8px; }
+.home-card-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; color: var(--text-muted);
+}
+.home-card-badge [data-lucide] { width: 13px; height: 13px; }
+.home-card-badge--green { color: var(--green); }
+.home-card-see-all {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; font-weight: 500; color: var(--text-faint);
+  background: transparent; border: none; cursor: pointer;
+  transition: color var(--transition); padding: 0;
+}
+.home-card-see-all:hover { color: var(--green); }
+.home-card-see-all [data-lucide] { width: 12px; height: 12px; }
+/* Opportunity list items */
+.home-opp-list { padding: 8px 0; max-height: 340px; overflow-y: auto; }
+.home-opp-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 18px; border-bottom: 1px solid var(--divider);
+  cursor: pointer; transition: background var(--transition);
+}
+.home-opp-item:last-child { border-bottom: none; }
+.home-opp-item:hover { background: var(--surface-2); }
+.home-opp-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green); flex-shrink: 0; margin-top: 5px;
+}
+.home-opp-body { flex: 1; min-width: 0; }
+.home-opp-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.home-opp-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.home-opp-tag { font-size: 10px; color: var(--text-muted); background: var(--surface-3); padding: 2px 7px; border-radius: var(--radius-full); font-weight: 500; }
+.home-opp-new { font-size: 10px; font-weight: 600; color: var(--green); background: var(--green-highlight); padding: 2px 7px; border-radius: var(--radius-full); border: 1px solid rgba(0,166,81,0.2); }
+.home-list-loading { padding: 24px 18px; color: var(--text-faint); font-size: 13px; }
+/* Watchlist empty */
+.home-wl-empty { display: flex; flex-direction: column; align-items: center; padding: 32px 18px; text-align: center; color: var(--text-muted); gap: 8px; }
+.home-wl-empty [data-lucide] { width: 28px; height: 28px; color: var(--text-faint); }
+.home-wl-empty p { font-size: 13px; }
+/* Sectors card */
+.home-card--sectors .home-sector-chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 18px; }
+.home-sector-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: var(--radius-full);
+  background: var(--surface-2); border: 1px solid var(--border);
+  font-size: 12px; font-weight: 500; color: var(--text-muted);
+  cursor: pointer; transition: all var(--transition);
+}
+.home-sector-chip:hover, .home-sector-chip.active { background: var(--green-highlight); border-color: var(--green); color: var(--green); }
+.home-sector-chip .chip-count { font-size: 10px; color: var(--text-faint); }
+.home-sector-chip.active .chip-count { color: var(--green); opacity: 0.8; }
+@media (max-width: 900px) {
+  .home-cols { grid-template-columns: 1fr; }
+  .home-greeting-row { flex-direction: column; }
+  .home-wrap { padding: 20px 16px 40px; }
+}
+
 /* opp view wrap — adds padding to the opportunities view content */
 .opp-view-wrap { height: 100%; }
 .opp-view-wrap > section { padding: 28px 28px 60px; max-width: 1280px; margin: 0 auto; }
@@ -4457,11 +4564,38 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
 }
 /* Logout nav item */
 .app-nav-item--logout:hover { background: rgba(239,68,68,0.08) !important; color: #ef4444 !important; }
-/* Saved card items */
-.saved-card-title { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-.saved-card-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.saved-card-status { font-size: 11px; color: var(--text-muted); background: var(--surface-2); padding: 2px 8px; border-radius: var(--radius-full); }
-.saved-card-country { font-size: 11px; color: var(--text-faint); }
+/* Saved workspace button */
+.saved-workspace-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-md); font-size: 13px; font-weight: 500;
+  color: var(--text-muted); cursor: pointer;
+  transition: all var(--transition); white-space: nowrap; flex-shrink: 0;
+}
+.saved-workspace-btn:hover { background: var(--green-highlight); border-color: var(--green); color: var(--green); }
+.saved-workspace-btn [data-lucide] { width: 14px; height: 14px; }
+/* Watchlist saved cards */
+.wl-saved-card {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 14px 18px;
+  margin-bottom: 8px; cursor: pointer;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.wl-saved-card:hover { border-color: var(--green); box-shadow: var(--shadow-green); }
+.wl-saved-card__body { flex: 1; min-width: 0; }
+.wl-saved-card__title { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wl-saved-card__meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.wl-saved-meta-tag { font-size: 11px; color: var(--text-muted); background: var(--surface-2); border: 1px solid var(--border); padding: 2px 8px; border-radius: var(--radius-full); }
+.wl-saved-card__right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+.wl-saved-status { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: var(--radius-full); background: var(--status-open-bg); color: var(--status-open-text); border: 1px solid var(--status-open-border); }
+.wl-status--closed { background: var(--status-closed-bg) !important; color: var(--status-closed-text) !important; border-color: var(--status-closed-border) !important; }
+.wl-status--upcoming, .wl-status--coming-soon { background: var(--status-recurring-bg) !important; color: var(--status-recurring-text) !important; border-color: var(--status-recurring-border) !important; }
+.wl-saved-date { font-size: 11px; color: var(--text-faint); }
+.wl-saved-open { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border); background: transparent; display: flex; align-items: center; justify-content: center; color: var(--text-muted); cursor: pointer; transition: all var(--transition); }
+.wl-saved-open:hover { background: var(--green-highlight); border-color: var(--green); color: var(--green); }
+.wl-saved-open [data-lucide] { width: 13px; height: 13px; }
 /* Mobile bottom tabs */
 .app-bottom-tabs { display: none; }
 @media (max-width: 767px) {
@@ -4475,7 +4609,7 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
   .app-sidebar { display: none; }
   .app-bottom-tabs {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     position: fixed;
     bottom: 0; left: 0; right: 0;
     background: var(--surface);
@@ -4523,8 +4657,11 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
       <span class="brand-dot" aria-hidden="true"></span>
       <span>Opportunity Hub</span>
     </div>
+    <button class="app-nav-item" data-view="home" data-route="#home" type="button">
+      <i data-lucide="home"></i><span>Home</span>
+    </button>
     <button class="app-nav-item" data-view="dashboard" data-route="#dashboard" type="button">
-      <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
+      <i data-lucide="bar-chart-2"></i><span>Analytics</span>
     </button>
     <button class="app-nav-item" data-view="opportunities" data-route="#opportunities" type="button">
       <i data-lucide="search"></i><span>Opportunities</span>
@@ -4605,7 +4742,7 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
       <div class="app-tb-lang">
         <a id="langEn" class="is-lang-btn is-lang-active" href="index.html" lang="en">EN</a>
         <span class="is-lang-sep">|</span>
-        <a id="langAr" class="is-lang-btn" href="#" lang="ar" dir="rtl">ع</a>
+        <a id="langAr" class="is-lang-btn" href="ar.html" lang="ar" dir="rtl">ع</a>
       </div>
       <div class="app-topbar-divider"></div>
       <!-- User + Logout -->
@@ -4620,6 +4757,106 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
 
   <!-- Main content area — holds all 5 views -->
   <div class="app-content">
+
+    <!-- VIEW: HOME — personalised landing page -->
+    <section class="app-view" id="view-home" aria-labelledby="homeHeading">
+      <div class="home-wrap">
+
+        <!-- Greeting row -->
+        <div class="home-greeting-row">
+          <div class="home-greeting">
+            <div class="home-greeting-badge" id="homeTimeBadge">Good morning</div>
+            <h1 class="home-title" id="homeHeading">Welcome back, <span id="homeUsername">there</span></h1>
+            <p class="home-sub">Here is what is happening in your sectors today.</p>
+          </div>
+          <div class="home-quick-actions">
+            <button class="home-qa-btn home-qa-btn--primary" onclick="setRoute('opportunities')" type="button">
+              <i data-lucide="search"></i> Browse Opportunities
+            </button>
+            <button class="home-qa-btn" onclick="WS.openPanel('watchlist')" type="button">
+              <i data-lucide="bookmark"></i> My Watchlist
+            </button>
+            <button class="home-qa-btn" onclick="WS.openSettings()" type="button">
+              <i data-lucide="sliders-horizontal"></i> Preferences
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats row -->
+        <div class="home-stats-row" id="homeStatsRow">
+          <div class="home-stat home-stat--green">
+            <div class="home-stat-val" id="homeTotalVal">—</div>
+            <div class="home-stat-lbl">Total opportunities</div>
+          </div>
+          <div class="home-stat">
+            <div class="home-stat-val" id="homeOpenVal">—</div>
+            <div class="home-stat-lbl">Open now</div>
+          </div>
+          <div class="home-stat home-stat--gold">
+            <div class="home-stat-val" id="homeNewVal">—</div>
+            <div class="home-stat-lbl">Added this week</div>
+          </div>
+          <div class="home-stat">
+            <div class="home-stat-val" id="homeWlVal">—</div>
+            <div class="home-stat-lbl">In your watchlist</div>
+          </div>
+          <div class="home-stat">
+            <div class="home-stat-val" id="homeSectorVal">—</div>
+            <div class="home-stat-lbl">Sectors tracked</div>
+          </div>
+        </div>
+
+        <!-- Two-column layout: New this week + Your watchlist -->
+        <div class="home-cols">
+
+          <!-- Left: New this week -->
+          <div class="home-card">
+            <div class="home-card-hdr">
+              <div class="home-card-hdr-left">
+                <span class="home-card-badge home-card-badge--green">
+                  <i data-lucide="sparkles"></i> New this week
+                </span>
+              </div>
+              <button class="home-card-see-all" onclick="setRoute('opportunities')" type="button">See all <i data-lucide="arrow-right"></i></button>
+            </div>
+            <div class="home-opp-list" id="homeNewList">
+              <div class="home-list-loading">Loading new opportunities…</div>
+            </div>
+          </div>
+
+          <!-- Right: Watchlist snapshot -->
+          <div class="home-card">
+            <div class="home-card-hdr">
+              <div class="home-card-hdr-left">
+                <span class="home-card-badge">
+                  <i data-lucide="bookmark"></i> Your watchlist
+                </span>
+              </div>
+              <button class="home-card-see-all" onclick="setRoute('saved')" type="button">See all <i data-lucide="arrow-right"></i></button>
+            </div>
+            <div class="home-opp-list" id="homeWlList">
+              <div class="home-wl-empty" id="homeWlEmpty">
+                <i data-lucide="bookmark"></i>
+                <p>Save opportunities to see them here.</p>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /home-cols -->
+
+        <!-- Sector quick-filter strip -->
+        <div class="home-card home-card--sectors" id="homeSectorsCard" style="margin-top: 0;">
+          <div class="home-card-hdr">
+            <span class="home-card-badge"><i data-lucide="layers"></i> Your sectors</span>
+            <button class="home-card-see-all" onclick="setRoute('sectors')" type="button">Browse all <i data-lucide="arrow-right"></i></button>
+          </div>
+          <div class="home-sector-chips" id="homeSectorChips">
+            <div class="home-list-loading">Loading sectors…</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
 
     <!-- VIEW: DASHBOARD -->
     <section class="app-view" id="view-dashboard" aria-labelledby="dashHeading">
@@ -5036,8 +5273,8 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
             <h2 class="dash-title" style="margin-bottom: 4px;">My Watchlist</h2>
             <p class="dash-sub">Opportunities you have saved. Synced to your account.</p>
           </div>
-          <button class="app-tb-icon-btn" style="padding: 8px 16px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; display:flex;align-items:center;gap:6px;" onclick="WS.openPanel('watchlist')" type="button">
-            <i data-lucide="external-link"></i> Open full workspace
+          <button class="saved-workspace-btn" onclick="WS.openPanel('watchlist')" type="button">
+            <i data-lucide="layout-panel-left"></i> Open Workspace
           </button>
         </div>
         <div id="savedViewList" style="margin-top: 16px;">
@@ -5171,8 +5408,11 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
 
   <!-- Mobile bottom tab bar (under 768px) -->
   <nav class="app-bottom-tabs" aria-label="Mobile navigation">
+    <button class="app-bottom-tab" data-view="home" data-route="#home" type="button">
+      <i data-lucide="home"></i><span>Home</span>
+    </button>
     <button class="app-bottom-tab" data-view="dashboard" data-route="#dashboard" type="button">
-      <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
+      <i data-lucide="bar-chart-2"></i><span>Analytics</span>
     </button>
     <button class="app-bottom-tab" data-view="opportunities" data-route="#opportunities" type="button">
       <i data-lucide="search"></i><span>Opportunities</span>
@@ -5804,15 +6044,16 @@ document.addEventListener('DOMContentLoaded', function () {
   paintIcons();
 
   /* ---------------- View routing ---------------- */
-  var VIEWS = ['dashboard', 'opportunities', 'sectors', 'saved', 'about'];
+  var VIEWS = ['home', 'dashboard', 'opportunities', 'sectors', 'saved', 'about'];
   var TITLES = {
+    home: 'Home',
     dashboard: 'Dashboard',
     opportunities: 'Opportunities',
     sectors: 'Sectors',
-    saved: 'Saved',
+    saved: 'Watchlist',
     about: 'About'
   };
-  var DEFAULT_VIEW = 'dashboard';
+  var DEFAULT_VIEW = 'home';
   var chartsInitialized = false;
 
   function getViewFromHash() {
@@ -5832,6 +6073,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var titleEl = document.getElementById('appTopbarTitle');
     if (titleEl) titleEl.textContent = TITLES[view] || 'Opportunity Hub';
     if (view === 'dashboard' && !chartsInitialized) initDashboard();
+    if (view === 'home') initHome();
     if (view === 'sectors') renderSectorChips();
     if (view === 'saved') renderSavedList();
     paintIcons();
@@ -5944,6 +6186,198 @@ document.addEventListener('DOMContentLoaded', function () {
     chartRefs[id] = new window.Chart(canvas.getContext('2d'), { type: type, data: data, options: options });
     return chartRefs[id];
   }
+
+  /* ─────────────────────────────────────────────────
+     HOME VIEW — init & render
+     ───────────────────────────────────────────────── */
+  var homeInitialized = false;
+
+  function initHome() {
+    /* Greeting time badge */
+    var badge = document.getElementById('homeTimeBadge');
+    if (badge) {
+      var h = new Date().getHours();
+      badge.textContent = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+    }
+    /* Username */
+    var wsName = document.getElementById('wsUserName');
+    var homeUser = document.getElementById('homeUsername');
+    if (homeUser && wsName && wsName.textContent && wsName.textContent !== 'User') {
+      homeUser.textContent = wsName.textContent;
+    } else if (homeUser) {
+      /* Try to get display name from prefs */
+      var prefs = window.__userPrefs;
+      if (prefs && prefs.displayName) homeUser.textContent = prefs.displayName;
+    }
+    /* Stats + lists */
+    waitForData(function(data) {
+      homeInitialized = true;
+      var now = new Date();
+      var weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+      var open = data.filter(function(d) {
+        var s = String(d.status || '').toLowerCase();
+        return s.indexOf('open') !== -1 || s.indexOf('recurring') !== -1 || s.indexOf('rolling') !== -1;
+      });
+      var newThis = data.filter(function(d) {
+        return d.isNew === true && d.last_verified && new Date(d.last_verified) >= weekAgo;
+      });
+      var sectorMap = {};
+      data.forEach(function(d) {
+        (d.sectors || []).forEach(function(s) { sectorMap[s] = (sectorMap[s] || 0) + 1; });
+      });
+
+      set('homeTotalVal', data.length.toLocaleString());
+      set('homeOpenVal', open.length.toLocaleString());
+      set('homeNewVal', newThis.length.toLocaleString());
+      set('homeSectorVal', Object.keys(sectorMap).length.toLocaleString());
+
+      /* Watchlist count */
+      var wl = (window.WS && window.WS.getWatchlist) ? window.WS.getWatchlist() : [];
+      set('homeWlVal', wl.length.toLocaleString());
+
+      /* New this week list */
+      renderHomeOppList('homeNewList', newThis.slice(0, 8), true);
+
+      /* Watchlist preview */
+      renderHomeWlList(wl, data);
+
+      /* Sector chips */
+      renderHomeSectorChips(sectorMap);
+
+      paintIcons();
+    });
+  }
+
+  function renderHomeOppList(elId, items, showNewBadge) {
+    var el = document.getElementById(elId);
+    if (!el) return;
+    if (!items.length) {
+      el.innerHTML = '<div class="home-list-loading">No items found.</div>';
+      return;
+    }
+    el.innerHTML = items.map(function(opp) {
+      var type = (opp.type || '').replace(/_/g, ' ');
+      var country = opp.country || '';
+      return '<div class="home-opp-item" data-id="' + opp.id + '">' +
+        '<div class="home-opp-dot"></div>' +
+        '<div class="home-opp-body">' +
+          '<div class="home-opp-title">' + (opp.title || '') + '</div>' +
+          '<div class="home-opp-meta">' +
+            (type ? '<span class="home-opp-tag">' + type + '</span>' : '') +
+            (country ? '<span class="home-opp-tag">' + country + '</span>' : '') +
+            (showNewBadge ? '<span class="home-opp-new">New</span>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    el.querySelectorAll('.home-opp-item').forEach(function(row) {
+      row.addEventListener('click', function() {
+        var id = row.getAttribute('data-id');
+        var opp = items.find(function(o) { return String(o.id) === String(id); });
+        if (opp && window.__openDetailPanel) window.__openDetailPanel(opp);
+      });
+    });
+  }
+
+  function renderHomeWlList(wl, data) {
+    var el = document.getElementById('homeWlList');
+    var empty = document.getElementById('homeWlEmpty');
+    if (!el) return;
+    if (!wl.length) {
+      if (empty) empty.style.display = '';
+      return;
+    }
+    if (empty) empty.style.display = 'none';
+    var byId = {};
+    data.forEach(function(d) { byId[String(d.id)] = d; });
+    var preview = wl.slice(0, 8);
+    el.innerHTML = preview.map(function(item) {
+      var id = String(item.id || item.opportunity_id || '');
+      var opp = byId[id] || {};
+      var title = item.title || opp.title || 'Untitled';
+      var type = (item.type || opp.type || '').replace(/_/g, ' ');
+      var status = opp.status || '';
+      return '<div class="home-opp-item" data-wl-id="' + id + '">' +
+        '<div class="home-opp-dot" style="background: var(--gold);"></div>' +
+        '<div class="home-opp-body">' +
+          '<div class="home-opp-title">' + title + '</div>' +
+          '<div class="home-opp-meta">' +
+            (type ? '<span class="home-opp-tag">' + type + '</span>' : '') +
+            (status ? '<span class="home-opp-tag">' + status + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    el.querySelectorAll('[data-wl-id]').forEach(function(row) {
+      row.addEventListener('click', function() {
+        var id = row.getAttribute('data-wl-id');
+        var opp = byId[id];
+        if (opp && window.__openDetailPanel) window.__openDetailPanel(opp);
+      });
+    });
+    if (empty) el.appendChild(empty);
+  }
+
+  function renderHomeSectorChips(sectorMap) {
+    var el = document.getElementById('homeSectorChips');
+    if (!el) return;
+    var prefs = window.__userPrefs;
+    var prefSectors = (prefs && prefs.sectors) ? prefs.sectors.map(function(s){ return s.toLowerCase().replace(/[\s\-\/]+/g,'_'); }) : [];
+    var entries = Object.keys(sectorMap).map(function(k) { return [k, sectorMap[k]]; });
+    entries.sort(function(a,b) { return b[1]-a[1]; });
+    el.innerHTML = entries.slice(0, 16).map(function(e) {
+      var key = e[0];
+      var isActive = prefSectors.indexOf(key.toLowerCase().replace(/[\s\-\/]+/g,'_')) !== -1;
+      return '<button class="home-sector-chip' + (isActive ? ' active' : '') + '" data-sector="' + key + '" type="button">' +
+        key.charAt(0).toUpperCase() + key.slice(1) +
+        ' <span class="chip-count">' + e[1] + '</span>' +
+      '</button>';
+    }).join('');
+    el.querySelectorAll('.home-sector-chip').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var sector = btn.getAttribute('data-sector');
+        setRoute('opportunities');
+        setTimeout(function() {
+          var sel = document.getElementById('sectorFilter');
+          if (sel) {
+            Array.from(sel.options).forEach(function(opt) {
+              if (opt.value.toLowerCase() === sector.toLowerCase() || opt.textContent.trim().toLowerCase() === sector.toLowerCase()) {
+                sel.value = opt.value;
+                sel.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+            });
+          }
+        }, 150);
+      });
+    });
+  }
+
+  /* Re-render home when navigating back to it */
+  var _origShowViewHome = showView;
+  showView = function(view) {
+    _origShowViewHome(view);
+    if (view === 'home') {
+      /* Always refresh stats/watchlist on revisit */
+      setTimeout(function() {
+        var wl = (window.WS && window.WS.getWatchlist) ? window.WS.getWatchlist() : [];
+        set('homeWlVal', wl.length.toLocaleString());
+        /* Refresh WL preview */
+        waitForData(function(data) { renderHomeWlList(wl, data); });
+        /* Sync username */
+        var wsName = document.getElementById('wsUserName');
+        var homeUser = document.getElementById('homeUsername');
+        if (homeUser && wsName && wsName.textContent && wsName.textContent !== 'User') {
+          homeUser.textContent = wsName.textContent;
+        }
+        paintIcons();
+      }, 100);
+    }
+    if (view === 'saved') {
+      setTimeout(renderSavedViewFromWatchlist, 200);
+    }
+    syncTopbarStats();
+    paintIcons();
+  };
 
   function initDashboard() {
     waitForData(function (data) {
@@ -6193,54 +6627,62 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  /* ─── Saved view: render from WS watchlist ─── */
+  /* ─── Saved view: render from WS.getWatchlist() ─── */
   function renderSavedViewFromWatchlist() {
     var list = document.getElementById('savedViewList');
     var empty = document.getElementById('savedEmpty');
     if (!list) return;
-    /* Read watchlist from WS IIFE */
-    var watchlist = (window.__ws && window.__ws.watchlist) ? window.__ws.watchlist : [];
-    /* Also try the wsWatchlistCount approach — read rendered cards from WS panel */
-    var wsPanelCards = document.querySelectorAll('.wl-card-item, .wl-item, [data-wl-id]');
-    /* Clear non-empty items */
+    var wl = (window.WS && window.WS.getWatchlist) ? window.WS.getWatchlist() : [];
+    /* Clear previously rendered cards */
     Array.from(list.children).forEach(function(c) { if (c !== empty) list.removeChild(c); });
-    if (!watchlist.length && !wsPanelCards.length) {
+    if (!wl || !wl.length) {
       if (empty) empty.style.display = '';
       return;
     }
     if (empty) empty.style.display = 'none';
-    /* If we have watchlist data, render compact cards */
-    if (watchlist.length) {
-      waitForData(function(data) {
-        var byId = {};
-        data.forEach(function(d) { byId[String(d.id)] = d; });
-        watchlist.forEach(function(item) {
-          var id = String(item.opportunity_id || item.id || '');
-          var opp = byId[id] || item;
-          if (!opp || (!opp.title && !item.title)) return;
-          var card = document.createElement('div');
-          card.className = 'saved-card-item';
-          var title = opp.title || item.title || 'Untitled';
-          var type = opp.type || '';
-          var status = opp.status || '';
-          var country = opp.country || '';
-          card.innerHTML = '<div class="saved-card-title">' + title + '</div>' +
-            '<div class="saved-card-meta">' +
-              (type ? '<span class="pill pill--' + type.replace(/[^a-z]/gi,'').toLowerCase() + '">' + type + '</span>' : '') +
-              (status ? '<span class="saved-card-status">' + status + '</span>' : '') +
-              (country ? '<span class="saved-card-country">' + country + '</span>' : '') +
-            '</div>';
-          card.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:all var(--transition);';
-          card.addEventListener('mouseenter', function() { card.style.borderColor = 'var(--green)'; });
-          card.addEventListener('mouseleave', function() { card.style.borderColor = 'var(--border)'; });
-          card.addEventListener('click', function() {
-            if (window.__openDetailPanel && opp.id) window.__openDetailPanel(opp);
-          });
-          list.appendChild(card);
+    waitForData(function(data) {
+      var byId = {};
+      data.forEach(function(d) { byId[String(d.id)] = d; });
+      wl.forEach(function(item) {
+        var id = String(item.id || item.opportunity_id || '');
+        var opp = byId[id] || {};
+        var title = item.title || opp.title || 'Untitled';
+        var type = item.type || opp.type || '';
+        var status = opp.status || '';
+        var country = opp.country || '';
+        var sector = item.sector || (opp.sectors && opp.sectors[0]) || '';
+        var savedAt = item.savedAt ? new Date(item.savedAt).toLocaleDateString() : '';
+        var card = document.createElement('div');
+        card.className = 'wl-saved-card';
+        card.setAttribute('data-id', id);
+        /* Type pill color */
+        var typeClass = type ? 'pill--' + type.replace(/[_\s\/]+/g,'-').toLowerCase() : '';
+        card.innerHTML =
+          '<div class="wl-saved-card__body">' +
+            '<div class="wl-saved-card__title">' + title + '</div>' +
+            '<div class="wl-saved-card__meta">' +
+              (type ? '<span class="pill ' + typeClass + '">' + type.replace(/_/g,' ') + '</span>' : '') +
+              (sector ? '<span class="wl-saved-meta-tag">' + sector + '</span>' : '') +
+              (country ? '<span class="wl-saved-meta-tag">' + country + '</span>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="wl-saved-card__right">' +
+            (status ? '<span class="wl-saved-status wl-status--' + status.toLowerCase().replace(/\s/g,'-') + '">' + status + '</span>' : '') +
+            (savedAt ? '<span class="wl-saved-date">' + savedAt + '</span>' : '') +
+            '<button class="wl-saved-open" data-id="' + id + '" title="View details" type="button"><i data-lucide="arrow-right"></i></button>' +
+          '</div>';
+        card.querySelector('.wl-saved-open').addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (window.__openDetailPanel && opp && opp.id) window.__openDetailPanel(opp);
+          else setRoute('opportunities');
         });
-        paintIcons();
+        card.addEventListener('click', function() {
+          if (window.__openDetailPanel && opp && opp.id) window.__openDetailPanel(opp);
+        });
+        list.appendChild(card);
       });
-    }
+      paintIcons();
+    });
   }
 
   /* Override renderSavedList to also update the saved view */
@@ -6250,16 +6692,7 @@ document.addEventListener('DOMContentLoaded', function () {
     renderSavedViewFromWatchlist();
   };
 
-  /* Render saved view when navigating to it */
-  var _origShowView = showView;
-  showView = function(view) {
-    _origShowView(view);
-    if (view === 'saved') {
-      setTimeout(renderSavedViewFromWatchlist, 200);
-    }
-    syncTopbarStats();
-    paintIcons();
-  };
+  /* showView override for saved merged into home handler above */
 
 })();
 </script>
@@ -11037,7 +11470,8 @@ document.addEventListener('DOMContentLoaded', function () {
       closePanel:        closePanel,
       openSettings:      openSettings,
       showToast:         showToast,
-      loadFromSupabase:  loadFromSupabase
+      loadFromSupabase:  loadFromSupabase,
+      getWatchlist:      function() { return watchlist; }
     };
 
     updateWsBar();
