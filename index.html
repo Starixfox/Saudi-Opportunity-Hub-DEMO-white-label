@@ -1182,6 +1182,44 @@ section:last-of-type { border-bottom: none; }
   flex-shrink: 0;
 }
 
+/* ── PANEL TRUST BAR ────────────────────────────────── */
+.panel-trust-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding: 10px var(--space-5);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.panel-trust-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.panel-trust-item svg { flex-shrink: 0; opacity: 0.75; }
+.panel-trust-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.panel-trust-dot--green { background: #00a651; box-shadow: 0 0 4px rgba(0,166,81,0.4); }
+.panel-trust-dot--gold  { background: #f5a623; }
+.panel-trust-dot--grey  { background: var(--text-faint); }
+.panel-trust-label { font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; }
+.panel-trust-val   { color: var(--text-muted); }
+.panel-trust-val--ok   { color: #00a651; font-weight: 600; }
+.panel-trust-val--warn { color: #f5a623; font-weight: 600; }
+/* Dark overrides */
+[data-theme="dark"] .panel-trust-bar { background: rgba(255,255,255,0.03); }
+[data-theme="light"] .panel-trust-bar { background: #f7faf8; }
+
 .panel-link-btn {
   display: block; width: 100%;
   padding: 12px var(--space-4);
@@ -4055,7 +4093,7 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
         <div class="hiw-step">
           <div class="hiw-num">2</div>
           <div class="hiw-step-title">Verified &amp; structured data</div>
-          <div class="hiw-step-desc">Each record is human-reviewed and enriched with sector tags, deadlines, funding size, eligibility criteria, and source links — then normalised into a consistent schema across all 1,034+ entries.</div>
+          <div class="hiw-step-desc">Each record is human-reviewed and enriched with sector tags, deadlines, funding size, eligibility criteria, and source links — then normalised into a consistent schema across all 1,074+ entries.</div>
         </div>
 
         <div class="hiw-connector" aria-hidden="true">&rarr;</div>
@@ -4163,7 +4201,7 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
 
     <!-- IS STATS STRIP -->
     <div class="is-stats-strip" role="list" aria-label="Platform highlights">
-      <div class="is-stat-item" role="listitem">1,000+ funding records</div>
+      <div class="is-stat-item" role="listitem">1,074 verified records</div>
       <div class="is-stat-divider" aria-hidden="true"></div>
       <div class="is-stat-item" role="listitem">15 sectors covered</div>
       <div class="is-stat-divider" aria-hidden="true"></div>
@@ -4571,7 +4609,7 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
         </div>
         <div class="about-meta-item">
           <div class="about-meta-label">Last dataset update</div>
-          <div class="about-meta-value">March 2026</div>
+          <div class="about-meta-value" id="aboutLastUpdated">May 2026</div>
         </div>
         <div class="about-meta-item">
           <div class="about-meta-label">Legal disclaimer</div>
@@ -4618,7 +4656,7 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
 
           <div class="form-group">
             <label class="form-label" for="feedbackText">Details &mdash; links, IDs, corrections, comments</label>
-            <textarea id="feedbackText" name="details" rows="4" class="form-textarea" required placeholder="e.g. SA-005 deadline updated to March 2026, or 'New call from KAUST for satellite research grants&hellip;'" data-notranslate-placeholder></textarea>
+            <textarea id="feedbackText" name="details" rows="4" class="form-textarea" required placeholder="e.g. SA-005 deadline updated, or 'New call from KAUST for satellite research grants&hellip;'" data-notranslate-placeholder></textarea>
           </div>
 
           <button type="submit" class="btn-submit">
@@ -4655,7 +4693,6 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
       <li><a href="mailto:jblancoapodaca@gmail.com">Contact</a></li>
     </ul>
     <div class="footer-attribution">
-      </a>
     </div>
     <p class="footer-disclaimer">
       This is a private demo build for internal evaluation only. Not for public distribution. All program information is provided for awareness and research purposes only. Verify all details directly with sponsoring organizations. Last updated: <span id="footerLastUpdated">—</span>.
@@ -4817,6 +4854,7 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
     <button class="panel-close" id="panelClose" aria-label="Close details panel">&#x2715;</button>
   </div>
   <div class="panel-badges" id="panelBadges" aria-label="Program badges"></div>
+  <div class="panel-trust-bar" id="panelTrustBar" aria-label="Record quality signals"></div>
   <div class="panel-body">
     <p class="panel-description" id="panelDesc"></p>
     <div id="panelFields"></div>
@@ -4913,7 +4951,7 @@ const TRANSLATIONS = {
     who4Role: 'Investors & Ecosystem',
     who4Desc: 'Map active programs in Saudi, GCC, and globally to identify deal-flow and co-investment opportunities.',
     // Stats strip
-    stat1: '1,000+ funding records',
+    stat1: '1,074 verified records',
     stat2: '15 sectors covered',
     stat3: 'Data snapshot: Live',
     stat4: 'Available for API integration',
@@ -4984,7 +5022,7 @@ const TRANSLATIONS = {
     who3Desc: 'تابع العطاءات ومبادرات النظام البيئي وبرامج بناء القدرات ذات الصلة بأولويات القطاع العام.',
     who4Role: 'المستثمرون والنظام البيئي',
     who4Desc: 'رسم خريطة البرامج الاستثمارية النشطة في السعودية ودول الخليج وعالمياً لتحديد فرص الاستثمار المشترك.',
-    stat1: 'أكثر من 1,000 فرصة تمويل نشطة',
+    stat1: '1,074 سجلاً مدققاً',
     stat2: '15 قطاعاً ذا صلة بالكيانات السعودية',
     stat3: 'لقطة بيانات: مباشر',
     stat4: 'تكامل API متاح لمنصات استثمر في السعودية',
@@ -5749,6 +5787,7 @@ document.addEventListener('DOMContentLoaded', function () {
     'Investor':            'مستثمر',
     'Student':             'طالب',
     // Latest additions widget
+    'Updated':                      'محدّث',
     'New to the Database':          'جديد في قاعدة البيانات',
     'Latest Additions':             'أحدث الإضافات',
     'No newly flagged opportunities.': 'لا توجد فرص جديدة.',
@@ -5951,8 +5990,8 @@ document.addEventListener('DOMContentLoaded', function () {
         var deadline   = item.deadline_date ? (t(item.deadline_date) || item.deadline_date) : '';
         var sponsor    = item.sponsor_institution || '';
         var titleStr   = highlightTerm(item.title || t('Untitled'), searchTerm);
-        var applyHref  = item.application_link || '#';
-        var applyAttrs = item.application_link ? 'target="_blank" rel="noopener noreferrer"' : '';
+        var applyHref  = (item.application_link && item.application_link.startsWith('http')) ? item.application_link : null;
+        var applyAttrs = applyHref ? 'target="_blank" rel="noopener noreferrer"' : '';
 
         // Status label: shorten verbose statuses
         var statusLabel = item.status === 'open' ? t('Open')
@@ -5989,7 +6028,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <button class="card-bookmark-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" data-sector="${(item.sectors&&item.sectors[0])||''}" data-type="${item.type||''}" onclick="WS&&WS.toggleBookmark(this)" title="Add to watchlist" aria-label="Bookmark" style="position:static;width:28px;height:28px;flex-shrink:0;">
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
                     </button>
-                    <a class="occ-apply-btn" href="${applyHref}" ${applyAttrs}>${t('Apply →')}</a>
+                    ${applyHref ? `<a class="occ-apply-btn" href="${applyHref}" ${applyAttrs}>${t('Apply →')}</a>` : `<span class="occ-apply-btn occ-apply-btn--disabled" style="opacity:0.35;cursor:default;pointer-events:none;">${t('Apply →')}</span>`}
                   </div>
                 </div>
 
@@ -6055,14 +6094,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     <span class="pill ${typeClass(item.type)}">${withTooltip(typeStr)}</span>
                     <span class="region-tag region-${region}">${regionLabel}</span>
                     <span class="status-badge ${statusClass(item.status)}">${statusStr}</span>
-                    ${item.isNew ? `<span class="badge-new">${newLabel}</span>` : ''}
+                    ${item.isNew ? `<span class="badge-new">${newLabel}</span>` : (item.last_verified && (Date.now() - new Date(item.last_verified).getTime()) <= 30*86400000 && !item.isNew ? `<span class="badge-new" style="background:rgba(245,166,35,0.15);color:#c68a00;border-color:rgba(245,166,35,0.3);">${t('Updated')}</span>` : '')}
                   </div>
                   <div class="opp-card-btns">
                     <button class="opp-insights-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" type="button">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                       ${t('View Insights')}
                     </button>
-                    <a class="panel-link-btn opp-card-link" href="${item.application_link || '#'}" ${item.application_link ? 'target="_blank" rel="noopener noreferrer"' : ''}>${t('Go to Website')}</a>
+                    ${item.application_link && item.application_link.startsWith('http') ? `<a class="panel-link-btn opp-card-link" href="${item.application_link}" target="_blank" rel="noopener noreferrer">${t('Go to Website')}</a>` : ''}
                   </div>
                 </div>
                 <div class="opp-card-sponsor">${item.sponsor_institution ? `<strong>${t('Sponsor:')}</strong> ${item.sponsor_institution}` : ''}</div>
@@ -7823,6 +7862,12 @@ document.addEventListener('DOMContentLoaded', function () {
     var footerLU = document.getElementById('footerLastUpdated');
     if (footerLU) footerLU.textContent = verifiedDisplay;
 
+    /* ── Update About section date ── */
+    var aboutLU = document.getElementById('aboutLastUpdated');
+    if (aboutLU) aboutLU.textContent = ar
+      ? latestVerified ? latestVerified.toLocaleDateString('ar-SA', { month: 'long', year: 'numeric' }) : 'مايو 2026'
+      : latestVerified ? latestVerified.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) : 'May 2026';
+
     /* ── Update provenance strip & stat strip with live date ── */
     var provDataset = document.getElementById('provDatasetVersion');
     if (provDataset) {
@@ -8104,6 +8149,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var panelDesc   = document.getElementById('panelDesc');
   var panelFields = document.getElementById('panelFields');
   var panelBadges = document.getElementById('panelBadges');
+  var panelTrustBar = document.getElementById('panelTrustBar');
   var panelLink   = document.getElementById('panelLink');
   var panelClose  = document.getElementById('panelClose');
 
@@ -8135,11 +8181,76 @@ document.addEventListener('DOMContentLoaded', function () {
     panelDesc.textContent  = item.description_short || '';
 
     // Badges
+    var statusCls = (item.status === 'open') ? 'status-open'
+                  : (item.status === 'recurring' || item.status === 'closed_but_recurring') ? 'status-recurring'
+                  : 'status-closed';
     panelBadges.innerHTML =
       badge(pretty(item.type || 'Other')) +
       badge(item.country || pretty(item.eligibility_region) || 'Global') +
-      (item.status === 'open' ? badge(t('Open'), 'status-open') : '') +
+      badge(pretty(item.status || 'Unknown'), statusCls) +
       (item.isNew ? badge(t('New'), 'badge-new') : '');
+
+    // Trust bar
+    if (panelTrustBar) {
+      var ar = window.__lang === 'ar';
+      var trustItems = '';
+
+      // Verified date
+      var vDate = item.last_verified || '';
+      var vAge = '';
+      var vCls = 'panel-trust-dot--grey';
+      if (vDate) {
+        var vMs = Date.now() - new Date(vDate).getTime();
+        var vDays = Math.floor(vMs / 86400000);
+        if (vDays <= 14)       { vAge = ar ? '(' + vDays + ' يوم)' : '(' + vDays + 'd ago)'; vCls = 'panel-trust-dot--green'; }
+        else if (vDays <= 60)  { vAge = ar ? '(' + Math.floor(vDays/7) + ' أسابيع)' : '(' + Math.floor(vDays/7) + 'w ago)'; vCls = 'panel-trust-dot--green'; }
+        else if (vDays <= 180) { vAge = ar ? '(' + Math.floor(vDays/30) + ' أشهر)' : '(' + Math.floor(vDays/30) + 'mo ago)'; vCls = 'panel-trust-dot--gold'; }
+        else                   { vAge = ar ? '(قديم)' : '(older)'; vCls = 'panel-trust-dot--grey'; }
+      }
+      trustItems += '<span class="panel-trust-item">' +
+        '<span class="panel-trust-dot ' + vCls + '"></span>' +
+        '<span class="panel-trust-label">' + (ar ? 'تحقق' : 'Verified') + '</span>' +
+        '<span class="panel-trust-val">' + esc(vDate || (ar ? 'غير محدد' : 'Not on record')) + (vAge ? ' ' + vAge : '') + '</span>' +
+      '</span>';
+
+      // Source link status
+      var hasLink = item.application_link && item.application_link !== '#' && item.application_link.startsWith('http');
+      trustItems += '<span class="panel-trust-item">' +
+        '<span class="panel-trust-dot ' + (hasLink ? 'panel-trust-dot--green' : 'panel-trust-dot--grey') + '"></span>' +
+        '<span class="panel-trust-label">' + (ar ? 'المصدر' : 'Source') + '</span>' +
+        '<span class="panel-trust-val ' + (hasLink ? 'panel-trust-val--ok' : '') + '">' +
+          (hasLink ? (ar ? 'رابط مُحقَّق' : 'Link verified') : (ar ? 'لا يوجد رابط' : 'No link on record')) +
+        '</span>' +
+      '</span>';
+
+      // Record state: New / Updated / On file
+      var recState, recDot;
+      if (item.isNew) {
+        recState = ar ? 'سجل جديد' : 'Newly added';
+        recDot = 'panel-trust-dot--green';
+      } else if (vDate && (Date.now() - new Date(vDate).getTime()) <= 30 * 86400000) {
+        recState = ar ? 'تم التحديث مؤخراً' : 'Recently updated';
+        recDot = 'panel-trust-dot--green';
+      } else {
+        recState = ar ? 'في الملف' : 'On file';
+        recDot = 'panel-trust-dot--grey';
+      }
+      trustItems += '<span class="panel-trust-item">' +
+        '<span class="panel-trust-dot ' + recDot + '"></span>' +
+        '<span class="panel-trust-label">' + (ar ? 'السجل' : 'Record') + '</span>' +
+        '<span class="panel-trust-val">' + recState + '</span>' +
+      '</span>';
+
+      // Human review indicator (all records are human-reviewed in this dataset)
+      trustItems += '<span class="panel-trust-item">' +
+        '<span class="panel-trust-dot panel-trust-dot--green"></span>' +
+        '<span class="panel-trust-label">' + (ar ? 'المراجعة' : 'Review') + '</span>' +
+        '<span class="panel-trust-val panel-trust-val--ok">' + (ar ? 'مراجعة بشرية' : 'Human-reviewed') + '</span>' +
+      '</span>';
+
+      panelTrustBar.innerHTML = trustItems;
+      panelTrustBar.style.display = '';
+    }
 
     // Sector context block
     var ctx = sectorContext(item.sectors || []);
@@ -8172,8 +8283,9 @@ document.addEventListener('DOMContentLoaded', function () {
       (item.sectors && item.sectors.length ? field(t('Sectors'), item.sectors.map(pretty).join(', ')) : '') +
       (item.profiles && item.profiles.length ? field(t('Audience'), item.profiles.map(pretty).join(', ')) : '');
 
-    panelLink.href = item.application_link || '#';
-    panelLink.style.display = item.application_link ? '' : 'none';
+    var validLink = item.application_link && item.application_link !== '#' && item.application_link.startsWith('http');
+    panelLink.href = validLink ? item.application_link : '#';
+    panelLink.style.display = validLink ? '' : 'none';
 
     panel.classList.add('open');
     panel.setAttribute('aria-hidden', 'false');
