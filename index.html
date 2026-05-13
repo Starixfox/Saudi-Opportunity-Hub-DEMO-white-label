@@ -9871,9 +9871,291 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 /* ── END LANDSCAPE INSIGHTS V2 ────────────────────────────────── */
 </script>
 <script>
-/* Language switching: EN → ar.html (Arabic page), AR → index.html (English page) */
-window.activateArabic  = function() { window.location.href = 'ar.html'; };
-window.activateEnglish = function() { window.location.href = 'index.html'; };
+/* =============================================================
+   AUTO TRANSLATE — walks the live DOM and translates every
+   visible text node EN→AR via MyMemory (free, no key needed).
+   RTL layout injected via a <style> block.
+   Toggle: window.activateArabic() / window.activateEnglish()
+   ============================================================= */
+(function () {
+
+  /* ── Config ── */
+  var API      = 'https://api.mymemory.translated.net/get?q={Q}&langpair=en|ar';
+  var CACHE_KEY = 'oh-ar-cache-v1';
+  var LANG_KEY  = 'oh-lang';
+  var BATCH     = 10;   /* strings per API call */
+
+  /* ── Skip these tags entirely ── */
+  var SKIP = new Set(['SCRIPT','STYLE','NOSCRIPT','IFRAME','CANVAS',
+                      'SVG','PATH','G','DEFS','SYMBOL','USE',
+                      'INPUT','TEXTAREA','SELECT','OPTION',
+                      'CODE','PRE','META','LINK','HEAD']);
+
+  /* ── Persistent translation cache ── */
+  var cache = {};
+  try { cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch(e) {}
+  function saveCache() { try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch(e) {} }
+
+  /* ── Original text cache (for EN restore) ── */
+  var originals = []; /* [{node, text}] */
+
+  /* ── RTL style injection ── */
+  var RTL_ID = 'oh-rtl-override';
+  function injectRTL() {
+    if (document.getElementById(RTL_ID)) return;
+    var s = document.createElement('style');
+    s.id = RTL_ID;
+    s.textContent = [
+      "body{direction:rtl}",
+      ".app-shell{direction:rtl}",
+      ".app-sidebar{direction:rtl}",
+      ".app-topbar-left{flex-direction:row-reverse}",
+      ".app-topbar-right{flex-direction:row-reverse}",
+      ".app-nav-item{flex-direction:row-reverse;text-align:right}",
+      ".app-nav-item [data-lucide]{margin-right:0;margin-left:10px}",
+      ".home-greeting-row{flex-direction:row-reverse}",
+      ".home-greeting{text-align:right}",
+      ".home-quick-actions{flex-direction:row-reverse}",
+      ".home-stats-row{flex-direction:row-reverse}",
+      ".home-card-hdr{flex-direction:row-reverse}",
+      ".home-cols{direction:rtl}",
+      ".home-card{text-align:right}",
+      ".filter-bar{direction:rtl}",
+      ".filter-row{flex-direction:row-reverse}",
+      ".filter-label{flex-direction:row-reverse}",
+      ".profile-chips{flex-direction:row-reverse}",
+      ".preset-chips{flex-direction:row-reverse}",
+      ".results-bar{flex-direction:row-reverse}",
+      ".active-chips-row{flex-direction:row-reverse}",
+      ".reset-btn{margin-left:0;margin-right:auto}",
+      ".opp-card-content{text-align:right}",
+      ".opp-card-meta{flex-direction:row-reverse}",
+      ".opp-card-actions{flex-direction:row-reverse}",
+      ".opp-card-noimg{flex-direction:row-reverse}",
+      ".dash-header{flex-direction:row-reverse}",
+      ".kpi-card{text-align:right}",
+      ".kpi-label{flex-direction:row-reverse;justify-content:flex-end}",
+      ".kpi-grid{direction:rtl}",
+      ".chart-grid{direction:rtl}",
+      ".chart-card{text-align:right}",
+      ".chart-card h3{text-align:right}",
+      ".saved-wrap{text-align:right}",
+      ".wl-saved-card{flex-direction:row-reverse}",
+      ".wl-saved-card__meta{flex-direction:row-reverse}",
+      ".sector-chip{flex-direction:row-reverse}",
+      ".sectors-grid{direction:rtl}",
+      ".about-wrap{text-align:right}",
+      ".about-card{text-align:right}",
+      ".panel-header{flex-direction:row-reverse}",
+      ".panel-badges{flex-direction:row-reverse}",
+      ".compare-tray__header{flex-direction:row-reverse}",
+      ".liv2-kpi-row{direction:rtl}",
+      ".liv2-chart-row{direction:rtl}",
+      ".liv2-heading-row{flex-direction:row-reverse;text-align:right}",
+      ".home-stat{text-align:right}",
+      ".home-opp-list{text-align:right}",
+      ".home-sector-chips{flex-direction:row-reverse}",
+      ".saved-header{flex-direction:row-reverse}",
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+  function removeRTL() {
+    var s = document.getElementById(RTL_ID);
+    if (s) s.remove();
+  }
+
+  /* ── Collect all translatable text nodes ── */
+  function collectTextNodes(root) {
+    var nodes = [];
+    var walker = document.createTreeWalker(
+      root || document.body,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: function(node) {
+          var p = node.parentElement;
+          if (!p) return NodeFilter.FILTER_REJECT;
+          if (SKIP.has(p.tagName)) return NodeFilter.FILTER_REJECT;
+          /* Skip hidden elements */
+          if (p.offsetParent === null && p.tagName !== 'BODY') {
+            /* still include — view may be hidden now but shown later */
+          }
+          /* Skip pure whitespace / numbers-only */
+          var t = node.textContent.trim();
+          if (!t || t.length < 2) return NodeFilter.FILTER_SKIP;
+          if (/^[\d\s\.,\-\+\%\$\/\(\)\[\]#@!:;]+$/.test(t)) return NodeFilter.FILTER_SKIP;
+          /* Skip Arabic already */
+          if (/[\u0600-\u06FF]/.test(t)) return NodeFilter.FILTER_SKIP;
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      }
+    );
+    var n;
+    while ((n = walker.nextNode())) nodes.push(n);
+    return nodes;
+  }
+
+  /* ── Also translate placeholder / title / aria-label attrs ── */
+  var ATTR_SELS = [
+    { sel: '#searchInput',      attr: 'placeholder' },
+    { sel: '[title]',           attr: 'title' },
+    { sel: '[aria-label]',      attr: 'aria-label' },
+    { sel: '[placeholder]',     attr: 'placeholder' },
+  ];
+  var origAttrs = [];
+
+  function collectAttrs() {
+    ATTR_SELS.forEach(function(item) {
+      document.querySelectorAll(item.sel).forEach(function(el) {
+        var val = el.getAttribute(item.attr);
+        if (!val || !val.trim() || /[\u0600-\u06FF]/.test(val)) return;
+        origAttrs.push({ el: el, attr: item.attr, orig: val });
+      });
+    });
+  }
+
+  /* ── Translate a batch of strings via MyMemory ── */
+  async function translateBatch(strings) {
+    var results = [];
+    for (var i = 0; i < strings.length; i++) {
+      var s = strings[i].trim();
+      if (!s) { results.push(''); continue; }
+      if (cache[s]) { results.push(cache[s]); continue; }
+      try {
+        var url = API.replace('{Q}', encodeURIComponent(s));
+        var res = await fetch(url);
+        var data = await res.json();
+        var tr = (data.responseData && data.responseData.translatedText) || s;
+        /* MyMemory sometimes returns the original if it fails */
+        if (tr && tr !== s) {
+          cache[s] = tr;
+          results.push(tr);
+        } else {
+          results.push(s);
+        }
+      } catch(e) {
+        results.push(s);
+      }
+    }
+    return results;
+  }
+
+  /* ── Main: translate entire page to Arabic ── */
+  var _translated = false;
+  var _translating = false;
+
+  async function translatePage() {
+    if (_translated || _translating) return;
+    _translating = true;
+
+    /* Show loading indicator on the lang button */
+    var langBtn = document.getElementById('appLangToggle');
+    var langLabel = document.getElementById('appLangLabel');
+    if (langLabel) langLabel.textContent = '...';
+
+    /* Apply RTL layout immediately so the page shifts right away */
+    document.documentElement.setAttribute('dir', 'rtl');
+    document.documentElement.setAttribute('lang', 'ar');
+    document.body.setAttribute('dir', 'rtl');
+    injectRTL();
+
+    /* Collect text nodes */
+    var nodes = collectTextNodes();
+    originals = nodes.map(function(n) { return { node: n, text: n.textContent }; });
+
+    /* Collect attrs */
+    collectAttrs();
+
+    /* Translate in batches */
+    var texts = nodes.map(function(n) { return n.textContent.trim(); });
+    for (var i = 0; i < texts.length; i += BATCH) {
+      var batch = texts.slice(i, i + BATCH);
+      var translated = await translateBatch(batch);
+      for (var j = 0; j < translated.length; j++) {
+        if (translated[j] && nodes[i + j]) {
+          nodes[i + j].textContent = nodes[i + j].textContent.replace(
+            nodes[i + j].textContent.trim(),
+            translated[j]
+          );
+        }
+      }
+    }
+
+    /* Translate attrs */
+    var attrTexts = origAttrs.map(function(a) { return a.orig; });
+    for (var i = 0; i < attrTexts.length; i += BATCH) {
+      var batch = attrTexts.slice(i, i + BATCH);
+      var translated = await translateBatch(batch);
+      for (var j = 0; j < translated.length; j++) {
+        if (translated[j] && origAttrs[i + j]) {
+          origAttrs[i + j].el.setAttribute(origAttrs[i + j].attr, translated[j]);
+        }
+      }
+    }
+
+    saveCache();
+    _translating = false;
+    _translated  = true;
+
+    /* Update button label */
+    if (langLabel) langLabel.textContent = 'English';
+
+    try { localStorage.setItem(LANG_KEY, 'ar'); } catch(e) {}
+  }
+
+  /* ── Restore English ── */
+  function restorePage() {
+    if (!_translated) return;
+
+    document.documentElement.setAttribute('dir', 'ltr');
+    document.documentElement.setAttribute('lang', 'en');
+    document.body.setAttribute('dir', 'ltr');
+    removeRTL();
+
+    /* Restore text nodes */
+    originals.forEach(function(item) {
+      if (item.node && item.node.parentNode) {
+        item.node.textContent = item.text;
+      }
+    });
+
+    /* Restore attrs */
+    origAttrs.forEach(function(item) {
+      item.el.setAttribute(item.attr, item.orig);
+    });
+
+    originals = [];
+    origAttrs  = [];
+    _translated  = false;
+
+    var langLabel = document.getElementById('appLangLabel');
+    if (langLabel) langLabel.textContent = 'العربية';
+
+    try { localStorage.setItem(LANG_KEY, 'en'); } catch(e) {}
+  }
+
+  /* ── Public API ── */
+  window.activateArabic  = function() { translatePage(); };
+  window.activateEnglish = function() { restorePage();   };
+
+  /* ── Wire the globe button in topbar ── */
+  document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('appLangToggle');
+    if (btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (_translated || _translating) { restorePage(); }
+        else { translatePage(); }
+      });
+    }
+    /* Restore saved preference */
+    try {
+      if (localStorage.getItem(LANG_KEY) === 'ar') {
+        setTimeout(translatePage, 800);
+      }
+    } catch(e) {}
+  });
+
+})();
 </script>
 
 <!-- Sign-out + hamburger + mobile lang handler -->
