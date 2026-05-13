@@ -9613,6 +9613,7 @@ document.addEventListener('DOMContentLoaded', function () {
       prefs = merged;
       save(KEY_PREFS, prefs);
       window.__userPrefs = prefs;  /* expose for insights personalisation */
+      window.dispatchEvent(new CustomEvent('__userPrefsUpdated'));  /* notify insights to re-render */
       applyDefaultFilters();
     });
     /* Searches */
@@ -10164,6 +10165,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
     save(KEY_PREFS, prefs);
     window.__userPrefs = prefs;  /* expose for insights personalisation */
+    window.dispatchEvent(new CustomEvent('__userPrefsUpdated'));  /* notify insights to re-render */
     dbSavePrefs(prefs);
     document.getElementById('settingsModalOverlay').classList.remove('open');
     showToast('Preferences saved');
