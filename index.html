@@ -9880,10 +9880,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 (function () {
 
   /* ── Config ── */
-  var API      = 'https://api.mymemory.translated.net/get?q={Q}&langpair=en|ar';
-  var CACHE_KEY = 'oh-ar-cache-v1';
+  /* Google unofficial endpoint — much faster than MyMemory */
+  var GT_URL    = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ar&dt=t&q=';
+  var CACHE_KEY = 'oh-ar-cache-v2';
   var LANG_KEY  = 'oh-lang';
-  var BATCH     = 10;   /* strings per API call */
+  var BATCH     = 40;   /* strings per batch — parallel fetches */
 
   /* ── Skip these tags entirely ── */
   var SKIP = new Set(['SCRIPT','STYLE','NOSCRIPT','IFRAME','CANVAS',
@@ -10013,30 +10014,65 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     });
   }
 
-  /* ── Translate a batch of strings via MyMemory ── */
-  async function translateBatch(strings) {
-    var results = [];
-    for (var i = 0; i < strings.length; i++) {
-      var s = strings[i].trim();
-      if (!s) { results.push(''); continue; }
-      if (cache[s]) { results.push(cache[s]); continue; }
-      try {
-        var url = API.replace('{Q}', encodeURIComponent(s));
-        var res = await fetch(url);
-        var data = await res.json();
-        var tr = (data.responseData && data.responseData.translatedText) || s;
-        /* MyMemory sometimes returns the original if it fails */
-        if (tr && tr !== s) {
-          cache[s] = tr;
-          results.push(tr);
-        } else {
-          results.push(s);
-        }
-      } catch(e) {
-        results.push(s);
+  /* ── Translate one string via Google Translate unofficial endpoint ── */
+  async function gtTranslate(text) {
+    if (!text || !text.trim()) return text;
+    var t = text.trim();
+    if (cache[t]) return cache[t];
+    try {
+      var res = await fetch(GT_URL + encodeURIComponent(t));
+      var data = await res.json();
+      /* Response structure: [[['translated','original',...],...], ...] */
+      var translated = '';
+      if (data && data[0]) {
+        data[0].forEach(function(chunk) {
+          if (chunk && chunk[0]) translated += chunk[0];
+        });
       }
-    }
-    return results;
+      if (translated && translated !== t) {
+        cache[t] = translated;
+        return translated;
+      }
+    } catch(e) {}
+    return text;
+  }
+
+  /* ── Translate a batch of strings in parallel (fire all at once) ── */
+  async function translateBatch(strings) {
+    var promises = strings.map(function(s) {
+      return gtTranslate(s);
+    });
+    return Promise.all(promises);
+  }
+
+  /* ── Dynamic content observer (catches Supabase-rendered cards after login) ── */
+  var _mutObs = null;
+  function startMutationObserver() {
+    if (_mutObs) return;
+    _mutObs = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mut) {
+        mut.addedNodes.forEach(function(added) {
+          if (added.nodeType !== 1) return;
+          var newNodes = collectTextNodes(added);
+          if (!newNodes.length) return;
+          newNodes.forEach(function(n) {
+            var t = n.textContent.trim();
+            if (!t) return;
+            originals.push({ node: n, text: t });
+            gtTranslate(t).then(function(ar) {
+              if (ar && ar !== t && n.parentNode) {
+                n.textContent = n.textContent.replace(t, ar);
+                saveCache();
+              }
+            });
+          });
+        });
+      });
+    });
+    _mutObs.observe(document.body, { childList: true, subtree: true });
+  }
+  function stopMutationObserver() {
+    if (_mutObs) { _mutObs.disconnect(); _mutObs = null; }
   }
 
   /* ── Main: translate entire page to Arabic ── */
@@ -10099,12 +10135,18 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     /* Update button label */
     if (langLabel) langLabel.textContent = 'English';
 
+    /* Watch for Supabase-injected content (cards, watchlist, etc.) */
+    startMutationObserver();
+
     try { localStorage.setItem(LANG_KEY, 'ar'); } catch(e) {}
   }
 
   /* ── Restore English ── */
   function restorePage() {
-    if (!_translated) return;
+    /* Work even if translation was mid-flight: check we have saved originals */
+    if (originals.length === 0 && !_translating) return;
+    /* Cancel any in-flight translation */
+    _translating = false;
 
     document.documentElement.setAttribute('dir', 'ltr');
     document.documentElement.setAttribute('lang', 'en');
@@ -10127,6 +10169,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     origAttrs  = [];
     _translated  = false;
 
+    /* Stop watching for new content */
+    stopMutationObserver();
+
     var langLabel = document.getElementById('appLangLabel');
     if (langLabel) langLabel.textContent = 'العربية';
 
@@ -10143,7 +10188,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (btn) {
       btn.addEventListener('click', function(e) {
         e.preventDefault();
-        if (_translated || _translating) { restorePage(); }
+        if (_translated || _translating || originals.length > 0) { restorePage(); }
         else { translatePage(); }
       });
     }
