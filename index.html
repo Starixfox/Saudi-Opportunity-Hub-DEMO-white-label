@@ -3965,7 +3965,7 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
           Funding Opportunities<br><span class="accent">Saudi Arabia to Global</span>
         </h1>
         <p class="hero-desc">
-          A structured dataset of grants, tenders, accelerators, fellowships, and investment programs across 15 sectors — covering Saudi Arabia, the GCC, and global initiatives open to Saudi-based organizations. This is a pilot release; data reflects a working snapshot as of March 2026.
+          A structured dataset of grants, tenders, accelerators, fellowships, and investment programs across 15 sectors — covering Saudi Arabia, the GCC, and global initiatives open to Saudi-based organizations. This is a pilot release; data reflects a live, continuously updated dataset.
         </p>
         <div class="hero-ctas">
           <a href="#opportunities" class="btn-primary">
@@ -4137,7 +4137,7 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
       <span class="prov-item">
         <span class="prov-dot prov-dot--green" aria-hidden="true"></span>
         <span class="prov-label">Dataset</span>
-        <span class="prov-value">v1.2 &middot; March 2026</span>
+        <span class="prov-value" id="provDatasetVersion">v1.2</span>
       </span>
       <span class="prov-divider" aria-hidden="true"></span>
       <span class="prov-item">
@@ -4147,7 +4147,7 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
       <span class="prov-divider" aria-hidden="true"></span>
       <span class="prov-item">
         <span class="prov-label">Verified</span>
-        <span class="prov-value">Human-reviewed &middot; March 2026</span>
+        <span class="prov-value" id="provVerifiedDate">Human-reviewed</span>
       </span>
       <span class="prov-divider" aria-hidden="true"></span>
       <span class="prov-item">
@@ -4167,7 +4167,7 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
       <div class="is-stat-divider" aria-hidden="true"></div>
       <div class="is-stat-item" role="listitem">15 sectors covered</div>
       <div class="is-stat-divider" aria-hidden="true"></div>
-      <div class="is-stat-item" role="listitem">Data snapshot: March 2026</div>
+      <div class="is-stat-item" role="listitem" id="statSnapshotDate">Data snapshot: Loading…</div>
       <div class="is-stat-divider" aria-hidden="true"></div>
       <div class="is-stat-item" role="listitem">Available for API integration</div>
     </div>
@@ -4915,7 +4915,7 @@ const TRANSLATIONS = {
     // Stats strip
     stat1: '1,000+ funding records',
     stat2: '15 sectors covered',
-    stat3: 'Data snapshot: March 2026',
+    stat3: 'Data snapshot: Live',
     stat4: 'Available for API integration',
     // Section labels & headings
     sectionLabelOpps:     'Database',
@@ -4986,7 +4986,7 @@ const TRANSLATIONS = {
     who4Desc: 'رسم خريطة البرامج الاستثمارية النشطة في السعودية ودول الخليج وعالمياً لتحديد فرص الاستثمار المشترك.',
     stat1: 'أكثر من 1,000 فرصة تمويل نشطة',
     stat2: '15 قطاعاً ذا صلة بالكيانات السعودية',
-    stat3: 'لقطة تجريبية — بيانات حتى مارس 2026',
+    stat3: 'لقطة بيانات: مباشر',
     stat4: 'تكامل API متاح لمنصات استثمر في السعودية',
     sectionLabelOpps:     'قاعدة البيانات',
     sectionHeadingOpps:   'استثمر في السعودية – الفرص',
@@ -5292,7 +5292,7 @@ document.addEventListener('DOMContentLoaded', function () {
           'id,title,description_short,type,sponsor_institution,country,' +
           'eligibility_region,eligibility_entities,funding_amount,funding_type,' +
           'application_link,deadline_date,status,language,notes,last_verified,' +
-          'profiles,sectors,isNew',
+          'profiles,sectors,isNew,created_at',
           { count: 'exact' }
         )
         .order('id', { ascending: true })
@@ -7746,8 +7746,11 @@ document.addEventListener('DOMContentLoaded', function () {
     var weekStart = new Date(now); weekStart.setHours(0,0,0,0); weekStart.setDate(now.getDate() - dow);
 
     var addedWeek = 0, updatedWeek = 0, latestVerified = null;
+    var isNewCount = 0;
     data.forEach(function(item) {
-      /* created_at / last_verified treated as "added" */
+      /* Track isNew flag — used as fallback for addedWeek */
+      if (item.isNew) isNewCount++;
+      /* created_at / last_verified treated as "added" / "updated" */
       var createdStr  = item.created_at  || '';
       var verifiedStr = item.last_verified || '';
       if (createdStr) {
@@ -7762,6 +7765,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
     });
+    /* If created_at wasn't in the dataset, fall back to isNew count */
+    if (addedWeek === 0 && isNewCount > 0) addedWeek = isNewCount;
 
     /* Format the most-recent verified date compactly */
     var verifiedDisplay = latestVerified
@@ -7820,6 +7825,26 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     var footerLU = document.getElementById('footerLastUpdated');
     if (footerLU) footerLU.textContent = verifiedDisplay;
+
+    /* ── Update provenance strip & stat strip with live date ── */
+    var provDataset = document.getElementById('provDatasetVersion');
+    if (provDataset) {
+      provDataset.textContent = ar
+        ? ('v1.2 · ' + verifiedDisplay)
+        : ('v1.2 \u00b7 ' + verifiedDisplay);
+    }
+    var provVerified = document.getElementById('provVerifiedDate');
+    if (provVerified) {
+      provVerified.textContent = ar
+        ? ('مراجعة بشرية · ' + verifiedDisplay)
+        : ('Human-reviewed \u00b7 ' + verifiedDisplay);
+    }
+    var statSnap = document.getElementById('statSnapshotDate');
+    if (statSnap) {
+      statSnap.textContent = ar
+        ? ('لقطة بيانات: ' + verifiedDisplay)
+        : ('Data snapshot: ' + verifiedDisplay);
+    }
   }
   /* Re-populate on language switch */
   window.__populateDfp = populateDfp;
@@ -9055,16 +9080,11 @@ document.addEventListener('DOMContentLoaded', function () {
     if (wc) wc.textContent = watchlist.length;
     if (sc) sc.textContent = searches.length;
 
-    // "New this week" = items added in the last 7 days
-    var weekAgo = Date.now() - 7 * 24 * 3600 * 1000;
+    // "New this week" = items flagged isNew in the dataset
     var newCount = 0;
-    // If we have dataset access, count new items since lastVisit
-    if (window._wsDataset && lastVisit) {
-      var lv = new Date(lastVisit).getTime();
-      newCount = window._wsDataset.filter(function(item) {
-        var d = item.created_at || item.last_verified || '';
-        return d && new Date(d).getTime() > lv;
-      }).length;
+    var _dataset = window.opportunitiesData || window.allOpportunities || window._wsDataset || null;
+    if (_dataset) {
+      newCount = _dataset.filter(function(item) { return !!item.isNew; }).length;
     }
     if (uc) uc.textContent = newCount;
 
@@ -9457,24 +9477,25 @@ document.addEventListener('DOMContentLoaded', function () {
     // ── Apply default filters from prefs
     setTimeout(applyDefaultFilters, 800);
 
-    // ── Wait for dataset, then render recommendations
+    // ── Wait for dataset, then render recommendations and refresh WS bar
     var recInterval = setInterval(function() {
-      // Hook into the dataset rendered by the main script
-      // The main script stores data via window.__ohDataset set after first load
-      var dataset = window.__ohDataset || window.__filteredDataset || null;
+      // Primary source: window.opportunitiesData (Supabase-loaded)
+      var dataset = window.opportunitiesData || window.allOpportunities ||
+                    window.__ohDataset || window.__filteredDataset || null;
       if (!dataset) {
         // Try to grab from script.js state via DOM
         var countEl = document.getElementById('resultsCount');
         if (countEl && !countEl.textContent.includes('Loading')) {
           // Dataset loaded — trigger recs via a small delay
           clearInterval(recInterval);
-          setTimeout(renderRecommendations, 500);
+          setTimeout(function() { renderRecommendations(); updateWsBar(); }, 500);
         }
         return;
       }
       window._wsDataset = dataset;
       clearInterval(recInterval);
       renderRecommendations();
+      updateWsBar(); // refresh "New this week" with real isNew count
     }, 600);
 
     // Update last visit time
