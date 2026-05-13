@@ -3057,6 +3057,58 @@ body[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
   .liv2-insight-item { padding: 0; }
 }
 
+/* Heading row with personalisation chip */
+.liv2-heading-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-3);
+}
+.liv2-heading-row .section-heading { margin-bottom: 0; }
+
+.liv2-personal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--green-dim);
+  border: 1px solid rgba(0,166,81,0.3);
+  border-radius: var(--radius-full);
+  padding: 4px 10px 4px 8px;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--green);
+  white-space: nowrap;
+}
+[data-theme="light"] .liv2-personal-chip {
+  background: #e0f5ec;
+  color: var(--green);
+}
+.liv2-personal-chip__dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  animation: liv2Pulse 2s ease-in-out infinite;
+}
+@keyframes liv2Pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+.liv2-personal-chip__reset {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 1;
+  padding: 1px 2px;
+  margin-left: 2px;
+  border-radius: 50%;
+  transition: color var(--transition);
+}
+.liv2-personal-chip__reset:hover { color: var(--text); }
+
 /* ── END LANDSCAPE INSIGHTS V2 ──────────────────────────────── */
 
 
@@ -4640,7 +4692,14 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
 
   <section id="insights" aria-label="Data insights and analytics">
     <div class="section-label">Analytics</div>
-    <h2 class="section-heading">Landscape Overview</h2>
+    <div class="liv2-heading-row">
+      <h2 class="section-heading">Landscape Overview</h2>
+      <span class="liv2-personal-chip" id="liv2PersonalChip" style="display:none" role="status">
+        <span class="liv2-personal-chip__dot"></span>
+        <span class="liv2-personal-chip__text" id="liv2ChipText">Personalised for you</span>
+        <button class="liv2-personal-chip__reset" id="liv2ChipReset" aria-label="Show global view">&#10005;</button>
+      </span>
+    </div>
     <p class="section-sub">
       Program-type distribution, regional breakdown, and status summary across all sectors and geographies. Use these charts to orient your research before drilling into individual records.
     </p>
@@ -8511,464 +8570,417 @@ document.addEventListener('DOMContentLoaded', function () {
 })();
 </script>
 <script>
-/* ── LANDSCAPE INSIGHTS V2 ─────────────────────────────────────
-   Data-driven KPI cards + Chart.js charts + insight strip
-   driven from window.opportunitiesData (async Supabase feed)
-   — supports dark/light mode, EN/AR bilingual, IntersectionObserver
-──────────────────────────────────────────────────── */
+/* ── LANDSCAPE INSIGHTS V2 (PERSONALISED) ───────────────────────
+   When the user has saved preferences (sectors / role), charts are
+   filtered to their interests. Falls back to global view if no prefs.
+────────────────────────────────────────────────── */
 (function() {
   'use strict';
 
-  /* —— sector display names (EN / AR) —————————————————————— */
+  /* —— sector display names ————————————————————————————— */
   var SECTOR_NAMES_EN = {
-    agriculture:  'Agriculture',  chemicals:  'Chemicals',
-    defense:      'Defense',      education:  'Education',
-    energy:       'Energy',       environment:'Environment',
-    financial:    'Financial',    gaming:     'Gaming',
-    healthcare:   'Healthcare',   ict:        'ICT',
-    industrial:   'Industrial',   innovation: 'Innovation',
-    media:        'Media',        mining:     'Mining',
-    pharma:       'Pharma',       realestate: 'Real Estate',
-    space:        'Space',        sports:     'Sports',
-    technology:   'Technology',   tourism:    'Tourism',
-    transport:    'Transport',    other:      'Other'
+    agriculture:'Agriculture', chemicals:'Chemicals', defense:'Defense',
+    education:'Education', energy:'Energy', environment:'Environment',
+    financial:'Financial', gaming:'Gaming', healthcare:'Healthcare',
+    ict:'ICT', industrial:'Industrial', innovation:'Innovation',
+    media:'Media', mining:'Mining', pharma:'Pharma',
+    realestate:'Real Estate', space:'Space', sports:'Sports',
+    technology:'Technology', tourism:'Tourism', transport:'Transport', other:'Other'
   };
   var SECTOR_NAMES_AR = {
-    agriculture:  '\u0627\u0644\u0632\u0631\u0627\u0639\u0629',
-    chemicals:    '\u0627\u0644\u0643\u064a\u0645\u064a\u0627\u0621',
-    defense:      '\u0627\u0644\u062f\u0641\u0627\u0639',
-    education:    '\u0627\u0644\u062a\u0639\u0644\u064a\u0645',
-    energy:       '\u0627\u0644\u0637\u0627\u0642\u0629',
-    environment:  '\u0627\u0644\u0628\u064a\u0626\u0629',
-    financial:    '\u0627\u0644\u0645\u0627\u0644\u064a\u0629',
-    gaming:       '\u0627\u0644\u0623\u0644\u0639\u0627\u0628',
-    healthcare:   '\u0627\u0644\u0631\u0639\u0627\u064a\u0629 \u0627\u0644\u0635\u062d\u064a\u0629',
-    ict:          '\u062a\u0642\u0646\u064a\u0629 \u0627\u0644\u0645\u0639\u0644\u0648\u0645\u0627\u062a',
-    industrial:   '\u0627\u0644\u0635\u0646\u0627\u0639\u0629',
-    innovation:   '\u0627\u0644\u0627\u0628\u062a\u0643\u0627\u0631',
-    media:        '\u0627\u0644\u0625\u0639\u0644\u0627\u0645',
-    mining:       '\u0627\u0644\u062a\u0639\u062f\u064a\u0646',
-    pharma:       '\u0627\u0644\u0635\u064a\u062f\u0644\u0629',
-    realestate:   '\u0627\u0644\u0639\u0642\u0627\u0631\u0627\u062a',
-    space:        '\u0627\u0644\u0641\u0636\u0627\u0621',
-    sports:       '\u0627\u0644\u0631\u064a\u0627\u0636\u0629',
-    technology:   '\u0627\u0644\u062a\u0643\u0646\u0648\u0644\u0648\u062c\u064a\u0627',
-    tourism:      '\u0627\u0644\u0633\u064a\u0627\u062d\u0629',
-    transport:    '\u0627\u0644\u0646\u0642\u0644',
-    other:        '\u0623\u062e\u0631\u0649'
+    agriculture:'\u0627\u0644\u0632\u0631\u0627\u0639\u0629', chemicals:'\u0627\u0644\u0643\u064a\u0645\u064a\u0627\u0621', defense:'\u0627\u0644\u062f\u0641\u0627\u0639',
+    education:'\u0627\u0644\u062a\u0639\u0644\u064a\u0645', energy:'\u0627\u0644\u0637\u0627\u0642\u0629', environment:'\u0627\u0644\u0628\u064a\u0626\u0629',
+    financial:'\u0627\u0644\u0645\u0627\u0644\u064a\u0629', gaming:'\u0627\u0644\u0623\u0644\u0639\u0627\u0628', healthcare:'\u0627\u0644\u0631\u0639\u0627\u064a\u0629 \u0627\u0644\u0635\u062d\u064a\u0629',
+    ict:'\u062a\u0642\u0646\u064a\u0629 \u0627\u0644\u0645\u0639\u0644\u0648\u0645\u0627\u062a', industrial:'\u0627\u0644\u0635\u0646\u0627\u0639\u0629', innovation:'\u0627\u0644\u0627\u0628\u062a\u0643\u0627\u0631',
+    media:'\u0627\u0644\u0625\u0639\u0644\u0627\u0645', mining:'\u0627\u0644\u062a\u0639\u062f\u064a\u0646', pharma:'\u0627\u0644\u0635\u064a\u062f\u0644\u0629',
+    realestate:'\u0627\u0644\u0639\u0642\u0627\u0631\u0627\u062a', space:'\u0627\u0644\u0641\u0636\u0627\u0621', sports:'\u0627\u0644\u0631\u064a\u0627\u0636\u0629',
+    technology:'\u0627\u0644\u062a\u0643\u0646\u0648\u0644\u0648\u062c\u064a\u0627', tourism:'\u0627\u0644\u0633\u064a\u0627\u062d\u0629', transport:'\u0627\u0644\u0646\u0642\u0644', other:'\u0623\u062e\u0631\u0649'
   };
 
-  /* Returns true if funding_amount string contains a real parseable amount
-     (i.e. a currency symbol + number, or explicit K/M/B suffix after a number).
-     Used to count programmes WITH known funding per sector. */
+  /* map prefs.role strings -> profile keys used in data */
+  var ROLE_TO_PROFILE = {
+    'Startup / SME':       'startup',
+    'Researcher':          'researcher',
+    'University':          'researcher',
+    'Government':          'government',
+    'Investor':            'investor',
+    'Student':             'student',
+    'Corporate':           'corporate'
+  };
+
+  /* type display names EN/AR */
+  var TYPE_NAMES_EN = {
+    grant:'Grant', tender:'Tender', accelerator:'Accelerator',
+    investment_program:'Investment Program', fellowship:'Fellowship',
+    loan_program:'Loan Program', partnership_program:'Partnership', other:'Other'
+  };
+  var TYPE_NAMES_AR = {
+    grant:'\u0645\u0646\u062d\u0629', tender:'\u0639\u0637\u0627\u0621',
+    accelerator:'\u0645\u0633\u0631\u0651\u0639\u0629', investment_program:'\u0628\u0631\u0646\u0627\u0645\u062c \u0627\u0633\u062a\u062b\u0645\u0627\u0631\u064a',
+    fellowship:'\u0632\u0645\u0627\u0644\u0629', loan_program:'\u0628\u0631\u0646\u0627\u0645\u062c \u0642\u0631\u0648\u0636',
+    partnership_program:'\u0634\u0631\u0627\u0643\u0629', other:'\u0623\u062e\u0631\u0649'
+  };
+
+  /* profile display names EN/AR */
+  var PROFILE_NAMES_EN = {
+    startup:'Startups', investor:'Investors', researcher:'Researchers',
+    government:'Government', student:'Students', corporate:'Corporate'
+  };
+  var PROFILE_NAMES_AR = {
+    startup:'\u0634\u0631\u0643\u0627\u062a \u0627\u0644\u0646\u0627\u0634\u0626\u0629',
+    investor:'\u0627\u0644\u0645\u0633\u062a\u062b\u0645\u0631\u0648\u0646',
+    researcher:'\u0627\u0644\u0628\u0627\u062d\u062b\u0648\u0646',
+    government:'\u0627\u0644\u062c\u0647\u0627\u062a \u0627\u0644\u062d\u0643\u0648\u0645\u064a\u0629',
+    student:'\u0627\u0644\u0637\u0644\u0627\u0628',
+    corporate:'\u0627\u0644\u0634\u0631\u0643\u0627\u062a'
+  };
+
+  /* —— helpers ———————————————————————————————————— */
+  function norm(s) { return String(s||'').toLowerCase().replace(/[\s\-\/]+/g,'_'); }
+
   function hasParsableFunding(str) {
     if (!str) return false;
     var s = String(str);
-    /* Must have a currency symbol OR an explicit M/K/B suffix right after digits */
     return /[$\u20ac\u00a3]\s*[\d]/.test(s) ||
            /\b(usd|eur|gbp|aed|sar|bhd|qar|omr|kwd)\s*[\d]/i.test(s) ||
            /[\d]\s*(million|billion|\bm\b|\bb\b)/i.test(s) ||
            /[\d][kK]\b/.test(s);
   }
 
-  /* resolve CSS variable value at runtime */
-  function cssVar(name) {
-    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  }
-
-  /* pick chart text colour from current theme */
   function chartTextColor() {
-    var theme = document.documentElement.getAttribute('data-theme') || 'dark';
-    return theme === 'light' ? '#1a1f36' : '#7c89ab';
+    return (document.documentElement.getAttribute('data-theme')||'dark') === 'light' ? '#1a1f36' : '#7c89ab';
   }
   function chartGridColor() {
-    var theme = document.documentElement.getAttribute('data-theme') || 'dark';
-    return theme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)';
+    return (document.documentElement.getAttribute('data-theme')||'dark') === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)';
   }
 
-  /* —— count-up animation ——————————————————————————————— */
   function countUp(el, target, duration) {
     if (!el) return;
-    var start = 0;
     var startTime = null;
     function step(ts) {
       if (!startTime) startTime = ts;
-      var progress = Math.min((ts - startTime) / duration, 1);
-      var ease = 1 - Math.pow(1 - progress, 3); /* ease-out cubic */
+      var ease = 1 - Math.pow(1 - Math.min((ts - startTime) / duration, 1), 3);
       el.textContent = Math.round(ease * target).toLocaleString();
-      if (progress < 1) requestAnimationFrame(step);
+      if (ease < 1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);
   }
 
-  /* —— chart instances (kept for theme re-render) ———————————— */
-  var fundingChart = null;
-  var sectorChart  = null;
-  var statusChart  = null;
-
-  /* —— data processing —————————————————————————————————— */
-  function processData(data) {
-    var ar = document.body.dir === 'rtl';
-    var NAMES = ar ? SECTOR_NAMES_AR : SECTOR_NAMES_EN;
-
-    /* KPI values */
-    var total = data.length;
-    var open  = data.filter(function(r) { return r.status === 'open'; }).length;
-    var cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    var newCount = data.filter(function(r) {
-      return r.isNew === true && r.last_verified && new Date(r.last_verified).getTime() >= cutoff;
-    }).length;
-
-    /* sectors covered */
-    var sectorSet = {};
-    data.forEach(function(r) {
-      (r.sectors || []).forEach(function(s) { if (s) sectorSet[s] = true; });
-    });
-    var sectorCount = Object.keys(sectorSet).length;
-
-    /* sector counts (for donut) */
-    var sectorCounts = {};
-    data.forEach(function(r) {
-      (r.sectors || []).forEach(function(s) {
-        if (s) sectorCounts[s] = (sectorCounts[s] || 0) + 1;
-      });
-    });
-    var sectorEntries = Object.keys(sectorCounts).map(function(k) {
-      return { key: k, label: NAMES[k] || k, count: sectorCounts[k] };
-    });
-    sectorEntries.sort(function(a, b) { return b.count - a.count; });
-    var topSectors = sectorEntries.slice(0, 8);
-
-    /* funding by sector (horizontal bar) — count of programmes with known funding amounts */
-    var fundingCountBySector = {};
-    data.forEach(function(r) {
-      if (!hasParsableFunding(r.funding_amount)) return;
-      (r.sectors || ['other']).forEach(function(s) {
-        fundingCountBySector[s] = (fundingCountBySector[s] || 0) + 1;
-      });
-    });
-    var fundingEntries = Object.keys(fundingCountBySector).map(function(k) {
-      return { key: k, label: NAMES[k] || k, value: fundingCountBySector[k] };
-    });
-    fundingEntries.sort(function(a, b) { return b.value - a.value; });
-    var topFunding = fundingEntries.slice(0, 8);
-
-    /* status counts */
-    var statusMap = {};
-    data.forEach(function(r) {
-      var s = r.status || 'unknown';
-      if (s === 'closed_but_recurring') s = 'recurring';
-      statusMap[s] = (statusMap[s] || 0) + 1;
-    });
-
-    return {
-      total: total, open: open, newCount: newCount, sectorCount: sectorCount,
-      topSectors: topSectors, topFunding: topFunding, statusMap: statusMap
-    };
+  /* —— get active prefs, normalise sector keys ——————————————— */
+  function getPrefs() {
+    var p = window.__userPrefs || {};
+    var sectors = (p.sectors || []).map(norm).filter(Boolean);
+    var role    = p.role || '';
+    var profile = ROLE_TO_PROFILE[role] || '';
+    var name    = p.displayName || '';
+    return { sectors: sectors, role: role, profile: profile, name: name };
   }
 
-  /* —— colour palette for charts —————————————————————————— */
+  /* —— filter dataset to prefs —————————————————————————— */
+  function filterByPrefs(data, prefs) {
+    if (!prefs.sectors.length && !prefs.profile) return data;
+    return data.filter(function(r) {
+      var rSectors = (r.sectors || []).map(norm);
+      var sectorMatch = !prefs.sectors.length ||
+        prefs.sectors.some(function(s) {
+          return rSectors.some(function(rs) { return rs === s || rs.indexOf(s) !== -1 || s.indexOf(rs) !== -1; });
+        });
+      var profileMatch = !prefs.profile ||
+        (r.profiles || []).map(norm).indexOf(prefs.profile) !== -1;
+      return sectorMatch;
+      /* Note: we filter by sector primarily; profile used for chart 3 only */
+    });
+  }
+
+  /* —— chart instances —————————————————————————————— */
+  var charts = { funding: null, sector: null, status: null };
+
   var CHART_COLORS = [
-    '#00a651', '#4f9cf9', '#f5a623', '#b071f9',
-    '#f6b384', '#34d97b', '#ef9090', '#5dd3d3'
+    '#00a651','#4f9cf9','#f5a623','#b071f9',
+    '#f6b384','#34d97b','#ef9090','#5dd3d3'
   ];
 
-  /* —— render / re-render all charts ——————————————————————— */
-  function renderInsightsV2(data) {
-    var d = processData(data);
-    var ar = document.body.dir === 'rtl';
-    var NAMES = ar ? SECTOR_NAMES_AR : SECTOR_NAMES_EN;
+  /* —— force override (reset chip) ——————————————————————— */
+  var forceGlobal = false;
 
-    /* --- KPI fill --- */
+  /* —— personalisation chip ——————————————————————————— */
+  function updateChip(prefs, isPersonalised) {
+    var chip = document.getElementById('liv2PersonalChip');
+    var text = document.getElementById('liv2ChipText');
+    if (!chip) return;
+    if (!isPersonalised) { chip.style.display = 'none'; return; }
+    var ar = document.body.dir === 'rtl';
+    var sectorLabels = prefs.sectors.map(function(s) {
+      return (ar ? SECTOR_NAMES_AR : SECTOR_NAMES_EN)[s] || s;
+    });
+    var label = ar
+      ? ('\u0645\u062e\u0635\u0635 \u0644\u0643: ' + (sectorLabels.length ? sectorLabels.join('\u060c ') : prefs.role))
+      : ('Personalised: ' + (sectorLabels.length ? sectorLabels.join(', ') : prefs.role));
+    if (text) text.textContent = label;
+    chip.style.display = '';
+  }
+
+  /* wire reset button once */
+  var resetBtn = document.getElementById('liv2ChipReset');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function() {
+      forceGlobal = true;
+      var chip = document.getElementById('liv2PersonalChip');
+      if (chip) chip.style.display = 'none';
+      if (Array.isArray(window.opportunitiesData)) {
+        renderInsightsV2(window.opportunitiesData);
+      }
+    });
+  }
+
+  /* —— build donut chart ————————————————————————————— */
+  function buildDonut(canvasId, labels, values, colors, textColor) {
+    var canvas = document.getElementById(canvasId);
+    if (!canvas) return null;
+    var ctx = canvas.getContext('2d');
+    return new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{ data: values,
+          backgroundColor: colors.map(function(c){ return c+'cc'; }),
+          borderColor: colors, borderWidth: 1.5, hoverOffset: 6 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '62%',
+        plugins: {
+          legend: { position:'bottom', labels:{ color:textColor, font:{size:10}, boxWidth:10, padding:8 } },
+          tooltip: { callbacks: { label: function(ctx){ return ' '+ctx.label+': '+ctx.parsed; } } }
+        }
+      }
+    });
+  }
+
+  /* —— main render ——————————————————————————————————— */
+  function renderInsightsV2(data) {
+    var ar       = document.body.dir === 'rtl';
+    var SNAMES   = ar ? SECTOR_NAMES_AR  : SECTOR_NAMES_EN;
+    var TNAMES   = ar ? TYPE_NAMES_AR    : TYPE_NAMES_EN;
+    var PNAMES   = ar ? PROFILE_NAMES_AR : PROFILE_NAMES_EN;
+    var prefs    = getPrefs();
+    var hasPrefs = !forceGlobal && (prefs.sectors.length > 0 || prefs.profile !== '');
+    var filtered = hasPrefs ? filterByPrefs(data, prefs) : data;
+    /* safety: never show an empty filtered set */
+    if (filtered.length === 0) { filtered = data; hasPrefs = false; }
+
+    var textColor = chartTextColor();
+    var gridColor = chartGridColor();
+
+    /* —— KPI row: always uses global data —— */
+    var total    = data.length;
+    var open     = data.filter(function(r){ return r.status==='open'; }).length;
+    var cutoff   = Date.now() - 7*24*60*60*1000;
+    var newCount = data.filter(function(r){ return r.isNew===true && r.last_verified && new Date(r.last_verified).getTime()>=cutoff; }).length;
+    var sectorSet= {};
+    data.forEach(function(r){ (r.sectors||[]).forEach(function(s){ if(s) sectorSet[s]=true; }); });
+
     var elTotal   = document.getElementById('liv2KpiTotal');
     var elOpen    = document.getElementById('liv2KpiOpen');
     var elSectors = document.getElementById('liv2KpiSectors');
     var elNew     = document.getElementById('liv2KpiNew');
+    countUp(elTotal,   total,                       900);
+    countUp(elOpen,    open,                        750);
+    countUp(elSectors, Object.keys(sectorSet).length, 600);
+    countUp(elNew,     newCount,                    500);
 
-    countUp(elTotal,   d.total,       900);
-    countUp(elOpen,    d.open,        750);
-    countUp(elSectors, d.sectorCount, 600);
-    countUp(elNew,     d.newCount,    500);
-
-    /* --- KPI labels bilingual --- */
-    document.querySelectorAll('.liv2-kpi__label').forEach(function(el) {
-      var key = ar ? 'ar' : 'en';
-      if (el.dataset[key]) el.textContent = el.dataset[key];
-    });
-    /* --- Chart card labels bilingual --- */
-    document.querySelectorAll('.liv2-chart-card__title, .liv2-chart-card__sub').forEach(function(el) {
-      var key = ar ? 'ar' : 'en';
-      if (el.dataset[key]) el.textContent = el.dataset[key];
+    document.querySelectorAll('.liv2-kpi__label').forEach(function(el){
+      var k = ar ? 'ar' : 'en'; if (el.dataset[k]) el.textContent = el.dataset[k];
     });
 
-    var textColor = chartTextColor();
-    var gridColor = chartGridColor();
-    var green     = cssVar('--green') || '#00a651';
+    /* —— personalisation chip —— */
+    updateChip(prefs, hasPrefs);
 
-    /* --- Funding by Sector (horizontal bar) --- */
+    /* —— CHART 1: Programme types in filtered data (horizontal bar) —— */
+    var typeCounts = {};
+    filtered.forEach(function(r){ var t=r.type||'other'; typeCounts[t]=(typeCounts[t]||0)+1; });
+    var typeEntries = Object.keys(typeCounts).map(function(k){
+      return { label: TNAMES[k]||k, value: typeCounts[k] };
+    }).sort(function(a,b){ return b.value-a.value; });
+
+    var c1title = document.getElementById('liv2FundingChart') &&
+      document.querySelector('[data-en="Programmes with Disclosed Funding"]');
+    if (c1title) {
+      c1title.textContent = hasPrefs
+        ? (ar ? '\u0623\u0646\u0648\u0627\u0639 \u0627\u0644\u0628\u0631\u0627\u0645\u062c \u2014 \u0644\u0642\u0637\u0627\u0639\u0627\u062a\u0643' : 'Programme Types — Your Sectors')
+        : (ar ? '\u062a\u0648\u0632\u064a\u0639 \u0623\u0646\u0648\u0627\u0639 \u0627\u0644\u0628\u0631\u0627\u0645\u062c' : 'Programme Type Breakdown');
+      var c1sub = c1title.nextElementSibling;
+      if (c1sub) c1sub.textContent = hasPrefs
+        ? (ar ? '\u062a\u0648\u0632\u064a\u0639 \u0627\u0644\u0628\u0631\u0627\u0645\u062c \u0641\u064a \u0642\u0637\u0627\u0639\u0627\u062a\u0643 \u0627\u0644\u0645\u062e\u062a\u0627\u0631\u0629' : 'Distribution across your selected sectors')
+        : (ar ? '\u0639\u0628\u0631 \u062c\u0645\u064a\u0639 \u0627\u0644\u0642\u0637\u0627\u0639\u0627\u062a' : 'Across all sectors in the database');
+    }
+
     var fCanvas = document.getElementById('liv2FundingChart');
     if (fCanvas) {
-      if (fundingChart) { fundingChart.destroy(); fundingChart = null; }
-      var fLabels = d.topFunding.map(function(e) { return e.label; });
-      var fValues = d.topFunding.map(function(e) { return Math.round(e.value); });
+      if (charts.funding) { charts.funding.destroy(); charts.funding = null; }
       var fCtx = fCanvas.getContext('2d');
-      fundingChart = new Chart(fCtx, {
+      charts.funding = new Chart(fCtx, {
         type: 'bar',
         data: {
-          labels: fLabels,
+          labels: typeEntries.map(function(e){ return e.label; }),
           datasets: [{
             label: ar ? '\u0639\u062f\u062f \u0627\u0644\u0628\u0631\u0627\u0645\u062c' : 'Programmes',
-            data: fValues,
-            backgroundColor: d.topFunding.map(function(_, i) {
-              return CHART_COLORS[i % CHART_COLORS.length] + '99';
-            }),
-            borderColor: d.topFunding.map(function(_, i) {
-              return CHART_COLORS[i % CHART_COLORS.length];
-            }),
-            borderWidth: 1,
-            borderRadius: 4,
-            borderSkipped: false
+            data:  typeEntries.map(function(e){ return e.value; }),
+            backgroundColor: typeEntries.map(function(_,i){ return CHART_COLORS[i%CHART_COLORS.length]+'99'; }),
+            borderColor:     typeEntries.map(function(_,i){ return CHART_COLORS[i%CHART_COLORS.length]; }),
+            borderWidth:1, borderRadius:4, borderSkipped:false
           }]
         },
         options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
+          indexAxis:'y', responsive:true, maintainAspectRatio:false,
           plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: function(ctx) {
-                  return ' ' + ctx.parsed.x + (ar ? ' \u0628\u0631\u0646\u0627\u0645\u062c' : ' programmes');
-                }
-              }
-            }
+            legend: { display:false },
+            tooltip: { callbacks: { label: function(ctx){ return ' '+ctx.parsed.x+(ar?' \u0628\u0631\u0646\u0627\u0645\u062c':' programmes'); } } }
           },
           scales: {
-            x: {
-              grid: { color: gridColor },
-              ticks: { color: textColor, font: { size: 11 },
-                stepSize: 1,
-                callback: function(v) { return Number.isInteger(v) ? v : ''; }
-              }
-            },
-            y: {
-              grid: { display: false },
-              ticks: { color: textColor, font: { size: 11 } }
-            }
+            x: { grid:{color:gridColor}, ticks:{ color:textColor, font:{size:11}, stepSize:1, callback:function(v){ return Number.isInteger(v)?v:''; } } },
+            y: { grid:{display:false}, ticks:{ color:textColor, font:{size:11} } }
           }
         }
       });
     }
 
-    /* --- Opportunities by Sector (donut) --- */
-    var sCanvas = document.getElementById('liv2SectorChart');
-    if (sCanvas) {
-      if (sectorChart) { sectorChart.destroy(); sectorChart = null; }
-      var sLabels = d.topSectors.map(function(e) { return e.label; });
-      var sValues = d.topSectors.map(function(e) { return e.count; });
-      var sCtx = sCanvas.getContext('2d');
-      sectorChart = new Chart(sCtx, {
-        type: 'doughnut',
-        data: {
-          labels: sLabels,
-          datasets: [{
-            data: sValues,
-            backgroundColor: CHART_COLORS.map(function(c) { return c + 'cc'; }),
-            borderColor: CHART_COLORS,
-            borderWidth: 1.5,
-            hoverOffset: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '62%',
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                color: textColor,
-                font: { size: 10 },
-                boxWidth: 10,
-                padding: 8
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label: function(ctx) {
-                  return ' ' + ctx.label + ': ' + ctx.parsed;
-                }
-              }
-            }
-          }
-        }
-      });
+    /* —— CHART 2: Status breakdown in filtered data (donut) —— */
+    var statusMap = {};
+    filtered.forEach(function(r){
+      var s = r.status||'unknown';
+      if (s==='closed_but_recurring') s='recurring';
+      statusMap[s]=(statusMap[s]||0)+1;
+    });
+    var statusLabelsMap = { open:ar?'\u0645\u0641\u062a\u0648\u062d':'Open', recurring:ar?'\u062f\u0648\u0631\u064a':'Recurring', closed:ar?'\u0645\u063a\u0644\u0642':'Closed', unknown:ar?'\u063a\u064a\u0631 \u0645\u062d\u062f\u062f':'Unknown' };
+    var statusColorMap  = { open:'#00a651', recurring:'#f5a623', closed:'#ef9090', unknown:'#7c89ab' };
+    var stKeys   = Object.keys(statusMap);
+
+    var c2title = document.querySelector('[data-en="Opportunities by Sector"]');
+    if (c2title) {
+      c2title.textContent = hasPrefs
+        ? (ar ? '\u062d\u0627\u0644\u0629 \u0627\u0644\u0628\u0631\u0627\u0645\u062c \u2014 \u0642\u0637\u0627\u0639\u0627\u062a\u0643' : 'Status in Your Sectors')
+        : (ar ? '\u062a\u0648\u0632\u064a\u0639 \u0627\u0644\u062d\u0627\u0644\u0627\u062a' : 'Status Breakdown');
+      var c2sub = c2title.nextElementSibling;
+      if (c2sub) c2sub.textContent = hasPrefs
+        ? (ar ? '\u0646\u0633\u0628\u0629 \u0627\u0644\u0628\u0631\u0627\u0645\u062c \u0627\u0644\u0645\u0641\u062a\u0648\u062d\u0629 \u0641\u064a \u0642\u0637\u0627\u0639\u0627\u062a\u0643' : 'Open vs closed in your selected sectors')
+        : (ar ? '\u0639\u0628\u0631 \u062c\u0645\u064a\u0639 \u0627\u0644\u0628\u0631\u0627\u0645\u062c' : 'Across all programmes in the database');
     }
 
-    /* --- Status Breakdown (donut) --- */
-    var stCanvas = document.getElementById('liv2StatusChart');
-    if (stCanvas) {
-      if (statusChart) { statusChart.destroy(); statusChart = null; }
-      var statusLabelsMap = {
-        open:       ar ? '\u0645\u0641\u062a\u0648\u062d' : 'Open',
-        recurring:  ar ? '\u062f\u0648\u0631\u064a' : 'Recurring',
-        closed:     ar ? '\u0645\u063a\u0644\u0642' : 'Closed',
-        unknown:    ar ? '\u063a\u064a\u0631 \u0645\u062d\u062f\u062f' : 'Unknown'
-      };
-      var statusColorMap = {
-        open:      '#00a651',
-        recurring: '#f5a623',
-        closed:    '#ef9090',
-        unknown:   '#7c89ab'
-      };
-      var stKeys = Object.keys(d.statusMap);
-      var stLabels = stKeys.map(function(k) { return statusLabelsMap[k] || k; });
-      var stValues = stKeys.map(function(k) { return d.statusMap[k]; });
-      var stColors = stKeys.map(function(k) { return statusColorMap[k] || '#9da6bf'; });
-      var stCtx = stCanvas.getContext('2d');
-      statusChart = new Chart(stCtx, {
-        type: 'doughnut',
-        data: {
-          labels: stLabels,
-          datasets: [{
-            data: stValues,
-            backgroundColor: stColors.map(function(c) { return c + 'cc'; }),
-            borderColor: stColors,
-            borderWidth: 1.5,
-            hoverOffset: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '62%',
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                color: textColor,
-                font: { size: 10 },
-                boxWidth: 10,
-                padding: 8
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label: function(ctx) {
-                  return ' ' + ctx.label + ': ' + ctx.parsed;
-                }
-              }
-            }
-          }
-        }
-      });
+    if (charts.sector) { charts.sector.destroy(); charts.sector=null; }
+    charts.sector = buildDonut('liv2SectorChart',
+      stKeys.map(function(k){ return statusLabelsMap[k]||k; }),
+      stKeys.map(function(k){ return statusMap[k]; }),
+      stKeys.map(function(k){ return statusColorMap[k]||'#9da6bf'; }),
+      textColor
+    );
+
+    /* —— CHART 3: Audience profile in filtered data (donut) —— */
+    var profileCounts = {};
+    filtered.forEach(function(r){
+      (r.profiles||[]).forEach(function(p){ if(p) profileCounts[p]=(profileCounts[p]||0)+1; });
+    });
+    var profKeys = Object.keys(profileCounts).sort(function(a,b){ return profileCounts[b]-profileCounts[a]; });
+
+    var c3title = document.querySelector('[data-en="Status Breakdown"]');
+    if (c3title) {
+      c3title.textContent = hasPrefs
+        ? (ar ? '\u0627\u0644\u062c\u0645\u0647\u0648\u0631 \u0627\u0644\u0645\u0633\u062a\u0647\u062f\u0641 \u2014 \u0642\u0637\u0627\u0639\u0627\u062a\u0643' : 'Audience — Your Sectors')
+        : (ar ? '\u062a\u0648\u0632\u064a\u0639 \u0627\u0644\u062c\u0645\u0647\u0648\u0631' : 'Audience Breakdown');
+      var c3sub = c3title.nextElementSibling;
+      if (c3sub) c3sub.textContent = hasPrefs
+        ? (ar ? '\u0645\u0646 \u064a\u0633\u062a\u0647\u062f\u0641\u0647 \u0647\u0630\u0627 \u0627\u0644\u0642\u0637\u0627\u0639 \u0645\u0646 \u0628\u0631\u0627\u0645\u062c' : 'Who the programmes in your sectors target')
+        : (ar ? '\u0645\u0646 \u062a\u0633\u062a\u0647\u062f\u0641\u0647 \u062c\u0645\u064a\u0639 \u0627\u0644\u0628\u0631\u0627\u0645\u062c' : 'Who all programmes in the database target');
     }
 
-    /* --- Insight strip --- */
-    var sm = d.statusMap;
-    var openPct   = d.total > 0 ? Math.round((d.open / d.total) * 100) : 0;
-    /* top sector */
-    var topSec    = d.topSectors.length > 0 ? d.topSectors[0] : null;
-    /* top funding sector */
-    var topFundSec = d.topFunding.length > 0 ? d.topFunding[0] : null;
+    if (charts.status) { charts.status.destroy(); charts.status=null; }
+    charts.status = buildDonut('liv2StatusChart',
+      profKeys.map(function(k){ return PNAMES[k]||k; }),
+      profKeys.map(function(k){ return profileCounts[k]; }),
+      CHART_COLORS.slice(0, profKeys.length),
+      textColor
+    );
 
-    var i1, i2, i3;
-    if (ar) {
-      i1 = topSec
-        ? '<strong>' + topSec.label + '</strong> \u0647\u0648 \u0627\u0644\u0642\u0637\u0627\u0639 \u0627\u0644\u0623\u0643\u062b\u0631 \u062a\u0645\u062b\u064a\u0644\u0627\u064b \u0628\u2060<strong>' + topSec.count.toLocaleString() + '</strong>\u2060 \u0628\u0631\u0646\u0627\u0645\u062c\u0627\u064b.'
-        : '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0645\u062a\u0627\u062d.';
-      i2 = '<strong>' + openPct + '%</strong> \u0645\u0646 \u0627\u0644\u0628\u0631\u0627\u0645\u062c (<strong>' + d.open.toLocaleString() + '</strong>) \u0645\u0641\u062a\u0648\u062d\u0629 \u062d\u0627\u0644\u064a\u0627\u064b \u0644\u0644\u062a\u0642\u062f\u064a\u0645.';
-      i3 = topFundSec
-        ? '\u0642\u0637\u0627\u0639 <strong>' + topFundSec.label + '</strong> \u0644\u062f\u064a\u0647 \u0623\u0643\u0628\u0631 \u0639\u062f\u062f \u0645\u0646 \u0627\u0644\u0628\u0631\u0627\u0645\u062c \u0628\u062a\u0645\u0648\u064a\u0644 \u0645\u0639\u0644\u0646 (<strong>' + topFundSec.value + '</strong> \u0628\u0631\u0646\u0627\u0645\u062c).'
-        : '\u062a\u063a\u0637\u064a \u0627\u0644\u0645\u0646\u0635\u0629 ' + d.sectorCount + ' \u0642\u0637\u0627\u0639\u0627\u064b \u0641\u064a \u062c\u0645\u064a\u0639 \u0623\u0646\u062d\u0627\u0621 \u0627\u0644\u0645\u0645\u0644\u0643\u0629.';
-    } else {
-      i1 = topSec
-        ? '<strong>' + topSec.label + '</strong> is the most-covered sector with <strong>' + topSec.count.toLocaleString() + '</strong> programmes in the database.'
-        : 'Data insights are ready.';
-      i2 = '<strong>' + openPct + '%</strong> of all programmes (<strong>' + d.open.toLocaleString() + '</strong>) are currently open for applications.';
-      i3 = topFundSec
-        ? '<strong>' + topFundSec.label + '</strong> has the most programmes with disclosed funding amounts (<strong>' + topFundSec.value + '</strong> programmes).'
-        : 'The hub covers <strong>' + d.sectorCount + '</strong> distinct sectors across all regions.';
-    }
+    /* —— insight strip —— */
+    var openPct  = filtered.length > 0 ? Math.round((filtered.filter(function(r){ return r.status==='open'; }).length / filtered.length)*100) : 0;
+    var topType  = typeEntries.length  > 0 ? typeEntries[0]  : null;
+    var topProf  = profKeys.length     > 0 ? { label: PNAMES[profKeys[0]]||profKeys[0], value: profileCounts[profKeys[0]] } : null;
 
     function setInsight(id, html) {
       var el = document.getElementById(id);
-      if (!el) return;
-      var span = el.querySelector('.liv2-insight-text');
-      if (span) span.innerHTML = html;
+      if (el) { var sp = el.querySelector('.liv2-insight-text'); if (sp) sp.innerHTML = html; }
     }
-    setInsight('liv2Insight1', i1);
-    setInsight('liv2Insight2', i2);
-    setInsight('liv2Insight3', i3);
+
+    if (ar) {
+      setInsight('liv2Insight1', topType
+        ? (hasPrefs ? '\u0641\u064a \u0642\u0637\u0627\u0639\u0627\u062a\u0643\u060c ' : '') + '\u0646\u0648\u0639 <strong>' + topType.label + '</strong> \u0647\u0648 \u0627\u0644\u0623\u0643\u062b\u0631 \u0634\u064a\u0648\u0639\u0627\u064b \u0628\u2060<strong>' + topType.value.toLocaleString() + '</strong>\u2060 \u0628\u0631\u0646\u0627\u0645\u062c.'
+        : '\u062a\u062d\u0644\u064a\u0644 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u062c\u0627\u0647\u0632.');
+      setInsight('liv2Insight2', '<strong>' + openPct + '%</strong> \u0645\u0646 \u0627\u0644\u0628\u0631\u0627\u0645\u062c' + (hasPrefs ? ' \u0641\u064a \u0642\u0637\u0627\u0639\u0627\u062a\u0643' : '') + ' (<strong>' + filtered.filter(function(r){ return r.status==='open'; }).length.toLocaleString() + '</strong>) \u0645\u0641\u062a\u0648\u062d\u0629 \u062d\u0627\u0644\u064a\u0627\u064b.');
+      setInsight('liv2Insight3', topProf
+        ? '\u0641\u0626\u0629 <strong>' + topProf.label + '</strong> \u0647\u064a \u0627\u0644\u0623\u0643\u062b\u0631 \u0627\u0633\u062a\u0647\u062f\u0627\u0641\u0627\u064b (<strong>' + topProf.value.toLocaleString() + '</strong> \u0628\u0631\u0646\u0627\u0645\u062c).'
+        : '\u062a\u063a\u0637\u064a \u0627\u0644\u0645\u0646\u0635\u0629 ' + Object.keys(sectorSet).length + ' \u0642\u0637\u0627\u0639\u0627\u064b.');
+    } else {
+      setInsight('liv2Insight1', topType
+        ? (hasPrefs ? 'In your sectors, ' : '') + '<strong>' + topType.label + '</strong> is the most common programme type with <strong>' + topType.value.toLocaleString() + '</strong> programmes.'
+        : 'Data insights are ready.');
+      setInsight('liv2Insight2', '<strong>' + openPct + '%</strong> of programmes' + (hasPrefs ? ' in your sectors' : '') + ' (<strong>' + filtered.filter(function(r){ return r.status==='open'; }).length.toLocaleString() + '</strong>) are currently open.');
+      setInsight('liv2Insight3', topProf
+        ? '<strong>' + topProf.label + '</strong> are the most-targeted audience with <strong>' + topProf.value.toLocaleString() + '</strong> programmes directed at them.'
+        : 'The hub covers ' + Object.keys(sectorSet).length + ' distinct sectors.');
+    }
   }
 
   /* —— IntersectionObserver ————————————————————————————— */
   var rendered = false;
+  var section  = document.getElementById('insights');
 
   function onInsightsVisible() {
     var data = window.opportunitiesData;
-    if (!Array.isArray(data) || data.length === 0) return;
+    if (!Array.isArray(data) || !data.length) return;
     if (rendered) return;
     rendered = true;
-
-    /* animate KPI cards + charts + strip into view */
-    document.querySelectorAll('.liv2-kpi, .liv2-chart-card, .liv2-insight-strip').forEach(function(el) {
+    document.querySelectorAll('.liv2-kpi, .liv2-chart-card, .liv2-insight-strip').forEach(function(el){
       el.classList.add('liv2-visible');
     });
     renderInsightsV2(data);
   }
 
-  var section = document.getElementById('insights');
   if (section && typeof IntersectionObserver !== 'undefined') {
     var obs = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) {
-          onInsightsVisible();
-          obs.disconnect();
-        }
-      });
+      entries.forEach(function(e){ if (e.isIntersecting){ onInsightsVisible(); obs.disconnect(); } });
     }, { threshold: 0.08 });
     obs.observe(section);
   }
 
-  /* —— wait for data if section already visible on load ———————— */
-  var bootAttempts = 0;
+  /* boot poll — data + prefs both async */
+  var bootTries = 0;
   var bootInterval = setInterval(function() {
-    bootAttempts++;
-    if (Array.isArray(window.opportunitiesData) && window.opportunitiesData.length > 0) {
+    bootTries++;
+    var dataReady = Array.isArray(window.opportunitiesData) && window.opportunitiesData.length > 0;
+    if (dataReady) {
       clearInterval(bootInterval);
-      /* If observer already fired, re-render now */
       if (rendered) { renderInsightsV2(window.opportunitiesData); return; }
-      /* Else let observer handle it; but also try if section in viewport */
       if (section) {
-        var rect = section.getBoundingClientRect();
-        if (rect.top < window.innerHeight && rect.bottom > 0) {
-          onInsightsVisible();
-        }
+        var r = section.getBoundingClientRect();
+        if (r.top < window.innerHeight && r.bottom > 0) onInsightsVisible();
       }
-    } else if (bootAttempts > 200) {
-      clearInterval(bootInterval);
-    }
+    } else if (bootTries > 200) { clearInterval(bootInterval); }
   }, 150);
 
-  /* —— theme change re-render ———————————————————————————— */
-  var themeObs = new MutationObserver(function() {
-    if (rendered && Array.isArray(window.opportunitiesData)) {
-      renderInsightsV2(window.opportunitiesData);
-    }
+  /* re-render when prefs update (settings saved after charts already rendered) */
+  window.addEventListener('__userPrefsUpdated', function() {
+    forceGlobal = false; /* re-enable personalisation if prefs change */
+    if (rendered && Array.isArray(window.opportunitiesData)) renderInsightsV2(window.opportunitiesData);
   });
-  themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
-  /* —— language switch re-render ————————————————————————— */
-  var dirObs = new MutationObserver(function() {
-    if (rendered && Array.isArray(window.opportunitiesData)) {
-      renderInsightsV2(window.opportunitiesData);
-    }
-  });
-  dirObs.observe(document.body, { attributes: true, attributeFilter: ['dir'] });
+  /* re-render on theme / lang change */
+  new MutationObserver(function(){
+    if (rendered && Array.isArray(window.opportunitiesData)) renderInsightsV2(window.opportunitiesData);
+  }).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
 
-  /* expose for external calls if needed */
+  new MutationObserver(function(){
+    if (rendered && Array.isArray(window.opportunitiesData)) renderInsightsV2(window.opportunitiesData);
+  }).observe(document.body, { attributes:true, attributeFilter:['dir'] });
+
   window.__renderInsightsV2 = renderInsightsV2;
 
 })();
@@ -9600,6 +9612,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!prefs.role && !prefs.sectors) merged = remote;
       prefs = merged;
       save(KEY_PREFS, prefs);
+      window.__userPrefs = prefs;  /* expose for insights personalisation */
       applyDefaultFilters();
     });
     /* Searches */
@@ -9642,6 +9655,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ── STATE ─────────────────────────────────────────────── */
   var prefs     = load(KEY_PREFS, {});
+  window.__userPrefs = prefs;  /* expose immediately for insights (updated on Supabase load) */
   var watchlist = load(KEY_WATCHLIST, []);
   var searches  = load(KEY_SEARCHES, []);
   var history   = load(KEY_HISTORY, []);
@@ -10149,6 +10163,7 @@ document.addEventListener('DOMContentLoaded', function () {
       alertDigest:    alertDigest?.checked === true
     };
     save(KEY_PREFS, prefs);
+    window.__userPrefs = prefs;  /* expose for insights personalisation */
     dbSavePrefs(prefs);
     document.getElementById('settingsModalOverlay').classList.remove('open');
     showToast('Preferences saved');
