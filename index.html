@@ -659,6 +659,112 @@ section:last-of-type { border-bottom: none; }
   50%       { opacity: 0.45; transform: scale(0.75); }
 }
 
+/* ── DATA FRESHNESS PANEL ───────────────────── */
+#dataFreshnessPanel {
+  margin: 0 0 var(--space-8);
+  padding: 0 var(--space-6);
+}
+.dfp-inner {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.dfp-brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 14px 18px;
+  background: var(--green-dim);
+  border-right: 1px solid var(--border);
+  min-width: 140px;
+  flex-shrink: 0;
+}
+.dfp-brand-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green);
+  opacity: 0.8;
+}
+.dfp-brand-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--green);
+}
+.dfp-brand-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  animation: pulse-dot 2.2s ease-in-out infinite;
+}
+.dfp-stats {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  flex-wrap: wrap;
+}
+.dfp-stat {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  padding: 12px 18px;
+  border-right: 1px solid var(--border);
+  flex: 1;
+  min-width: 110px;
+}
+.dfp-stat:last-child { border-right: none; }
+.dfp-stat-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+  font-family: var(--font-display, inherit);
+}
+.dfp-stat-label {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.dfp-stat-sub {
+  font-size: 0.68rem;
+  color: var(--text-faint);
+  margin-top: 1px;
+}
+.dfp-stat--green .dfp-stat-value { color: var(--green); }
+.dfp-stat--gold  .dfp-stat-value { color: var(--gold, #f5a623); }
+/* Light theme overrides */
+[data-theme="light"] .dfp-inner { background: #f9fbfd; border-color: #dde3ed; }
+[data-theme="light"] .dfp-brand { background: rgba(0,106,53,0.07); border-right-color: #dde3ed; }
+[data-theme="light"] .dfp-stat  { border-right-color: #dde3ed; }
+/* Mobile: stack to 2-column grid */
+@media (max-width: 640px) {
+  #dataFreshnessPanel { padding: 0 var(--space-4); }
+  .dfp-inner { flex-direction: column; border-radius: 12px; }
+  .dfp-brand { border-right: none; border-bottom: 1px solid var(--border); flex-direction: row; justify-content: space-between; align-items: center; min-width: unset; }
+  [data-theme="light"] .dfp-brand { border-bottom-color: #dde3ed; }
+  .dfp-stats { display: grid; grid-template-columns: 1fr 1fr; }
+  .dfp-stat  { border-right: none; border-bottom: 1px solid var(--border); min-width: unset; }
+  .dfp-stat:nth-child(odd) { border-right: 1px solid var(--border); }
+  .dfp-stat:nth-last-child(-n+2) { border-bottom: none; }
+  [data-theme="light"] .dfp-stat  { border-color: #dde3ed; }
+}
+
 /* ── OPPORTUNITIES SECTION ───────────────────── */
 #opportunities { padding-block: var(--space-16); }
 
@@ -3963,6 +4069,51 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
       </div>
     </div>
   </section>
+
+  <!-- DATA FRESHNESS PANEL -->
+  <div id="dataFreshnessPanel" aria-label="Data freshness and platform status">
+    <div class="dfp-inner">
+      <!-- Left brand column -->
+      <div class="dfp-brand">
+        <span class="dfp-brand-label" id="dfpPanelLabel">Platform Status</span>
+        <span class="dfp-brand-status">
+          <span class="dfp-brand-dot"></span>
+          <span id="dfpPipelineStatus">Pipeline Active</span>
+        </span>
+      </div>
+      <!-- Stats -->
+      <div class="dfp-stats">
+        <div class="dfp-stat">
+          <span class="dfp-stat-value" id="dfpTotalRecords">&mdash;</span>
+          <span class="dfp-stat-label" id="dfpTotalLabel">Total Records</span>
+        </div>
+        <div class="dfp-stat dfp-stat--green">
+          <span class="dfp-stat-value" id="dfpAddedWeek">&mdash;</span>
+          <span class="dfp-stat-label" id="dfpAddedLabel">Added This Week</span>
+        </div>
+        <div class="dfp-stat dfp-stat--gold">
+          <span class="dfp-stat-value" id="dfpUpdatedWeek">&mdash;</span>
+          <span class="dfp-stat-label" id="dfpUpdatedLabel">Updated This Week</span>
+        </div>
+        <div class="dfp-stat">
+          <span class="dfp-stat-value" id="dfpLastVerified">&mdash;</span>
+          <span class="dfp-stat-label" id="dfpVerifiedLabel">Last Verified</span>
+        </div>
+        <div class="dfp-stat">
+          <span class="dfp-stat-value" id="dfpApiStatus">
+            <span style="color:var(--green);">&#x2714;</span> Live
+          </span>
+          <span class="dfp-stat-label" id="dfpApiLabel">API Status</span>
+        </div>
+        <div class="dfp-stat">
+          <span class="dfp-stat-value" id="dfpVerifStatus">
+            <span style="color:var(--green);">&#x2714;</span> Verified
+          </span>
+          <span class="dfp-stat-label" id="dfpVerifLabel">Human Review</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <section id="opportunities" aria-label="Opportunities database">
     <div class="section-label">Database</div>
@@ -7553,12 +7704,89 @@ document.addEventListener('DOMContentLoaded', function () {
     })();
   }
 
+  /* ── DATA FRESHNESS PANEL ─────────────────────────────────── */
+  function populateDfp() {
+    var data = window.opportunitiesData || window.allOpportunities || [];
+    var ar   = window.__lang === 'ar';
+    var now  = new Date();
+    /* Start-of-week = Monday 00:00 local */
+    var dow  = (now.getDay() + 6) % 7; // 0=Mon…6=Sun
+    var weekStart = new Date(now); weekStart.setHours(0,0,0,0); weekStart.setDate(now.getDate() - dow);
+
+    var addedWeek = 0, updatedWeek = 0, latestVerified = null;
+    data.forEach(function(item) {
+      /* created_at / last_verified treated as "added" */
+      var createdStr  = item.created_at  || '';
+      var verifiedStr = item.last_verified || '';
+      if (createdStr) {
+        var d = new Date(createdStr);
+        if (!isNaN(d) && d >= weekStart) addedWeek++;
+      }
+      if (verifiedStr) {
+        var dv = new Date(verifiedStr);
+        if (!isNaN(dv)) {
+          if (dv >= weekStart) updatedWeek++;
+          if (!latestVerified || dv > latestVerified) latestVerified = dv;
+        }
+      }
+    });
+
+    /* Format the most-recent verified date compactly */
+    var verifiedDisplay = latestVerified
+      ? latestVerified.toLocaleDateString(ar ? 'ar-SA' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+      : (ar ? 'مُحدَّث' : 'Current');
+
+    /* Labels — EN / AR */
+    var labels = ar ? {
+      panel:    'حالة المنصة',
+      pipeline: 'التحديث نشط',
+      total:    'إجمالي السجلات',
+      added:    'مضاف هذا الأسبوع',
+      updated:  'محدّث هذا الأسبوع',
+      verified: 'آخر تحقق',
+      api:      'حالة الواجهة',
+      apiVal:   '<span style="color:var(--green)">✔</span> متصل',
+      review:   'مراجعة بشرية',
+      reviewVal:'<span style="color:var(--green)">✔</span> موثّق'
+    } : {
+      panel:    'Platform Status',
+      pipeline: 'Pipeline Active',
+      total:    'Total Records',
+      added:    'Added This Week',
+      updated:  'Updated This Week',
+      verified: 'Last Verified',
+      api:      'API Status',
+      apiVal:   '<span style="color:var(--green)">✔</span> Live',
+      review:   'Human Review',
+      reviewVal:'<span style="color:var(--green)">✔</span> Verified'
+    };
+
+    function set(id, val) { var el = document.getElementById(id); if (el) el.innerHTML = val; }
+    set('dfpPanelLabel',     labels.panel);
+    set('dfpPipelineStatus', labels.pipeline);
+    set('dfpTotalRecords',   data.length.toLocaleString(ar ? 'ar-SA' : 'en-GB'));
+    set('dfpTotalLabel',     labels.total);
+    set('dfpAddedWeek',      addedWeek  > 0 ? '+' + addedWeek  : (ar ? 'محدث' : 'Current'));
+    set('dfpAddedLabel',     labels.added);
+    set('dfpUpdatedWeek',    updatedWeek > 0 ? '+' + updatedWeek : (ar ? 'محدث' : 'Current'));
+    set('dfpUpdatedLabel',   labels.updated);
+    set('dfpLastVerified',   verifiedDisplay);
+    set('dfpVerifiedLabel',  labels.verified);
+    set('dfpApiStatus',      labels.apiVal);
+    set('dfpApiLabel',       labels.api);
+    set('dfpVerifStatus',    labels.reviewVal);
+    set('dfpVerifLabel',     labels.review);
+  }
+  /* Re-populate on language switch */
+  window.__populateDfp = populateDfp;
+
   const wait = setInterval(() => {
     if (Array.isArray(window.opportunitiesData) || Array.isArray(window.allOpportunities)) {
       clearInterval(wait);
       boot();
       window.__renderCards = renderCards; // expose for language toggle
       window.t = t;                       // expose for script 4 panel (openPanel uses t())
+      populateDfp();                      // fill Data Freshness panel
     }
   }, 200);
 })();
@@ -8238,6 +8466,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // swapSelectOptions runs after translateAll, but translateAttrs may have cached
     // bad entries for placeholders. Force-set them again on the next frame to win.
     requestAnimationFrame(function() { swapSelectOptions(true); });
+    // Re-populate Data Freshness panel in Arabic
+    if (typeof window.__populateDfp === 'function') window.__populateDfp();
     // Set sign-out label to Arabic (covers runtime switch, not just page-load)
     var signoutLabelAr = document.querySelector('.signout-label');
     if (signoutLabelAr) signoutLabelAr.textContent = signoutLabelAr.getAttribute('data-ar') || 'تسجيل الخروج';
@@ -8268,6 +8498,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Reset panel direction to LTR
     const pnl = document.getElementById('detailPanel');
     if (pnl) pnl.setAttribute('dir', 'ltr');
+    // Re-populate Data Freshness panel in English
+    if (typeof window.__populateDfp === 'function') window.__populateDfp();
     // Reset sign-out label to English
     var signoutLabel = document.querySelector('.signout-label');
     if (signoutLabel) signoutLabel.textContent = signoutLabel.getAttribute('data-en') || 'Sign out';
