@@ -8232,6 +8232,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }, 100);
 
+  /* Expose openPanel so rec cards and other modules can call it directly */
+  window.__openDetailPanel = openPanel;
+
 })();
 </script>
 <script>
@@ -9374,12 +9377,20 @@ document.addEventListener('DOMContentLoaded', function () {
     cards.querySelectorAll('.rec-card').forEach(function(card) {
       card.addEventListener('click', function() {
         var id = card.dataset.id;
-        var item = window._wsDataset.find(function(d) { return d.id === id; });
+        var allData = window.opportunitiesData || window.allOpportunities || window._wsDataset || [];
+        var item = allData.find(function(d) { return d.id === id; });
         if (!item) return;
-        // Open the detail panel if available
-        var panelOpen = document.querySelector('[data-id="' + id + '"] .opp-insights-btn');
-        if (panelOpen) panelOpen.click();
-        else document.getElementById('opportunities')?.scrollIntoView({ behavior: 'smooth' });
+        // Open detail panel directly — works regardless of which page the card is on
+        if (typeof window.__openDetailPanel === 'function') {
+          window.__openDetailPanel(item);
+        } else {
+          // Fallback: scroll to opportunities and try to click button in DOM
+          document.getElementById('opportunities')?.scrollIntoView({ behavior: 'smooth' });
+          setTimeout(function() {
+            var btn = document.querySelector('[data-id="' + id + '"] .opp-insights-btn');
+            if (btn) btn.click();
+          }, 600);
+        }
       });
     });
   }
