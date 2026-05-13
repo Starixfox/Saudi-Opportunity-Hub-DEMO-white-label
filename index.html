@@ -9367,8 +9367,8 @@ document.addEventListener('DOMContentLoaded', function () {
           '<div class="ws-item-content">' +
             '<div class="ws-item-title">' + esc(item.title) + '</div>' +
             '<div class="ws-item-meta">' +
-              (item.sector ? '<span>' + esc(item.sector.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();})) + '</span>' : '') +
-              (item.type ? '<span>· ' + esc(item.type.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();})) + '</span>' : '') +
+              (item.sector ? '<span>' + esc(ar && window.t ? window.t(item.sector.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();})) : item.sector.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();})) + '</span>' : '') +
+              (item.type ? '<span>· ' + esc(ar && window.t ? window.t(item.type.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();})) : item.type.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();})) + '</span>' : '') +
               '<span style="color:var(--text-faint);">' + timeAgo(item.savedAt) + '</span>' +
             '</div>' +
             (hasNote
@@ -9523,7 +9523,7 @@ document.addEventListener('DOMContentLoaded', function () {
           '<div class="ws-item-content">' +
             '<div class="ws-item-title">' + esc(item.title) + '</div>' +
             '<div class="ws-item-meta">' +
-              (item.sector ? '<span>' + esc(item.sector) + '</span>' : '') +
+              (item.sector ? '<span>' + esc(document.body.dir==='rtl' && window.t ? window.t(item.sector.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();})) : item.sector.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();})) + '</span>' : '') +
               '<span style="color:var(--text-faint);">' + (document.body.dir==='rtl' ? 'عُرض ' : 'Viewed ') + timeAgo(item.viewedAt) + '</span>' +
             '</div>' +
           '</div>' +
