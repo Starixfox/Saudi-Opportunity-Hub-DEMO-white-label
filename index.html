@@ -3498,6 +3498,31 @@ body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
   outline-offset: 3px;
 }
 
+/* Bouncing arrow that points at the highlighted element */
+.ob-tour-arrow {
+  position: fixed;
+  z-index: 1803;
+  pointer-events: none;
+  width: 32px;
+  height: 32px;
+  animation: ob-arrow-bounce 0.8s ease-in-out infinite alternate;
+}
+.ob-tour-arrow::before {
+  content: '';
+  display: block;
+  width: 0;
+  height: 0;
+  border-left: 11px solid transparent;
+  border-right: 11px solid transparent;
+  border-top: 18px solid var(--gold, #f5a623);
+  filter: drop-shadow(0 2px 6px rgba(245,166,35,0.7));
+  margin: auto;
+}
+@keyframes ob-arrow-bounce {
+  from { transform: translateY(0); }
+  to   { transform: translateY(10px); }
+}
+
 .ob-tour-tooltip {
   position: fixed; z-index: 1802;
   background: var(--surface);
@@ -5074,6 +5099,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <!-- ══ TOUR SPOTLIGHT + TOOLTIP ══════════════════════════════════ -->
 <div class="ob-tour-cutout" id="obTourCutout" style="display:none;"></div>
+<div class="ob-tour-arrow" id="obTourArrow" style="display:none;"></div>
 <div class="ob-tour-tooltip" id="obTourTooltip" style="display:none;">
   <div class="ob-tour-step-label" id="obTourStepLabel">Step 1 of 7</div>
   <div class="ob-tour-title" id="obTourTitle"></div>
@@ -9465,10 +9491,24 @@ document.addEventListener('DOMContentLoaded', function () {
         placement: 'top'
       },
       {
-        /* 7 — Compare mode (tray at bottom of page) */
+        /* 7 — Compare button on a card */
+        targetId: '__firstCompareBtn',
+        title:    ar ? 'أضف إلى المقارنة' : 'Add to Comparison',
+        body:     ar ? 'انقر زر "+" على أي بطاقة فرصة لإضافتها إلى المقارنة. يمكنك اختيار حتى 3 فرص.' : 'Click the "+" button on any opportunity card to add it to a comparison. You can select up to 3 at once.',
+        placement: 'top',
+        spotlightPad: 14,
+        showArrow: true,
+        resolveTarget: function() {
+          /* First try Latest Additions + btn, then fall back to main card opp-select-btn */
+          return document.querySelector('[data-cmpid]') ||
+                 document.querySelector('.opp-select-btn');
+        }
+      },
+      {
+        /* 8 — Compare tray at bottom */
         targetId: 'compareTray',
-        title:    ar ? 'وضع المقارنة' : 'Compare Mode',
-        body:     ar ? 'انقر على أيقونة ✓ في زاوية أي بطاقة لإضافتها إلى المقارنة. حدد حتى 3 فرص ثم انقر «مقارنة» لعرضها جنباً إلى جنب.' : 'Click the ✓ icon in the corner of any card to select it for comparison. Pick up to 3 opportunities then click Compare to see them side-by-side.',
+        title:    ar ? 'شريط المقارنة' : 'The Comparison Tray',
+        body:     ar ? 'بعد إضافة فرصتين أو أكثر يظهر هذا الشريط أسفل الصفحة. انقر «مقارنة» لعرضها جنباً إلى جنب ومقارنة التفاصيل والمواعيد والتمويل.' : 'Once you add 2 or more opportunities this tray appears at the bottom. Click Compare to view them side-by-side and compare details, deadlines, and funding.',
         placement: 'top',
         showTray: true
       }
@@ -9484,7 +9524,9 @@ document.addEventListener('DOMContentLoaded', function () {
     var current = steps[step];
     if (!current) return;
 
-    var target  = document.getElementById(current.targetId);
+    var target = current.resolveTarget
+      ? current.resolveTarget()
+      : document.getElementById(current.targetId);
     if (!target) { advanceTour(1); return; }
 
     /* If this step needs the compare tray visible, show it temporarily */
@@ -9502,7 +9544,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setTimeout(function() {
       var rect = target.getBoundingClientRect();
-      var pad  = 6;
+      var pad  = current.spotlightPad !== undefined ? current.spotlightPad : 6;
 
       /* Safety: if element has no size (hidden/collapsed), skip to next step */
       if (rect.width === 0 && rect.height === 0) { advanceTour(1); return; }
@@ -9514,6 +9556,21 @@ document.addEventListener('DOMContentLoaded', function () {
       c.style.width  = (rect.width  + pad * 2) + 'px';
       c.style.height = (rect.height + pad * 2) + 'px';
       c.style.display = 'block';
+
+      /* Bouncing arrow — show only on steps that request it */
+      var arrowEl = document.getElementById('obTourArrow');
+      if (arrowEl) {
+        if (current.showArrow) {
+          /* Position arrow horizontally centred above the cutout */
+          var arrowLeft = rect.left + rect.width / 2 - 16;
+          var arrowTop  = rect.top - pad - 38; /* 38px = arrow height + small gap */
+          arrowEl.style.left    = arrowLeft + 'px';
+          arrowEl.style.top     = arrowTop  + 'px';
+          arrowEl.style.display = 'block';
+        } else {
+          arrowEl.style.display = 'none';
+        }
+      }
 
       /* Tooltip positioning — pick whichever side has more room */
       var tt = tourEl.tooltip;
@@ -9599,6 +9656,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var c = tourEl.cutout, tt = tourEl.tooltip;
     if (c)  { c.style.display = 'none'; }
     if (tt) { tt.style.display = 'none'; }
+    var arrowEl = document.getElementById('obTourArrow');
+    if (arrowEl) arrowEl.style.display = 'none';
     document.body.style.overflow = '';
     showToastOb(isAr() ? 'تم إكمال الجولة التعريفية ✓' : "Tour complete — you're all set ✓");
   }
