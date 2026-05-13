@@ -5131,22 +5131,22 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
             <span data-ar="القطاع">Sector</span>
           </label>
           <select id="sectorFilter" class="filter-select" aria-label="Filter by sector">
-            <option value="all">All sectors</option>
-            <option value="agriculture">Agriculture & Food Processing</option>
-            <option value="energy">Energy</option>
-            <option value="healthcare">Healthcare & Life Sciences</option>
-            <option value="environment">Environment Services</option>
-            <option value="industrial">Industrial & Manufacturing</option>
-            <option value="pharma">Pharma & Biotech</option>
-            <option value="chemicals">Chemicals</option>
-            <option value="realestate">Real Estate</option>
-            <option value="financial">Financial Services</option>
-            <option value="transport">Transport & Logistics</option>
-            <option value="mining">Mining & Metals</option>
-            <option value="tourism">Tourism & Quality of Life</option>
-            <option value="education">Education</option>
-            <option value="ict">ICT</option>
-            <option value="innovation">Innovation & Entrepreneurship</option>
+            <option value="all" data-ar="جميع القطاعات">All sectors</option>
+            <option value="agriculture" data-ar="الزراعة والغذاء">Agriculture & Food Processing</option>
+            <option value="energy" data-ar="الطاقة">Energy</option>
+            <option value="healthcare" data-ar="الرعاية الصحية">Healthcare & Life Sciences</option>
+            <option value="environment" data-ar="البيئة">Environment Services</option>
+            <option value="industrial" data-ar="الصناعة والتصنيع">Industrial & Manufacturing</option>
+            <option value="pharma" data-ar="الصيدلة والتقنية الحيوية">Pharma & Biotech</option>
+            <option value="chemicals" data-ar="الكيميائيات">Chemicals</option>
+            <option value="realestate" data-ar="العقارات">Real Estate</option>
+            <option value="financial" data-ar="الخدمات المالية">Financial Services</option>
+            <option value="transport" data-ar="النقل واللوجستيك">Transport & Logistics</option>
+            <option value="mining" data-ar="التعدين والمعادن">Mining & Metals</option>
+            <option value="tourism" data-ar="السياحة وجودة الحياة">Tourism & Quality of Life</option>
+            <option value="education" data-ar="التعليم">Education</option>
+            <option value="ict" data-ar="تقنية المعلومات">ICT</option>
+            <option value="innovation" data-ar="الابتكار والريادة">Innovation & Entrepreneurship</option>
           </select>
         </div>
 
@@ -5157,10 +5157,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
             <span class="info-icon" data-tooltip="Saudi: programs from Saudi institutions. GCC: UAE, Oman, Qatar, Bahrain, Kuwait. Global: international programs." tabindex="0" aria-label="Country group info">i</span>
           </label>
           <select id="countryFilter" class="filter-select" aria-label="Filter by country group">
-            <option value="all">All regions</option>
-            <option value="saudi">Saudi Arabia</option>
-            <option value="gcc">GCC</option>
-            <option value="global">Global</option>
+            <option value="all" data-ar="جميع المناطق">All regions</option>
+            <option value="saudi" data-ar="المملكة العربية السعودية">Saudi Arabia</option>
+            <option value="gcc" data-ar="دول الخليج">GCC</option>
+            <option value="global" data-ar="عالمي">Global</option>
           </select>
         </div>
 
@@ -6116,18 +6116,18 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       }
     };
 
-    // Sectors (bar, top 10)
+    // Sectors (bar, top 10) — labels go through t() for Arabic
     var sectorTop = topN(tally(data, 'sectors'), 10);
     makeChart('chartSectors', 'bar', {
-      labels: sectorTop.map(function (x) { return x[0]; }),
-      datasets: [{ label: 'Opportunities', data: sectorTop.map(function (x) { return x[1]; }), backgroundColor: GREEN, borderRadius: 6 }]
+      labels: sectorTop.map(function (x) { return t(x[0]); }),
+      datasets: [{ label: t('Opportunities'), data: sectorTop.map(function (x) { return x[1]; }), backgroundColor: GREEN, borderRadius: 6 }]
     }, Object.assign({}, baseOpts, { plugins: { legend: { display: false } }, indexAxis: 'y' }));
 
     // Types (doughnut)
     var typeMap = tally(data, 'type');
     var typeLabels = Object.keys(typeMap);
     makeChart('chartTypes', 'doughnut', {
-      labels: typeLabels,
+      labels: typeLabels.map(function (k) { return t(k); }),
       datasets: [{ data: typeLabels.map(function (k) { return typeMap[k]; }), backgroundColor: PALETTE, borderWidth: 0 }]
     }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: tc, font: { size: 11 } } } } });
 
@@ -6135,17 +6135,19 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var statusMap = tally(data, 'status');
     var statusLabels = Object.keys(statusMap);
     makeChart('chartStatus', 'pie', {
-      labels: statusLabels,
+      labels: statusLabels.map(function (k) { return t(k); }),
       datasets: [{ data: statusLabels.map(function (k) { return statusMap[k]; }), backgroundColor: PALETTE, borderWidth: 0 }]
     }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: tc, font: { size: 11 } } } } });
 
     // Countries (bar, top 8)
     var countryTop = topN(tally(data, 'country'), 8);
     makeChart('chartCountries', 'bar', {
-      labels: countryTop.map(function (x) { return x[0]; }),
-      datasets: [{ label: 'Opportunities', data: countryTop.map(function (x) { return x[1]; }), backgroundColor: '#4f9cf9', borderRadius: 6 }]
+      labels: countryTop.map(function (x) { return t(x[0]); }),
+      datasets: [{ label: t('Opportunities'), data: countryTop.map(function (x) { return x[1]; }), backgroundColor: '#4f9cf9', borderRadius: 6 }]
     }, Object.assign({}, baseOpts, { plugins: { legend: { display: false } } }));
   }
+  /* Expose so the translation IIFE can trigger a chart rebuild on lang switch */
+  window.rebuildChartsAr = rebuildCharts;
 
   /* ---------------- Sectors view ---------------- */
   function renderSectorChips() {
@@ -6798,6 +6800,51 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     'Closed':              'مغلق',
     'Recurring':           'دوري',
     'Global':              'عالمي',
+    // Sector display names as they may appear in chart labels
+    'Agriculture & Food Processing': 'الزراعة والغذاء',
+    'Healthcare & Life Sciences': 'الرعاية الصحية',
+    'Environment Services': 'البيئة',
+    'Industrial & Manufacturing': 'الصناعة والتصنيع',
+    'Pharma & Biotech': 'الصيدلة والتقنية الحيوية',
+    'Real Estate': 'العقارات',
+    'Financial Services': 'الخدمات المالية',
+    'Transport & Logistics': 'النقل واللوجستيك',
+    'Mining & Metals': 'التعدين والمعادن',
+    'Tourism & Quality of Life': 'السياحة وجودة الحياة',
+    'Innovation & Entrepreneurship': 'الابتكار والريادة',
+    'ICT': 'تقنية المعلومات',
+    'Energy': 'الطاقة',
+    'Chemicals': 'الكيميائيات',
+    'Education': 'التعليم',
+    'Agriculture': 'الزراعة',
+    // Country/region labels (used in chart axes from Supabase data)
+    'saudi':               'السعودية',
+    'gcc':                 'دول الخليج',
+    'global':              'عالمي',
+    'Saudi Arabia':        'المملكة العربية السعودية',
+    'UAE':                 'الإمارات',
+    'Qatar':               'قطر',
+    'Bahrain':             'البحرين',
+    'Kuwait':              'الكويت',
+    'Oman':                'عُمان',
+    'Europe':              'أوروبا',
+    'United States':       'الولايات المتحدة',
+    'United Kingdom':      'المملكة المتحدة',
+    'Japan':               'اليابان',
+    'China':               'الصين',
+    'Germany':             'ألمانيا',
+    'France':              'فرنسا',
+    // Opportunity types (raw Supabase values used in chart legends)
+    'investment program':  'برنامج استثماري',
+    'other':               'أخرى',
+    'partnership_program': 'برنامج شراكة',
+    'loan_program':        'برنامج قرض',
+    'Opportunities':       'فرص',
+    // Status raw values
+    'open':                'مفتوح',
+    'closed':              'مغلق',
+    'closed_but_recurring':'مغلق مع تكرار دوري',
+    'recurring':           'دوري',
     'Other':               'أخرى',
     // Detailed card
     'View Insights':       'عرض التحليلات',
@@ -10125,6 +10172,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     document.documentElement.setAttribute('dir', 'rtl');
     document.documentElement.setAttribute('lang', 'ar');
     document.body.setAttribute('dir', 'rtl');
+    window.__lang = 'ar';   /* tells t() and all chart builders to use Arabic */
     injectRTL();
 
     /* Apply known data-ar translations immediately (no API needed) */
@@ -10174,6 +10222,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     /* Watch for Supabase-injected content (cards, watchlist, etc.) */
     startMutationObserver();
 
+    /* Rebuild charts with Arabic labels now that __lang is 'ar' */
+    if (typeof window.rebuildChartsAr === 'function') window.rebuildChartsAr();
+
     try { localStorage.setItem(LANG_KEY, 'ar'); } catch(e) {}
   }
 
@@ -10187,6 +10238,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     document.documentElement.setAttribute('dir', 'ltr');
     document.documentElement.setAttribute('lang', 'en');
     document.body.setAttribute('dir', 'ltr');
+    window.__lang = 'en';   /* tells t() and all chart builders to use English */
     removeRTL();
 
     /* Restore data-ar elements first */
@@ -10210,6 +10262,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
     /* Stop watching for new content */
     stopMutationObserver();
+
+    /* Rebuild charts with English labels */
+    if (typeof window.rebuildChartsAr === 'function') window.rebuildChartsAr();
 
     var langLabel = document.getElementById('appLangLabel');
     if (langLabel) langLabel.textContent = 'العربية';
