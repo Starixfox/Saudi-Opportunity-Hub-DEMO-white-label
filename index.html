@@ -4306,7 +4306,7 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
       </button>
       <span class="freshness-badge" id="freshnessBadge" title="Dataset freshness">
         <span class="freshness-dot"></span>
-        <span id="freshnessText">✓ Last updated: May 11, 2026 &nbsp;|&nbsp; Pipeline: Active</span>
+        <span id="freshnessText">✓ Loading freshness&hellip;</span>
       </span>
       <div class="view-toggle" role="group" aria-label="Card view">
         <button class="view-btn view-btn--detailed active" id="viewBtnDetailed" title="Detailed view" aria-pressed="true">
@@ -4658,7 +4658,7 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
       </a>
     </div>
     <p class="footer-disclaimer">
-      This is a private demo build for internal evaluation only. Not for public distribution. All program information is provided for awareness and research purposes only. Verify all details directly with sponsoring organizations. Last updated: March 2026.
+      This is a private demo build for internal evaluation only. Not for public distribution. All program information is provided for awareness and research purposes only. Verify all details directly with sponsoring organizations. Last updated: <span id="footerLastUpdated">—</span>.
     </p>
   </div>
 </footer>
@@ -4947,7 +4947,7 @@ const TRANSLATIONS = {
     // Theme toggle
     themeToggleTip: 'Toggle theme',
     // Footer
-    footerDisclaimer: 'This is a private demo build for internal evaluation only. Not for public distribution. All program information is provided for awareness and research purposes only. Verify all details directly with sponsoring organizations. Last updated: March 2026.',
+    footerDisclaimer: 'This is a private demo build for internal evaluation only. Not for public distribution. All program information is provided for awareness and research purposes only. Verify all details directly with sponsoring organizations. Last updated: <span id="footerLastUpdated">—</span>.',
     // IS logo hub text
     logoHubText: 'Opportunity <span>Hub</span>',
     dir: 'ltr',
@@ -5013,7 +5013,7 @@ const TRANSLATIONS = {
     thStatus:       'الحالة',
     thDeadline:     'الموعد النهائي',
     themeToggleTip: 'تبديل المظهر',
-    footerDisclaimer: 'هذا إصدار تجريبي خاص للتقييم الداخلي فقط، وليس للتوزيع العام. جميع المعلومات المقدمة لأغراض التوعية والبحث فقط. يُرجى التحقق من جميع التفاصيل مباشرة مع المنظمات الراعية. آخر تحديث: مارس 2026.',
+    footerDisclaimer: 'هذا إصدار تجريبي خاص للتقييم الداخلي فقط، وليس للتوزيع العام. جميع المعلومات المقدمة لأغراض التوعية والبحث فقط. يُرجى التحقق من جميع التفاصيل مباشرة مع المنظمات الراعية. آخر تحديث: <span id="footerLastUpdated">—</span>.',
     logoHubText: 'مركز <span>الفرص</span>',
     dir: 'rtl',
     lang: 'ar',
@@ -7808,6 +7808,18 @@ document.addEventListener('DOMContentLoaded', function () {
     set('dfpApiLabel',       labels.api);
     set('dfpVerifStatus',    labels.reviewVal);
     set('dfpVerifLabel',     labels.review);
+
+    /* Drive the top "freshnessText" badge from the same Supabase-derived
+       latestVerified value — single source of truth, no hardcoded dates. */
+    var freshnessEl = document.getElementById('freshnessText');
+    if (freshnessEl) {
+      var prefix = ar ? '✓ آخر تحديث: ' : '✓ Last updated: ';
+      var sep    = ar ? ' &nbsp;|&nbsp; ' : ' &nbsp;|&nbsp; ';
+      var pipe   = ar ? 'النظام نشط' : 'Pipeline: Active';
+      freshnessEl.innerHTML = prefix + verifiedDisplay + sep + pipe;
+    }
+    var footerLU = document.getElementById('footerLastUpdated');
+    if (footerLU) footerLU.textContent = verifiedDisplay;
   }
   /* Re-populate on language switch */
   window.__populateDfp = populateDfp;

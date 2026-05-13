@@ -1,7 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
-const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -9,34 +7,68 @@ const PORT = process.env.PORT || 3001;
 // Enable CORS for all origins
 app.use(cors());
 
-// Load dataset
-// Try local copy first, then parent directory, then fetch from GitHub
+// ─── Supabase config ───
+const SUPABASE_URL =
+  process.env.SUPABASE_URL || 'https://dshrbbnjahjcwxzvzygh.supabase.co';
+const SUPABASE_ANON_KEY =
+  process.env.SUPABASE_ANON_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzaHJiYm5qYWhqY3d4enZ6eWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE3OTgsImV4cCI6MjA5NDA1Nzc5OH0.OpUGgfL91m7STsZpE6fnX281KN_Ge8oytR-2lM-3qTo';
+
+// In-memory cache (refreshed periodically)
 let opportunities = [];
+let lastLoadedAt = 0;
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 async function loadData() {
-  const localPath = path.join(__dirname, 'opportunitiesData.json');
-  const parentPath = path.join(__dirname, '..', 'opportunitiesData.json');
+  // Page through PostgREST (max 1000 per request)
+  const pageSize = 1000;
+  let offset = 0;
+  const all = [];
 
-  if (fs.existsSync(localPath)) {
-    opportunities = JSON.parse(fs.readFileSync(localPath, 'utf-8'));
-    console.log(`Loaded ${opportunities.length} opportunities from local file`);
-  } else if (fs.existsSync(parentPath)) {
-    opportunities = JSON.parse(fs.readFileSync(parentPath, 'utf-8'));
-    console.log(`Loaded ${opportunities.length} opportunities from parent directory`);
-  } else {
-    // Fallback: fetch from raw GitHub
-    console.log('Local file not found, fetching from GitHub...');
+  while (true) {
+    const url = `${SUPABASE_URL}/rest/v1/opportunities?select=*&order=id.asc&limit=${pageSize}&offset=${offset}`;
+    const res = await fetch(url, {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`Supabase HTTP ${res.status}: ${body.slice(0, 200)}`);
+    }
+    const batch = await res.json();
+    all.push(...batch);
+    if (batch.length < pageSize) break;
+    offset += pageSize;
+  }
+
+  opportunities = all;
+  lastLoadedAt = Date.now();
+  console.log(`Loaded ${opportunities.length} opportunities from Supabase`);
+}
+
+async function ensureFresh() {
+  if (!opportunities.length || Date.now() - lastLoadedAt > CACHE_TTL_MS) {
     try {
-      const res = await fetch('https://raw.githubusercontent.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/main/opportunitiesData.json');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      opportunities = await res.json();
-      console.log(`Loaded ${opportunities.length} opportunities from GitHub`);
+      await loadData();
     } catch (err) {
-      console.error('ERROR: Could not load opportunitiesData.json from any source!', err.message);
-      process.exit(1);
+      // If we already have a cached copy, keep serving it; else surface the error.
+      console.error('Refresh failed:', err.message);
+      if (!opportunities.length) throw err;
     }
   }
 }
+
+// Middleware: ensure data loaded before any /api/* request
+app.use('/api', async (req, res, next) => {
+  try {
+    await ensureFresh();
+    next();
+  } catch (err) {
+    res.status(503).json({ error: 'Data temporarily unavailable', detail: err.message });
+  }
+});
 
 // ─── GET /api/opportunities ───
 app.get('/api/opportunities', (req, res) => {
@@ -138,11 +170,24 @@ app.get('/api/stats', (req, res) => {
     regionCounts[r] = (regionCounts[r] || 0) + 1;
   });
 
+  // Freshness signals (driven by Supabase)
+  const lastVerifiedDates = opportunities
+    .map(o => o.last_verified)
+    .filter(Boolean)
+    .sort();
+  const lastUpdatedDates = opportunities
+    .map(o => o.updated_at || o.last_updated)
+    .filter(Boolean)
+    .sort();
+
   res.json({
     total,
     byStatus: statusCounts,
     byType: typeCounts,
-    byRegion: regionCounts
+    byRegion: regionCounts,
+    lastVerified: lastVerifiedDates.length ? lastVerifiedDates[lastVerifiedDates.length - 1] : null,
+    lastUpdated: lastUpdatedDates.length ? lastUpdatedDates[lastUpdatedDates.length - 1] : null,
+    dataSource: 'supabase'
   });
 });
 
@@ -171,15 +216,35 @@ app.get('/api/meta', (req, res) => {
   });
 });
 
-// ─── Start server ───
-loadData().then(() => {
-  app.listen(PORT, () => {
-    console.log(`\n  Saudi Opportunity Hub API running at:`);
-    console.log(`  Local:  http://localhost:${PORT}`);
-    console.log(`\n  Endpoints:`);
-    console.log(`  GET /api/opportunities`);
-    console.log(`  GET /api/opportunities/:id`);
-    console.log(`  GET /api/stats`);
-    console.log(`  GET /api/meta\n`);
+// ─── Health check ───
+app.get('/api/health', (req, res) => {
+  res.json({
+    ok: true,
+    loaded: opportunities.length,
+    lastLoadedAt: lastLoadedAt ? new Date(lastLoadedAt).toISOString() : null,
+    dataSource: 'supabase'
   });
 });
+
+// ─── Start server ───
+loadData()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`\n  Saudi Opportunity Hub API running at:`);
+      console.log(`  Local:  http://localhost:${PORT}`);
+      console.log(`  Data:   Supabase (${SUPABASE_URL})`);
+      console.log(`\n  Endpoints:`);
+      console.log(`  GET /api/opportunities`);
+      console.log(`  GET /api/opportunities/:id`);
+      console.log(`  GET /api/stats`);
+      console.log(`  GET /api/meta`);
+      console.log(`  GET /api/health\n`);
+    });
+  })
+  .catch(err => {
+    console.error('FATAL: initial Supabase load failed:', err.message);
+    // Still start the server so /api/health works & retries happen on demand.
+    app.listen(PORT, () => {
+      console.log(`Server up on ${PORT} but dataset empty — will retry on first request.`);
+    });
+  });
