@@ -309,16 +309,35 @@
   }
 
   async function loadDataset() {
-    const candidates = ['./opportunitiesData.json', './data/opportunities.json', './opportunities.json', './data/dataset.json', './dataset.json'];
-    for (const url of candidates) {
-      try {
-        const response = await fetch(url, { cache: 'no-store' });
-        if (!response.ok) continue;
-        const json = await response.json();
-        const arr = Array.isArray(json) ? json : (Array.isArray(json.items) ? json.items : null);
-        if (arr?.length) return arr.map(normalizeRecord);
-      } catch (_) {}
+    // Preferred path: the page (index.html / ar.html) has already loaded
+    // the opportunities from Supabase into window.opportunitiesData.
+    if (Array.isArray(window.opportunitiesData) && window.opportunitiesData.length) {
+      return window.opportunitiesData.map(normalizeRecord);
     }
+
+    // Direct Supabase fetch as a backup, in case script.js is loaded
+    // standalone (e.g. on a page without the inline bootstrap).
+    try {
+      const SUPABASE_URL = window.SUPABASE_URL || 'https://dshrbbnjahjcwxzvzygh.supabase.co';
+      const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY ||
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzaHJiYm5qYWhqY3d4enZ6eWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE3OTgsImV4cCI6MjA5NDA1Nzc5OH0.OpUGgfL91m7STsZpE6fnX281KN_Ge8oytR-2lM-3qTo';
+      const url = `${SUPABASE_URL}/rest/v1/opportunities?select=*&order=id.asc`;
+      const response = await fetch(url, {
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+          Range: '0-9999',
+          'Range-Unit': 'items'
+        }
+      });
+      if (response.ok) {
+        const arr = await response.json();
+        if (Array.isArray(arr) && arr.length) {
+          window.opportunitiesData = arr;
+          return arr.map(normalizeRecord);
+        }
+      }
+    } catch (_) {}
 
     return fallbackDataset();
   }

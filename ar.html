@@ -2526,15 +2526,45 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
 </aside>
 
 <script>
-(async function () {
+// Supabase config — loads opportunities directly from the database.
+// Anon key is safe to expose; reads are gated by the table's RLS policy.
+window.SUPABASE_URL = 'https://dshrbbnjahjcwxzvzygh.supabase.co';
+window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzaHJiYm5qYWhqY3d4enZ6eWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE3OTgsImV4cCI6MjA5NDA1Nzc5OH0.OpUGgfL91m7STsZpE6fnX281KN_Ge8oytR-2lM-3qTo';
+
+(async function loadOpportunitiesFromSupabase() {
   const resultsEl = document.getElementById('resultsCount');
   const tbody = document.getElementById('oppsTableBody');
+  const PAGE = 1000;
 
   try {
-    const response = await fetch('opportunitiesData.json', { cache: 'no-store' });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    window.opportunitiesData = await response.json();
+    let all = [];
+    let from = 0;
+    while (true) {
+      const url = `${window.SUPABASE_URL}/rest/v1/opportunities` +
+        `?select=id,title,description_short,type,sponsor_institution,country,` +
+        `eligibility_region,eligibility_entities,funding_amount,funding_type,` +
+        `application_link,deadline_date,status,language,notes,last_verified,` +
+        `profiles,sectors,isNew` +
+        `&order=id.asc`;
+      const response = await fetch(url, {
+        headers: {
+          apikey: window.SUPABASE_ANON_KEY,
+          Authorization: 'Bearer ' + window.SUPABASE_ANON_KEY,
+          Range: `${from}-${from + PAGE - 1}`,
+          'Range-Unit': 'items',
+          Prefer: 'count=exact'
+        }
+      });
+      if (!response.ok) throw new Error(`Supabase HTTP ${response.status}: ${await response.text()}`);
+      const batch = await response.json();
+      all = all.concat(batch);
+      const contentRange = response.headers.get('Content-Range') || '';
+      const total = parseInt(contentRange.split('/')[1], 10);
+      if (!batch.length || isNaN(total) || all.length >= total) break;
+      from += PAGE;
+    }
+    window.opportunitiesData = all;
+    console.log('Loaded', all.length, 'opportunities from Supabase');
 
     const appScript = document.createElement('script');
     appScript.src = 'script.js';
@@ -2543,15 +2573,15 @@ html[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
     };
     document.body.appendChild(appScript);
   } catch (error) {
-    console.error('Failed to load opportunitiesData.json', error);
+    console.error('Failed to load opportunities from Supabase', error);
     if (resultsEl) resultsEl.textContent = 'Failed to load opportunities.';
     if (tbody) {
       tbody.innerHTML = `
         <tr>
           <td colspan="7" class="empty-state">
             <div class="empty-icon">\u26a0</div>
-            <div class="empty-title">Failed to load opportunitiesData.json</div>
-            <div class="empty-sub">Make sure the JSON file is in the same folder as this HTML file.</div>
+            <div class="empty-title">Failed to load opportunities</div>
+            <div class="empty-sub">Could not reach the database. Please try again later.</div>
           </td>
         </tr>
       `;
