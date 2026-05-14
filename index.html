@@ -3643,10 +3643,14 @@ body.page-entering {
   border: 1.5px solid var(--border);
   font-size: 0.75rem;
   font-weight: 600;
+  font-family: inherit;
   color: var(--text-muted);
   background: var(--surface-3);
   cursor: pointer;
   transition: all var(--transition);
+  appearance: none;
+  -webkit-appearance: none;
+  line-height: 1.4;
 }
 .settings-chip.selected {
   border-color: var(--green);
@@ -5609,17 +5613,17 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     <div class="settings-section">
       <div class="settings-section-title" data-en="Sector Interests" data-ar="اهتمامات القطاع">Sector Interests</div>
       <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:var(--space-3);" data-en="Select the sectors you want to track. Recommendations and insights will prioritise these." data-ar="اختر القطاعات التي تريد تتبعها. ستُعطي التوصيات والرؤى الأولوية لها.">Select the sectors you want to track. Recommendations and insights will prioritise these.</p>
-      <div class="settings-chips" id="settingsSectorChips">
-        <span class="settings-chip" data-sector="ICT">ICT</span>
-        <span class="settings-chip" data-sector="Energy">Energy</span>
-        <span class="settings-chip" data-sector="Healthcare & Life Sciences">Healthcare</span>
-        <span class="settings-chip" data-sector="Agriculture">Agriculture</span>
-        <span class="settings-chip" data-sector="Financial Services">FinTech</span>
-        <span class="settings-chip" data-sector="Education">Education</span>
-        <span class="settings-chip" data-sector="Tourism">Tourism</span>
-        <span class="settings-chip" data-sector="Manufacturing">Manufacturing</span>
-        <span class="settings-chip" data-sector="Logistics & Transport">Logistics</span>
-        <span class="settings-chip" data-sector="Innovation & Entrepreneurship">Innovation</span>
+      <div class="settings-chips" id="settingsSectorChips" role="group" aria-label="Sector preferences">
+        <button type="button" class="settings-chip" data-sector="ICT" aria-pressed="false">ICT</button>
+        <button type="button" class="settings-chip" data-sector="Energy" aria-pressed="false">Energy</button>
+        <button type="button" class="settings-chip" data-sector="Healthcare & Life Sciences" aria-pressed="false">Healthcare</button>
+        <button type="button" class="settings-chip" data-sector="Agriculture" aria-pressed="false">Agriculture</button>
+        <button type="button" class="settings-chip" data-sector="Financial Services" aria-pressed="false">FinTech</button>
+        <button type="button" class="settings-chip" data-sector="Education" aria-pressed="false">Education</button>
+        <button type="button" class="settings-chip" data-sector="Tourism" aria-pressed="false">Tourism</button>
+        <button type="button" class="settings-chip" data-sector="Manufacturing" aria-pressed="false">Manufacturing</button>
+        <button type="button" class="settings-chip" data-sector="Logistics & Transport" aria-pressed="false">Logistics</button>
+        <button type="button" class="settings-chip" data-sector="Innovation & Entrepreneurship" aria-pressed="false">Innovation</button>
       </div>
     </div>
 
@@ -5895,11 +5899,16 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     return (typeof window.t === 'function') ? window.t(str) : (str || '');
   }
 
-  /* ---------------- Lucide icons ---------------- */
+  /* ---------------- Lucide icons (debounced) ---- */
+  var _paintTimer = null;
   function paintIcons() {
-    if (window.lucide && typeof window.lucide.createIcons === 'function') {
-      try { window.lucide.createIcons(); } catch (e) {}
-    }
+    if (_paintTimer) clearTimeout(_paintTimer);
+    _paintTimer = setTimeout(function() {
+      _paintTimer = null;
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        try { window.lucide.createIcons(); } catch (e) {}
+      }
+    }, 50);
   }
   paintIcons();
 
@@ -5915,6 +5924,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   };
   var DEFAULT_VIEW = 'home';
   var chartsInitialized = false;
+  var _viewBtns = null;
 
   function getViewFromHash() {
     var raw = (window.location.hash || '').replace(/^#/, '').toLowerCase();
@@ -5927,7 +5937,8 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var el = document.getElementById('view-' + v);
       if (el) el.classList.toggle('active', v === view);
     });
-    document.querySelectorAll('[data-view]').forEach(function (btn) {
+    if (!_viewBtns) _viewBtns = document.querySelectorAll('[data-view]');
+    _viewBtns.forEach(function (btn) {
       btn.classList.toggle('active', btn.getAttribute('data-view') === view);
     });
     var titleEl = document.getElementById('appTopbarTitle');
@@ -6208,7 +6219,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           if (scEl && scEl.querySelector('.home-list-loading')) scEl.innerHTML = '<div class="home-list-loading" style="color:var(--text-faint)">Sectors will appear once data loads.</div>';
         }
       }
-    }, 8000);
+    }, 4000);
   }
 
   function renderHomeOppList(elId, items, showNewBadge) {
@@ -6221,7 +6232,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     el.innerHTML = items.map(function(opp) {
       var type = (opp.type || '').replace(/_/g, ' ');
       var country = opp.country || '';
-      return '<div class="home-opp-item" data-id="' + esc(opp.id || '') + '">' +
+      return '<div class="home-opp-item" tabindex="0" role="button" data-id="' + esc(opp.id || '') + '">' +
         '<div class="home-opp-dot"></div>' +
         '<div class="home-opp-body">' +
           '<div class="home-opp-title">' + esc(opp.title || '') + '</div>' +
@@ -6234,11 +6245,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       '</div>';
     }).join('');
     el.querySelectorAll('.home-opp-item').forEach(function(row) {
-      row.addEventListener('click', function() {
+      function activate() {
         var id = row.getAttribute('data-id');
         var opp = items.find(function(o) { return String(o.id) === String(id); });
         if (opp && window.__openDetailPanel) window.__openDetailPanel(opp);
-      });
+      }
+      row.addEventListener('click', activate);
+      row.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } });
     });
   }
 
@@ -6260,7 +6273,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var title = item.title || opp.title || 'Untitled';
       var type = (item.type || opp.type || '').replace(/_/g, ' ');
       var status = opp.status || '';
-      return '<div class="home-opp-item" data-wl-id="' + esc(id) + '">' +
+      return '<div class="home-opp-item" tabindex="0" role="button" data-wl-id="' + esc(id) + '">' +
         '<div class="home-opp-dot" style="background: var(--gold);"></div>' +
         '<div class="home-opp-body">' +
           '<div class="home-opp-title">' + esc(title) + '</div>' +
@@ -6272,11 +6285,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       '</div>';
     }).join('');
     el.querySelectorAll('[data-wl-id]').forEach(function(row) {
-      row.addEventListener('click', function() {
+      function activate() {
         var id = row.getAttribute('data-wl-id');
         var opp = byId[id];
         if (opp && window.__openDetailPanel) window.__openDetailPanel(opp);
-      });
+      }
+      row.addEventListener('click', activate);
+      row.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } });
     });
     if (empty) el.appendChild(empty);
   }
@@ -6635,11 +6650,19 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   /* Poll frequently for the first 20s after load, then settle */
   (function() {
     var polls = 0;
+    var settled = false;
     var iv = setInterval(function() {
+      if (document.hidden) return;
       syncTopbarStats();
       polls++;
-      if (polls > 20) { clearInterval(iv); setInterval(syncTopbarStats, 5000); }
+      if (polls > 20) { clearInterval(iv); settled = true; }
     }, 400);
+    var slowIv = null;
+    function startSlow() { if (!slowIv) slowIv = setInterval(function() { if (!document.hidden) syncTopbarStats(); }, 5000); }
+    document.addEventListener('visibilitychange', function() {
+      if (!document.hidden && settled) syncTopbarStats();
+    });
+    setTimeout(function() { if (settled || polls > 20) startSlow(); else { var w = setInterval(function() { if (settled) { clearInterval(w); startSlow(); } }, 500); } }, 8500);
   })();
 
   /* Theme toggle removed — platform is fixed to light mode */
@@ -6834,20 +6857,23 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       const CONCURRENCY = 4;
       for (let i = 0; i < remainingPages.length; i += CONCURRENCY) {
         const batch = remainingPages.slice(i, i + CONCURRENCY);
-        const results = await Promise.all(batch.map(from => fetchPageWithRetry(from)));
-        results.forEach(r => { all = all.concat(r.data); });
+        const results = await Promise.allSettled(batch.map(from => fetchPageWithRetry(from)));
+        results.forEach(r => { if (r.status === 'fulfilled' && r.value.data) all = all.concat(r.value.data); });
         /* Update global data as pages arrive */
         window.opportunitiesData = all.slice();
       }
     } else if (!totalCount) {
       /* No count returned — fall back to sequential until empty page */
       let from = PAGE;
-      while (true) {
+      const MAX_PAGES = 200;
+      let pageCount = 0;
+      while (pageCount < MAX_PAGES) {
         const { data } = await fetchPageWithRetry(from);
         if (!data || !data.length) break;
         all = all.concat(data);
         window.opportunitiesData = all.slice();
         from += PAGE;
+        pageCount++;
       }
     }
 
@@ -6957,14 +6983,20 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     return profiles.includes(selectedProfile);
   }
 
-  function matchesFilters(item) {
-    const q = norm(document.getElementById('searchInput')?.value);
-    const sector = norm(document.getElementById('sectorFilter')?.value || 'all');
-    const country = norm(document.getElementById('countryFilter')?.value || 'all');
-    const type = norm(document.getElementById('typeFilter')?.value || 'all');
-    const status = norm(document.getElementById('statusFilter')?.value || 'all');
+  var _filterCache = {};
+  function _readFilters() {
+    _filterCache.q = norm(document.getElementById('searchInput')?.value);
+    _filterCache.sector = norm(document.getElementById('sectorFilter')?.value || 'all');
+    _filterCache.country = norm(document.getElementById('countryFilter')?.value || 'all');
+    _filterCache.type = norm(document.getElementById('typeFilter')?.value || 'all');
+    _filterCache.status = norm(document.getElementById('statusFilter')?.value || 'all');
+  }
 
-    const haystack = [
+  function matchesFilters(item) {
+    var q = _filterCache.q, sector = _filterCache.sector, country = _filterCache.country;
+    var type = _filterCache.type, status = _filterCache.status;
+
+    var haystack = [
       item.id, item.title, item.description_short, item.sponsor_institution,
       item.country, item.eligibility_region, item.eligibility_entities,
       item.funding_amount, item.funding_type, item.deadline_date,
@@ -6977,7 +7009,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (country !== 'all' && regionGroup(item) !== country) return false;
     if (type !== 'all' && norm(item.type) !== type) return false;
     if (status !== 'all') {
-      const s = norm(item.status);
+      var s = norm(item.status);
       if (status === 'open' && !s.includes('open')) return false;
       if (status === 'closedbutrecurring' && !(s.includes('recurring') || s.includes('closed_but_recurring'))) return false;
       if (status === 'closed' && (s.includes('open') || s.includes('recurring'))) return false;
@@ -7978,6 +8010,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   }
 
   function applyFilters() {
+    _readFilters();
     filteredData = dataSource().filter(matchesFilters);
     sortedData = sortData(filteredData);
     currentPage = 1;
@@ -9372,7 +9405,8 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           btn.classList.remove('selected');
         } else {
           if (compareItems.length >= MAX_COMPARE) {
-            alert(t('You can compare up to') + ' ' + MAX_COMPARE + ' ' + t('opportunities at a time.'));
+            if (typeof showToastOb === 'function') showToastOb(t('You can compare up to') + ' ' + MAX_COMPARE + ' ' + t('opportunities at a time.'));
+            else if (typeof window.showToast === 'function') window.showToast(t('You can compare up to') + ' ' + MAX_COMPARE + ' ' + t('opportunities at a time.'));
             return;
           }
           compareItems.push(item);
@@ -11619,6 +11653,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     document.querySelectorAll('.settings-chip[data-sector]').forEach(function(chip) {
       var sel = (prefs.sectors || []).includes(chip.dataset.sector);
       chip.classList.toggle('selected', sel);
+      chip.setAttribute('aria-pressed', sel);
     });
 
     document.getElementById('settingsModalOverlay').classList.add('open');
@@ -11728,7 +11763,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     cards.innerHTML = matches.map(function(item) {
       var typeStr = item.type ? item.type.replace(/_/g,' ') : 'Program';
       var sectorStr = (item.sectors && item.sectors[0]) || '';
-      return '<div class="rec-card" role="listitem" data-id="' + esc(item.id) + '">' +
+      return '<div class="rec-card" role="listitem" tabindex="0" data-id="' + esc(item.id) + '">' +
         '<div class="rec-card-title">' + esc(item.title || '') + '</div>' +
         '<div class="rec-card-meta">' + esc(typeStr) + (sectorStr ? ' · ' + esc(sectorStr) : '') + '</div>' +
         '<div class="rec-card-why">Matches your ' + esc(sources[0] || '') + ' interest</div>' +
@@ -11736,23 +11771,23 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     }).join('');
 
     cards.querySelectorAll('.rec-card').forEach(function(card) {
-      card.addEventListener('click', function() {
+      function activate() {
         var id = card.dataset.id;
         var allData = window.opportunitiesData || window.allOpportunities || window._wsDataset || [];
         var item = allData.find(function(d) { return d.id === id; });
         if (!item) return;
-        // Open detail panel directly — works regardless of which page the card is on
         if (typeof window.__openDetailPanel === 'function') {
           window.__openDetailPanel(item);
         } else {
-          // Fallback: scroll to opportunities and try to click button in DOM
           document.getElementById('opportunities')?.scrollIntoView({ behavior: 'smooth' });
           setTimeout(function() {
             var btn = document.querySelector('[data-id="' + id + '"] .opp-insights-btn');
             if (btn) btn.click();
           }, 600);
         }
-      });
+      }
+      card.addEventListener('click', activate);
+      card.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } });
     });
   }
 
@@ -11886,7 +11921,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
     // ── Settings sector chips toggle
     document.querySelectorAll('.settings-chip[data-sector]').forEach(function(chip) {
-      chip.addEventListener('click', function() { chip.classList.toggle('selected'); });
+      chip.addEventListener('click', function() {
+        chip.classList.toggle('selected');
+        chip.setAttribute('aria-pressed', chip.classList.contains('selected'));
+      });
     });
 
     // ── Apply default filters from prefs
@@ -11983,7 +12021,8 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     } catch (err) {
       btn.innerHTML = origText;
       btn.disabled = false;
-      alert('Failed to send feedback. Please try again.');
+      if (typeof showToastOb === 'function') showToastOb('Failed to send feedback. Please try again.');
+      else if (typeof window.showToast === 'function') window.showToast('Failed to send feedback. Please try again.');
     }
   });
 })();
@@ -12734,10 +12773,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         _maybeShowModal();
       }, { once: true });
 
-      /* Data fallback — show modal even if data is slow (after 8s) */
+      /* Data fallback — show modal even if data is slow (after 4s) */
       setTimeout(function() {
         if (!_dataReady) { _dataReady = true; _maybeShowModal(); }
-      }, 8000);
+      }, 4000);
     }
   }
 
