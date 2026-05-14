@@ -38,7 +38,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script defer src="https://unpkg.com/lucide@0.263.1"></script>
+<script defer src="https://unpkg.com/lucide@0.263.1" onload="if(window.lucide)window.lucide.createIcons()"></script>
 <style>
 /* =============================================
    Saudi Opportunity Hub — styles.css
@@ -5927,12 +5927,18 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   /* ---------------- Lucide icons (debounced) ---- */
   var _paintTimer = null;
   function paintIcons() {
-    if (_paintTimer) clearTimeout(_paintTimer);
-    _paintTimer = setTimeout(function() {
-      _paintTimer = null;
+    if (_paintTimer) clearInterval(_paintTimer);
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      try { window.lucide.createIcons(); } catch (e) {}
+      return;
+    }
+    var tries = 0;
+    _paintTimer = setInterval(function() {
       if (window.lucide && typeof window.lucide.createIcons === 'function') {
         try { window.lucide.createIcons(); } catch (e) {}
+        clearInterval(_paintTimer); _paintTimer = null; return;
       }
+      if (++tries > 60) { clearInterval(_paintTimer); _paintTimer = null; }
     }, 50);
   }
   paintIcons();
