@@ -3,16 +3,32 @@ const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Enable CORS for all origins
-app.use(cors());
+// Restrict CORS to an allow-list in production, allow all in dev for easier debugging.
+const CORS_ORIGINS = (process.env.CORS_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
+if (NODE_ENV === 'production' && CORS_ORIGINS.length) {
+  app.use(cors({ origin: CORS_ORIGINS }));
+} else {
+  app.use(cors());
+}
+
+// Trust the first proxy when running behind a reverse proxy / PaaS load balancer.
+app.set('trust proxy', 1);
+app.disable('x-powered-by');
 
 // ─── Supabase config ───
+// Defaults are baked in for the demo project; production deploys MUST supply env vars.
 const SUPABASE_URL =
   process.env.SUPABASE_URL || 'https://dshrbbnjahjcwxzvzygh.supabase.co';
 const SUPABASE_ANON_KEY =
   process.env.SUPABASE_ANON_KEY ||
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzaHJiYm5qYWhqY3d4enZ6eWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE3OTgsImV4cCI6MjA5NDA1Nzc5OH0.OpUGgfL91m7STsZpE6fnX281KN_Ge8oytR-2lM-3qTo';
+
+if (NODE_ENV === 'production' && (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY)) {
+  console.error('FATAL: SUPABASE_URL and SUPABASE_ANON_KEY must be set in production.');
+  process.exit(1);
+}
 
 // In-memory cache (refreshed periodically)
 let opportunities = [];
@@ -227,24 +243,45 @@ app.get('/api/health', (req, res) => {
 });
 
 // ─── Start server ───
-loadData()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`\n  Saudi Opportunity Hub API running at:`);
-      console.log(`  Local:  http://localhost:${PORT}`);
-      console.log(`  Data:   Supabase (${SUPABASE_URL})`);
-      console.log(`\n  Endpoints:`);
-      console.log(`  GET /api/opportunities`);
-      console.log(`  GET /api/opportunities/:id`);
-      console.log(`  GET /api/stats`);
-      console.log(`  GET /api/meta`);
-      console.log(`  GET /api/health\n`);
+function startListening(message) {
+  const server = app.listen(PORT, () => {
+    console.log(`\n  Saudi Opportunity Hub API running at:`);
+    console.log(`  Local:  http://localhost:${PORT}`);
+    console.log(`  Env:    ${NODE_ENV}`);
+    console.log(`  Data:   Supabase (${SUPABASE_URL})`);
+    if (message) console.log(`  Note:   ${message}`);
+    console.log(`\n  Endpoints:`);
+    console.log(`  GET /api/opportunities`);
+    console.log(`  GET /api/opportunities/:id`);
+    console.log(`  GET /api/stats`);
+    console.log(`  GET /api/meta`);
+    console.log(`  GET /api/health\n`);
+  });
+
+  // Background refresh — keeps the cache warm even if no requests come in.
+  const refreshInterval = setInterval(() => {
+    loadData().catch(err => console.error('Background refresh failed:', err.message));
+  }, CACHE_TTL_MS);
+
+  // Graceful shutdown so in-flight requests finish.
+  const shutdown = signal => {
+    console.log(`\n${signal} received — shutting down gracefully.`);
+    clearInterval(refreshInterval);
+    server.close(err => {
+      if (err) { console.error('Error during shutdown:', err); process.exit(1); }
+      process.exit(0);
     });
-  })
+    // Hard exit if it takes too long.
+    setTimeout(() => process.exit(1), 10000).unref();
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT',  () => shutdown('SIGINT'));
+}
+
+loadData()
+  .then(() => startListening())
   .catch(err => {
     console.error('FATAL: initial Supabase load failed:', err.message);
     // Still start the server so /api/health works & retries happen on demand.
-    app.listen(PORT, () => {
-      console.log(`Server up on ${PORT} but dataset empty — will retry on first request.`);
-    });
+    startListening(`dataset empty — will retry on first request`);
   });
