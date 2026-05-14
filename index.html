@@ -13105,5 +13105,859 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
      DOM is fully built by this point, so this call always succeeds. -->
 <script>lucide.createIcons();</script>
 
+<!-- ══════════════════════════════════════════════════════════════
+     OH ENHANCEMENTS MODULE
+     Self-contained additive layer that augments the existing UI:
+       • Card decorations: smart-match score, deadline urgency bar,
+         eligibility chips, share button
+       • Deep-link routing (#opp=ID opens the detail panel)
+       • Side-by-side comparison table (replaces the modal body)
+       • Analytics: deadline-closing leaderboard, 12-week sparkline,
+         month-over-month KPI deltas
+       • Watchlist CSV export
+       • Notification preferences inside Settings
+     No localStorage; persists to existing `user_prefs` Supabase blob.
+     ══════════════════════════════════════════════════════════════ -->
+<style id="oh-enh-styles">
+  /* === Top row above title (match + eligibility) === */
+  .oh-enh-top { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 0 0 10px; }
+
+  /* Smart-match badge */
+  .oh-enh-match {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px; border-radius: 999px;
+    font-size: 11px; font-weight: 600; line-height: 1.5;
+    border: 1px solid; letter-spacing: 0.01em;
+  }
+  .oh-enh-match svg { flex-shrink: 0; }
+  .oh-enh-match-compact { font-weight: 600; font-size: 10.5px; }
+
+  /* Eligibility chips */
+  .oh-enh-eligibility { display: flex; gap: 4px; flex-wrap: wrap; }
+  .oh-enh-elig-chip {
+    font-size: 10.5px; font-weight: 500;
+    padding: 2px 7px; border-radius: 4px;
+    background: rgba(0,108,53,0.10); color: #006C35;
+    border: 1px solid rgba(0,108,53,0.25);
+    white-space: nowrap;
+  }
+  .oh-enh-elig-startup { background: rgba(245,166,35,0.12); color: #b45309; border-color: rgba(245,166,35,0.30); }
+  .oh-enh-elig-research { background: rgba(79,156,249,0.12); color: #1d4ed8; border-color: rgba(79,156,249,0.30); }
+  .oh-enh-elig-govern { background: rgba(124,137,171,0.18); color: #475569; border-color: rgba(124,137,171,0.35); }
+  .oh-enh-elig-invest { background: rgba(176,113,249,0.12); color: #7e22ce; border-color: rgba(176,113,249,0.30); }
+  .oh-enh-elig-student { background: rgba(246,179,132,0.18); color: #c2410c; border-color: rgba(246,179,132,0.35); }
+  [data-theme="dark"] .oh-enh-elig-chip { background: rgba(0,166,81,0.15); color: #34d97b; border-color: rgba(0,166,81,0.30); }
+  [data-theme="dark"] .oh-enh-elig-startup { background: rgba(245,166,35,0.15); color: #f5c842; border-color: rgba(245,166,35,0.30); }
+  [data-theme="dark"] .oh-enh-elig-research { background: rgba(79,156,249,0.15); color: #80b8fb; border-color: rgba(79,156,249,0.30); }
+  [data-theme="dark"] .oh-enh-elig-govern { background: rgba(124,137,171,0.15); color: #9da6bf; border-color: rgba(124,137,171,0.30); }
+  [data-theme="dark"] .oh-enh-elig-invest { background: rgba(176,113,249,0.15); color: #c89efb; border-color: rgba(176,113,249,0.30); }
+  [data-theme="dark"] .oh-enh-elig-student { background: rgba(246,179,132,0.15); color: #f6b384; border-color: rgba(246,179,132,0.30); }
+
+  /* Deadline urgency bar */
+  .oh-enh-urgency { margin: 8px 0 12px; }
+  .oh-enh-urgency-track { height: 4px; background: rgba(124,137,171,0.18); border-radius: 2px; overflow: hidden; }
+  .oh-enh-urgency-fill { height: 100%; border-radius: 2px; transition: width .3s ease; }
+  .oh-enh-urgency-label { margin-top: 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.01em; }
+
+  /* Share button — sits with the apply / insights actions */
+  .oh-enh-share {
+    background: transparent;
+    border: 1px solid var(--border, #e2e8f0);
+    color: var(--text-muted, #64748b);
+    padding: 7px 9px; border-radius: 8px;
+    cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+  .oh-enh-share:hover {
+    color: var(--green, #006C35);
+    border-color: var(--green, #006C35);
+    background: rgba(0,108,53,0.06);
+  }
+
+  /* === Compare side-by-side table === */
+  .oh-enh-compare-table-wrap { overflow-x: auto; margin: 8px 0; -webkit-overflow-scrolling: touch; }
+  .oh-enh-compare-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 480px; }
+  .oh-enh-compare-table th, .oh-enh-compare-table td {
+    text-align: start; padding: 12px 14px;
+    border-bottom: 1px solid var(--border, #e2e8f0);
+    vertical-align: top;
+  }
+  .oh-enh-ct-rowlabel {
+    font-weight: 600; font-size: 11.5px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-muted, #64748b);
+    background: var(--surface-2, #f9fafb);
+    width: 140px;
+  }
+  .oh-enh-ct-col { position: relative; padding-top: 22px !important; }
+  .oh-enh-ct-title { font-size: 13.5px; font-weight: 600; line-height: 1.35; color: var(--text, #1a1f36); }
+  .oh-enh-ct-badge {
+    position: absolute; top: 0; inset-inline-start: 14px;
+    transform: translateY(-50%);
+    background: var(--green, #006C35); color: #fff;
+    font-size: 9.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 3px 8px; border-radius: 999px;
+    white-space: nowrap;
+  }
+  .oh-enh-ct-cell { font-size: 12.5px; color: var(--text, #1a1f36); }
+  .oh-enh-ct-best { background: rgba(0,108,53,0.04); border-inline-start: 2px solid rgba(0,108,53,0.4); }
+  [data-theme="dark"] .oh-enh-ct-best { background: rgba(0,166,81,0.06); }
+  .oh-enh-ct-action { text-align: center !important; padding: 16px 14px !important; }
+  .oh-enh-ct-apply {
+    display: inline-block;
+    background: var(--green, #006C35); color: #fff;
+    text-decoration: none; font-weight: 600; font-size: 12px;
+    padding: 7px 14px; border-radius: 6px;
+  }
+  .oh-enh-ct-apply:hover { background: var(--green-hover, #005229); }
+  .oh-enh-compare-actions { display: flex; justify-content: flex-end; padding: 12px 0 4px; gap: 8px; }
+  [dir="rtl"] .oh-enh-compare-actions { justify-content: flex-start; }
+  .oh-enh-compare-print {
+    background: transparent; border: 1px solid var(--border, #e2e8f0);
+    color: var(--text, #1a1f36);
+    padding: 8px 14px; border-radius: 8px;
+    font-size: 12.5px; font-weight: 500; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: all .15s;
+  }
+  .oh-enh-compare-print:hover { color: var(--green, #006C35); border-color: var(--green, #006C35); }
+  @media print { .oh-enh-compare-actions { display: none !important; } }
+
+  /* === Analytics widgets === */
+  .oh-enh-analytics { margin: 24px 0 12px; display: flex; flex-direction: column; gap: 16px; }
+  .oh-enh-analytics-row { display: grid; gap: 16px; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { .oh-enh-analytics-row { grid-template-columns: 1fr 1fr; } }
+  .oh-enh-card {
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 12px;
+    padding: 18px 18px 16px;
+  }
+  .oh-enh-card__header { margin-bottom: 14px; }
+  .oh-enh-card__title { font-size: 14px; font-weight: 600; color: var(--text, #1a1f36); }
+  .oh-enh-card__sub { font-size: 11.5px; color: var(--text-muted, #64748b); margin-top: 2px; }
+  .oh-enh-leaderboard { list-style: none; padding: 0; margin: 0; max-height: 280px; overflow-y: auto; }
+  .oh-enh-lb-item {
+    display: grid; grid-template-columns: 6px 1fr auto;
+    gap: 10px; align-items: center;
+    padding: 9px 4px;
+    border-bottom: 1px solid var(--divider, #edf2f7);
+    cursor: pointer; font-size: 12.5px;
+  }
+  .oh-enh-lb-item:last-child { border-bottom: none; }
+  .oh-enh-lb-item:hover { background: var(--surface-2, #f9fafb); }
+  .oh-enh-lb-pulse { width: 6px; height: 6px; border-radius: 999px; }
+  .oh-enh-lb-title { color: var(--text, #1a1f36); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .oh-enh-lb-days { font-weight: 700; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .oh-enh-lb-empty { padding: 16px 4px; font-size: 12.5px; color: var(--text-muted, #64748b); text-align: center; }
+  .oh-enh-spark-wrap { position: relative; height: 140px; }
+  .oh-enh-spark-stats {
+    display: flex; gap: 14px; margin-top: 10px;
+    flex-wrap: wrap;
+    font-size: 11.5px; color: var(--text-muted, #64748b);
+  }
+  .oh-enh-spark-stats strong { color: var(--text, #1a1f36); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .oh-enh-mom { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  @media (min-width: 600px) { .oh-enh-mom { grid-template-columns: 1fr 1fr; } }
+  .oh-enh-mom-card {
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .oh-enh-mom-label {
+    font-size: 11.5px; color: var(--text-muted, #64748b);
+    text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
+  }
+  .oh-enh-mom-value {
+    font-size: 28px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin: 4px 0 2px; color: var(--text, #1a1f36);
+  }
+  .oh-enh-mom-delta { font-size: 11.5px; font-weight: 600; }
+
+  /* === Watchlist CSV button === */
+  .oh-enh-wl-csv {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin: 8px 16px 4px;
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid var(--border, #e2e8f0);
+    color: var(--text, #1a1f36);
+    border-radius: 8px;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer;
+  }
+  .oh-enh-wl-csv:hover {
+    color: var(--green, #006C35);
+    border-color: var(--green, #006C35);
+    background: rgba(0,108,53,0.06);
+  }
+
+  /* === Notification preferences === */
+  .oh-enh-notif-prefs {
+    margin: 18px 0 6px;
+    padding: 16px;
+    background: var(--surface-2, #f9fafb);
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 10px;
+  }
+  .oh-enh-notif-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: var(--text, #1a1f36); }
+  .oh-enh-notif-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 0; font-size: 13px;
+    cursor: pointer; color: var(--text, #1a1f36);
+  }
+  .oh-enh-notif-row input[type=checkbox] {
+    width: 16px; height: 16px;
+    accent-color: var(--green, #006C35);
+    cursor: pointer;
+  }
+
+  /* Mobile (≤600px) */
+  @media (max-width: 600px) {
+    .oh-enh-top { gap: 5px; }
+    .oh-enh-match span:last-child { display: none; }
+    .oh-enh-match { padding: 3px 6px; }
+    .oh-enh-eligibility { gap: 3px; }
+    .oh-enh-elig-chip { font-size: 9.5px; padding: 1px 5px; }
+    .oh-enh-ct-rowlabel { width: 100px; font-size: 10px; padding: 8px 10px; }
+    .oh-enh-ct-title { font-size: 12.5px; }
+    .oh-enh-mom-value { font-size: 24px; }
+  }
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Helpers ────────────────────────────────────────────── */
+  function $$(s, root) { return Array.from((root || document).querySelectorAll(s)); }
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function isAr() { return window.__lang === 'ar'; }
+  function T(en, ar) { return isAr() ? (ar || en) : en; }
+  function prettify(s) { return String(s||'').replace(/_/g,' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); }); }
+
+  function getData() { return window.opportunitiesData || window.allOpportunities || []; }
+  function findItem(id) { return getData().find(function(it){ return (it.id||'') === id; }); }
+
+  var ROLE_TO_PROFILE = {
+    'Startup / SME':'startup','Researcher':'researcher','University':'researcher',
+    'Government':'government','Investor':'investor','Student':'student','Corporate':'corporate'
+  };
+  function getPrefs() {
+    var p = window.__userPrefs || {};
+    var sectors = (p.sectors || []).map(function(s){ return String(s||'').toLowerCase().replace(/[\s\-\/]+/g,'_'); }).filter(Boolean);
+    return {
+      sectors: sectors,
+      role: p.role || '',
+      profile: ROLE_TO_PROFILE[p.role || ''] || '',
+      notif: p.notifications || { newInSector: true, closingSoon: true, savedSearchMatch: true }
+    };
+  }
+
+  /* ── Compute ────────────────────────────────────────────── */
+  function parseDeadline(item) {
+    if (!item || !item.deadline_date) return null;
+    var d = new Date(item.deadline_date);
+    if (!isNaN(d.getTime())) return d;
+    var m = String(item.deadline_date).match(/(\d{4})/);
+    return m ? new Date(+m[1], 11, 31) : null;
+  }
+  function daysUntil(item) {
+    var d = parseDeadline(item);
+    return d ? Math.ceil((d.getTime() - Date.now()) / 86400000) : null;
+  }
+  function urgencyLevel(days) {
+    if (days == null) return null;
+    if (days < 0)   return { level:'past',     color:'#94a3b8', pct:100, label:T('Closed','مغلق') };
+    if (days <= 7)  return { level:'critical', color:'#dc2626', pct:95,  label:days + 'd ' + T('left','متبقي') };
+    if (days <= 14) return { level:'urgent',   color:'#ea580c', pct:80,  label:days + 'd ' + T('left','متبقي') };
+    if (days <= 30) return { level:'soon',     color:'#d97706', pct:60,  label:days + 'd ' + T('left','متبقي') };
+    if (days <= 90) return { level:'open',     color:'#16a34a', pct:35,  label:days + 'd ' + T('left','متبقي') };
+    return { level:'far', color:'#64748b', pct:15, label:days + 'd ' + T('left','متبقي') };
+  }
+  function computeMatch(item) {
+    var p = getPrefs();
+    if (!p.sectors.length && !p.profile) return null;
+    var score = 0, max = 0;
+    if (p.sectors.length) {
+      var itemSecs = (item.sectors || []).map(function(s){ return String(s).toLowerCase().replace(/[\s\-\/]+/g,'_'); });
+      var hits = p.sectors.filter(function(ps){
+        return itemSecs.some(function(is){ return is.indexOf(ps) >= 0 || ps.indexOf(is) >= 0; });
+      });
+      score += (hits.length / Math.max(1, p.sectors.length)) * 60;
+      max += 60;
+    }
+    if (p.profile) {
+      var profs = (item.profiles || []).map(function(x){ return String(x).toLowerCase(); });
+      if (profs.some(function(pf){ return pf.indexOf(p.profile) >= 0 || p.profile.indexOf(pf) >= 0; })) score += 25;
+      max += 25;
+    }
+    if ((item.status || '').toLowerCase() === 'open') score += 15;
+    max += 15;
+    return max ? Math.round((score / max) * 100) : null;
+  }
+  function matchColor(score) {
+    return score >= 80 ? '#15803d' : score >= 60 ? '#0891b2' : score >= 40 ? '#d97706' : '#64748b';
+  }
+
+  /* ── Card decoration ──────────────────────────────────── */
+  function decorate(row) {
+    if (!row || row.dataset.ohEnhanced === '1') return;
+    var id = row.dataset.id;
+    if (!id) return;
+    var item = findItem(id);
+    if (!item) return;
+
+    var card = row.querySelector('.opp-card-noimg');
+    var content = row.querySelector('.opp-card-content');
+    if (!card || !content) { decorateCompact(row, item); return; }
+
+    var topPieces = [];
+
+    var score = computeMatch(item);
+    if (score !== null) {
+      var col = matchColor(score);
+      topPieces.push(
+        '<div class="oh-enh-match" title="' + T('Match score based on your sectors and role','نسبة التطابق') + '" ' +
+        'style="background:' + col + '1a;color:' + col + ';border-color:' + col + '40;">' +
+        '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' +
+        '<span>' + score + '% ' + T('match','تطابق') + '</span></div>'
+      );
+    }
+
+    var eligibles = [].concat(item.profiles || []).concat(item.eligibility_entities || []);
+    var seen = {};
+    eligibles = eligibles.filter(function(e){ var k = String(e).toLowerCase(); if (seen[k]) return false; seen[k] = 1; return !!e; }).slice(0, 4);
+    if (eligibles.length) {
+      topPieces.push('<div class="oh-enh-eligibility">' +
+        eligibles.map(function(e){
+          var l = String(e).toLowerCase();
+          var cls = l.indexOf('startup') >= 0 || l.indexOf('sme') >= 0 ? 'startup' :
+                    l.indexOf('research') >= 0 ? 'research' :
+                    l.indexOf('govern') >= 0 ? 'govern' :
+                    l.indexOf('invest') >= 0 ? 'invest' :
+                    l.indexOf('student') >= 0 ? 'student' : 'other';
+          return '<span class="oh-enh-elig-chip oh-enh-elig-' + cls + '">' + esc(prettify(e)) + '</span>';
+        }).join('') +
+      '</div>');
+    }
+
+    if (topPieces.length) {
+      var top = document.createElement('div');
+      top.className = 'oh-enh-top';
+      top.innerHTML = topPieces.join('');
+      content.insertBefore(top, content.firstChild);
+    }
+
+    /* Urgency bar — inserted after the stats row */
+    var days = daysUntil(item);
+    var urg = urgencyLevel(days);
+    if (urg) {
+      var stats = content.querySelector('.opp-card-stats');
+      if (stats) {
+        var bar = document.createElement('div');
+        bar.className = 'oh-enh-urgency';
+        bar.innerHTML =
+          '<div class="oh-enh-urgency-track"><div class="oh-enh-urgency-fill" style="width:' + urg.pct + '%;background:' + urg.color + '"></div></div>' +
+          '<div class="oh-enh-urgency-label" style="color:' + urg.color + '">' + urg.label + '</div>';
+        stats.parentNode.insertBefore(bar, stats.nextSibling);
+      }
+    }
+
+    /* Share button */
+    var actions = content.querySelector('.opp-card-btns');
+    if (actions && !actions.querySelector('.oh-enh-share')) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'oh-enh-share';
+      btn.title = T('Copy share link','نسخ الرابط');
+      btn.setAttribute('aria-label', T('Share','مشاركة'));
+      btn.dataset.id = id;
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="11.49"/></svg>';
+      btn.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        copyShareLink(id);
+      });
+      actions.insertBefore(btn, actions.firstChild);
+    }
+
+    row.dataset.ohEnhanced = '1';
+  }
+
+  function decorateCompact(row, item) {
+    if (row.dataset.ohEnhanced === '1') return;
+    var chips = row.querySelector('.occ-chips');
+    if (chips) {
+      var score = computeMatch(item);
+      if (score !== null) {
+        var col = matchColor(score);
+        var pill = document.createElement('span');
+        pill.className = 'occ-chip oh-enh-match-compact';
+        pill.title = T('Smart match','تطابق ذكي');
+        pill.style.cssText = 'background:' + col + '15;color:' + col + ';border-color:' + col + '30;';
+        pill.innerHTML = '★ ' + score + '%';
+        chips.insertBefore(pill, chips.firstChild);
+      }
+    }
+    row.dataset.ohEnhanced = '1';
+  }
+
+  /* ── Share-link copy ──────────────────────────────────── */
+  function toast(msg) {
+    if (window.WS && window.WS.showToast) window.WS.showToast(msg);
+    else if (typeof window.showToast === 'function') window.showToast(msg);
+    else alert(msg);
+  }
+  function copyShareLink(id) {
+    var url = location.origin + location.pathname + '#opp=' + encodeURIComponent(id);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(
+        function(){ toast(T('Link copied to clipboard ✓','تم نسخ الرابط ✓')); },
+        function(){ fallbackCopy(url); }
+      );
+    } else { fallbackCopy(url); }
+  }
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); toast(T('Link copied ✓','تم النسخ ✓')); }
+    catch (_) { toast(T('Could not copy. ','تعذر النسخ. ') + text); }
+    finally { document.body.removeChild(ta); }
+  }
+
+  /* Deep link: opening with #opp=ID navigates to opportunities + opens panel */
+  function handleDeepLink() {
+    var m = (location.hash || '').match(/^#opp=([\w\-]+)/);
+    if (!m) return;
+    var id = decodeURIComponent(m[1]);
+    var tries = 0;
+    var iv = setInterval(function(){
+      if (getData().length && window.WS) {
+        clearInterval(iv);
+        if (typeof window.setRoute === 'function') window.setRoute('opportunities');
+        setTimeout(function(){
+          var btn = document.querySelector('.opp-insights-btn[data-id="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
+          if (btn) btn.click();
+        }, 600);
+      } else if (++tries > 40) clearInterval(iv);
+    }, 250);
+  }
+
+  /* ── MutationObserver on cards table ──────────────────── */
+  function observeCards() {
+    var tbody = document.getElementById('oppsTableBody');
+    if (!tbody) { setTimeout(observeCards, 500); return; }
+    var pending = false;
+    function pass() {
+      pending = false;
+      $$('.opp-card-row', tbody).forEach(decorate);
+    }
+    new MutationObserver(function () {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(pass);
+    }).observe(tbody, { childList: true });
+    pass();
+    window.addEventListener('__userPrefsUpdated', function () {
+      $$('.opp-card-row', tbody).forEach(function (r) { r.dataset.ohEnhanced = ''; });
+      pass();
+    });
+  }
+
+  /* ── Compare modal: rebuild body as side-by-side table ── */
+  function overrideCompareModal() {
+    var modal = document.getElementById('compareModal');
+    var body = document.getElementById('compareModalBody');
+    if (!modal || !body) { setTimeout(overrideCompareModal, 600); return; }
+
+    var obs = new MutationObserver(function () {
+      if (modal.classList.contains('compare-modal--hidden')) return;
+      if (body.dataset.ohRebuilt === '1') return;
+      var slots = $$('.compare-slot');
+      var items = slots.map(function (s) {
+        var rid = s.querySelector('[data-remove-id]') && s.querySelector('[data-remove-id]').dataset.removeId;
+        return findItem(rid);
+      }).filter(Boolean);
+      if (!items.length) return;
+      renderCompareTable(body, items);
+      body.dataset.ohRebuilt = '1';
+    });
+    obs.observe(modal, { attributes: true, attributeFilter: ['class'] });
+
+    var resetFlag = function () { body.dataset.ohRebuilt = ''; };
+    var close = document.getElementById('compareModalClose');
+    var overlay = document.getElementById('compareOverlay');
+    if (close) close.addEventListener('click', resetFlag);
+    if (overlay) overlay.addEventListener('click', resetFlag);
+    var clear = document.getElementById('compareClearBtn');
+    if (clear) clear.addEventListener('click', resetFlag);
+  }
+
+  function renderCompareTable(container, items) {
+    var rows = [
+      [T('Type','النوع'),               function (i) { return i.type ? esc(prettify(i.type)) : '—'; }],
+      [T('Status','الحالة'),            function (i) { return i.status ? esc(prettify(i.status)) : '—'; }],
+      [T('Country / Region','الدولة'),  function (i) { return esc(i.country || prettify(i.eligibility_region) || '—'); }],
+      [T('Sector','القطاع'),            function (i) { return esc((i.sectors||[]).slice(0,3).map(prettify).join(', ') || '—'); }],
+      [T('Deadline','الموعد'),          function (i) {
+        var u = urgencyLevel(daysUntil(i));
+        return esc(i.deadline_date || '—') + (u ? ' <span style="color:' + u.color + ';font-size:11px;font-weight:600">(' + u.label + ')</span>' : '');
+      }],
+      [T('Funding','التمويل'),          function (i) { return esc(i.funding_amount || '—'); }],
+      [T('Eligibility','الأهلية'),      function (i) {
+        var ee = [].concat(i.profiles||[]).concat(i.eligibility_entities||[]);
+        var seen2 = {};
+        ee = ee.filter(function(x){ var k = String(x).toLowerCase(); if (seen2[k]) return false; seen2[k]=1; return !!x; }).slice(0,3);
+        return esc(ee.map(prettify).join(', ') || '—');
+      }],
+      [T('Sponsor','الجهة'),            function (i) { return esc(i.sponsor_institution || '—'); }],
+      [T('Smart match','التطابق'),      function (i) { var s = computeMatch(i); return s == null ? '—' : s + '%'; }]
+    ];
+
+    var scores = items.map(computeMatch);
+    var bestIdx = -1, bestScore = -1;
+    scores.forEach(function (s, i) { if (s !== null && s > bestScore) { bestScore = s; bestIdx = i; } });
+
+    var html = '<div class="oh-enh-compare-table-wrap"><table class="oh-enh-compare-table" role="table">';
+    html += '<thead><tr><th class="oh-enh-ct-rowlabel">&nbsp;</th>';
+    items.forEach(function (it, i) {
+      var best = i === bestIdx ? ' oh-enh-ct-best' : '';
+      html += '<th class="oh-enh-ct-col' + best + '">' +
+        (i === bestIdx ? '<span class="oh-enh-ct-badge">' + T('Best match','الأفضل') + '</span>' : '') +
+        '<div class="oh-enh-ct-title">' + esc(it.title || T('Untitled','بلا عنوان')) + '</div>' +
+      '</th>';
+    });
+    html += '</tr></thead><tbody>';
+    rows.forEach(function (row) {
+      html += '<tr><th scope="row" class="oh-enh-ct-rowlabel">' + row[0] + '</th>';
+      items.forEach(function (it, i) {
+        var best = i === bestIdx ? ' oh-enh-ct-best' : '';
+        html += '<td class="oh-enh-ct-cell' + best + '">' + row[1](it) + '</td>';
+      });
+      html += '</tr>';
+    });
+    html += '<tr><th scope="row" class="oh-enh-ct-rowlabel">&nbsp;</th>';
+    items.forEach(function (it, i) {
+      var best = i === bestIdx ? ' oh-enh-ct-best' : '';
+      var link = (it.application_link || '').indexOf('http') === 0 ? it.application_link : '';
+      html += '<td class="oh-enh-ct-cell oh-enh-ct-action' + best + '">' +
+        (link ? '<a class="oh-enh-ct-apply" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + T('Apply →','تقديم') + '</a>'
+              : '<span style="color:var(--text-muted);font-size:12px">—</span>') +
+      '</td>';
+    });
+    html += '</tr></tbody></table></div>';
+    html += '<div class="oh-enh-compare-actions">' +
+      '<button type="button" class="oh-enh-compare-print" aria-label="' + T('Print or save comparison as PDF','طباعة المقارنة أو حفظها PDF') + '">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>' +
+        T('Print / Save as PDF','طباعة / حفظ PDF') +
+      '</button>' +
+    '</div>';
+    container.innerHTML = html;
+    var pBtn = container.querySelector('.oh-enh-compare-print');
+    if (pBtn) pBtn.addEventListener('click', function(){ window.print(); });
+  }
+
+  /* ── Analytics widgets ──────────────────────────────── */
+  function injectAnalyticsWidgets() {
+    var dash = document.getElementById('view-dashboard');
+    if (!dash) { setTimeout(injectAnalyticsWidgets, 600); return; }
+    if (dash.querySelector('.oh-enh-analytics')) return;
+    var kpi = dash.querySelector('.kpi-grid');
+    if (!kpi) { setTimeout(injectAnalyticsWidgets, 600); return; }
+
+    var wrap = document.createElement('div');
+    wrap.className = 'oh-enh-analytics';
+    wrap.innerHTML =
+      '<div class="oh-enh-analytics-row">' +
+        '<div class="oh-enh-card">' +
+          '<div class="oh-enh-card__header"><div class="oh-enh-card__title">' + T('Closing Soonest','الأقرب إغلاقاً') + '</div><div class="oh-enh-card__sub">' + T('Top 10 open deadlines','أهم 10 مواعيد مفتوحة') + '</div></div>' +
+          '<ol class="oh-enh-leaderboard" id="ohEnhLeaderboard"></ol>' +
+        '</div>' +
+        '<div class="oh-enh-card">' +
+          '<div class="oh-enh-card__header"><div class="oh-enh-card__title">' + T('Added per week','المضافة أسبوعياً') + '</div><div class="oh-enh-card__sub">' + T('Last 12 weeks','آخر 12 أسبوعاً') + '</div></div>' +
+          '<div class="oh-enh-spark-wrap"><canvas id="ohEnhSparkline" aria-label="Opportunities added per week"></canvas></div>' +
+          '<div class="oh-enh-spark-stats" id="ohEnhSparkStats"></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="oh-enh-mom" id="ohEnhMomRow"></div>';
+
+    kpi.parentNode.insertBefore(wrap, kpi.nextSibling);
+
+    refreshAnalytics();
+    document.addEventListener('oh:data-complete', refreshAnalytics);
+    document.addEventListener('oh:data-ready', refreshAnalytics);
+  }
+
+  function refreshAnalytics() {
+    var d = getData();
+    if (!d.length) return;
+    renderLeaderboard(d);
+    renderSparkline(d);
+    renderMoMDeltas(d);
+  }
+
+  function renderLeaderboard(data) {
+    var ol = document.getElementById('ohEnhLeaderboard');
+    if (!ol) return;
+    var items = data
+      .filter(function (it) { return (it.status||'').toLowerCase() === 'open' && parseDeadline(it); })
+      .map(function (it) { return { item: it, days: daysUntil(it) }; })
+      .filter(function (o) { return o.days != null && o.days >= 0; })
+      .sort(function (a, b) { return a.days - b.days; })
+      .slice(0, 10);
+    if (!items.length) {
+      ol.innerHTML = '<li class="oh-enh-lb-empty">' + T('No open opportunities with parseable deadlines.','لا توجد فرص مفتوحة بمواعيد محددة.') + '</li>';
+      return;
+    }
+    ol.innerHTML = items.map(function (o) {
+      var u = urgencyLevel(o.days);
+      return '<li class="oh-enh-lb-item" data-id="' + esc(o.item.id||'') + '">' +
+        '<span class="oh-enh-lb-pulse" style="background:' + u.color + '"></span>' +
+        '<span class="oh-enh-lb-title">' + esc(o.item.title || T('Untitled','بلا عنوان')) + '</span>' +
+        '<span class="oh-enh-lb-days" style="color:' + u.color + '">' + o.days + 'd</span>' +
+      '</li>';
+    }).join('');
+    ol.querySelectorAll('.oh-enh-lb-item').forEach(function (li) {
+      li.addEventListener('click', function () {
+        var id = li.dataset.id;
+        if (!id) return;
+        if (typeof window.setRoute === 'function') window.setRoute('opportunities');
+        location.hash = '#opp=' + encodeURIComponent(id);
+        setTimeout(handleDeepLink, 200);
+      });
+    });
+  }
+
+  function renderSparkline(data) {
+    var canvas = document.getElementById('ohEnhSparkline');
+    if (!canvas || !window.Chart) return;
+    var weeks = 12, msPerWeek = 7 * 86400000, now = Date.now();
+    var buckets = new Array(weeks).fill(0);
+    var labels = [];
+    for (var i = 0; i < weeks; i++) {
+      var d = new Date(now - (weeks - 1 - i) * msPerWeek);
+      labels.push((d.getMonth() + 1) + '/' + d.getDate());
+    }
+    data.forEach(function (it) {
+      var s = it.created_at || it.last_verified;
+      if (!s) return;
+      var t = new Date(s).getTime();
+      if (isNaN(t)) return;
+      var diff = now - t;
+      if (diff < 0 || diff > weeks * msPerWeek) return;
+      var bucket = weeks - 1 - Math.floor(diff / msPerWeek);
+      if (bucket >= 0 && bucket < weeks) buckets[bucket]++;
+    });
+    if (canvas._ohChart) canvas._ohChart.destroy();
+    canvas._ohChart = new Chart(canvas.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: buckets, fill: true,
+          borderColor: '#006C35',
+          backgroundColor: 'rgba(0,108,53,0.12)',
+          tension: 0.35, pointRadius: 2.5, pointHoverRadius: 4,
+          pointBackgroundColor: '#006C35', borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { displayColors: false, callbacks: { title: function (c) { return T('Week of ','أسبوع ') + c[0].label; } } }
+        },
+        scales: {
+          y: { beginAtZero: true, grid: { color: 'rgba(124,137,171,0.08)' }, ticks: { stepSize: 1, font: { size: 10 } } },
+          x: { grid: { display: false }, ticks: { font: { size: 10 }, maxTicksLimit: 6 } }
+        }
+      }
+    });
+    var stats = document.getElementById('ohEnhSparkStats');
+    if (stats) {
+      var total = buckets.reduce(function (a, b) { return a + b; }, 0);
+      var thisWeek = buckets[weeks - 1];
+      var avg = total / weeks;
+      var trend = thisWeek > avg * 1.2 ? '▲' : thisWeek < avg * 0.8 ? '▼' : '◆';
+      stats.innerHTML =
+        '<span><strong>' + total + '</strong> ' + T('total','إجمالي') + '</span>' +
+        '<span><strong>' + thisWeek + '</strong> ' + T('this week','هذا الأسبوع') + '</span>' +
+        '<span><strong>' + avg.toFixed(1) + '</strong> ' + T('avg','متوسط') + ' ' + trend + '</span>';
+    }
+  }
+
+  function renderMoMDeltas(data) {
+    var row = document.getElementById('ohEnhMomRow');
+    if (!row) return;
+    var now = Date.now(), month = 30 * 86400000;
+    var thisStart = now - month, lastStart = now - 2 * month;
+    function inWin(it, s, e) {
+      var t = new Date(it.created_at || it.last_verified || 0).getTime();
+      return t >= s && t < e;
+    }
+    var thisCount = data.filter(function (it) { return inWin(it, thisStart, now); }).length;
+    var lastCount = data.filter(function (it) { return inWin(it, lastStart, thisStart); }).length;
+    var openThis = data.filter(function (it) { return inWin(it, thisStart, now) && (it.status||'').toLowerCase() === 'open'; }).length;
+    var openLast = data.filter(function (it) { return inWin(it, lastStart, thisStart) && (it.status||'').toLowerCase() === 'open'; }).length;
+
+    function deltaHtml(label, c, p) {
+      var dir, pct;
+      if (p === 0) { pct = c > 0 ? 100 : 0; dir = c > 0 ? 'up' : 'flat'; }
+      else { pct = Math.round(((c - p) / p) * 100); dir = pct > 5 ? 'up' : pct < -5 ? 'down' : 'flat'; }
+      var arrow = dir === 'up' ? '▲' : dir === 'down' ? '▼' : '◆';
+      var color = dir === 'up' ? '#15803d' : dir === 'down' ? '#dc2626' : '#64748b';
+      var deltaText = (c === 0 && p === 0) ? T('no data','بلا بيانات')
+                    : (pct > 0 ? '+' : '') + pct + '% ' + T('vs last month','مقارنة بالشهر الماضي');
+      return '<div class="oh-enh-mom-card">' +
+        '<div class="oh-enh-mom-label">' + label + '</div>' +
+        '<div class="oh-enh-mom-value">' + c + '</div>' +
+        '<div class="oh-enh-mom-delta" style="color:' + color + '">' + arrow + ' ' + deltaText + '</div>' +
+      '</div>';
+    }
+    row.innerHTML =
+      deltaHtml(T('Added (30 days)','المضافة (30 يوم)'), thisCount, lastCount) +
+      deltaHtml(T('Opens this month','مفتوحة هذا الشهر'), openThis, openLast);
+  }
+
+  /* ── Watchlist CSV button ───────────────────────────── */
+  function injectWatchlistCsv() {
+    var panel = document.getElementById('wsPanel');
+    if (!panel) { setTimeout(injectWatchlistCsv, 600); return; }
+    var obs = new MutationObserver(function () {
+      if (!panel.classList.contains('open')) return;
+      if (panel.dataset.ohCsvInjected === '1') return;
+      setTimeout(function () {
+        if (panel.querySelector('.oh-enh-wl-csv')) return;
+        var h = panel.querySelector('.ws-panel-title, h2, header');
+        if (!h) return;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'oh-enh-wl-csv';
+        btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+          '<span>' + T('Export CSV','تصدير CSV') + '</span>';
+        btn.addEventListener('click', exportWatchlistCsv);
+        h.parentNode.insertBefore(btn, h.nextSibling);
+        panel.dataset.ohCsvInjected = '1';
+      }, 120);
+    });
+    obs.observe(panel, { attributes: true, attributeFilter: ['class'] });
+    panel.querySelectorAll('.ws-panel-close, [data-close]').forEach(function (c) {
+      c.addEventListener('click', function () { panel.dataset.ohCsvInjected = ''; });
+    });
+  }
+
+  function exportWatchlistCsv() {
+    var wl = (window.WS && window.WS.getWatchlist) ? window.WS.getWatchlist() : [];
+    if (!wl.length) { toast(T('Watchlist is empty','قائمة المتابعة فارغة')); return; }
+    var data = getData();
+    function cell(v) {
+      var s = String(v == null ? '' : v);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }
+    var rows = wl.map(function (w) {
+      var item = data.find(function (d) { return (d.id||'') === (w.opp_id || w.id); }) || {};
+      var dl = daysUntil(item);
+      var sm = computeMatch(item);
+      return {
+        id: item.id || w.opp_id || w.id || '',
+        title: item.title || w.title || '',
+        type: item.type || '',
+        status: item.status || '',
+        country: item.country || item.eligibility_region || '',
+        sectors: (item.sectors||[]).join('; '),
+        profiles: (item.profiles||[]).join('; '),
+        funding: item.funding_amount || '',
+        deadline: item.deadline_date || '',
+        days_remaining: dl == null ? '' : dl,
+        sponsor: item.sponsor_institution || '',
+        link: item.application_link || '',
+        smart_match: sm == null ? '' : sm
+      };
+    });
+    var headers = Object.keys(rows[0]);
+    var csv = '﻿' + headers.join(',') + '\n' +
+      rows.map(function (r) { return headers.map(function (h) { return cell(r[h]); }).join(','); }).join('\n');
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'watchlist-' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    toast(T('Watchlist exported ✓','تم تصدير القائمة ✓'));
+  }
+
+  /* ── Notification prefs in Settings ───────────────── */
+  function injectNotifPrefs() {
+    /* Settings modal id is uncertain; try common selectors */
+    var modal = document.getElementById('settingsModal') ||
+                document.querySelector('[role="dialog"][aria-label*="Settings"], .settings-modal-overlay');
+    if (!modal) { setTimeout(injectNotifPrefs, 1000); return; }
+    var obs = new MutationObserver(function () {
+      var visible = !modal.classList.contains('hidden') &&
+                    !modal.classList.contains('is-hidden') &&
+                    getComputedStyle(modal).display !== 'none' &&
+                    modal.offsetParent !== null;
+      if (!visible) return;
+      if (modal.querySelector('.oh-enh-notif-prefs')) return;
+      var host = modal.querySelector('form, .settings-form, .settings-body, .settings-content') || modal;
+      var prefs = getPrefs().notif;
+      var section = document.createElement('div');
+      section.className = 'oh-enh-notif-prefs';
+      section.innerHTML =
+        '<div class="oh-enh-notif-title">' + T('Notification preferences','تفضيلات الإشعارات') + '</div>' +
+        ['newInSector', 'closingSoon', 'savedSearchMatch'].map(function (k) {
+          var label = ({
+            newInSector:      T('New opportunity in my sectors','فرص جديدة في قطاعاتي'),
+            closingSoon:      T('Closing within 3 days','تنتهي خلال 3 أيام'),
+            savedSearchMatch: T('Match for a saved search','تطابق لبحث محفوظ')
+          })[k];
+          return '<label class="oh-enh-notif-row">' +
+            '<input type="checkbox" data-pref="' + k + '"' + (prefs[k] !== false ? ' checked' : '') + ' />' +
+            '<span>' + label + '</span></label>';
+        }).join('');
+      host.appendChild(section);
+      section.querySelectorAll('input[type=checkbox]').forEach(function (input) {
+        input.addEventListener('change', function () {
+          var p = window.__userPrefs = window.__userPrefs || {};
+          p.notifications = p.notifications || {};
+          p.notifications[input.dataset.pref] = input.checked;
+          if (window._supabase && window._uid) {
+            try {
+              window._supabase.from('user_prefs').upsert(
+                { user_id: window._uid, prefs: p, updated_at: new Date().toISOString() },
+                { onConflict: 'user_id' }
+              ).then(function(){}, function(){});
+            } catch (_) {}
+          }
+          window.dispatchEvent(new Event('__userPrefsUpdated'));
+        });
+      });
+    });
+    obs.observe(modal, { attributes: true, attributeFilter: ['class', 'style', 'hidden'] });
+  }
+
+  /* ── Boot ──────────────────────────────────────────── */
+  function init() {
+    observeCards();
+    overrideCompareModal();
+    injectAnalyticsWidgets();
+    injectWatchlistCsv();
+    injectNotifPrefs();
+    handleDeepLink();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+
 </body>
 </html>
