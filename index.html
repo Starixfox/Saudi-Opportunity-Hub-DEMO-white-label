@@ -5955,8 +5955,14 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       if (!chartsInitialized) {
         initDashboard();
       } else {
-        /* Re-visit: rebuild charts so they repaint correctly after tab switch */
-        setTimeout(function() { rebuildCharts(); }, 100);
+        /* Re-visit: rebuild charts so they repaint correctly after tab switch.
+           Use 200ms to let the view's display:block fully settle before Chart.js reads dimensions. */
+        setTimeout(function() {
+          rebuildCharts();
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() { rebuildCharts(); });
+          });
+        }, 200);
       }
     }
     if (view === 'home') initHome();
@@ -6069,16 +6075,27 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var canvas = document.getElementById(id);
     if (!canvas || !window.Chart) return null;
     if (chartRefs[id]) { try { chartRefs[id].destroy(); } catch (e) {} }
-    /* BUG-001 FIX (part 2): force canvas to inherit parent dimensions before Chart.js reads them.
-       When the chart-canvas-wrap container was previously display:none, the canvas
-       reports 0x0 width/height. Setting explicit pixel dimensions from the parent
-       gives Chart.js correct bounds to render into. */
+    /* BUG-001 FIX: Force canvas to explicit pixel dimensions.
+       When the view panel transitions from display:none → display:block,
+       offsetWidth may still be 0 on the first paint tick. We use a two-step
+       approach: (1) look up the parent; (2) fallback to the closest
+       chart-card width; (3) absolute fallback 600px. After creation we
+       call chart.resize() so Chart.js re-measures after layout is stable. */
     var wrap = canvas.parentElement;
-    if (wrap && wrap.offsetWidth > 0) {
-      canvas.width  = wrap.offsetWidth;
-      canvas.height = wrap.offsetHeight || 260;
-    }
+    var card = canvas.closest ? canvas.closest('.chart-card') : null;
+    var w = (wrap && wrap.offsetWidth > 10 ? wrap.offsetWidth :
+             card && card.offsetWidth > 10 ? card.offsetWidth - 40 : 600);
+    var h = (wrap && wrap.offsetHeight > 10 ? wrap.offsetHeight : 260);
+    canvas.width  = w;
+    canvas.height = h;
+    canvas.style.width  = w + 'px';
+    canvas.style.height = h + 'px';
     chartRefs[id] = new window.Chart(canvas.getContext('2d'), { type: type, data: data, options: options });
+    /* Schedule a resize so Chart.js re-measures once the DOM is fully painted */
+    var _c = chartRefs[id];
+    requestAnimationFrame(function() {
+      try { if (_c) _c.resize(); } catch(e) {}
+    });
     return chartRefs[id];
   }
 
@@ -6171,14 +6188,21 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (_d0 && _d0.length) {
       _renderHomeStats(_d0);
     } else {
-      /* Strategy 2: listen for oh:data-ready event */
+      /* Strategy 2: listen for oh:data-ready event — but only if it hasn't already fired.
+         _ohDataFired is set by the Supabase loader when the first page arrives.  If it
+         already fired before this initHome() call (e.g. user navigated away and back),
+         the { once:true } listener would never trigger — so we fall through to Strategy 3
+         which polls until data is found. */
       var _homeDataHandler = function() {
         var d = getData();
         if (d && d.length) _renderHomeStats(d);
       };
-      document.addEventListener('oh:data-ready', _homeDataHandler, { once: true });
+      if (!window._ohDataFired) {
+        /* Event hasn't fired yet — register listener */
+        document.addEventListener('oh:data-ready', _homeDataHandler, { once: true });
+      }
 
-      /* Strategy 3: waitForData polling as backup */
+      /* Strategy 3: waitForData polling as backup (also covers already-fired case) */
       waitForData(function(data) { _renderHomeStats(data); });
     }
 
@@ -6377,10 +6401,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       set('kpiOpen', openCount.toLocaleString());
       set('kpiSectors', Object.keys(sectorMap).length.toLocaleString());
       set('kpiCountries', Object.keys(countryMap).length.toLocaleString());
-      /* BUG-001 FIX: defer chart rendering so the dashboard's display:block has
-         been fully painted AND laid out before Chart.js reads canvas dimensions.
-         100ms ensures layout is complete even on slower devices. */
-      setTimeout(function() { rebuildCharts(); }, 100);
+      /* BUG-001 FIX: use two deferred repaints to ensure chart-card layout is settled.
+         100ms handles normal cases; the rAF-based second pass catches slower paints. */
+      setTimeout(function() {
+        rebuildCharts();
+        /* Second pass after another rAF to handle slow-layout cases */
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() { rebuildCharts(); });
+        });
+      }, 150);
   }
 
   function initDashboard() {
@@ -6810,6 +6839,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
     /* ── Step 2: stream first page immediately so cards render now ── */
     window.opportunitiesData = all.slice(); /* partial — triggers boot() */
+    window._ohDataFired = true; /* flag so late initHome() callers don't wait for an already-fired event */
     document.dispatchEvent(new CustomEvent('oh:data-ready', { detail: { count: all.length, partial: true } }));
     console.log('[OH] First page loaded (' + all.length + ' rows), streaming remainder…');
 
