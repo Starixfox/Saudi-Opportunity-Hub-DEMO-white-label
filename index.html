@@ -3839,94 +3839,202 @@ body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
 /* ── Welcome Modal ───────────────────────────────────────── */
 .ob-overlay {
   position: fixed; inset: 0; z-index: 2000;
-  background: rgba(0,0,0,0.65);
-  backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(6px);
   display: flex; align-items: center; justify-content: center;
-  padding: 20px;
+  padding: 16px;
   opacity: 0; pointer-events: none;
   transition: opacity 0.3s ease;
 }
 .ob-overlay.open { opacity: 1; pointer-events: auto; }
 
+/* ── Slide pagination ── */
+.ob-slide { display: none; }
+.ob-slide.ob-slide--active { display: block; }
+
 .ob-modal {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: #0d1117;
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 20px;
-  max-width: 500px; width: 100%;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.45);
+  max-width: 560px; width: 100%;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
   overflow: hidden;
-  transform: translateY(24px) scale(0.97);
-  transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
+  transform: translateY(28px) scale(0.96);
+  transition: transform 0.38s cubic-bezier(0.22,1,0.36,1);
+  max-height: 92vh; overflow-y: auto;
 }
 .ob-overlay.open .ob-modal { transform: none; }
 
-.ob-modal-header {
-  background: linear-gradient(135deg, #006C35 0%, #00a651 100%);
-  padding: 28px 28px 20px;
-  color: #fff;
+/* ── Slide 1: Hero header ── */
+.ob-hero {
+  background: linear-gradient(145deg, #004d26 0%, #006C35 55%, #00954a 100%);
+  padding: 36px 32px 28px;
   position: relative;
+  overflow: hidden;
 }
-.ob-modal-logo {
-  font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
-  text-transform: uppercase; color: rgba(255,255,255,0.65);
+.ob-hero::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+}
+.ob-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -60px; left: -20px;
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.03);
+}
+.ob-hero-eyebrow {
+  font-size: 10px; font-weight: 800; letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.ob-hero-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 20px; height: 2px;
+  background: #C9A66B;
+  border-radius: 2px;
+}
+.ob-hero-title {
+  font-size: clamp(24px, 4.5vw, 32px);
+  font-weight: 900; line-height: 1.1;
+  color: #fff; margin: 0 0 10px;
+  letter-spacing: -0.02em;
+}
+.ob-hero-title em { font-style: normal; color: #C9A66B; }
+.ob-hero-sub {
+  font-size: 14px; line-height: 1.6;
+  color: rgba(255,255,255,0.78);
+  margin: 0; max-width: 420px;
+}
+.ob-gold-bar { height: 3px; background: linear-gradient(90deg, #C9A66B, #e8c98a, #C9A66B); margin: 0; }
+
+/* ── Stats strip ── */
+.ob-stats-strip {
+  display: flex; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.ob-stat-item {
+  flex: 1; padding: 14px 12px;
+  text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+.ob-stat-item:last-child { border-right: none; }
+.ob-stat-val {
+  font-size: 22px; font-weight: 800;
+  color: #fff; line-height: 1;
+  margin-bottom: 3px;
+}
+.ob-stat-val span { color: #C9A66B; }
+.ob-stat-lbl {
+  font-size: 10px; font-weight: 600;
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+
+/* ── About section ── */
+.ob-about {
+  padding: 24px 32px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.ob-about-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #006C35;
   margin-bottom: 8px;
 }
-.ob-modal-title {
-  font-size: clamp(22px, 4vw, 28px);
-  font-weight: 800; line-height: 1.15; margin: 0 0 6px;
-}
-.ob-modal-sub {
-  font-size: 14px; color: rgba(255,255,255,0.80); margin: 0;
-}
-.ob-gold-bar {
-  height: 3px; background: #C9A66B;
+.ob-about-text {
+  font-size: 13px; line-height: 1.65;
+  color: rgba(255,255,255,0.65);
   margin: 0;
 }
 
-.ob-modal-body { padding: 24px 28px 20px; }
-
+/* ── Feature grid (what you can do) ── */
+.ob-what {
+  padding: 22px 32px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.ob-what-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #006C35;
+  margin-bottom: 14px;
+}
 .ob-features {
   display: grid; grid-template-columns: 1fr 1fr;
-  gap: 12px; margin-bottom: 22px;
+  gap: 10px;
 }
 .ob-feature {
   display: flex; align-items: flex-start; gap: 10px;
-  padding: 12px; border-radius: 10px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+  padding: 12px 14px; border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  transition: border-color 0.2s;
 }
+.ob-feature:hover { border-color: rgba(0,108,53,0.4); }
 .ob-feature-icon {
-  width: 32px; height: 32px; border-radius: 8px;
-  background: var(--green-dim);
-  color: var(--green);
+  width: 30px; height: 30px; border-radius: 8px;
+  background: rgba(0,108,53,0.2);
+  color: #00c45e;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.ob-feature-text strong { display: block; font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
-.ob-feature-text span { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+.ob-feature-text strong {
+  display: block; font-size: 12px; font-weight: 700;
+  color: #fff; margin-bottom: 2px;
+}
+.ob-feature-text span { font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.4; }
 
+/* ── Sector tags ── */
+.ob-sectors {
+  padding: 16px 32px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.ob-sector-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: rgba(255,255,255,0.35);
+  margin-bottom: 10px;
+}
+.ob-sector-tags {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.ob-sector-tag {
+  font-size: 11px; font-weight: 600;
+  padding: 4px 10px; border-radius: 999px;
+  background: rgba(0,108,53,0.15);
+  color: #00c45e;
+  border: 1px solid rgba(0,108,53,0.25);
+}
+
+/* ── Actions ── */
 .ob-modal-actions {
   display: flex; gap: 10px; align-items: center;
-  padding: 0 28px 24px;
+  padding: 18px 32px 22px;
 }
 .ob-btn-primary {
-  flex: 1; padding: 12px 20px;
+  flex: 1; padding: 13px 20px;
   background: #006C35; color: #fff;
   border: none; border-radius: 10px;
   font-size: 14px; font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.1s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
 }
-.ob-btn-primary:hover { background: #00a651; }
+.ob-btn-primary:hover { background: #00854a; transform: translateY(-1px); }
+.ob-btn-primary:active { transform: none; }
 .ob-btn-skip {
-  padding: 12px 16px;
-  background: transparent; color: var(--text-muted);
-  border: 1px solid var(--border); border-radius: 10px;
+  padding: 13px 18px;
+  background: transparent; color: rgba(255,255,255,0.4);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 10px;
   font-size: 13px; cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
   white-space: nowrap;
 }
-.ob-btn-skip:hover { color: var(--text); border-color: var(--text-muted); }
+.ob-btn-skip:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
 
 /* ── Tour Spotlight ──────────────────────────────────────── */
 .ob-tour-backdrop {
@@ -4147,10 +4255,13 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
 /* Mobile */
 @media (max-width: 600px) {
   .ob-features { grid-template-columns: 1fr; }
-  .ob-modal-header { padding: 22px 20px 16px; }
-  .ob-modal-body { padding: 18px 20px 14px; }
-  .ob-modal-actions { padding: 0 20px 20px; flex-direction: column; }
+  .ob-hero { padding: 28px 20px 22px; }
+  .ob-about { padding: 18px 20px 16px; }
+  .ob-what { padding: 16px 20px 16px; }
+  .ob-sectors { padding: 14px 20px 14px; }
+  .ob-modal-actions { padding: 14px 20px 18px; flex-direction: column; }
   .ob-btn-skip { width: 100%; text-align: center; }
+  .ob-stat-val { font-size: 18px; }
   .ob-tour-tooltip { max-width: calc(100vw - 32px); width: calc(100vw - 32px); left: 16px !important; }
 }
 
@@ -5676,38 +5787,110 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 <!-- ══ ONBOARDING WELCOME MODAL ══════════════════════════════════ -->
 <div class="ob-overlay" id="obOverlay" role="dialog" aria-modal="true" aria-label="Welcome to Opportunity Hub">
   <div class="ob-modal" id="obModal">
-    <div class="ob-modal-header">
-      <div class="ob-modal-logo">Saudi Opportunity Hub · Pilot</div>
-      <h2 class="ob-modal-title" id="obWelcomeTitle">Welcome to your Intelligence Workspace</h2>
-      <p class="ob-modal-sub" id="obWelcomeSub">Your personal hub for tracking Saudi Vision 2030 grants, tenders, and investment programmes.</p>
+
+    <!-- ── Hero header ── -->
+    <div class="ob-hero">
+      <div class="ob-hero-eyebrow" id="obEyebrow">Saudi Opportunity Hub · Pilot</div>
+      <h2 class="ob-hero-title" id="obWelcomeTitle">Welcome to your<br><em>Intelligence Workspace</em></h2>
+      <p class="ob-hero-sub" id="obWelcomeSub">The single platform tracking every Saudi Vision 2030 grant, tender, accelerator, and investment programme — updated continuously and built for serious practitioners.</p>
     </div>
     <div class="ob-gold-bar"></div>
-    <div class="ob-modal-body">
+
+    <!-- ── Live stats strip ── -->
+    <div class="ob-stats-strip">
+      <div class="ob-stat-item">
+        <div class="ob-stat-val" id="obStatOpps">1,000<span>+</span></div>
+        <div class="ob-stat-lbl" id="obStatOppsLbl">Opportunities</div>
+      </div>
+      <div class="ob-stat-item">
+        <div class="ob-stat-val">15<span>+</span></div>
+        <div class="ob-stat-lbl" id="obStatSectorsLbl">Sectors</div>
+      </div>
+      <div class="ob-stat-item">
+        <div class="ob-stat-val">40<span>+</span></div>
+        <div class="ob-stat-lbl" id="obStatCountriesLbl">Countries</div>
+      </div>
+      <div class="ob-stat-item">
+        <div class="ob-stat-val ob-stat-live" id="obStatLive">
+          <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#00c45e;margin-right:4px;vertical-align:middle;animation:ob-pulse 2s infinite;"></span>Live
+        </div>
+        <div class="ob-stat-lbl" id="obStatLiveLbl">Dataset</div>
+      </div>
+    </div>
+
+    <!-- ── About the platform ── -->
+    <div class="ob-about">
+      <div class="ob-about-title" id="obAboutTitle">What is this platform?</div>
+      <p class="ob-about-text" id="obAboutText">Saudi Opportunity Hub aggregates funding and partnership signals across all Vision 2030 sectors — from government-backed grants and NEOM tenders to global accelerators actively recruiting Saudi startups, researchers, and institutions. Everything is verified, categorised, and searchable in one place.</p>
+    </div>
+
+    <!-- ── What you can do ── -->
+    <div class="ob-what">
+      <div class="ob-what-title" id="obWhatTitle">What you can do</div>
       <div class="ob-features">
         <div class="ob-feature">
-          <div class="ob-feature-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg></div>
-          <div class="ob-feature-text"><strong id="obF1Title">Watchlist</strong><span id="obF1Body">Save opportunities so you never lose track of a deadline.</span></div>
+          <div class="ob-feature-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+          <div class="ob-feature-text"><strong id="obF1Title">Search &amp; Filter</strong><span id="obF1Body">Filter by sector, region, type, and status. Find the right opportunity in seconds.</span></div>
         </div>
         <div class="ob-feature">
-          <div class="ob-feature-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
-          <div class="ob-feature-text"><strong id="obF2Title">Saved Searches</strong><span id="obF2Body">Bookmark your filter combinations and re-apply them in one click.</span></div>
+          <div class="ob-feature-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg></div>
+          <div class="ob-feature-text"><strong id="obF2Title">Watchlist</strong><span id="obF2Body">Bookmark any opportunity to track deadlines and get back to it later.</span></div>
         </div>
         <div class="ob-feature">
-          <div class="ob-feature-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
-          <div class="ob-feature-text"><strong id="obF3Title">Personalised Feed</strong><span id="obF3Body">Set your sector interests to surface relevant opportunities first.</span></div>
+          <div class="ob-feature-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
+          <div class="ob-feature-text"><strong id="obF3Title">Live Analytics</strong><span id="obF3Body">Interactive charts showing the distribution of opportunities by sector, type, and region.</span></div>
         </div>
         <div class="ob-feature">
-          <div class="ob-feature-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
-          <div class="ob-feature-text"><strong id="obF4Title">Compare Mode</strong><span id="obF4Body">Select up to 3 opportunities side-by-side to compare details.</span></div>
+          <div class="ob-feature-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+          <div class="ob-feature-text"><strong id="obF4Title">Compare</strong><span id="obF4Body">Select up to 3 opportunities and compare details, funding, and deadlines side-by-side.</span></div>
+        </div>
+        <div class="ob-feature">
+          <div class="ob-feature-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <div class="ob-feature-text"><strong id="obF5Title">Saved Searches</strong><span id="obF5Body">Save your filter setup and re-apply it in one click on your next visit.</span></div>
+        </div>
+        <div class="ob-feature">
+          <div class="ob-feature-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M5.2 20a7 7 0 0 1 13.6 0"/></svg></div>
+          <div class="ob-feature-text"><strong id="obF6Title">Personalised Feed</strong><span id="obF6Body">Set your role and sectors so the most relevant opportunities always surface first.</span></div>
         </div>
       </div>
     </div>
-    <div class="ob-modal-actions">
-      <button class="ob-btn-primary" id="obStartTourBtn">Take a quick tour →</button>
-      <button class="ob-btn-skip" id="obSkipTourBtn" id="obSkipBtn">Skip for now</button>
+
+    <!-- ── Sector coverage strip ── -->
+    <div class="ob-sectors">
+      <div class="ob-sector-label" id="obSectorLabel">Sectors covered</div>
+      <div class="ob-sector-tags">
+        <span class="ob-sector-tag">Energy</span>
+        <span class="ob-sector-tag">ICT</span>
+        <span class="ob-sector-tag">Healthcare</span>
+        <span class="ob-sector-tag">Real Estate</span>
+        <span class="ob-sector-tag">Financial Services</span>
+        <span class="ob-sector-tag">Agriculture</span>
+        <span class="ob-sector-tag">Tourism</span>
+        <span class="ob-sector-tag">Industrial</span>
+        <span class="ob-sector-tag">Education</span>
+        <span class="ob-sector-tag">Transport</span>
+        <span class="ob-sector-tag">+5 more</span>
+      </div>
     </div>
+
+    <!-- ── Actions ── -->
+    <div class="ob-modal-actions">
+      <button class="ob-btn-primary" id="obStartTourBtn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span id="obStartTourLabel">Take a quick tour</span>
+      </button>
+      <button class="ob-btn-skip" id="obSkipTourBtn">Skip for now</button>
+    </div>
+
   </div>
 </div>
+
+<style>
+@keyframes ob-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+</style>
 
 <!-- ══ TOUR SPOTLIGHT + TOOLTIP ══════════════════════════════════ -->
 <div class="ob-tour-cutout" id="obTourCutout" style="display:none;"></div>
@@ -11954,24 +12137,38 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   function translateModal() {
     if (!isAr()) return;
     var map = {
-      obWelcomeTitle: 'مرحباً بك في مساحة الاستخبارات',
-      obWelcomeSub:   'مركزك الشخصي لمتابعة منح ومناقصات وبرامج الاستثمار في رؤية 2030',
-      obF1Title: 'قائمة المتابعة',
-      obF1Body:  'احفظ الفرص حتى لا تفوتك أي مواعيد نهائية.',
-      obF2Title: 'عمليات البحث المحفوظة',
-      obF2Body:  'احفظ مجموعات الفلاتر وأعد تطبيقها بنقرة واحدة.',
-      obF3Title: 'تغذية مخصصة',
-      obF3Body:  'حدد اهتماماتك القطاعية لعرض الفرص الأنسب أولاً.',
-      obF4Title: 'وضع المقارنة',
-      obF4Body:  'قارن حتى 3 فرص جنباً إلى جنب.',
+      obEyebrow:          'مركز الفرص السعودية · تجريبي',
+      obWelcomeTitle:     'مرحباً بك في<br><em>مساحة الاستخبارات</em>',
+      obWelcomeSub:       'المنصة الوحيدة التي تتابع كل منح وعطاءات ومسرّعات وبرامج استثمار رؤية 2030 — محدّثة باستمرار ومبنية للممارسين الجادين.',
+      obStatOppsLbl:      'فرصة',
+      obStatSectorsLbl:   'قطاع',
+      obStatCountriesLbl: 'دولة',
+      obStatLiveLbl:      'بيانات مباشرة',
+      obAboutTitle:       'ما هي هذه المنصة؟',
+      obAboutText:        'مركز الفرص السعودية يجمع إشارات التمويل والشراكة عبر جميع قطاعات رؤية 2030 — من المنح الحكومية وعطاءات نيوم إلى المسرّعات العالمية التي تستهدف الشركات الناشئة والباحثين والمؤسسات السعودية. كل شيء موثّق ومصنّف وقابل للبحث في مكان واحد.',
+      obWhatTitle:        'ما الذي يمكنك فعله؟',
+      obF1Title:          'البحث والتصفية',
+      obF1Body:           'صفّي حسب القطاع والمنطقة والنوع والحالة. ابحث عن الفرصة المناسبة في ثوانٍ.',
+      obF2Title:          'قائمة المتابعة',
+      obF2Body:           'احفظ أي فرصة لمتابعة مواعيدها النهائية والرجوع إليها لاحقاً.',
+      obF3Title:          'تحليلات مباشرة',
+      obF3Body:           'مخططات تفاعلية تُظهر توزيع الفرص حسب القطاع والنوع والمنطقة.',
+      obF4Title:          'المقارنة',
+      obF4Body:           'اختر حتى 3 فرص وقارن التفاصيل والتمويل والمواعيد جنباً إلى جنب.',
+      obF5Title:          'عمليات البحث المحفوظة',
+      obF5Body:           'احفظ إعداد الفلاتر وأعد تطبيقه بنقرة واحدة في زيارتك القادمة.',
+      obF6Title:          'تغذية مخصصة',
+      obF6Body:           'حدد دورك وقطاعاتك لتظهر الفرص الأنسب دائماً في المقدمة.',
+      obSectorLabel:      'القطاعات المغطاة',
+      obStartTourLabel:   'ابدأ الجولة التعريفية',
     };
     Object.keys(map).forEach(function(id) {
       var el = document.getElementById(id);
-      if (el) el.textContent = map[id];
+      if (!el) return;
+      if (id === 'obWelcomeTitle') { el.innerHTML = map[id]; return; }
+      el.textContent = map[id];
     });
-    var startBtn = document.getElementById('obStartTourBtn');
     var skipBtn  = document.getElementById('obSkipTourBtn');
-    if (startBtn) startBtn.textContent = 'ابدأ الجولة التعريفية ←';
     if (skipBtn)  skipBtn.textContent  = 'تخطي الآن';
   }
 
@@ -11979,11 +12176,19 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var overlay = document.getElementById('obOverlay');
     if (!overlay) return;
     translateModal();
+
+    /* Populate live stat from loaded dataset if available */
+    var statOpps = document.getElementById('obStatOpps');
+    if (statOpps && window.allOpportunities && window.allOpportunities.length > 0) {
+      var total = window.allOpportunities.length;
+      statOpps.innerHTML = total.toLocaleString() + '<span>+</span>';
+    }
+
     overlay.classList.add('open');
 
     document.getElementById('obStartTourBtn').addEventListener('click', function() {
       overlay.classList.remove('open');
-      setTimeout(startTour, 350);
+      setTimeout(startTour, 380);
     });
     document.getElementById('obSkipTourBtn').addEventListener('click', function() {
       overlay.classList.remove('open');
@@ -12008,16 +12213,25 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var modalShown = localStorage.getItem(KEY_OB_MODAL);
     var tourDone   = localStorage.getItem(KEY_OB_DONE);
 
-    /* Wait for session guard to confirm logged-in state */
+    /* Wait for session guard to confirm logged-in state.
+       Detection: Supabase sets homeUsername to the user's name (not 'there')
+       once the session resolves, OR the app-view becomes visible.
+       Fallback: show after 3 seconds regardless, since wsBar is always hidden. */
     var attempts = 0;
     var checkLogin = setInterval(function() {
       attempts++;
-      var wsBar = document.getElementById('wsBar');
-      var isLoggedIn = wsBar && getComputedStyle(wsBar).display !== 'none';
+      /* Check if the user is logged in: home view is active OR username resolved */
+      var homeView  = document.getElementById('view-home');
+      var userSpan  = document.getElementById('homeUsername');
+      var appShell  = document.querySelector('.app-shell');
+      var isLoggedIn = (homeView && homeView.classList.contains('app-view--active'))
+                    || (userSpan && userSpan.textContent && userSpan.textContent !== 'there' && userSpan.textContent !== 'User')
+                    || (appShell && appShell.getAttribute('data-ready') === '1')
+                    || attempts > 10; /* fallback after ~4s */
       if (isLoggedIn && !modalShown) {
         clearInterval(checkLogin);
         localStorage.setItem(KEY_OB_MODAL, '1');
-        setTimeout(showWelcomeModal, 1200);
+        setTimeout(showWelcomeModal, 800);
       } else if (attempts > 30 || (isLoggedIn && modalShown)) {
         clearInterval(checkLogin);
       }
