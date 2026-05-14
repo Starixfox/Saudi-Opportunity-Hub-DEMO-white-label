@@ -5993,9 +5993,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   var _paintTimer = null;
   var _paintWaitAttempts = 0;
   function paintIcons() {
-    if (_paintTimer) clearTimeout(_paintTimer);
-    _paintTimer = setTimeout(function() {
-      _paintTimer = null;
+    if (_paintTimer) clearInterval(_paintTimer);
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      try { window.lucide.createIcons(); } catch (e) {}
+      return;
+    }
+    var tries = 0;
+    _paintTimer = setInterval(function() {
       if (window.lucide && typeof window.lucide.createIcons === 'function') {
         try { window.lucide.createIcons(); } catch (e) {}
         _paintWaitAttempts = 0;
@@ -6003,6 +6007,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         _paintWaitAttempts++;
         paintIcons();
       }
+      if (++tries > 60) { clearInterval(_paintTimer); _paintTimer = null; }
     }, 50);
   }
   paintIcons();
