@@ -59,12 +59,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<!-- Lucide: loaded synchronously (no `defer`) so window.lucide is ready
-     before the inline App-shell IIFE calls createIcons(). Explicit UMD path
-     avoids unpkg's package.json redirect, which has caused intermittent
-     blank-icon issues when the redirect resolves to a non-browser bundle. -->
-<script src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js"></script>
-<script>window.lucide && window.lucide.createIcons && window.lucide.createIcons();</script>
+<!-- Lucide: synchronous load, explicit UMD path. Icons are painted at the
+     end of <body> via lucide.createIcons() so the DOM is fully built. -->
+<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
 <style>
 /* =============================================
    Saudi Opportunity Hub — styles.css
@@ -5990,32 +5987,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
-  /* ---------------- Lucide icons (debounced) ---- */
-  /* Lucide is loaded with `defer`, so window.lucide may not yet exist when this
-     IIFE first runs during HTML parsing. Retry on a short interval until the
-     library is ready (with an upper bound), so icons get painted as soon as
-     the script finishes loading. */
-  var _paintTimer = null;
-  var _paintWaitAttempts = 0;
-  function paintIcons() {
-    if (_paintTimer) clearInterval(_paintTimer);
-    if (window.lucide && typeof window.lucide.createIcons === 'function') {
-      try { window.lucide.createIcons(); } catch (e) {}
-      return;
-    }
-    var tries = 0;
-    _paintTimer = setInterval(function() {
-      if (window.lucide && typeof window.lucide.createIcons === 'function') {
-        try { window.lucide.createIcons(); } catch (e) {}
-        _paintWaitAttempts = 0;
-      } else if (_paintWaitAttempts < 60) {
-        _paintWaitAttempts++;
-        paintIcons();
-      }
-      if (++tries > 60) { clearInterval(_paintTimer); _paintTimer = null; }
-    }, 50);
-  }
-  paintIcons();
+  /* Lucide icons are painted by the bottom-of-body createIcons() call.
+     Re-paint on demand after dynamic content injection — handled inline
+     at each call site below via lucide.createIcons(). */
 
   /* ---------------- View routing ---------------- */
   var VIEWS = ['home', 'dashboard', 'opportunities', 'sectors', 'saved', 'about'];
@@ -6062,7 +6036,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (view === 'home') initHome();
     if (view === 'sectors') renderSectorChips();
     if (view === 'saved') renderSavedList();
-    paintIcons();
+    lucide.createIcons();
     try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch (e) { window.scrollTo(0, 0); }
   }
 
@@ -6118,7 +6092,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (themeBtn) {
       var icon = themeBtn.querySelector('[data-lucide]');
       if (icon) icon.setAttribute('data-lucide', t === 'dark' ? 'sun' : 'moon');
-      paintIcons();
+      lucide.createIcons();
     }
   }
   syncThemeLabel();  /* themeBtn is null — handled by topbar appThemeToggle */
@@ -6270,7 +6244,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       /* Sector chips */
       renderHomeSectorChips(sectorMap);
 
-      paintIcons();
+      lucide.createIcons();
     }
 
     /* Strategy 1: try immediately if data is already loaded */
@@ -6457,7 +6431,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         if (homeUser && wsName && wsName.textContent && wsName.textContent !== 'User') {
           homeUser.textContent = wsName.textContent;
         }
-        paintIcons();
+        lucide.createIcons();
       }, 100);
     }
     if (view === 'saved') {
@@ -6472,7 +6446,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       }, 300);
     }
     syncTopbarStats();
-    paintIcons();
+    lucide.createIcons();
   };
 
   function _renderDashboard(data) {
@@ -6635,7 +6609,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         grid.appendChild(btn);
       });
       if (hint) hint.textContent = entries.length + ' sectors · ' + data.length + ' opportunities total.';
-      paintIcons();
+      lucide.createIcons();
     });
   }
 
@@ -6674,7 +6648,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         });
         card.appendChild(btn);
       });
-      paintIcons();
+      lucide.createIcons();
     });
   }
 
@@ -6709,7 +6683,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       }
       wrap.appendChild(clone);
     });
-    paintIcons();
+    lucide.createIcons();
   }
 
   /* Inject bookmark buttons whenever cards appear/change */
@@ -6725,8 +6699,8 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   }
 
   /* Re-paint icons after any view change */
-  setTimeout(paintIcons, 300);
-  setTimeout(paintIcons, 1500);
+  setTimeout(function(){ lucide.createIcons(); }, 300);
+  setTimeout(function(){ lucide.createIcons(); }, 1500);
 
   /* ─── Sync topbar stats from WS counters ─── */
   function syncTopbarStats() {
@@ -6861,7 +6835,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         });
         list.appendChild(card);
       });
-      paintIcons();
+      lucide.createIcons();
     });
   }
 
@@ -13125,6 +13099,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     padding: 12px !important;
   }
 </style>
+
+<!-- Paint lucide icons. The library is loaded synchronously in <head>, the
+     DOM is fully built by this point, so this call always succeeds. -->
+<script>lucide.createIcons();</script>
 
 </body>
 </html>
