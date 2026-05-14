@@ -4614,9 +4614,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   padding: 18px 20px 14px;
   box-shadow: var(--shadow-sm);
   min-height: 320px;
+  width: 100%;
+  box-sizing: border-box;
 }
 .chart-card h3 { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
 .chart-card .chart-canvas-wrap { position: relative; height: 260px; width: 100%; display: block; }
+/* Ensure Chart.js canvas fills its container correctly */
+.chart-card .chart-canvas-wrap canvas { display: block; }
 /* Sectors view */
 .sectors-wrap { padding: 28px; max-width: 1280px; margin: 0 auto; }
 .sectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin: 20px 0 28px; }
@@ -5955,18 +5959,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       if (!chartsInitialized) {
         initDashboard();
       } else {
-        /* Re-visit: rebuild charts so they repaint correctly after tab switch.
-           Use 500ms to let the view's display:block fully settle before Chart.js reads dimensions. */
-        setTimeout(function() {
-          rebuildCharts();
-          requestAnimationFrame(function() {
-            requestAnimationFrame(function() {
-              Object.keys(chartRefs).forEach(function(id) {
-                try { if (chartRefs[id]) chartRefs[id].resize(); } catch(e) {}
-              });
-            });
-          });
-        }, 500);
+        /* Re-visit: rebuild charts after a 300ms paint delay.
+           The view's .active class is added above (display:block) and the browser
+           needs one layout pass before Chart.js can read correct dimensions.
+           responsive:true + removeAttribute('width') ensures Chart.js measures the CSS width. */
+        setTimeout(function() { rebuildCharts(); }, 300);
       }
     }
     if (view === 'home') initHome();
@@ -6079,35 +6076,18 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var canvas = document.getElementById(id);
     if (!canvas || !window.Chart) return null;
     if (chartRefs[id]) { try { chartRefs[id].destroy(); } catch (e) {} }
-    /* BUG-001 FIX: Force canvas to explicit pixel dimensions.
-       When the view panel transitions from display:none → display:block,
-       offsetWidth may still be 0 on the first paint tick. We use a two-step
-       approach: (1) look up the parent; (2) fallback to the closest
-       chart-card width; (3) absolute fallback 600px. After creation we
-       call chart.resize() so Chart.js re-measures after layout is stable. */
-    var wrap = canvas.parentElement;
-    var card = canvas.closest ? canvas.closest('.chart-card') : null;
-    /* BUG-001 FIX: Read the widest available ancestor that has a real width.
-       Priority: wrap > card (minus padding) > dashboard grid container > 600px fallback.
-       We never pass 0 to Chart.js — if everything reports 0 the view isn't visible yet
-       so we schedule a retry via setTimeout instead of creating a blank chart. */
-    var dashGrid = document.querySelector('.chart-grid');
-    var w = (wrap && wrap.offsetWidth > 10 ? wrap.offsetWidth :
-             card && card.offsetWidth > 10 ? card.offsetWidth - 40 :
-             dashGrid && dashGrid.offsetWidth > 10 ? Math.floor((dashGrid.offsetWidth - 60) / 3) : 600);
-    var h = (wrap && wrap.offsetHeight > 10 ? wrap.offsetHeight : 260);
-    canvas.width  = w;
-    canvas.height = h;
-    canvas.style.width  = w + 'px';
-    canvas.style.height = h + 'px';
+    /* BUG-001 FIX: Clear any stale inline dimensions that block Chart.js responsive mode.
+       When responsive:true + maintainAspectRatio:false are set, Chart.js reads the
+       CSS-computed size of the parent container — NOT the canvas element's inline
+       width/height attributes. Inline styles on the canvas itself OVERRIDE the parent
+       layout and cause Chart.js to render at 0×0 when the view was previously hidden.
+       Solution: strip inline styles, let CSS control the wrap size (width:100%,
+       height:260px), and call chart.resize() once the view is visible. */
+    canvas.removeAttribute('width');
+    canvas.removeAttribute('height');
+    canvas.style.width  = '';
+    canvas.style.height = '';
     chartRefs[id] = new window.Chart(canvas.getContext('2d'), { type: type, data: data, options: options });
-    /* Schedule a resize after two animation frames so Chart.js re-measures the final painted layout */
-    var _c = chartRefs[id];
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        try { if (_c) _c.resize(); } catch(e) {}
-      });
-    });
     return chartRefs[id];
   }
 
@@ -6413,22 +6393,17 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       set('kpiOpen', openCount.toLocaleString());
       set('kpiSectors', Object.keys(sectorMap).length.toLocaleString());
       set('kpiCountries', Object.keys(countryMap).length.toLocaleString());
-      /* BUG-001 FIX: defer chart rendering with a generous 500ms buffer.
-         The dashboard view transitions from display:none → display:block and the
-         browser needs time to compute grid column widths before offsetWidth is valid.
-         500ms is enough even on slow connections. The rAF second pass handles any
-         remaining layout jitter after the initial render. */
-      setTimeout(function() {
-        rebuildCharts();
-        /* Second pass: force Chart.js to resize into the now-stable layout */
-        requestAnimationFrame(function() {
-          requestAnimationFrame(function() {
-            Object.keys(chartRefs).forEach(function(id) {
-              try { if (chartRefs[id]) chartRefs[id].resize(); } catch(e) {}
-            });
-          });
-        });
-      }, 500);
+      /* BUG-001 FIX: only render charts if the dashboard view is currently visible.
+         If it's hidden (display:none), Chart.js reads 0px dimensions and draws blank.
+         When the view is hidden, just store the data and let showView('dashboard')
+         trigger rebuildCharts() with a fresh layout measurement when it becomes visible. */
+      var dashView = document.getElementById('view-dashboard');
+      var isVisible = dashView && dashView.classList.contains('active');
+      if (isVisible) {
+        /* Dashboard is open — render immediately with a small paint delay */
+        setTimeout(function() { rebuildCharts(); }, 100);
+      }
+      /* Charts will be rebuilt by showView('dashboard') when user navigates there */
   }
 
   function initDashboard() {
@@ -6437,14 +6412,17 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (_d0 && _d0.length) {
       _renderDashboard(_d0);
     } else {
-      /* Listen for oh:data-ready and also poll via waitForData */
-      document.addEventListener('oh:data-ready', function() {
-        var d = getData();
-        if (d && d.length) _renderDashboard(d);
-      }, { once: true });
+      /* Listen for oh:data-ready only if it hasn't already fired */
+      if (!window._ohDataFired) {
+        document.addEventListener('oh:data-ready', function() {
+          var d = getData();
+          if (d && d.length) _renderDashboard(d);
+        }, { once: true });
+      }
+      /* Also poll via waitForData as a reliable fallback */
       waitForData(function(data) { _renderDashboard(data); });
     }
-    /* Refresh with full dataset when all pages finish loading */
+    /* Refresh KPIs + charts with complete dataset when all pages finish loading */
     document.addEventListener('oh:data-complete', function() {
       var d = getData();
       if (d && d.length) _renderDashboard(d);
