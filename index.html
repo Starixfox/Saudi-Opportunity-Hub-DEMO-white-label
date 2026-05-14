@@ -6699,6 +6699,25 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     /* ── Signal all waiting modules ─────────────────────── */
     document.dispatchEvent(new CustomEvent('oh:data-ready', { detail: { count: all.length } }));
 
+    /* ── Refresh home stats now that data is loaded ───────── */
+    /* Small delay so boot() and renderCards() finish first */
+    setTimeout(function() {
+      /* Update home stat cards */
+      var total = all.length;
+      var open  = all.filter(function(o) { return (o.status || '').toLowerCase() === 'open'; }).length;
+      var thisWeek = (function() {
+        var cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        return all.filter(function(o) { return o.isNew && o.last_verified && new Date(o.last_verified) >= cutoff; }).length;
+      })();
+      function setEl(id, val) { var el = document.getElementById(id); if (el) el.textContent = val.toLocaleString(); }
+      setEl('homeTotalVal', total);
+      setEl('homeOpenVal',  open);
+      setEl('homeNewVal',   thisWeek);
+      /* Update welcome modal stat if it's open */
+      var statOpps = document.getElementById('obStatOpps');
+      if (statOpps) statOpps.innerHTML = total.toLocaleString() + '<span>+</span>';
+    }, 400);
+
   } catch (e) {
     console.error('[OH] Failed to load opportunities after retries:', e);
     const el   = document.getElementById('resultsCount');
@@ -11699,21 +11718,45 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
   /* Onboarding keys — also namespaced per user so each account
      gets their own welcome modal and tour state.              */
-  var _obUid = (function() {
+  /* _obUid is resolved asynchronously — keys are computed after getUser() resolves.
+     We use placeholder keys with 'anon' as a safe fallback while waiting. */
+  var _obUid = 'anon';
+  var KEY_OB_DONE     = 'oh-ob-done:anon';
+  var KEY_OB_MODAL    = 'oh-ob-modal:anon';
+  var KEY_OB_CL       = 'oh-ob-checklist:anon';
+
+  /* Resolve real user ID from Supabase auth, then re-key the localStorage keys */
+  (function resolveObUid() {
+    function applyUid(uid) {
+      if (!uid || uid === 'anon') return;
+      _obUid        = uid;
+      KEY_OB_DONE   = 'oh-ob-done:'      + uid;
+      KEY_OB_MODAL  = 'oh-ob-modal:'     + uid;
+      KEY_OB_CL     = 'oh-ob-checklist:' + uid;
+    }
+
+    /* Try localStorage first (fast path — already logged in) */
     try {
       var raw = localStorage.getItem('sb-dshrbbnjahjcwxzvzygh-auth-token');
-      if (!raw) return 'anon';
-      var p = JSON.parse(raw);
-      if (p && p.user && p.user.id) return p.user.id;
-      var tok = p && (p.access_token || p.token);
-      if (tok) { var pl = JSON.parse(atob(tok.split('.')[1])); if (pl && pl.sub) return pl.sub; }
+      if (raw) {
+        var p = JSON.parse(raw);
+        var uid = (p && p.user && p.user.id) ? p.user.id : null;
+        if (!uid && p) {
+          var tok = p.access_token || p.token;
+          if (tok) { try { var pl = JSON.parse(atob(tok.split('.')[1])); uid = pl && pl.sub; } catch(e){} }
+        }
+        if (uid) { applyUid(uid); return; }
+      }
     } catch(e) {}
-    return 'anon';
-  })();
 
-  var KEY_OB_DONE     = 'oh-ob-done:'      + _obUid;
-  var KEY_OB_MODAL    = 'oh-ob-modal:'     + _obUid;
-  var KEY_OB_CL       = 'oh-ob-checklist:' + _obUid;
+    /* Slow path — first login, token not yet in localStorage: use getUser() */
+    if (window._supabase) {
+      window._supabase.auth.getUser().then(function(res) {
+        var uid = res && res.data && res.data.user && res.data.user.id;
+        if (uid) applyUid(uid);
+      }).catch(function(){});
+    }
+  })();
 
   /* ── Language helper ────────────────────────────────────── */
   function isAr() { return document.body && document.body.dir === 'rtl'; }
@@ -11729,7 +11772,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   var cl = loadCL();
 
   /* Mark returned as done once they visit again */
-  var _visitKey = 'oh-ob-visits:' + _obUid;
+  var _visitKey = 'oh-ob-visits:anon'; /* updated when _obUid resolves */
   var visits = parseInt(localStorage.getItem(_visitKey) || '0', 10);
   visits++;
   localStorage.setItem(_visitKey, visits);
@@ -12311,45 +12354,69 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       patchWS();
     }, 800);
 
-    /* Show welcome modal only once, only when user is logged in */
-    var modalShown = localStorage.getItem(KEY_OB_MODAL);
-    var tourDone   = localStorage.getItem(KEY_OB_DONE);
-
-    /* ── Login detection ──────────────────────────────────────────
-       The app redirects to login.html if no session exists, so by
-       the time this code runs the user IS logged in. We just need to
-       wait for the initial view render to settle before showing the
-       modal (so it doesn't flash before the UI is ready).
-       Strategy:
-         1. Listen for the custom 'oh:data-ready' event fired by the
-            Supabase loader — guarantees data is loaded before modal.
-         2. Fallback poll every 400ms up to 20s; check for the home
-            view being active (class 'active', not 'app-view--active').
+    /* ── Welcome modal — show once per real user ──────────────────
+       Problem on first login: _obUid may still be 'anon' when this
+       runs because the auth token isn't in localStorage yet.
+       Solution: use Supabase onAuthStateChange which fires reliably
+       on every session (SIGNED_IN event), then check the per-user key.
+       We also wait for 'oh:data-ready' so data is loaded before the
+       modal appears — avoids showing a loading skeleton behind it.
        ─────────────────────────────────────────────────────────── */
-    if (!modalShown) {
-      var _modalFired = false;
-      function _triggerModal() {
-        if (_modalFired) return;
-        _modalFired = true;
-        localStorage.setItem(KEY_OB_MODAL, '1');
-        setTimeout(showWelcomeModal, 600);
-      }
+    var _authResolved = false;
+    var _dataReady    = false;
+    var _modalFired   = false;
 
-      /* Primary: fire when data is ready (event dispatched by Supabase loader) */
-      document.addEventListener('oh:data-ready', _triggerModal, { once: true });
+    function _maybeShowModal() {
+      if (_modalFired || !_authResolved || !_dataReady) return;
+      /* Re-read keys now that _obUid is resolved */
+      var modalShown = localStorage.getItem(KEY_OB_MODAL);
+      if (modalShown) return; /* already seen */
+      _modalFired = true;
+      localStorage.setItem(KEY_OB_MODAL, '1');
+      setTimeout(showWelcomeModal, 500);
+    }
 
-      /* Fallback: poll for the home view being rendered */
-      var _fbAttempts = 0;
-      var _fbTimer = setInterval(function() {
-        _fbAttempts++;
-        var homeView = document.getElementById('view-home');
-        var isReady  = (homeView && homeView.classList.contains('active'))
-                    || _fbAttempts > 50; /* 20s hard fallback */
-        if (isReady) {
-          clearInterval(_fbTimer);
-          setTimeout(_triggerModal, 800);
+    /* Listen for auth state — fires for every login including first */
+    if (window._supabase) {
+      window._supabase.auth.onAuthStateChange(function(event, session) {
+        if (event === 'SIGNED_IN' && session && session.user) {
+          /* Update uid and re-key */
+          _obUid       = session.user.id;
+          KEY_OB_DONE  = 'oh-ob-done:'      + _obUid;
+          KEY_OB_MODAL = 'oh-ob-modal:'     + _obUid;
+          KEY_OB_CL    = 'oh-ob-checklist:' + _obUid;
+          _authResolved = true;
+          _maybeShowModal();
         }
-      }, 400);
+      });
+    }
+
+    /* Fallback: if auth already resolved before this runs */
+    setTimeout(function() {
+      if (!_authResolved && _obUid !== 'anon') {
+        _authResolved = true;
+        _maybeShowModal();
+      }
+      /* Hard fallback after 5s — assume logged in */
+      if (!_authResolved) {
+        _authResolved = true;
+        _maybeShowModal();
+      }
+    }, 5000);
+
+    /* Listen for data ready event */
+    if (Array.isArray(window.opportunitiesData) && window.opportunitiesData.length > 0) {
+      _dataReady = true;
+    } else {
+      document.addEventListener('oh:data-ready', function() {
+        _dataReady = true;
+        _maybeShowModal();
+      }, { once: true });
+
+      /* Data fallback — show modal even if data is slow (after 8s) */
+      setTimeout(function() {
+        if (!_dataReady) { _dataReady = true; _maybeShowModal(); }
+      }, 8000);
     }
   }
 
