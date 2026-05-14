@@ -5,20 +5,85 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Restrict CORS to an allow-list in production, allow all in dev for easier debugging.
-const CORS_ORIGINS = (process.env.CORS_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
-if (NODE_ENV === 'production' && CORS_ORIGINS.length) {
-  app.use(cors({ origin: CORS_ORIGINS }));
-} else {
-  app.use(cors());
-}
-
-// Trust the first proxy when running behind a reverse proxy / PaaS load balancer.
-app.set('trust proxy', 1);
 app.disable('x-powered-by');
+app.set('trust proxy', 1);
 
-// ─── Supabase config ───
-// Defaults are baked in for the demo project; production deploys MUST supply env vars.
+// ─── CORS ──────────────────────────────────────────────────────
+// Accept a comma-separated allowlist via ALLOWED_ORIGINS or CORS_ORIGINS env.
+// In production with no allowlist set, default to permissive (demo); set the
+// var to lock it down.
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin(origin, cb) {
+    if (!ALLOWED_ORIGINS.length) return cb(null, true);
+    if (!origin) return cb(null, true);                    // server-to-server / curl
+    if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    return cb(new Error('Origin not allowed by CORS'));
+  },
+  methods: ['GET', 'HEAD', 'OPTIONS'],
+  maxAge: 86400,
+}));
+
+// ─── Security headers (manual, no extra deps) ──────────────────
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Permissions-Policy', 'geolocation=(), camera=(), microphone=(), payment=()');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.setHeader('Cache-Control', 'public, max-age=60');
+  next();
+});
+
+// ─── Request logging (concise, no body) ────────────────────────
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const ms = Date.now() - start;
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '-';
+    console.log(`${new Date().toISOString()} ${ip} ${req.method} ${req.originalUrl} ${res.statusCode} ${ms}ms`);
+  });
+  next();
+});
+
+// ─── In-memory token-bucket rate limiter ───────────────────────
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX, 10) || 60;
+const buckets = new Map();
+
+setInterval(() => {
+  const cutoff = Date.now() - RATE_LIMIT_WINDOW_MS * 2;
+  for (const [key, bucket] of buckets) {
+    if (bucket.resetAt < cutoff) buckets.delete(key);
+  }
+}, RATE_LIMIT_WINDOW_MS).unref();
+
+app.use('/api', (req, res, next) => {
+  const key = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+  const now = Date.now();
+  let bucket = buckets.get(key);
+  if (!bucket || bucket.resetAt < now) {
+    bucket = { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
+    buckets.set(key, bucket);
+  }
+  bucket.count++;
+  const remaining = Math.max(0, RATE_LIMIT_MAX - bucket.count);
+  res.setHeader('X-RateLimit-Limit', String(RATE_LIMIT_MAX));
+  res.setHeader('X-RateLimit-Remaining', String(remaining));
+  res.setHeader('X-RateLimit-Reset', String(Math.ceil(bucket.resetAt / 1000)));
+  if (bucket.count > RATE_LIMIT_MAX) {
+    res.setHeader('Retry-After', String(Math.ceil((bucket.resetAt - now) / 1000)));
+    return res.status(429).json({ error: 'Too many requests', retryAfter: Math.ceil((bucket.resetAt - now) / 1000) });
+  }
+  next();
+});
+
+// ─── Supabase config ───────────────────────────────────────────
 const SUPABASE_URL =
   process.env.SUPABASE_URL || 'https://dshrbbnjahjcwxzvzygh.supabase.co';
 const SUPABASE_ANON_KEY =
@@ -30,25 +95,34 @@ if (NODE_ENV === 'production' && (!process.env.SUPABASE_URL || !process.env.SUPA
   process.exit(1);
 }
 
-// In-memory cache (refreshed periodically)
+// ─── In-memory cache ───────────────────────────────────────────
 let opportunities = [];
 let lastLoadedAt = 0;
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+let isLoading = false;
+let loadPromise = null;
+const CACHE_TTL_MS = 5 * 60 * 1000;
 
 async function loadData() {
-  // Page through PostgREST (max 1000 per request)
   const pageSize = 1000;
   let offset = 0;
   const all = [];
 
   while (true) {
     const url = `${SUPABASE_URL}/rest/v1/opportunities?select=*&order=id.asc&limit=${pageSize}&offset=${offset}`;
-    const res = await fetch(url, {
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      },
-    });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    let res;
+    try {
+      res = await fetch(url, {
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timer);
+    }
     if (!res.ok) {
       const body = await res.text();
       throw new Error(`Supabase HTTP ${res.status}: ${body.slice(0, 200)}`);
@@ -57,6 +131,7 @@ async function loadData() {
     all.push(...batch);
     if (batch.length < pageSize) break;
     offset += pageSize;
+    if (offset > 100000) break;  // hard safety cap
   }
 
   opportunities = all;
@@ -64,20 +139,39 @@ async function loadData() {
   console.log(`Loaded ${opportunities.length} opportunities from Supabase`);
 }
 
+// Coalesce concurrent refresh attempts so a thundering herd hits Supabase once.
 async function ensureFresh() {
-  if (!opportunities.length || Date.now() - lastLoadedAt > CACHE_TTL_MS) {
-    try {
-      await loadData();
-    } catch (err) {
-      // If we already have a cached copy, keep serving it; else surface the error.
+  const stale = !opportunities.length || Date.now() - lastLoadedAt > CACHE_TTL_MS;
+  if (!stale) return;
+  if (isLoading && loadPromise) return loadPromise;
+  isLoading = true;
+  loadPromise = loadData()
+    .catch(err => {
       console.error('Refresh failed:', err.message);
       if (!opportunities.length) throw err;
-    }
-  }
+    })
+    .finally(() => {
+      isLoading = false;
+      loadPromise = null;
+    });
+  return loadPromise;
 }
 
-// Middleware: ensure data loaded before any /api/* request
+// ─── Input validation helpers ──────────────────────────────────
+function sanitize(value, maxLen = 100) {
+  if (typeof value !== 'string') return '';
+  return value.replace(/[\x00-\x1f\x7f]/g, '').slice(0, maxLen).trim();
+}
+
+function clampInt(value, min, max, fallback) {
+  const n = parseInt(value, 10);
+  if (Number.isNaN(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
+
+// Middleware: ensure data loaded before any /api/* request (except health)
 app.use('/api', async (req, res, next) => {
+  if (req.path === '/health') return next();
   try {
     await ensureFresh();
     next();
@@ -86,63 +180,61 @@ app.use('/api', async (req, res, next) => {
   }
 });
 
-// ─── GET /api/opportunities ───
+// ─── GET /api/opportunities ────────────────────────────────────
 app.get('/api/opportunities', (req, res) => {
-  let results = [...opportunities];
+  let results = opportunities;
 
-  // Text search (q)
-  if (req.query.q) {
-    const q = req.query.q.toLowerCase();
+  const q = sanitize(req.query.q, 200);
+  if (q) {
+    const needle = q.toLowerCase();
     results = results.filter(o =>
-      (o.title && o.title.toLowerCase().includes(q)) ||
-      (o.sponsor_institution && o.sponsor_institution.toLowerCase().includes(q)) ||
-      (o.description_short && o.description_short.toLowerCase().includes(q))
+      (o.title && o.title.toLowerCase().includes(needle)) ||
+      (o.sponsor_institution && o.sponsor_institution.toLowerCase().includes(needle)) ||
+      (o.description_short && o.description_short.toLowerCase().includes(needle))
     );
   }
 
-  // Filter: sector
-  if (req.query.sector) {
-    const sector = req.query.sector.toLowerCase();
+  const sector = sanitize(req.query.sector).toLowerCase();
+  if (sector) {
     results = results.filter(o =>
       Array.isArray(o.sectors) && o.sectors.some(s => s.toLowerCase() === sector)
     );
   }
 
-  // Filter: region
-  if (req.query.region) {
-    const region = req.query.region.toLowerCase();
+  const region = sanitize(req.query.region).toLowerCase();
+  if (region) {
     results = results.filter(o =>
       o.eligibility_region && o.eligibility_region.toLowerCase().includes(region)
     );
   }
 
-  // Filter: type
-  if (req.query.type) {
-    const type = req.query.type.toLowerCase();
-    results = results.filter(o =>
-      o.type && o.type.toLowerCase() === type
-    );
+  const type = sanitize(req.query.type).toLowerCase();
+  if (type) {
+    results = results.filter(o => o.type && o.type.toLowerCase() === type);
   }
 
-  // Filter: status
-  if (req.query.status) {
-    const status = req.query.status.toLowerCase();
-    results = results.filter(o =>
-      o.status && o.status.toLowerCase() === status
-    );
+  const status = sanitize(req.query.status).toLowerCase();
+  if (status) {
+    results = results.filter(o => o.status && o.status.toLowerCase() === status);
   }
 
-  // Filter: profile
-  if (req.query.profile) {
-    const profile = req.query.profile.toLowerCase();
+  const profile = sanitize(req.query.profile).toLowerCase();
+  if (profile) {
     results = results.filter(o =>
       Array.isArray(o.profiles) && o.profiles.some(p => p.toLowerCase() === profile)
     );
   }
 
-  // Pagination
-  const page = Math.max(1, parseInt(req.query.page) || 1);
-  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+  const sort = sanitize(req.query.sort, 30).toLowerCase();
+  if (sort) {
+    results = results.slice();
+    if (sort === 'newest')      results.sort((a, b) => String(b.last_verified || b.created_at || '').localeCompare(String(a.last_verified || a.created_at || '')));
+    else if (sort === 'oldest') results.sort((a, b) => String(a.last_verified || a.created_at || '').localeCompare(String(b.last_verified || b.created_at || '')));
+    else if (sort === 'title')  results.sort((a, b) => String(a.title || '').localeCompare(String(b.title || '')));
+  }
+
+  const page = clampInt(req.query.page, 1, 10000, 1);
+  const limit = clampInt(req.query.limit, 1, 100, 20);
   const total = results.length;
   const start = (page - 1) * limit;
   const paged = results.slice(start, start + limit);
@@ -151,63 +243,59 @@ app.get('/api/opportunities', (req, res) => {
     total,
     page,
     limit,
-    results: paged
+    pages: Math.ceil(total / limit),
+    results: paged,
   });
 });
 
-// ─── GET /api/opportunities/:id ───
+// ─── GET /api/opportunities/:id ────────────────────────────────
 app.get('/api/opportunities/:id', (req, res) => {
-  const opp = opportunities.find(o => o.id === req.params.id);
-  if (!opp) {
-    return res.status(404).json({ error: 'Opportunity not found', id: req.params.id });
+  const id = sanitize(req.params.id, 50);
+  if (!id || !/^[A-Za-z0-9_\-]+$/.test(id)) {
+    return res.status(400).json({ error: 'Invalid id format' });
   }
+  const opp = opportunities.find(o => o.id === id);
+  if (!opp) return res.status(404).json({ error: 'Opportunity not found', id });
   res.json(opp);
 });
 
-// ─── GET /api/stats ───
+// ─── GET /api/stats ────────────────────────────────────────────
 app.get('/api/stats', (req, res) => {
   const total = opportunities.length;
-
   const statusCounts = {};
+  const typeCounts = {};
+  const regionCounts = {};
+  const sectorCounts = {};
+
   opportunities.forEach(o => {
     const s = o.status || 'unknown';
     statusCounts[s] = (statusCounts[s] || 0) + 1;
-  });
-
-  const typeCounts = {};
-  opportunities.forEach(o => {
     const t = o.type || 'unknown';
     typeCounts[t] = (typeCounts[t] || 0) + 1;
-  });
-
-  const regionCounts = {};
-  opportunities.forEach(o => {
     const r = o.eligibility_region || 'unknown';
     regionCounts[r] = (regionCounts[r] || 0) + 1;
+    if (Array.isArray(o.sectors)) {
+      o.sectors.forEach(sec => { sectorCounts[sec] = (sectorCounts[sec] || 0) + 1; });
+    }
   });
 
-  // Freshness signals (driven by Supabase)
-  const lastVerifiedDates = opportunities
-    .map(o => o.last_verified)
-    .filter(Boolean)
-    .sort();
-  const lastUpdatedDates = opportunities
-    .map(o => o.updated_at || o.last_updated)
-    .filter(Boolean)
-    .sort();
+  const lastVerifiedDates = opportunities.map(o => o.last_verified).filter(Boolean).sort();
+  const lastUpdatedDates = opportunities.map(o => o.updated_at || o.last_updated).filter(Boolean).sort();
 
   res.json({
     total,
     byStatus: statusCounts,
     byType: typeCounts,
     byRegion: regionCounts,
+    bySector: sectorCounts,
     lastVerified: lastVerifiedDates.length ? lastVerifiedDates[lastVerifiedDates.length - 1] : null,
     lastUpdated: lastUpdatedDates.length ? lastUpdatedDates[lastUpdatedDates.length - 1] : null,
-    dataSource: 'supabase'
+    cacheAge: lastLoadedAt ? Math.round((Date.now() - lastLoadedAt) / 1000) : null,
+    dataSource: 'supabase',
   });
 });
 
-// ─── GET /api/meta ───
+// ─── GET /api/meta ─────────────────────────────────────────────
 app.get('/api/meta', (req, res) => {
   const sectorsSet = new Set();
   const profilesSet = new Set();
@@ -228,21 +316,45 @@ app.get('/api/meta', (req, res) => {
     profiles: [...profilesSet].sort(),
     types: [...typesSet].sort(),
     statuses: [...statusesSet].sort(),
-    regions: [...regionsSet].sort()
+    regions: [...regionsSet].sort(),
   });
 });
 
-// ─── Health check ───
+// ─── GET /api/health ───────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   res.json({
     ok: true,
     loaded: opportunities.length,
     lastLoadedAt: lastLoadedAt ? new Date(lastLoadedAt).toISOString() : null,
-    dataSource: 'supabase'
+    uptime: Math.round(process.uptime()),
+    env: NODE_ENV,
+    dataSource: 'supabase',
   });
 });
 
-// ─── Start server ───
+// ─── 404 fallback for /api/* ───────────────────────────────────
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'Endpoint not found', path: req.originalUrl });
+});
+
+// ─── Root: tiny landing JSON ───────────────────────────────────
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Saudi Opportunity Hub API',
+    version: '1.1.0',
+    docs: '/api.html',
+    endpoints: ['/api/opportunities', '/api/opportunities/:id', '/api/stats', '/api/meta', '/api/health'],
+  });
+});
+
+// ─── Global error handler (last resort) ────────────────────────
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err && err.stack ? err.stack : err);
+  if (res.headersSent) return next(err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+// ─── Start server ──────────────────────────────────────────────
 function startListening(message) {
   const server = app.listen(PORT, () => {
     console.log(`\n  Saudi Opportunity Hub API running at:`);
@@ -263,19 +375,19 @@ function startListening(message) {
     loadData().catch(err => console.error('Background refresh failed:', err.message));
   }, CACHE_TTL_MS);
 
-  // Graceful shutdown so in-flight requests finish.
-  const shutdown = signal => {
-    console.log(`\n${signal} received — shutting down gracefully.`);
+  // Graceful shutdown
+  function shutdown(signal) {
+    console.log(`\n${signal} received — shutting down gracefully...`);
     clearInterval(refreshInterval);
     server.close(err => {
       if (err) { console.error('Error during shutdown:', err); process.exit(1); }
+      console.log('HTTP server closed.');
       process.exit(0);
     });
-    // Hard exit if it takes too long.
     setTimeout(() => process.exit(1), 10000).unref();
-  };
+  }
+  process.on('SIGINT', () => shutdown('SIGINT'));
   process.on('SIGTERM', () => shutdown('SIGTERM'));
-  process.on('SIGINT',  () => shutdown('SIGINT'));
 }
 
 loadData()
@@ -283,5 +395,5 @@ loadData()
   .catch(err => {
     console.error('FATAL: initial Supabase load failed:', err.message);
     // Still start the server so /api/health works & retries happen on demand.
-    startListening(`dataset empty — will retry on first request`);
+    startListening('dataset empty — will retry on first request');
   });

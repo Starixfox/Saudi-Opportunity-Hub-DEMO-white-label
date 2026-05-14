@@ -15,11 +15,26 @@ A private demo platform that aggregates **grants, tenders, accelerators, investm
 | `reset-password.html` | Password reset flow |
 | `contact.html` | Standalone contact / feedback form |
 | `api.html` | Public API documentation page |
+| `404.html` | Custom not-found page |
+| `manifest.webmanifest` | PWA manifest (installable) |
+| `robots.txt` / `sitemap.xml` | SEO basics |
 | `script.js` | Shared helpers loaded by static pages |
 | `api/server.js` | Express read-only REST API in front of Supabase |
 | `api/package.json` | API server dependencies (`express`, `cors`) |
 
 The frontend is **vanilla JavaScript** (IIFEs, no framework). Charts via [Chart.js](https://www.chartjs.org/), icons via [Lucide](https://lucide.dev/), data + auth via [Supabase](https://supabase.com/).
+
+## Architecture
+
+```
+┌──────────────────┐      ┌──────────────────┐      ┌──────────────────┐
+│  Static frontend │──────│  Supabase (auth, │──────│  Express API     │
+│  (HTML + JS)     │      │   Postgres, RLS) │      │  (read-only      │
+│  GitHub Pages    │      │                  │      │   cache proxy)   │
+└──────────────────┘      └──────────────────┘      └──────────────────┘
+                                                              │
+                                                          Railway
+```
 
 ## Views
 
@@ -36,6 +51,16 @@ The frontend is **vanilla JavaScript** (IIFEs, no framework). Charts via [Chart.
 - **Settings modal**: Display name, role, organisation, sector interests (drives recommendations).
 - **Notifications dropdown** with badge.
 
+## Audience
+
+| Profile | What they get |
+|---|---|
+| Startups / SMEs | Non-dilutive grants, accelerators, equity programs |
+| Researchers / Universities | Research grants, fellowships, lab partnerships |
+| Government | Tenders, partnership programs, intergovernmental schemes |
+| Investors | Co-investment funds, equity programs, sovereign vehicles |
+| Students | Scholarships, fellowships, training programs |
+
 ## Data
 
 The dataset lives in the Supabase project `dshrbbnjahjcwxzvzygh`. Tables consumed by the frontend:
@@ -48,6 +73,8 @@ The dataset lives in the Supabase project `dshrbbnjahjcwxzvzygh`. Tables consume
 | `user_searches` | Saved search filters per user |
 
 Anon-key auth + Supabase Row Level Security gates everything user-specific.
+
+The opportunity rows cover **15 sectors** (ICT, Healthcare & Life Sciences, Energy, Agriculture, Education, Financial Services, Tourism, Mining, Manufacturing, Transport & Logistics, Real Estate, Sports, Entertainment, Innovation & Entrepreneurship, Environment) and **3 region scopes** — Saudi Arabia (`SA-`), GCC (`GCC-`), Global (`GL-`).
 
 ## Internationalisation
 
@@ -62,9 +89,11 @@ Two complementary mechanisms ship side-by-side:
 
 ### Frontend
 
-The frontend is fully static — open `index.html` in a browser, or serve the directory with any static server. It calls Supabase directly from the browser.
+The frontend is fully static — open `login.html` in a browser, or serve the directory:
 
 ```bash
+npx serve .
+# or
 python3 -m http.server 8080
 # then visit http://localhost:8080/login.html
 ```
@@ -81,11 +110,13 @@ npm start
 
 Endpoints:
 
-- `GET /api/opportunities` — filters: `q`, `sector`, `region`, `type`, `status`, `profile`; pagination: `page`, `limit`
+- `GET /api/opportunities` — filters: `q`, `sector`, `region`, `type`, `status`, `profile`; sort: `sort=newest|oldest|title`; pagination: `page`, `limit`
 - `GET /api/opportunities/:id`
-- `GET /api/stats`
-- `GET /api/meta`
+- `GET /api/stats` — counts by status / type / region / sector + freshness
+- `GET /api/meta` — available filter values
 - `GET /api/health`
+
+Extra env vars: `PORT`, `NODE_ENV`, `ALLOWED_ORIGINS` (comma-separated CORS allowlist), `RATE_LIMIT_MAX` (default 60 req/min/IP). See [`api/README.md`](api/README.md).
 
 ## Browser support
 
@@ -104,6 +135,7 @@ Modern evergreen browsers (Chromium 100+, Firefox 100+, Safari 15+). The page is
 - A strict CSP locks `connect-src` to Supabase + the Google Translate endpoint and `script-src` to jsdelivr + unpkg.
 - All DB-sourced strings are escaped via `esc()` before being injected as HTML.
 - `noindex, nofollow` is set because this is a private demo.
+- The Express API ships with strict security headers, per-IP rate limiting, input validation, and an origin allowlist. See [`api/server.js`](api/server.js).
 
 ## Reporting issues / contributing
 

@@ -3,3 +3,5 @@
 
 User-agent: *
 Disallow: /
+
+Sitemap: https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/sitemap.xml
