@@ -59,7 +59,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script defer src="https://unpkg.com/lucide@0.263.1" onload="window.lucide&&window.lucide.createIcons&&window.lucide.createIcons()"></script>
+<!-- Lucide: loaded synchronously (no `defer`) so window.lucide is ready
+     before the inline App-shell IIFE calls createIcons(). Explicit UMD path
+     avoids unpkg's package.json redirect, which has caused intermittent
+     blank-icon issues when the redirect resolves to a non-browser bundle. -->
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js"></script>
+<script>window.lucide && window.lucide.createIcons && window.lucide.createIcons();</script>
 <style>
 /* =============================================
    Saudi Opportunity Hub — styles.css
