@@ -5918,6 +5918,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 (function () {
   'use strict';
 
+  /* ---------------- Translation shim ---------------- */
+  /* t() may not be defined yet when this IIFE first runs (the Translation IIFE
+     loads later in the file). Use window.t if available, else return the raw string.
+     This prevents 'ReferenceError: t is not defined' from crashing initHome() and
+     rebuildCharts() which both call t() for labels. */
+  function t(str) {
+    return (typeof window.t === 'function') ? window.t(str) : (str || '');
+  }
+
   /* ---------------- Lucide icons ---------------- */
   function paintIcons() {
     if (window.lucide && typeof window.lucide.createIcons === 'function') {
