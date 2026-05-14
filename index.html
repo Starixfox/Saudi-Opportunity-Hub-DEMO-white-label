@@ -13959,5 +13959,920 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 })();
 </script>
 
+<!-- ══════════════════════════════════════════════════════════════
+     OH ENHANCEMENTS — PHASE 2
+       • Sector radar chart (analytics)
+       • GCC heatmap (analytics)
+       • Funding range chip (cards)
+       • Similar opportunities tooltip (cards, title hover)
+       • Watchlist folders (panel chips + drag-drop + move dropdown)
+     Folder metadata persists in user_prefs.prefs.folders (no schema change)
+     ══════════════════════════════════════════════════════════════ -->
+<style id="oh-enh2-styles">
+  /* Analytics row 2 (radar + heatmap) */
+  .oh-enh2-analytics-row {
+    display: grid; gap: 16px; grid-template-columns: 1fr;
+    margin: 0 0 16px;
+  }
+  @media (min-width: 900px) { .oh-enh2-analytics-row { grid-template-columns: 1fr 1fr; } }
+  .oh-enh2-radar-wrap { position: relative; height: 280px; }
+
+  /* GCC heatmap */
+  .oh-enh2-gcc-wrap { position: relative; padding: 6px 0 0; }
+  .oh-enh2-gcc-svg { width: 100%; height: 220px; cursor: pointer; }
+  .oh-enh2-gcc-country {
+    transition: opacity .15s, stroke-width .15s;
+    stroke: var(--surface, #fff); stroke-width: 1.5;
+  }
+  .oh-enh2-gcc-country:hover {
+    stroke: var(--text, #1a1f36);
+    stroke-width: 2;
+  }
+  .oh-enh2-gcc-label {
+    font-size: 10px; font-weight: 600;
+    fill: var(--text, #1a1f36);
+    pointer-events: none;
+    text-anchor: middle;
+  }
+  .oh-enh2-gcc-count {
+    font-size: 11px; font-weight: 700;
+    fill: #fff;
+    pointer-events: none;
+    text-anchor: middle;
+  }
+  .oh-enh2-gcc-legend {
+    display: flex; align-items: center; gap: 6px;
+    margin-top: 8px; font-size: 11px; color: var(--text-muted, #64748b);
+    justify-content: center;
+  }
+  .oh-enh2-gcc-legend-bar {
+    height: 8px; width: 120px;
+    background: linear-gradient(to right, rgba(0,108,53,0.15), rgba(0,108,53,1));
+    border-radius: 2px;
+  }
+
+  /* Funding range chip */
+  .oh-enh2-funding-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 7px; border-radius: 4px;
+    font-size: 10.5px; font-weight: 600;
+    background: rgba(0,108,53,0.10); color: #006C35;
+    border: 1px solid rgba(0,108,53,0.25);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  [data-theme="dark"] .oh-enh2-funding-chip {
+    background: rgba(0,166,81,0.14); color: #34d97b;
+    border-color: rgba(0,166,81,0.30);
+  }
+
+  /* Similar opps tooltip */
+  .oh-enh2-similar-tooltip {
+    position: absolute; z-index: 9990;
+    width: 280px; max-width: calc(100vw - 24px);
+    background: var(--surface-elevated, var(--surface, #fff));
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 10px;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.08);
+    padding: 12px;
+    opacity: 0; transform: translateY(4px);
+    transition: opacity .14s, transform .14s;
+    pointer-events: none;
+    font-size: 12.5px;
+  }
+  .oh-enh2-similar-tooltip.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .oh-enh2-similar-title {
+    font-size: 10.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-muted, #64748b);
+    margin-bottom: 8px;
+  }
+  .oh-enh2-similar-item {
+    display: block; padding: 6px 0;
+    border-bottom: 1px solid var(--divider, #edf2f7);
+    cursor: pointer;
+    color: var(--text, #1a1f36);
+    line-height: 1.4;
+  }
+  .oh-enh2-similar-item:last-child { border-bottom: none; }
+  .oh-enh2-similar-item:hover { color: var(--green, #006C35); }
+  .oh-enh2-similar-meta {
+    font-size: 10.5px; color: var(--text-muted, #64748b);
+    margin-top: 2px;
+  }
+
+  /* Watchlist folders */
+  .oh-enh2-folders-bar {
+    display: flex; gap: 6px; flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 12px 16px 6px;
+    border-bottom: 1px solid var(--divider, #edf2f7);
+    margin-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .oh-enh2-folder-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 999px;
+    font-size: 11.5px; font-weight: 600;
+    background: var(--surface-2, #f9fafb);
+    border: 1px solid var(--border, #e2e8f0);
+    color: var(--text, #1a1f36);
+    cursor: pointer; white-space: nowrap;
+    transition: all .15s;
+    flex-shrink: 0;
+  }
+  .oh-enh2-folder-chip:hover {
+    border-color: var(--green, #006C35);
+    color: var(--green, #006C35);
+  }
+  .oh-enh2-folder-chip.active {
+    background: var(--green, #006C35);
+    color: #fff;
+    border-color: var(--green, #006C35);
+  }
+  .oh-enh2-folder-chip.drop-target {
+    background: rgba(0,108,53,0.12);
+    border-color: var(--green, #006C35);
+    border-style: dashed;
+    transform: scale(1.05);
+  }
+  .oh-enh2-folder-chip-count {
+    font-size: 10px;
+    opacity: 0.75;
+    font-weight: 500;
+  }
+  .oh-enh2-folder-new {
+    background: transparent; border-style: dashed;
+    color: var(--text-muted, #64748b);
+  }
+  .oh-enh2-folder-new:hover { color: var(--green, #006C35); }
+  .oh-enh2-folder-rename, .oh-enh2-folder-delete {
+    background: transparent; border: none;
+    color: inherit; opacity: 0.6;
+    cursor: pointer; padding: 0 0 0 2px;
+    display: inline-flex;
+    font-size: 13px;
+  }
+  .oh-enh2-folder-rename:hover, .oh-enh2-folder-delete:hover { opacity: 1; }
+
+  /* Move-to dropdown */
+  .oh-enh2-move-btn {
+    background: transparent; border: 1px solid var(--border, #e2e8f0);
+    color: var(--text-muted, #64748b);
+    padding: 3px 8px; border-radius: 6px;
+    font-size: 10.5px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 3px;
+    margin-top: 4px;
+  }
+  .oh-enh2-move-btn:hover {
+    color: var(--green, #006C35);
+    border-color: var(--green, #006C35);
+  }
+  .oh-enh2-move-popover {
+    position: absolute; z-index: 9995;
+    background: var(--surface-elevated, var(--surface, #fff));
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    padding: 4px;
+    min-width: 180px;
+    max-height: 240px;
+    overflow-y: auto;
+  }
+  .oh-enh2-move-option {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px; border-radius: 5px;
+    font-size: 12px; cursor: pointer;
+    color: var(--text, #1a1f36);
+  }
+  .oh-enh2-move-option:hover { background: var(--surface-2, #f9fafb); }
+  .oh-enh2-move-option.current { color: var(--green, #006C35); font-weight: 600; }
+  .oh-enh2-move-option-check { width: 14px; opacity: 0; }
+  .oh-enh2-move-option.current .oh-enh2-move-option-check { opacity: 1; }
+  .oh-enh2-move-option--new {
+    border-top: 1px solid var(--divider, #edf2f7);
+    color: var(--green, #006C35);
+    font-weight: 600;
+  }
+
+  /* Draggable watchlist item */
+  .ws-item.oh-enh2-dragging { opacity: 0.4; }
+
+  @media (max-width: 600px) {
+    .oh-enh2-similar-tooltip { width: 240px; padding: 10px; }
+    .oh-enh2-funding-chip { font-size: 9.5px; padding: 1px 5px; }
+    .oh-enh2-radar-wrap { height: 220px; }
+    .oh-enh2-gcc-svg { height: 180px; }
+  }
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  function $$(s, root) { return Array.from((root || document).querySelectorAll(s)); }
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function isAr() { return window.__lang === 'ar'; }
+  function T(en, ar) { return isAr() ? (ar || en) : en; }
+  function getData() { return window.opportunitiesData || window.allOpportunities || []; }
+  function findItem(id) { return getData().find(function (it) { return (it.id||'') === id; }); }
+  function toast(m) {
+    if (window.WS && window.WS.showToast) window.WS.showToast(m);
+    else if (typeof window.showToast === 'function') window.showToast(m);
+    else alert(m);
+  }
+
+  /* ── Funding parser ──────────────────────────────────── */
+  /* Conservative: returns a short range chip only when the input has
+     unambiguous currency/scale signals. Skips percentages, plain numbers,
+     and prose ("Varies by program", "Equity / Co-investment"). */
+  function parseFundingRange(raw) {
+    if (!raw) return null;
+    var s = String(raw).trim();
+    if (s.length > 200) return null;
+
+    /* Gate: at least one currency or scale signal must appear */
+    if (!/\$|\bUSD\b|\bSAR\b|\bAED\b|\bEUR\b|\bGBP\b|\bQAR\b|\bKWD\b|\bOMR\b|\bBHD\b|\d\s*[KMB]\b|\bmillion\b|\bbillion\b|\bthousand\b/i.test(s)) return null;
+
+    /* Strip percentage chunks so "75% of project costs" doesn't read as $75 */
+    var clean = s.replace(/\b\d[\d.,]*\s*%/g, ' ');
+    /* Normalize currency prefixes/suffixes to $ */
+    var norm = clean
+      .replace(/\b(USD|SAR|AED|EUR|GBP|QAR|KWD|OMR|BHD)\s*/gi, '$ ')
+      .replace(/\s*\b(USD|SAR|AED|EUR|GBP|QAR|KWD|OMR|BHD)\b/gi, '');
+
+    function fmt(n) {
+      if (n >= 1e9) return '$' + (n / 1e9).toFixed(n >= 1e10 ? 0 : 1).replace(/\.0$/,'') + 'B';
+      if (n >= 1e6) return '$' + (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/,'') + 'M';
+      if (n >= 1e3) return '$' + Math.round(n / 1e3) + 'K';
+      return '$' + Math.round(n);
+    }
+    function suffixOf(x) {
+      var u = String(x || '').toLowerCase();
+      if (u === 'k' || u === 'thousand') return 'K';
+      if (u === 'm' || u === 'million')  return 'M';
+      if (u === 'b' || u === 'billion')  return 'B';
+      return '';
+    }
+    function toNum(numStr, sfx) {
+      var n = parseFloat(String(numStr).replace(/,/g, ''));
+      if (isNaN(n)) return null;
+      sfx = (sfx || '').toUpperCase();
+      if (sfx === 'B') n *= 1e9;
+      else if (sfx === 'M') n *= 1e6;
+      else if (sfx === 'K') n *= 1e3;
+      return n;
+    }
+
+    /* RANGE — require explicit separator (-, –, —, "to") */
+    var rangeRe = /\$?\s*([\d][\d.,]*)\s*(K|M|B|million|billion|thousand)?\s*(?:-|–|—|\bto\b)\s*\$?\s*([\d][\d.,]*)\s*(K|M|B|million|billion|thousand)?/i;
+    var rm = norm.match(rangeRe);
+    if (rm) {
+      var sa = suffixOf(rm[2] || rm[4]);
+      var sb = suffixOf(rm[4] || rm[2]);
+      var a = toNum(rm[1], sa);
+      var b = toNum(rm[3], sb);
+      if (a !== null && b !== null && a > 0 && a < b) return fmt(a) + '–' + fmt(b);
+    }
+
+    /* UP TO / MAX — require unit (so "Up to 75 entries" can't slip through) */
+    var upTo = norm.match(/(?:up to|max(?:imum)?|≤|<=)\s*\$?\s*([\d][\d.,]*)\s*(K|M|B|million|billion|thousand)\b/i);
+    if (!upTo) upTo = norm.match(/(?:up to|max(?:imum)?|≤|<=)\s*\$\s*([\d][\d.,]*)/i);
+    if (upTo) {
+      var v = toNum(upTo[1], suffixOf(upTo[2]));
+      if (v && v >= 1000) return T('Up to ','حتى ') + fmt(v);
+    }
+
+    /* SINGLE — must have $ prefix OR unit suffix */
+    var singleA = norm.match(/\$\s*([\d][\d.,]*)\s*(K|M|B|million|billion|thousand)?\b/i);
+    var singleB = norm.match(/\b([\d][\d.,]*)\s*(million|billion|thousand)\b/i);
+    var singleC = norm.match(/\b([\d][\d.,]*)\s*(K|M|B)\b/);
+    var single = singleA || singleB || singleC;
+    if (single) {
+      var v2 = toNum(single[1], suffixOf(single[2]));
+      if (v2 && v2 >= 1000) return fmt(v2);
+    }
+    return null;
+  }
+
+  /* ── Card augmentation pass for Phase 2 ─────────────────── */
+  function decorate2(row) {
+    if (!row || row.dataset.ohEnh2 === '1') return;
+    var id = row.dataset.id;
+    if (!id) return;
+    var item = findItem(id);
+    if (!item) return;
+
+    /* Funding range chip — add to the top decoration row */
+    var top = row.querySelector('.oh-enh-top');
+    var range = parseFundingRange(item.funding_amount);
+    if (range) {
+      if (!top) {
+        var content = row.querySelector('.opp-card-content');
+        if (content) {
+          top = document.createElement('div');
+          top.className = 'oh-enh-top';
+          content.insertBefore(top, content.firstChild);
+        }
+      }
+      if (top && !top.querySelector('.oh-enh2-funding-chip')) {
+        var chip = document.createElement('span');
+        chip.className = 'oh-enh2-funding-chip';
+        chip.title = esc(item.funding_amount || '');
+        chip.innerHTML = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>' + esc(range);
+        top.appendChild(chip);
+      }
+    }
+
+    /* Similar opportunities tooltip — attach to title */
+    var title = row.querySelector('.opp-card-title');
+    if (title && !title.dataset.ohEnh2 === '1') {
+      attachSimilarTooltip(title, item);
+      title.dataset.ohEnh2 = '1';
+      title.style.cursor = 'help';
+    }
+
+    row.dataset.ohEnh2 = '1';
+  }
+
+  /* ── Similar opportunities tooltip ──────────────────── */
+  var sharedTooltip = null;
+  var tooltipHideTimer = null;
+  function ensureTooltip() {
+    if (sharedTooltip) return sharedTooltip;
+    sharedTooltip = document.createElement('div');
+    sharedTooltip.className = 'oh-enh2-similar-tooltip';
+    sharedTooltip.setAttribute('role', 'tooltip');
+    document.body.appendChild(sharedTooltip);
+    sharedTooltip.addEventListener('mouseenter', function () {
+      if (tooltipHideTimer) { clearTimeout(tooltipHideTimer); tooltipHideTimer = null; }
+    });
+    sharedTooltip.addEventListener('mouseleave', hideTooltipSoon);
+    return sharedTooltip;
+  }
+  function findSimilar(item, limit) {
+    var data = getData();
+    if (!data.length) return [];
+    var s = (item.sectors||[]).map(function(x){ return String(x).toLowerCase(); });
+    if (!s.length) return [];
+    var scored = data
+      .filter(function(o){ return o.id && o.id !== item.id; })
+      .map(function(o){
+        var os = (o.sectors||[]).map(function(x){ return String(x).toLowerCase(); });
+        var overlap = os.filter(function(x){ return s.indexOf(x) >= 0; }).length;
+        return overlap > 0 ? { item: o, score: overlap, isOpen: (o.status||'').toLowerCase() === 'open' } : null;
+      })
+      .filter(Boolean)
+      .sort(function(a,b){ if (b.score !== a.score) return b.score - a.score; return (b.isOpen?1:0) - (a.isOpen?1:0); })
+      .slice(0, limit);
+    return scored.map(function(x){ return x.item; });
+  }
+  function showTooltip(target, item) {
+    var tip = ensureTooltip();
+    var similar = findSimilar(item, 3);
+    if (!similar.length) return;
+    var html = '<div class="oh-enh2-similar-title">' + T('Similar opportunities','فرص مشابهة') + '</div>';
+    similar.forEach(function(s){
+      var country = s.country || (s.eligibility_region || '').replace(/_/g,' ');
+      var statusLabel = (s.status||'').toLowerCase() === 'open' ? T('Open','مفتوحة')
+                      : ((s.status||'').toLowerCase().indexOf('recurring') >= 0 ? T('Recurring','متكررة') : T('Closed','مغلقة'));
+      html += '<a class="oh-enh2-similar-item" data-id="' + esc(s.id||'') + '">' +
+        '<div>' + esc(s.title || T('Untitled','بلا عنوان')) + '</div>' +
+        '<div class="oh-enh2-similar-meta">' + esc(country) + ' · ' + statusLabel + '</div>' +
+      '</a>';
+    });
+    tip.innerHTML = html;
+    tip.querySelectorAll('.oh-enh2-similar-item').forEach(function(a){
+      a.addEventListener('click', function(){
+        var id = a.dataset.id;
+        if (!id) return;
+        if (typeof window.setRoute === 'function') window.setRoute('opportunities');
+        location.hash = '#opp=' + encodeURIComponent(id);
+        var btn = document.querySelector('.opp-insights-btn[data-id="' + id + '"]');
+        if (btn) btn.click();
+        hideTooltip();
+      });
+    });
+    /* position below + start, clamp to viewport */
+    var rect = target.getBoundingClientRect();
+    var w = 280, gap = 8;
+    var left = window.scrollX + rect.left;
+    var top = window.scrollY + rect.bottom + gap;
+    if (left + w > window.scrollX + window.innerWidth - 12) left = window.scrollX + window.innerWidth - w - 12;
+    if (left < window.scrollX + 12) left = window.scrollX + 12;
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+    tip.classList.add('visible');
+  }
+  function hideTooltip() {
+    if (!sharedTooltip) return;
+    sharedTooltip.classList.remove('visible');
+  }
+  function hideTooltipSoon() {
+    if (tooltipHideTimer) clearTimeout(tooltipHideTimer);
+    tooltipHideTimer = setTimeout(hideTooltip, 180);
+  }
+  function attachSimilarTooltip(target, item) {
+    var enterTimer;
+    target.addEventListener('mouseenter', function () {
+      if (enterTimer) clearTimeout(enterTimer);
+      enterTimer = setTimeout(function () { showTooltip(target, item); }, 250);
+    });
+    target.addEventListener('mouseleave', function () {
+      if (enterTimer) clearTimeout(enterTimer);
+      hideTooltipSoon();
+    });
+  }
+
+  /* ── MutationObserver for Phase 2 card pass ────────────── */
+  function observeCards2() {
+    var tbody = document.getElementById('oppsTableBody');
+    if (!tbody) { setTimeout(observeCards2, 600); return; }
+    var pending = false;
+    function pass() {
+      pending = false;
+      $$('.opp-card-row', tbody).forEach(decorate2);
+    }
+    new MutationObserver(function () {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(pass);
+    }).observe(tbody, { childList: true });
+    pass();
+  }
+
+  /* ── Sector radar (added to analytics) ────────────────── */
+  function injectRadarAndHeatmap() {
+    var dash = document.getElementById('view-dashboard');
+    if (!dash) { setTimeout(injectRadarAndHeatmap, 800); return; }
+    if (dash.querySelector('.oh-enh2-analytics-row')) return;
+    var phase1 = dash.querySelector('.oh-enh-analytics');
+    if (!phase1) { setTimeout(injectRadarAndHeatmap, 800); return; }
+    var wrap = document.createElement('div');
+    wrap.className = 'oh-enh2-analytics-row';
+    wrap.innerHTML =
+      '<div class="oh-enh-card">' +
+        '<div class="oh-enh-card__header">' +
+          '<div class="oh-enh-card__title">' + T('Sector coverage','تغطية القطاعات') + '</div>' +
+          '<div class="oh-enh-card__sub">' + T('Breadth across top 8 sectors (all vs open)','أعلى 8 قطاعات (الكل مقابل المفتوحة)') + '</div>' +
+        '</div>' +
+        '<div class="oh-enh2-radar-wrap"><canvas id="ohEnh2Radar" aria-label="Sector coverage radar"></canvas></div>' +
+      '</div>' +
+      '<div class="oh-enh-card">' +
+        '<div class="oh-enh-card__header">' +
+          '<div class="oh-enh-card__title">' + T('GCC density','كثافة دول الخليج') + '</div>' +
+          '<div class="oh-enh-card__sub">' + T('Opportunities by country (click to filter)','الفرص حسب الدولة (انقر للتصفية)') + '</div>' +
+        '</div>' +
+        '<div class="oh-enh2-gcc-wrap" id="ohEnh2GccWrap"></div>' +
+      '</div>';
+    phase1.parentNode.insertBefore(wrap, phase1.nextSibling);
+
+    refreshPhase2Analytics();
+    document.addEventListener('oh:data-complete', refreshPhase2Analytics);
+    document.addEventListener('oh:data-ready', refreshPhase2Analytics);
+  }
+
+  function refreshPhase2Analytics() {
+    var d = getData();
+    if (!d.length) return;
+    renderRadar(d);
+    renderGccHeatmap(d);
+  }
+
+  function renderRadar(data) {
+    var canvas = document.getElementById('ohEnh2Radar');
+    if (!canvas || !window.Chart) return;
+    var counts = {}, openCounts = {};
+    data.forEach(function (it) {
+      (it.sectors || []).forEach(function (s) {
+        var k = String(s);
+        counts[k] = (counts[k] || 0) + 1;
+        if ((it.status||'').toLowerCase() === 'open') openCounts[k] = (openCounts[k] || 0) + 1;
+      });
+    });
+    var top = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; }).slice(0, 8);
+    if (!top.length) return;
+    function pretty(s) { return s.replace(/_/g,' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); }); }
+    if (canvas._ohChart) canvas._ohChart.destroy();
+    canvas._ohChart = new Chart(canvas.getContext('2d'), {
+      type: 'radar',
+      data: {
+        labels: top.map(pretty),
+        datasets: [
+          {
+            label: T('All','الكل'),
+            data: top.map(function (k) { return counts[k] || 0; }),
+            backgroundColor: 'rgba(0,108,53,0.18)',
+            borderColor: '#006C35', borderWidth: 2,
+            pointBackgroundColor: '#006C35', pointRadius: 3
+          },
+          {
+            label: T('Open','مفتوحة'),
+            data: top.map(function (k) { return openCounts[k] || 0; }),
+            backgroundColor: 'rgba(201,166,107,0.18)',
+            borderColor: '#C9A66B', borderWidth: 2,
+            pointBackgroundColor: '#C9A66B', pointRadius: 3
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 10 } } },
+        scales: {
+          r: {
+            beginAtZero: true,
+            grid: { color: 'rgba(124,137,171,0.15)' },
+            angleLines: { color: 'rgba(124,137,171,0.15)' },
+            pointLabels: { font: { size: 10 } },
+            ticks: { display: false }
+          }
+        }
+      }
+    });
+  }
+
+  /* GCC heatmap — simplified positional layout (6 countries + a "Saudi" anchor) */
+  var GCC_COUNTRIES = [
+    /* roughly arranged on a simplified Arabian peninsula */
+    { id: 'sa', name: T('Saudi Arabia','السعودية'), shortName: 'SA',
+      keywords: ['saudi'], cx: 110, cy: 110, r: 60 },
+    { id: 'ae', name: T('UAE','الإمارات'), shortName: 'UAE',
+      keywords: ['uae','emirates'], cx: 215, cy: 130, r: 25 },
+    { id: 'om', name: T('Oman','عُمان'), shortName: 'OM',
+      keywords: ['oman'], cx: 250, cy: 175, r: 28 },
+    { id: 'qa', name: T('Qatar','قطر'), shortName: 'QA',
+      keywords: ['qatar'], cx: 190, cy: 102, r: 17 },
+    { id: 'bh', name: T('Bahrain','البحرين'), shortName: 'BH',
+      keywords: ['bahrain'], cx: 175, cy: 85, r: 12 },
+    { id: 'kw', name: T('Kuwait','الكويت'), shortName: 'KW',
+      keywords: ['kuwait'], cx: 135, cy: 50, r: 16 }
+  ];
+
+  function renderGccHeatmap(data) {
+    var wrap = document.getElementById('ohEnh2GccWrap');
+    if (!wrap) return;
+    var counts = {};
+    GCC_COUNTRIES.forEach(function (c) { counts[c.id] = 0; });
+    data.forEach(function (it) {
+      var s = ((it.country || '') + ' ' + (it.eligibility_region || '')).toLowerCase();
+      GCC_COUNTRIES.forEach(function (c) {
+        if (c.keywords.some(function (k) { return s.indexOf(k) >= 0; })) counts[c.id]++;
+      });
+    });
+    var maxCount = Math.max(1, Math.max.apply(null, Object.values(counts)));
+
+    function colorFor(n) {
+      if (!n) return 'rgba(124,137,171,0.18)';
+      var t = n / maxCount;
+      /* interpolate between Saudi-green light → dark */
+      var alpha = 0.25 + t * 0.75;
+      return 'rgba(0,108,53,' + alpha.toFixed(2) + ')';
+    }
+
+    var svg = '<svg class="oh-enh2-gcc-svg" viewBox="0 0 320 220" role="img" aria-label="GCC opportunity density">';
+    /* Faint backdrop */
+    svg += '<rect x="0" y="0" width="320" height="220" fill="var(--surface-2,#f9fafb)" rx="8"/>';
+    /* Countries */
+    GCC_COUNTRIES.forEach(function (c) {
+      var n = counts[c.id];
+      svg += '<g class="oh-enh2-gcc-group" data-id="' + c.id + '" data-name="' + esc(c.name) + '" data-count="' + n + '" tabindex="0" aria-label="' + esc(c.name) + ': ' + n + ' opportunities">' +
+        '<circle class="oh-enh2-gcc-country" cx="' + c.cx + '" cy="' + c.cy + '" r="' + c.r + '" fill="' + colorFor(n) + '"/>' +
+        (c.r >= 18 ? '<text class="oh-enh2-gcc-count" x="' + c.cx + '" y="' + (c.cy + 4) + '">' + n + '</text>' : '') +
+        '<text class="oh-enh2-gcc-label" x="' + c.cx + '" y="' + (c.cy + c.r + 13) + '">' + esc(c.shortName) + '</text>' +
+      '</g>';
+    });
+    svg += '</svg>';
+    svg += '<div class="oh-enh2-gcc-legend">' +
+      '<span>' + T('Less','أقل') + '</span>' +
+      '<span class="oh-enh2-gcc-legend-bar" aria-hidden="true"></span>' +
+      '<span>' + T('More','أكثر') + ' (' + maxCount + ')</span>' +
+    '</div>';
+    wrap.innerHTML = svg;
+
+    /* Click → filter opportunities by country */
+    wrap.querySelectorAll('.oh-enh2-gcc-group').forEach(function (g) {
+      g.addEventListener('click', function () { filterByCountry(g.dataset.id, g.dataset.name); });
+      g.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          filterByCountry(g.dataset.id, g.dataset.name);
+        }
+      });
+    });
+  }
+
+  function filterByCountry(cid, label) {
+    if (typeof window.setRoute === 'function') window.setRoute('opportunities');
+    var search = document.getElementById('searchInput');
+    if (search) {
+      search.value = label;
+      search.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    toast(T('Filtered to ','تصفية ') + label);
+  }
+
+  /* ════════════════════════════════════════════════════════
+     WATCHLIST FOLDERS
+     ════════════════════════════════════════════════════════ */
+  /* Folder model lives in user_prefs.folders = [{id, name, opp_ids:[]}] */
+  /* No schema change — persists via existing user_prefs blob upsert. */
+
+  function getFolders() {
+    var p = window.__userPrefs || {};
+    return Array.isArray(p.folders) ? p.folders : [];
+  }
+  function saveFolders(folders) {
+    var p = window.__userPrefs = window.__userPrefs || {};
+    p.folders = folders;
+    if (window._supabase && window._uid) {
+      try {
+        window._supabase.from('user_prefs').upsert(
+          { user_id: window._uid, prefs: p, updated_at: new Date().toISOString() },
+          { onConflict: 'user_id' }
+        ).then(function(){}, function(){});
+      } catch(_) {}
+    }
+    window.dispatchEvent(new Event('__userPrefsUpdated'));
+  }
+  function genId() { return 'fold_' + Math.random().toString(36).slice(2, 9); }
+
+  function ensureUnfilledAll(folders) {
+    /* When called repeatedly nothing changes; folders is the source of truth. */
+    return folders;
+  }
+
+  /* Active folder filter state */
+  var activeFolderId = 'all';
+
+  function getFolderForItem(oppId) {
+    var folders = getFolders();
+    for (var i = 0; i < folders.length; i++) {
+      if ((folders[i].opp_ids || []).indexOf(oppId) >= 0) return folders[i];
+    }
+    return null;
+  }
+
+  function moveItemToFolder(oppId, folderId) {
+    var folders = getFolders().map(function (f) {
+      return Object.assign({}, f, { opp_ids: (f.opp_ids||[]).filter(function (x) { return x !== oppId; }) });
+    });
+    if (folderId && folderId !== 'all' && folderId !== 'none') {
+      var t = folders.find(function (f) { return f.id === folderId; });
+      if (t) t.opp_ids = (t.opp_ids||[]).concat(oppId);
+    }
+    saveFolders(folders);
+    /* Re-render the panel body */
+    if (window.WS && window.WS.refreshPanel) window.WS.refreshPanel();
+    setTimeout(injectFolderUI, 50);
+  }
+
+  function createFolder() {
+    var name = prompt(T('New folder name','اسم المجلد الجديد'));
+    if (!name) return;
+    name = name.trim().slice(0, 40);
+    if (!name) return;
+    var folders = getFolders().slice();
+    folders.push({ id: genId(), name: name, opp_ids: [] });
+    saveFolders(folders);
+    activeFolderId = folders[folders.length - 1].id;
+    setTimeout(injectFolderUI, 50);
+  }
+
+  function renameFolder(id) {
+    var folders = getFolders().slice();
+    var f = folders.find(function (x) { return x.id === id; });
+    if (!f) return;
+    var nm = prompt(T('Rename folder','إعادة تسمية المجلد'), f.name);
+    if (!nm) return;
+    f.name = nm.trim().slice(0, 40);
+    saveFolders(folders);
+    setTimeout(injectFolderUI, 50);
+  }
+
+  function deleteFolder(id) {
+    if (!confirm(T('Delete this folder? Items in it will move to "All".','حذف هذا المجلد؟ ستنتقل العناصر إلى "الكل".'))) return;
+    var folders = getFolders().filter(function (x) { return x.id !== id; });
+    saveFolders(folders);
+    if (activeFolderId === id) activeFolderId = 'all';
+    setTimeout(injectFolderUI, 50);
+  }
+
+  /* ── Inject folder UI into watchlist panel ──────────── */
+  function injectFolderUI() {
+    var panel = document.getElementById('wsPanel');
+    if (!panel || !panel.classList.contains('open')) return;
+    var activeTab = panel.querySelector('.ws-panel-tab.active');
+    if (!activeTab || activeTab.dataset.wstab !== 'watchlist') return;
+    var body = document.getElementById('wsPanelBody');
+    if (!body) return;
+    /* Don't inject if there are no watchlist items (empty state shown) */
+    var items = body.querySelectorAll('.ws-item');
+    if (!items.length) {
+      var existingBar = panel.querySelector('.oh-enh2-folders-bar');
+      if (existingBar) existingBar.remove();
+      return;
+    }
+
+    /* Replace or create folders bar */
+    var existingBar = panel.querySelector('.oh-enh2-folders-bar');
+    if (existingBar) existingBar.remove();
+
+    var folders = getFolders();
+    var counts = { all: items.length };
+    folders.forEach(function (f) {
+      counts[f.id] = 0;
+      items.forEach(function (it) {
+        if ((f.opp_ids||[]).indexOf(it.dataset.id) >= 0) counts[f.id]++;
+      });
+    });
+
+    var bar = document.createElement('div');
+    bar.className = 'oh-enh2-folders-bar';
+    var html = '';
+    html += '<button class="oh-enh2-folder-chip' + (activeFolderId === 'all' ? ' active' : '') + '" data-fid="all" type="button">' +
+              '<span>' + T('All','الكل') + '</span>' +
+              '<span class="oh-enh2-folder-chip-count">' + counts.all + '</span>' +
+            '</button>';
+    folders.forEach(function (f) {
+      html += '<button class="oh-enh2-folder-chip' + (activeFolderId === f.id ? ' active' : '') + '" data-fid="' + esc(f.id) + '" type="button">' +
+                '<span>' + esc(f.name) + '</span>' +
+                '<span class="oh-enh2-folder-chip-count">' + (counts[f.id] || 0) + '</span>' +
+                '<span class="oh-enh2-folder-rename" data-rename="' + esc(f.id) + '" title="' + T('Rename','إعادة تسمية') + '">✎</span>' +
+                '<span class="oh-enh2-folder-delete" data-delete="' + esc(f.id) + '" title="' + T('Delete','حذف') + '">×</span>' +
+              '</button>';
+    });
+    html += '<button class="oh-enh2-folder-chip oh-enh2-folder-new" type="button" id="ohEnh2FolderNew">+ ' + T('New folder','مجلد جديد') + '</button>';
+    bar.innerHTML = html;
+    body.parentNode.insertBefore(bar, body);
+
+    /* Wire chip clicks */
+    bar.querySelectorAll('.oh-enh2-folder-chip').forEach(function (chip) {
+      chip.addEventListener('click', function (e) {
+        /* If rename/delete sub-button, handle that */
+        var r = e.target.closest('[data-rename]');
+        if (r) { e.stopPropagation(); renameFolder(r.dataset.rename); return; }
+        var d = e.target.closest('[data-delete]');
+        if (d) { e.stopPropagation(); deleteFolder(d.dataset.delete); return; }
+        var fid = chip.dataset.fid;
+        if (fid) {
+          activeFolderId = fid;
+          applyFolderFilter();
+          /* Re-paint chips active state */
+          bar.querySelectorAll('.oh-enh2-folder-chip').forEach(function (c) { c.classList.toggle('active', c.dataset.fid === fid); });
+        }
+      });
+      /* Drag-drop targets */
+      chip.addEventListener('dragover', function (e) {
+        if (chip.classList.contains('oh-enh2-folder-new')) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        chip.classList.add('drop-target');
+      });
+      chip.addEventListener('dragleave', function () { chip.classList.remove('drop-target'); });
+      chip.addEventListener('drop', function (e) {
+        e.preventDefault();
+        chip.classList.remove('drop-target');
+        var oppId = e.dataTransfer.getData('text/plain');
+        var fid = chip.dataset.fid;
+        if (!oppId || !fid) return;
+        moveItemToFolder(oppId, fid === 'all' ? 'none' : fid);
+        var folder = getFolders().find(function (f) { return f.id === fid; });
+        toast(T('Moved to ','تم النقل إلى ') + (folder ? folder.name : T('All','الكل')));
+      });
+    });
+    var newBtn = document.getElementById('ohEnh2FolderNew');
+    if (newBtn) newBtn.addEventListener('click', function (e) { e.stopPropagation(); createFolder(); });
+
+    /* Make items draggable + add "Move ▸" button */
+    items.forEach(function (it) {
+      var id = it.dataset.id;
+      if (!id) return;
+      it.setAttribute('draggable', 'true');
+      it.addEventListener('dragstart', function (e) {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', id);
+        it.classList.add('oh-enh2-dragging');
+      });
+      it.addEventListener('dragend', function () { it.classList.remove('oh-enh2-dragging'); });
+
+      var rightCol = it.querySelector('div[style*="flex-direction:column"]') || it.querySelector('.ws-item-remove') && it.querySelector('.ws-item-remove').parentNode;
+      if (rightCol && !rightCol.querySelector('.oh-enh2-move-btn')) {
+        var moveBtn = document.createElement('button');
+        moveBtn.type = 'button';
+        moveBtn.className = 'oh-enh2-move-btn';
+        var cur = getFolderForItem(id);
+        moveBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>' +
+          '<span>' + (cur ? esc(cur.name) : T('Folder','مجلد')) + '</span>';
+        moveBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          openMovePopover(moveBtn, id);
+        });
+        rightCol.appendChild(moveBtn);
+      }
+    });
+
+    applyFolderFilter();
+  }
+
+  function applyFolderFilter() {
+    var body = document.getElementById('wsPanelBody');
+    if (!body) return;
+    var items = body.querySelectorAll('.ws-item');
+    var folders = getFolders();
+    items.forEach(function (it) {
+      var id = it.dataset.id;
+      if (activeFolderId === 'all') { it.style.display = ''; return; }
+      var f = folders.find(function (x) { return x.id === activeFolderId; });
+      it.style.display = (f && (f.opp_ids||[]).indexOf(id) >= 0) ? '' : 'none';
+    });
+  }
+
+  /* Move-to popover */
+  var movePopover = null;
+  function openMovePopover(anchor, oppId) {
+    closeMovePopover();
+    var folders = getFolders();
+    var current = getFolderForItem(oppId);
+    movePopover = document.createElement('div');
+    movePopover.className = 'oh-enh2-move-popover';
+    var html = '<div class="oh-enh2-move-option' + (!current ? ' current' : '') + '" data-fid="none">' +
+        '<svg class="oh-enh2-move-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' +
+        '<span>' + T('No folder (All)','بدون مجلد (الكل)') + '</span>' +
+      '</div>';
+    folders.forEach(function (f) {
+      html += '<div class="oh-enh2-move-option' + (current && current.id === f.id ? ' current' : '') + '" data-fid="' + esc(f.id) + '">' +
+        '<svg class="oh-enh2-move-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' +
+        '<span>' + esc(f.name) + '</span>' +
+      '</div>';
+    });
+    html += '<div class="oh-enh2-move-option oh-enh2-move-option--new" data-fid="__new__">+ ' + T('New folder…','مجلد جديد…') + '</div>';
+    movePopover.innerHTML = html;
+    document.body.appendChild(movePopover);
+    var rect = anchor.getBoundingClientRect();
+    movePopover.style.left = (window.scrollX + rect.left) + 'px';
+    movePopover.style.top  = (window.scrollY + rect.bottom + 4) + 'px';
+    var w = movePopover.offsetWidth;
+    if (rect.left + w > window.innerWidth - 12) {
+      movePopover.style.left = (window.scrollX + rect.right - w) + 'px';
+    }
+    movePopover.querySelectorAll('.oh-enh2-move-option').forEach(function (opt) {
+      opt.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var fid = opt.dataset.fid;
+        closeMovePopover();
+        if (fid === '__new__') {
+          var name = prompt(T('New folder name','اسم المجلد الجديد'));
+          if (!name) return;
+          name = name.trim().slice(0, 40);
+          if (!name) return;
+          var fs = getFolders().slice();
+          var nf = { id: genId(), name: name, opp_ids: [oppId] };
+          fs.push(nf);
+          saveFolders(fs);
+          setTimeout(injectFolderUI, 50);
+          toast(T('Folder created','تم إنشاء المجلد'));
+          return;
+        }
+        moveItemToFolder(oppId, fid);
+        var folders2 = getFolders();
+        var folder = folders2.find(function (f) { return f.id === fid; });
+        toast(T('Moved to ','تم النقل إلى ') + (fid === 'none' ? T('All','الكل') : (folder ? folder.name : '')));
+      });
+    });
+    setTimeout(function () { document.addEventListener('click', closeMovePopover, { once: true }); }, 0);
+  }
+  function closeMovePopover() {
+    if (movePopover) {
+      movePopover.remove();
+      movePopover = null;
+    }
+  }
+
+  /* Watch the workspace panel for watchlist tab activation / re-render */
+  function observePanel() {
+    var panel = document.getElementById('wsPanel');
+    if (!panel) { setTimeout(observePanel, 600); return; }
+    var rafPending = false;
+    function trigger() {
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(function () { rafPending = false; injectFolderUI(); });
+    }
+    new MutationObserver(trigger).observe(panel, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+    /* Initial */
+    trigger();
+  }
+
+  /* ── Boot ───────────────────────────────────────── */
+  function init() {
+    observeCards2();
+    injectRadarAndHeatmap();
+    observePanel();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+
 </body>
 </html>
