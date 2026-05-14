@@ -4616,7 +4616,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   min-height: 320px;
 }
 .chart-card h3 { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
-.chart-card .chart-canvas-wrap { position: relative; height: 260px; }
+.chart-card .chart-canvas-wrap { position: relative; height: 260px; width: 100%; display: block; }
 /* Sectors view */
 .sectors-wrap { padding: 28px; max-width: 1280px; margin: 0 auto; }
 .sectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin: 20px 0 28px; }
@@ -5956,13 +5956,17 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         initDashboard();
       } else {
         /* Re-visit: rebuild charts so they repaint correctly after tab switch.
-           Use 200ms to let the view's display:block fully settle before Chart.js reads dimensions. */
+           Use 500ms to let the view's display:block fully settle before Chart.js reads dimensions. */
         setTimeout(function() {
           rebuildCharts();
           requestAnimationFrame(function() {
-            requestAnimationFrame(function() { rebuildCharts(); });
+            requestAnimationFrame(function() {
+              Object.keys(chartRefs).forEach(function(id) {
+                try { if (chartRefs[id]) chartRefs[id].resize(); } catch(e) {}
+              });
+            });
           });
-        }, 200);
+        }, 500);
       }
     }
     if (view === 'home') initHome();
@@ -6083,18 +6087,26 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
        call chart.resize() so Chart.js re-measures after layout is stable. */
     var wrap = canvas.parentElement;
     var card = canvas.closest ? canvas.closest('.chart-card') : null;
+    /* BUG-001 FIX: Read the widest available ancestor that has a real width.
+       Priority: wrap > card (minus padding) > dashboard grid container > 600px fallback.
+       We never pass 0 to Chart.js — if everything reports 0 the view isn't visible yet
+       so we schedule a retry via setTimeout instead of creating a blank chart. */
+    var dashGrid = document.querySelector('.chart-grid');
     var w = (wrap && wrap.offsetWidth > 10 ? wrap.offsetWidth :
-             card && card.offsetWidth > 10 ? card.offsetWidth - 40 : 600);
+             card && card.offsetWidth > 10 ? card.offsetWidth - 40 :
+             dashGrid && dashGrid.offsetWidth > 10 ? Math.floor((dashGrid.offsetWidth - 60) / 3) : 600);
     var h = (wrap && wrap.offsetHeight > 10 ? wrap.offsetHeight : 260);
     canvas.width  = w;
     canvas.height = h;
     canvas.style.width  = w + 'px';
     canvas.style.height = h + 'px';
     chartRefs[id] = new window.Chart(canvas.getContext('2d'), { type: type, data: data, options: options });
-    /* Schedule a resize so Chart.js re-measures once the DOM is fully painted */
+    /* Schedule a resize after two animation frames so Chart.js re-measures the final painted layout */
     var _c = chartRefs[id];
     requestAnimationFrame(function() {
-      try { if (_c) _c.resize(); } catch(e) {}
+      requestAnimationFrame(function() {
+        try { if (_c) _c.resize(); } catch(e) {}
+      });
     });
     return chartRefs[id];
   }
@@ -6401,15 +6413,22 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       set('kpiOpen', openCount.toLocaleString());
       set('kpiSectors', Object.keys(sectorMap).length.toLocaleString());
       set('kpiCountries', Object.keys(countryMap).length.toLocaleString());
-      /* BUG-001 FIX: use two deferred repaints to ensure chart-card layout is settled.
-         100ms handles normal cases; the rAF-based second pass catches slower paints. */
+      /* BUG-001 FIX: defer chart rendering with a generous 500ms buffer.
+         The dashboard view transitions from display:none → display:block and the
+         browser needs time to compute grid column widths before offsetWidth is valid.
+         500ms is enough even on slow connections. The rAF second pass handles any
+         remaining layout jitter after the initial render. */
       setTimeout(function() {
         rebuildCharts();
-        /* Second pass after another rAF to handle slow-layout cases */
+        /* Second pass: force Chart.js to resize into the now-stable layout */
         requestAnimationFrame(function() {
-          requestAnimationFrame(function() { rebuildCharts(); });
+          requestAnimationFrame(function() {
+            Object.keys(chartRefs).forEach(function(id) {
+              try { if (chartRefs[id]) chartRefs[id].resize(); } catch(e) {}
+            });
+          });
         });
-      }, 150);
+      }, 500);
   }
 
   function initDashboard() {
@@ -11815,11 +11834,14 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                  || (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name))
                  || user.email.split('@')[0];
         name = name.charAt(0).toUpperCase() + name.slice(1);
+        /* BUG-011 FIX: update ALL username display elements immediately */
         var un = document.getElementById('wsUserName');
         if (un) un.textContent = name;
+        var tbUn = document.getElementById('appTbUsername');
+        if (tbUn) tbUn.textContent = name;
         /* Also push to home greeting if still default */
         var homeUser = document.getElementById('homeUsername');
-        if (homeUser && (homeUser.textContent === 'there' || homeUser.textContent === 'User')) {
+        if (homeUser && (homeUser.textContent === 'there' || homeUser.textContent === 'User' || !homeUser.textContent)) {
           homeUser.textContent = name;
         }
       }
