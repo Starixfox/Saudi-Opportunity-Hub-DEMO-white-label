@@ -5956,9 +5956,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         initDashboard();
       } else {
         /* Re-visit: rebuild charts so they repaint correctly after tab switch */
-        requestAnimationFrame(function() {
-          requestAnimationFrame(function() { rebuildCharts(); });
-        });
+        setTimeout(function() { rebuildCharts(); }, 100);
       }
     }
     if (view === 'home') initHome();
@@ -6071,6 +6069,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var canvas = document.getElementById(id);
     if (!canvas || !window.Chart) return null;
     if (chartRefs[id]) { try { chartRefs[id].destroy(); } catch (e) {} }
+    /* BUG-001 FIX (part 2): force canvas to inherit parent dimensions before Chart.js reads them.
+       When the chart-canvas-wrap container was previously display:none, the canvas
+       reports 0x0 width/height. Setting explicit pixel dimensions from the parent
+       gives Chart.js correct bounds to render into. */
+    var wrap = canvas.parentElement;
+    if (wrap && wrap.offsetWidth > 0) {
+      canvas.width  = wrap.offsetWidth;
+      canvas.height = wrap.offsetHeight || 260;
+    }
     chartRefs[id] = new window.Chart(canvas.getContext('2d'), { type: type, data: data, options: options });
     return chartRefs[id];
   }
@@ -6120,14 +6127,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         }).catch(function(){});
       }
     })();
-    /* Stats + lists */
-    waitForData(function(data) {
+    /* Stats + lists — called once data is available */
+    function _renderHomeStats(data) {
+      if (!data || !data.length) return;
       homeInitialized = true;
       var now = new Date();
       var weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
       var open = data.filter(function(d) {
         var s = String(d.status || '').toLowerCase();
-        return s.indexOf('open') !== -1 || s.indexOf('recurring') !== -1 || s.indexOf('rolling') !== -1;
+        return s === 'open' || s === 'recurring' || s === 'rolling';
       });
       var newThis = data.filter(function(d) {
         return d.isNew === true && d.last_verified && new Date(d.last_verified) >= weekAgo;
@@ -6156,7 +6164,29 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       renderHomeSectorChips(sectorMap);
 
       paintIcons();
-    });
+    }
+
+    /* Strategy 1: try immediately if data is already loaded */
+    var _d0 = getData();
+    if (_d0 && _d0.length) {
+      _renderHomeStats(_d0);
+    } else {
+      /* Strategy 2: listen for oh:data-ready event */
+      var _homeDataHandler = function() {
+        var d = getData();
+        if (d && d.length) _renderHomeStats(d);
+      };
+      document.addEventListener('oh:data-ready', _homeDataHandler, { once: true });
+
+      /* Strategy 3: waitForData polling as backup */
+      waitForData(function(data) { _renderHomeStats(data); });
+    }
+
+    /* Strategy 4: oh:data-complete refreshes the list with full dataset */
+    document.addEventListener('oh:data-complete', function() {
+      var d = getData();
+      if (d && d.length) _renderHomeStats(d);
+    }, { once: true });
 
     /* BUG-002/003 FIX: Safety fallback — if data is still loading after 8s,
        show friendly empty states instead of infinite 'Loading...' */
@@ -6327,9 +6357,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     paintIcons();
   };
 
-  function initDashboard() {
-    waitForData(function (data) {
-      chartsInitialized = true;
+  function _renderDashboard(data) {
+    if (!data || !data.length) return;
+    chartsInitialized = true;
       // KPIs
       var sectorMap = tally(data, 'sectors');
       var countryMap = tally(data, 'country');
@@ -6347,15 +6377,30 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       set('kpiOpen', openCount.toLocaleString());
       set('kpiSectors', Object.keys(sectorMap).length.toLocaleString());
       set('kpiCountries', Object.keys(countryMap).length.toLocaleString());
-      /* BUG-001 FIX: defer chart rendering by 2 frames so the dashboard
-         view's display:block has been painted before Chart.js reads canvas
-         dimensions. Without this, canvases have width=0 and charts are blank. */
-      requestAnimationFrame(function() {
-        requestAnimationFrame(function() {
-          rebuildCharts();
-        });
-      });
-    });
+      /* BUG-001 FIX: defer chart rendering so the dashboard's display:block has
+         been fully painted AND laid out before Chart.js reads canvas dimensions.
+         100ms ensures layout is complete even on slower devices. */
+      setTimeout(function() { rebuildCharts(); }, 100);
+  }
+
+  function initDashboard() {
+    /* Try immediately if data is already in memory */
+    var _d0 = getData();
+    if (_d0 && _d0.length) {
+      _renderDashboard(_d0);
+    } else {
+      /* Listen for oh:data-ready and also poll via waitForData */
+      document.addEventListener('oh:data-ready', function() {
+        var d = getData();
+        if (d && d.length) _renderDashboard(d);
+      }, { once: true });
+      waitForData(function(data) { _renderDashboard(data); });
+    }
+    /* Refresh with full dataset when all pages finish loading */
+    document.addEventListener('oh:data-complete', function() {
+      var d = getData();
+      if (d && d.length) _renderDashboard(d);
+    }, { once: true });
   }
 
   function set(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
