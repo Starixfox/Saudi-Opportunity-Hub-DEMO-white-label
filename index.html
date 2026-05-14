@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
+<meta charset="UTF-8">
 
 <!-- Supabase JS client -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -28,16 +29,16 @@
 
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Saudi Opportunity Hub","url":"https://starixfox.github.io","creator":{"@type":"SoftwareApplication","name":"Perplexity Computer","url":"https://www.perplexity.ai/computer"}}</script>
 
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Opportunity Hub (Pilot Demo)</title>
 <meta name="description" content="Explore grants, tenders, accelerators, and investment programs across Saudi Arabia, the GCC, and global programs — spanning 15 key sectors including Energy, ICT, Healthcare, Agriculture, and more.">
 <meta name="theme-color" content="#006C35">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://images.unsplash.com data:; connect-src https://dshrbbnjahjcwxzvzygh.supabase.co wss://dshrbbnjahjcwxzvzygh.supabase.co;">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script defer src="https://unpkg.com/lucide@0.263.1"></script>
 <style>
 /* =============================================
    Saudi Opportunity Hub — styles.css
@@ -94,6 +95,7 @@
 
   --text:             #e8eaf2;
   --text-muted:       #7c89ab;
+  --text-2:           #7c89ab;
   --text-faint:       #3f4a68;
   --text-inverse:     #080c14;
 
@@ -151,6 +153,7 @@
 
   --text:             #1a1f36;
   --text-muted:       #64748b;
+  --text-2:           #64748b;
   --text-faint:       #94a3b8;
   --text-inverse:     #f8fafc;
 
@@ -246,27 +249,6 @@ a:hover { text-decoration: underline; }
   }
 }
 
-/* ── STARFIELD ───────────────────────────────── */
-[data-theme="dark"] body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.50) 0%, transparent 100%),
-    radial-gradient(1px 1px at 25% 60%, rgba(255,255,255,0.35) 0%, transparent 100%),
-    radial-gradient(1px 1px at 40% 30%, rgba(255,255,255,0.40) 0%, transparent 100%),
-    radial-gradient(1px 1px at 55% 80%, rgba(255,255,255,0.30) 0%, transparent 100%),
-    radial-gradient(1px 1px at 70% 20%, rgba(255,255,255,0.45) 0%, transparent 100%),
-    radial-gradient(1px 1px at 85% 55%, rgba(255,255,255,0.35) 0%, transparent 100%),
-    radial-gradient(1px 1px at 95% 10%, rgba(255,255,255,0.40) 0%, transparent 100%),
-    radial-gradient(1px 1px at 15% 90%, rgba(255,255,255,0.30) 0%, transparent 100%),
-    radial-gradient(1px 1px at 35% 45%, rgba(255,255,255,0.25) 0%, transparent 100%),
-    radial-gradient(1px 1px at 60% 70%, rgba(255,255,255,0.35) 0%, transparent 100%),
-    radial-gradient(1px 1px at 75% 40%, rgba(255,255,255,0.30) 0%, transparent 100%),
-    radial-gradient(2px 2px at 50% 50%, rgba(0,166,81,0.15) 0%, transparent 100%);
-  pointer-events: none;
-  z-index: 0;
-}
 
 /* ── NAVIGATION ──────────────────────────────── */
 .navbar {
@@ -1462,15 +1444,6 @@ section:last-of-type { border-bottom: none; }
 
 .no-recent { padding: var(--space-5); color: var(--text-faint); font-size: var(--text-sm); text-align: center; }
 
-/* ── LEGACY .changelog-* kept for safety (unused) ────────── */
-.changelog-list { display: flex; flex-direction: column; }
-.changelog-item { padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--divider); }
-.changelog-item:last-child { border-bottom: none; }
-.changelog-item-title { margin-bottom: 5px; }
-.changelog-link { color: var(--text); font-size: var(--text-sm); font-weight: 500; text-decoration: none; }
-.changelog-link:hover { color: var(--green); text-decoration: underline; }
-.changelog-item-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
-.changelog-date { font-size: var(--text-xs); color: var(--text-faint); }
 
 /* ── INSIGHTS ────────────────────────────────── */
 .insights-grid {
@@ -2006,9 +1979,6 @@ footer {
 body.panel-open { overflow: hidden; }
 
 /* ── RESPONSIVE ──────────────────────────────── */
-@media (min-width: 1100px) {
-}
-
 @media (max-width: 900px) {
   .hero-grid { grid-template-columns: 1fr; gap: var(--space-8); }
   .about-grid { grid-template-columns: 1fr; gap: var(--space-8); }
@@ -2170,6 +2140,7 @@ html[data-theme="light"],
 
   --text:             #12243a;
   --text-muted:       #4a5568;
+  --text-2:           #4a5568;
   --text-faint:       #8fa0b8;
   --text-inverse:     #ffffff;
 
@@ -4849,7 +4820,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       <div class="app-topbar-divider"></div>
       <!-- Notifications -->
       <div style="position:relative;">
-        <button class="notif-btn app-tb-icon-btn" id="notifBtn" aria-label="Notifications" title="Notifications" type="button">
+        <button class="notif-btn app-tb-icon-btn" id="notifBtn" aria-label="Notifications" title="Notifications" type="button" aria-expanded="false" aria-controls="notifDropdown">
           <i data-lucide="bell"></i>
           <span class="notif-badge hidden" id="notifBadge">0</span>
         </button>
@@ -4897,7 +4868,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
 
   <!-- Main content area — holds all 5 views -->
-  <div class="app-content">
+  <div class="app-content" role="main">
 
     <!-- VIEW: HOME — personalised landing page -->
     <section class="app-view" id="view-home" aria-labelledby="homeHeading">
@@ -5042,19 +5013,19 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         <div class="chart-grid">
           <div class="chart-card">
             <h3 data-ar="الفرص حسب القطاع">Opportunities by sector</h3>
-            <div class="chart-canvas-wrap"><canvas id="chartSectors"></canvas></div>
+            <div class="chart-canvas-wrap"><canvas id="chartSectors" role="img" aria-label="Opportunities by sector chart">Chart: opportunities by sector</canvas></div>
           </div>
           <div class="chart-card">
             <h3 data-ar="الفرص حسب النوع">Opportunities by type</h3>
-            <div class="chart-canvas-wrap"><canvas id="chartTypes"></canvas></div>
+            <div class="chart-canvas-wrap"><canvas id="chartTypes" role="img" aria-label="Opportunities by type chart">Chart: opportunities by type</canvas></div>
           </div>
           <div class="chart-card">
             <h3 data-ar="توزيع الحالات">Status breakdown</h3>
-            <div class="chart-canvas-wrap"><canvas id="chartStatus"></canvas></div>
+            <div class="chart-canvas-wrap"><canvas id="chartStatus" role="img" aria-label="Opportunities by status chart">Chart: opportunities by status</canvas></div>
           </div>
           <div class="chart-card">
             <h3 data-ar="أهم الدول والمناطق">Top countries / regions</h3>
-            <div class="chart-canvas-wrap"><canvas id="chartCountries"></canvas></div>
+            <div class="chart-canvas-wrap"><canvas id="chartCountries" role="img" aria-label="Opportunities by country chart">Chart: opportunities by country</canvas></div>
           </div>
         </div>
 
@@ -5397,8 +5368,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     </div>
   </section>
 
-
-</main>
 </div><!-- /opp-view-wrap -->
     </section>
     <!-- /VIEW: OPPORTUNITIES -->
@@ -5528,7 +5497,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
             </div>
             <div class="form-group">
               <label class="form-label" for="feedbackContact" data-ar="كيف نتواصل معك؟">How can we contact you? <span style="color: var(--text-faint); font-weight: 400; text-transform: none;">(optional)</span></label>
-              <input id="feedbackContact" name="contact" type="email" class="form-input" placeholder="your@email.com" data-notranslate-placeholder>
+              <input id="feedbackContact" name="contact" type="email" class="form-input" placeholder="your@email.com" data-notranslate-placeholder autocomplete="email">
             </div>
           </div>
 
@@ -5549,7 +5518,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     </div>
   </section>
 
-</main>
         </div>
       </div>
     </section>
@@ -5612,7 +5580,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           <span data-en="Display name" data-ar="الاسم المعروض">Display name</span>
           <div class="settings-sublabel" data-en="Shown in your workspace greeting" data-ar="يظهر في تحية مساحتك">Shown in your workspace greeting</div>
         </div>
-        <input type="text" class="settings-select" id="settingsDisplayName" placeholder="e.g. Ahmed, Sarah…" style="min-width:160px;" />
+        <input type="text" class="settings-select" id="settingsDisplayName" placeholder="e.g. Ahmed, Sarah…" style="min-width:160px;" autocomplete="name" />
       </div>
       <div class="settings-row">
         <div class="settings-label">
@@ -5634,7 +5602,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           <span data-en="Organisation name" data-ar="اسم المؤسسة">Organisation name</span>
           <div class="settings-sublabel" data-en="Displayed in your workspace" data-ar="يظهر في مساحة عملك">Displayed in your workspace</div>
         </div>
-        <input type="text" class="settings-select" id="settingsOrg" placeholder="e.g. KAUST, Aramco&hellip;" style="min-width:160px;" />
+        <input type="text" class="settings-select" id="settingsOrg" placeholder="e.g. KAUST, Aramco&hellip;" style="min-width:160px;" autocomplete="organization" />
       </div>
     </div>
 
@@ -6096,7 +6064,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     canvas.removeAttribute('height');
     canvas.style.width  = '';
     canvas.style.height = '';
-    chartRefs[id] = new window.Chart(canvas.getContext('2d'), { type: type, data: data, options: options });
+    try {
+      chartRefs[id] = new window.Chart(canvas.getContext('2d'), { type: type, data: data, options: options });
+    } catch (e) {
+      console.warn('[Chart] Failed to create', id, e);
+      return null;
+    }
     return chartRefs[id];
   }
 
@@ -6136,7 +6109,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           if (!user) return;
           /* Use full_name metadata first, then email prefix */
           var name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name))
-                   || user.email.split('@')[0];
+                   || (user.email || '').split('@')[0] || 'User';
           /* Capitalise */
           name = name.charAt(0).toUpperCase() + name.slice(1);
           homeUser.textContent = name;
@@ -6248,13 +6221,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     el.innerHTML = items.map(function(opp) {
       var type = (opp.type || '').replace(/_/g, ' ');
       var country = opp.country || '';
-      return '<div class="home-opp-item" data-id="' + opp.id + '">' +
+      return '<div class="home-opp-item" data-id="' + esc(opp.id || '') + '">' +
         '<div class="home-opp-dot"></div>' +
         '<div class="home-opp-body">' +
-          '<div class="home-opp-title">' + (opp.title || '') + '</div>' +
+          '<div class="home-opp-title">' + esc(opp.title || '') + '</div>' +
           '<div class="home-opp-meta">' +
-            (type ? '<span class="home-opp-tag">' + type + '</span>' : '') +
-            (country ? '<span class="home-opp-tag">' + country + '</span>' : '') +
+            (type ? '<span class="home-opp-tag">' + esc(type) + '</span>' : '') +
+            (country ? '<span class="home-opp-tag">' + esc(country) + '</span>' : '') +
             (showNewBadge ? '<span class="home-opp-new">New</span>' : '') +
           '</div>' +
         '</div>' +
@@ -6287,13 +6260,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var title = item.title || opp.title || 'Untitled';
       var type = (item.type || opp.type || '').replace(/_/g, ' ');
       var status = opp.status || '';
-      return '<div class="home-opp-item" data-wl-id="' + id + '">' +
+      return '<div class="home-opp-item" data-wl-id="' + esc(id) + '">' +
         '<div class="home-opp-dot" style="background: var(--gold);"></div>' +
         '<div class="home-opp-body">' +
-          '<div class="home-opp-title">' + title + '</div>' +
+          '<div class="home-opp-title">' + esc(title) + '</div>' +
           '<div class="home-opp-meta">' +
-            (type ? '<span class="home-opp-tag">' + type + '</span>' : '') +
-            (status ? '<span class="home-opp-tag">' + status + '</span>' : '') +
+            (type ? '<span class="home-opp-tag">' + esc(type) + '</span>' : '') +
+            (status ? '<span class="home-opp-tag">' + esc(status) + '</span>' : '') +
           '</div>' +
         '</div>' +
       '</div>';
@@ -6384,6 +6357,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
   function _renderDashboard(data) {
     if (!data || !data.length) return;
+    if (!window.Chart) return;
     chartsInitialized = true;
       // KPIs
       var sectorMap = tally(data, 'sectors');
@@ -6713,19 +6687,20 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         var typeClass = type ? 'pill--' + type.replace(/[_\s\/]+/g,'-').toLowerCase() : '';
         card.innerHTML =
           '<div class="wl-saved-card__body">' +
-            '<div class="wl-saved-card__title">' + title + '</div>' +
+            '<div class="wl-saved-card__title">' + esc(title) + '</div>' +
             '<div class="wl-saved-card__meta">' +
-              (type ? '<span class="pill ' + typeClass + '">' + type.replace(/_/g,' ') + '</span>' : '') +
-              (sector ? '<span class="wl-saved-meta-tag">' + sector + '</span>' : '') +
-              (country ? '<span class="wl-saved-meta-tag">' + country + '</span>' : '') +
+              (type ? '<span class="pill ' + typeClass + '">' + esc(type.replace(/_/g,' ')) + '</span>' : '') +
+              (sector ? '<span class="wl-saved-meta-tag">' + esc(sector) + '</span>' : '') +
+              (country ? '<span class="wl-saved-meta-tag">' + esc(country) + '</span>' : '') +
             '</div>' +
           '</div>' +
           '<div class="wl-saved-card__right">' +
-            (status ? '<span class="wl-saved-status wl-status--' + status.toLowerCase().replace(/\s/g,'-') + '">' + status + '</span>' : '') +
-            (savedAt ? '<span class="wl-saved-date">' + savedAt + '</span>' : '') +
-            '<button class="wl-saved-open" data-id="' + id + '" title="View details" type="button"><i data-lucide="arrow-right"></i></button>' +
+            (status ? '<span class="wl-saved-status wl-status--' + esc(status.toLowerCase().replace(/\s/g,'-')) + '">' + esc(status) + '</span>' : '') +
+            (savedAt ? '<span class="wl-saved-date">' + esc(savedAt) + '</span>' : '') +
+            '<button class="wl-saved-open" data-id="' + esc(id) + '" title="View details" type="button"><i data-lucide="arrow-right"></i></button>' +
           '</div>';
-        card.querySelector('.wl-saved-open').addEventListener('click', function(e) {
+        var openBtn = card.querySelector('.wl-saved-open');
+        if (openBtn) openBtn.addEventListener('click', function(e) {
           e.stopPropagation();
           if (window.__openDetailPanel && opp && opp.id) window.__openDetailPanel(opp);
           else setRoute('opportunities');
@@ -6915,6 +6890,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
 <script>
 (function () {
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   const PER_PAGE = 10;
   let currentPage = 1;
   let filteredData = [];
@@ -6930,7 +6906,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   }
 
   function norm(v) { return (v || '').toString().trim().toLowerCase(); }
-  function pretty(v) { return (v || '').toString().replace(/_/g, ' ').replace(/\w/g, c => c.toUpperCase()); }
+  function pretty(v) { return (v || '').toString().replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
 
   function regionGroup(item) {
     // Priority 1: ID prefix — most authoritative signal (SA-, GCC-, GL-)
@@ -7070,7 +7046,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       watchlistIds = rawWL ? (JSON.parse(rawWL) || []).map(function(w){ return w.id || w; }) : [];
     } catch(e){ watchlistIds = []; }
 
-    var isAr = document.documentElement.lang === 'ar' || (localStorage.getItem('is-demo-lang') === 'ar');
+    var isAr = document.documentElement.lang === 'ar' || (localStorage.getItem('oh-lang') === 'ar');
 
     el.innerHTML = recent.map(function(item) {
       var itemSectors = (item.sectors || []).map(function(s){ return norm(s); });
@@ -7652,7 +7628,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                 <div class="occ-primary">
                   <span class="pill ${typeClass(item.type)} occ-pill">${typeLabel}</span>
                   <div class="occ-title">${titleStr}</div>
-                  ${sponsor ? `<div class="occ-sponsor">${sponsor}</div>` : ''}
+                  ${sponsor ? `<div class="occ-sponsor">${esc(sponsor)}</div>` : ''}
                 </div>
 
                 <!-- RIGHT: 4 data chips + actions -->
@@ -7719,10 +7695,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                   </span>
                 </div>
                 <p class="opp-card-desc">${highlightTerm(item.description_short || t('No description available.'), searchTerm)}</p>
-                <div class="opp-card-chips">${chips.map(c => `<span class="opp-card-chip">${c}</span>`).join('')}</div>
+                <div class="opp-card-chips">${chips.map(c => `<span class="opp-card-chip">${esc(c)}</span>`).join('')}</div>
                 <div class="opp-card-stats">
                   <div class="opp-card-stat">
-                    <div class="opp-card-value">${item.funding_amount || t('See details')}</div>
+                    <div class="opp-card-value">${esc(item.funding_amount) || t('See details')}</div>
                     <div class="opp-card-label">${fundingLabel}</div>
                   </div>
                   <div class="opp-card-stat">
@@ -7731,7 +7707,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                   </div>
                   <div class="opp-card-stat">
                     <div class="opp-card-value">${deadlineStr}</div>
-                    <div class="opp-card-label">${deadlineLabel}${item.last_verified ? ` &middot; <span title="${verifiedLabel}: ${item.last_verified}" class="gloss-tip" data-tip="${verifiedLabel}: ${item.last_verified}">${verifiedLabel} ${item.last_verified}</span>` : ''}</div>
+                    <div class="opp-card-label">${deadlineLabel}${item.last_verified ? ` &middot; <span title="${verifiedLabel}: ${esc(item.last_verified)}" class="gloss-tip" data-tip="${verifiedLabel}: ${esc(item.last_verified)}">${verifiedLabel} ${esc(item.last_verified)}</span>` : ''}</div>
                   </div>
                 </div>
                 <div class="opp-card-actions">
@@ -7746,10 +7722,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                       ${t('View Insights')}
                     </button>
-                    ${item.application_link && item.application_link.startsWith('http') ? `<a class="panel-link-btn opp-card-link" href="${item.application_link}" target="_blank" rel="noopener noreferrer">${t('Go to Website')}</a>` : ''}
+                    ${item.application_link && item.application_link.startsWith('http') ? `<a class="panel-link-btn opp-card-link" href="${esc(item.application_link)}" target="_blank" rel="noopener noreferrer">${t('Go to Website')}</a>` : ''}
                   </div>
                 </div>
-                <div class="opp-card-sponsor">${item.sponsor_institution ? `<strong>${t('Sponsor:')}</strong> ${item.sponsor_institution}` : ''}</div>
+                <div class="opp-card-sponsor">${item.sponsor_institution ? `<strong>${t('Sponsor:')}</strong> ${esc(item.sponsor_institution)}` : ''}</div>
               </div>
             <button class="card-bookmark-btn opp-card-bookmark-edge" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" data-sector="${(item.sectors&&item.sectors[0])||''}" data-type="${item.type||''}" onclick="WS&&WS.toggleBookmark(this)" title="Save to Watchlist" aria-label="Save to Watchlist" data-label-en="Save to Watchlist" data-label-ar="حفظ في قائمة المتابعة" data-saved-en="Saved ✓" data-saved-ar="تم الحفظ ✓">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
@@ -7934,7 +7910,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   function buildFilterSummary() {
     var parts = [];
     var searchVal = ((document.getElementById('searchInput') || {}).value || '').trim();
-    if (searchVal) parts.push('"' + searchVal + '"');
+    if (searchVal) parts.push('"' + esc(searchVal) + '"');
     var sectorEl = document.getElementById('sectorFilter');
     if (sectorEl && sectorEl.value !== 'all') parts.push('Sector: ' + (sectorEl.options[sectorEl.selectedIndex] ? sectorEl.options[sectorEl.selectedIndex].text : sectorEl.value));
     var regionEl = document.getElementById('countryFilter');
@@ -9120,10 +9096,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
   function highlightTerm(text, term) {
     if (!term || !text) return text || '';
+    var safe = String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     try {
       var re = new RegExp('(' + escapeRegex(term) + ')', 'gi');
-      return text.replace(re, '<mark class="hl">$1</mark>');
-    } catch(e) { return text; }
+      return safe.replace(re, '<mark class="hl">$1</mark>');
+    } catch(e) { return safe; }
   }
 
   var currentView = 'detailed'; // 'detailed' | 'compact'
@@ -9807,7 +9784,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       '<ul style="margin:0;padding-left:14px;font-size:11px;color:var(--text-muted);line-height:1.5">' + items + '</ul></div>';
   }
 
-  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
   /* ---- HUB SNAPSHOT (card 5 right column) ---- */
   function renderSnapshot(data) {
@@ -9982,10 +9959,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
     panel.classList.add('open');
     panel.setAttribute('aria-hidden', 'false');
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-modal', 'true');
     if (overlay) { overlay.classList.add('visible'); overlay.setAttribute('aria-hidden', 'false'); }
     document.body.classList.add('panel-open');
     panel.setAttribute('tabindex', '-1');
     try { panel.focus(); } catch(e) {}
+    if (window.__trapFocus) window.__trapFocus(panel);
 
     // If Arabic mode is active, translate the freshly-rendered panel content
     if (window.__lang === 'ar' && typeof window.__translatePanel === 'function') {
@@ -9997,8 +9977,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (!panel) return;
     panel.classList.remove('open');
     panel.setAttribute('aria-hidden', 'true');
+    panel.removeAttribute('aria-modal');
     if (overlay) { overlay.classList.remove('visible'); overlay.setAttribute('aria-hidden', 'true'); }
     document.body.classList.remove('panel-open');
+    if (window.__releaseFocus) window.__releaseFocus(panel);
   }
 
   // Wire close button and overlay
@@ -10879,7 +10861,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       window.location.href = 'login.html';
     });
     var label = signoutBtn.querySelector('.signout-label');
-    if (label && localStorage.getItem('is-demo-lang') === 'ar') {
+    if (label && localStorage.getItem('oh-lang') === 'ar') {
       label.textContent = label.getAttribute('data-ar') || 'تسجيل الخروج';
     }
   }
@@ -10948,7 +10930,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     }
     // Sync active state on load
     if (arM && enM) {
-      var isAr = localStorage.getItem('is-demo-lang') === 'ar';
+      var isAr = localStorage.getItem('oh-lang') === 'ar';
       arM.classList.toggle('is-lang-active', isAr);
       enM.classList.toggle('is-lang-active', !isAr);
     }
@@ -11387,7 +11369,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         /* Priority: 1) user-set display name in prefs, 2) OAuth full_name, 3) email prefix */
         var name = prefs.displayName
                 || (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name))
-                || user.email.split('@')[0];
+                || (user.email || '').split('@')[0] || 'User';
         /* Capitalise first letter */
         name = name.charAt(0).toUpperCase() + name.slice(1);
         un.textContent = name;
@@ -11409,12 +11391,20 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     });
     renderPanelBody();
     panel.classList.add('open');
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-modal', 'true');
     overlay.classList.add('open');
     panel.focus();
+    if (window.__trapFocus) window.__trapFocus(panel);
   }
 
   function closePanel() {
-    document.getElementById('wsPanel')?.classList.remove('open');
+    var panel = document.getElementById('wsPanel');
+    if (panel) {
+      panel.classList.remove('open');
+      panel.removeAttribute('aria-modal');
+      if (window.__releaseFocus) window.__releaseFocus(panel);
+    }
     document.getElementById('wsPanelOverlay')?.classList.remove('open');
   }
 
@@ -11819,7 +11809,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         var pref = prefs && prefs.displayName;
         var name = pref
                  || (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name))
-                 || user.email.split('@')[0];
+                 || (user.email || '').split('@')[0] || 'User';
         name = name.charAt(0).toUpperCase() + name.slice(1);
         /* BUG-011 FIX: update ALL username display elements immediately */
         var un = document.getElementById('wsUserName');
@@ -11854,11 +11844,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     notifBtn && notifBtn.addEventListener('click', function(e) {
       e.stopPropagation();
       notifDrop.classList.toggle('open');
+      notifBtn.setAttribute('aria-expanded', notifDrop.classList.contains('open'));
     });
     clearBtn && clearBtn.addEventListener('click', markAllRead);
     document.addEventListener('click', function(e) {
       if (!notifBtn?.contains(e.target) && !notifDrop?.contains(e.target)) {
         notifDrop?.classList.remove('open');
+        if (notifBtn) notifBtn.setAttribute('aria-expanded', 'false');
       }
     });
 
@@ -12208,7 +12200,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   }
 
   /* Hook into renderPanelBody for checklist tab */
-  var _origRenderPanelBody = window.WS && window.WS._renderPanelBody;
   function hookPanel() {
     if (!window.WS) return;
     var origOpen = window.WS.openPanel;
@@ -12539,8 +12530,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       }
     };
 
-    var _ss = window.WS.saveCurrentSearch || (window.WS._saveCurrentSearch);
-    /* saveCurrentSearch is not exposed on WS directly — hook via saveSearchBtn click */
   }
 
   /* Hook saveSearchBtn */
@@ -12651,18 +12640,23 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     }
 
     overlay.classList.add('open');
+    if (window.__trapFocus) window.__trapFocus(overlay);
 
     /* BUG FIX: only wire listeners once to prevent duplicate handler accumulation */
     if (!_obModalListenersWired) {
       _obModalListenersWired = true;
       var startBtn = document.getElementById('obStartTourBtn');
       var skipBtn  = document.getElementById('obSkipTourBtn');
-      if (startBtn) startBtn.addEventListener('click', function() {
+      function _closeModal() {
         overlay.classList.remove('open');
+        if (window.__releaseFocus) window.__releaseFocus(overlay);
+      }
+      if (startBtn) startBtn.addEventListener('click', function() {
+        _closeModal();
         setTimeout(startTour, 380);
       });
       if (skipBtn) skipBtn.addEventListener('click', function() {
-        overlay.classList.remove('open');
+        _closeModal();
         localStorage.setItem(KEY_OB_DONE, '1');
       });
     }
@@ -12758,4 +12752,43 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
 })();
 
+</script>
+<script>
+(function() {
+  var _traps = new Map();
+  var FOCUSABLE = 'a[href],button:not([disabled]),textarea:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])';
+
+  window.__trapFocus = function(container) {
+    if (_traps.has(container)) return;
+    function handler(e) {
+      if (e.key !== 'Tab') return;
+      var focusable = Array.from(container.querySelectorAll(FOCUSABLE)).filter(function(el) { return el.offsetParent !== null; });
+      if (!focusable.length) return;
+      var first = focusable[0];
+      var last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+    function escHandler(e) {
+      if (e.key === 'Escape') {
+        var closeBtn = container.querySelector('[data-close],[aria-label*="Close"],.panel-close-btn,.ws-panel-close,.ob-btn-skip,#obSkipTourBtn');
+        if (closeBtn) closeBtn.click();
+      }
+    }
+    container.addEventListener('keydown', handler);
+    container.addEventListener('keydown', escHandler);
+    _traps.set(container, { tab: handler, esc: escHandler });
+  };
+
+  window.__releaseFocus = function(container) {
+    var handlers = _traps.get(container);
+    if (!handlers) return;
+    container.removeEventListener('keydown', handlers.tab);
+    container.removeEventListener('keydown', handlers.esc);
+    _traps.delete(container);
+  };
+})();
 </script>
