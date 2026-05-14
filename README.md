@@ -19,21 +19,20 @@ A private demo platform that aggregates **grants, tenders, accelerators, investm
 | `manifest.webmanifest` | PWA manifest (installable) |
 | `robots.txt` / `sitemap.xml` | SEO basics |
 | `script.js` | Shared helpers loaded by static pages |
-| `api/server.js` | Express read-only REST API in front of Supabase |
-| `api/package.json` | API server dependencies (`express`, `cors`) |
 
 The frontend is **vanilla JavaScript** (IIFEs, no framework). Charts via [Chart.js](https://www.chartjs.org/), icons via [Lucide](https://lucide.dev/), data + auth via [Supabase](https://supabase.com/).
+
+> The `api/` folder contains an older Express proxy that is no longer deployed. The site now talks to Supabase REST (PostgREST) directly from the browser.
 
 ## Architecture
 
 ```
-┌──────────────────┐      ┌──────────────────┐      ┌──────────────────┐
-│  Static frontend │──────│  Supabase (auth, │──────│  Express API     │
-│  (HTML + JS)     │      │   Postgres, RLS) │      │  (read-only      │
-│  GitHub Pages    │      │                  │      │   cache proxy)   │
-└──────────────────┘      └──────────────────┘      └──────────────────┘
-                                                              │
-                                                          Railway
+┌──────────────────┐      ┌──────────────────────────────┐
+│  Static frontend │──────│  Supabase                    │
+│  (HTML + JS)     │      │   • Auth (email/pw + OAuth)  │
+│  GitHub Pages    │      │   • Postgres + RLS           │
+│                  │      │   • PostgREST (rest/v1)      │
+└──────────────────┘      └──────────────────────────────┘
 ```
 
 ## Views
@@ -87,8 +86,6 @@ Two complementary mechanisms ship side-by-side:
 
 ## Running locally
 
-### Frontend
-
 The frontend is fully static — open `login.html` in a browser, or serve the directory:
 
 ```bash
@@ -98,25 +95,31 @@ python3 -m http.server 8080
 # then visit http://localhost:8080/login.html
 ```
 
-### API server (optional)
+No backend to run — auth and data come from Supabase directly.
+
+## Public API (Supabase REST / PostgREST)
+
+The opportunities dataset is read directly from Supabase's auto-generated REST API. See [`api.html`](api.html) for the full reference; quick examples:
 
 ```bash
-cd api
-npm install
-SUPABASE_URL=https://<project>.supabase.co \
-SUPABASE_ANON_KEY=<anon-key> \
-npm start
+# Base URL
+BASE="https://dshrbbnjahjcwxzvzygh.supabase.co/rest/v1"
+KEY="<anon-key>"   # same anon key the frontend uses
+
+# List opportunities (with filters)
+curl "$BASE/opportunities?select=id,title,type,status&status=eq.open&limit=10" \
+  -H "apikey: $KEY"
+
+# Single opportunity
+curl "$BASE/opportunities?id=eq.SA-001&select=*" \
+  -H "apikey: $KEY" \
+  -H "Accept: application/vnd.pgrst.object+json"
+
+# Filter by sector (array contains)
+curl "$BASE/opportunities?select=*&sectors=cs.{ict}&status=eq.open"
 ```
 
-Endpoints:
-
-- `GET /api/opportunities` — filters: `q`, `sector`, `region`, `type`, `status`, `profile`; sort: `sort=newest|oldest|title`; pagination: `page`, `limit`
-- `GET /api/opportunities/:id`
-- `GET /api/stats` — counts by status / type / region / sector + freshness
-- `GET /api/meta` — available filter values
-- `GET /api/health`
-
-Extra env vars: `PORT`, `NODE_ENV`, `ALLOWED_ORIGINS` (comma-separated CORS allowlist), `RATE_LIMIT_MAX` (default 60 req/min/IP). See [`api/README.md`](api/README.md).
+Useful PostgREST features: `select=` (column projection), `eq.`, `in.`, `cs.` (array contains), `ilike.` (case-insensitive search), `order=`, `limit=` / `offset=`, and the `Range` header for pagination.
 
 ## Browser support
 
@@ -135,7 +138,7 @@ Modern evergreen browsers (Chromium 100+, Firefox 100+, Safari 15+). The page is
 - A strict CSP locks `connect-src` to Supabase + the Google Translate endpoint and `script-src` to jsdelivr + unpkg.
 - All DB-sourced strings are escaped via `esc()` before being injected as HTML.
 - `noindex, nofollow` is set because this is a private demo.
-- The Express API ships with strict security headers, per-IP rate limiting, input validation, and an origin allowlist. See [`api/server.js`](api/server.js).
+- Supabase enforces Row Level Security policies + rate limiting at the edge.
 
 ## Reporting issues / contributing
 
