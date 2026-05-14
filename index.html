@@ -13777,7 +13777,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           tooltip: { displayColors: false, callbacks: { title: function (c) { return T('Week of ','أسبوع ') + c[0].label; } } }
         },
         scales: {
-          y: { beginAtZero: true, grid: { color: 'rgba(124,137,171,0.08)' }, ticks: { stepSize: 1, font: { size: 10 } } },
+          /* maxTicksLimit + precision:0 prevents Chart.js from trying to
+             draw 1000+ y-axis ticks when a single weekly bucket happens to
+             contain the entire bulk-imported dataset (~1000 rows imported
+             in one week). With stepSize:1 the render would block the main
+             thread for several seconds and freeze the whole page. */
+          y: { beginAtZero: true, grid: { color: 'rgba(124,137,171,0.08)' }, ticks: { maxTicksLimit: 6, precision: 0, font: { size: 10 } } },
           x: { grid: { display: false }, ticks: { font: { size: 10 }, maxTicksLimit: 6 } }
         }
       }
