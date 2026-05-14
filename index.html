@@ -27,11 +27,11 @@
 })();
 </script>
 
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Saudi Opportunity Hub","url":"https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/","description":"Grants, tenders, accelerators, investment programs, and fellowships across 15 sectors in Saudi Arabia, the GCC, and internationally."}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Saudi Opportunity Hub","url":"https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/","description":"Grants, tenders, accelerators, investment programs, and fellowships across 20+ sectors in Saudi Arabia, the GCC, and internationally."}</script>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Saudi Opportunity Hub — Grants, Tenders & Investment Programs</title>
-<meta name="description" content="Explore grants, tenders, accelerators, and investment programs across Saudi Arabia, the GCC, and global programs — spanning 15 key sectors including Energy, ICT, Healthcare, Agriculture, and more.">
+<meta name="description" content="Explore grants, tenders, accelerators, and investment programs across Saudi Arabia, the GCC, and global programs — spanning 20+ key sectors including Energy, ICT, Healthcare, Agriculture, and more.">
 <meta name="keywords" content="Saudi Arabia, Vision 2030, grants, tenders, accelerators, fellowships, investment, GCC, ICT, healthcare, energy, RDIA, KAUST, Monsha'at, Misk, opportunities">
 <meta name="author" content="Saudi Opportunity Hub">
 <meta property="og:title" content="Saudi Opportunity Hub">
@@ -4917,6 +4917,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           <ul class="notif-list" id="notifList"></ul>
         </div>
       </div>
+      <!-- Theme toggle (light ↔ dark) — wired by oh-theme-toggle module below -->
+      <button class="app-tb-icon-btn" id="appThemeToggle" type="button" aria-label="Toggle theme" title="Switch between light and dark mode">
+        <svg id="appThemeToggleIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
       <!-- Settings -->
       <button class="app-tb-icon-btn" id="appTbSettings" onclick="WS.openSettings()" title="Settings" type="button" aria-label="Settings">
         <i data-lucide="settings"></i>
@@ -5223,7 +5229,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     <div class="section-label" data-ar="قاعدة البيانات">Database</div>
     <h2 class="section-heading" data-ar="قاعدة بيانات التمويل">Funding Database</h2>
     <p class="section-sub">
-      Search and filter structured records across grants, tenders, accelerators, investment programs, fellowships, and ecosystem initiatives. Coverage spans 15 sectors, Saudi Arabia, the GCC, and qualifying global programs.
+      Search and filter structured records across grants, tenders, accelerators, investment programs, fellowships, and ecosystem initiatives. Coverage spans 20+ sectors, Saudi Arabia, the GCC, and qualifying global programs.
     </p>
 
     <!-- PERSONALIZED RECOMMENDATIONS STRIP (shown when user has sector prefs) -->
@@ -5269,7 +5275,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     <div class="is-stats-strip" role="list" aria-label="Platform highlights">
       <div class="is-stat-item" role="listitem">1,074 verified records</div>
       <div class="is-stat-divider" aria-hidden="true"></div>
-      <div class="is-stat-item" role="listitem">15 sectors covered</div>
+      <div class="is-stat-item" role="listitem">20+ sectors covered</div>
       <div class="is-stat-divider" aria-hidden="true"></div>
       <div class="is-stat-item" role="listitem" id="statSnapshotDate">Data snapshot: Loading…</div>
       <div class="is-stat-divider" aria-hidden="true"></div>
@@ -5507,7 +5513,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     <h2 class="section-heading">About This Hub</h2>
     <div class="about-grid">
       <div class="about-prose">
-        <p>The <strong>Saudi Opportunity Hub</strong> is a private demo platform tracking grants, tenders, accelerators, investment programs, and fellowships across <strong>15 key sectors</strong> of Saudi Arabia's evolving economy.</p>
+        <p>The <strong>Saudi Opportunity Hub</strong> is a private demo platform tracking grants, tenders, accelerators, investment programs, and fellowships across <strong>20+ key sectors</strong> of Saudi Arabia's evolving economy.</p>
         <p>Saudi Arabia's Vision 2030 commitments have generated a diverse portfolio of funding and partnership opportunities across Agriculture, Energy, Healthcare, ICT, Financial Services, Tourism, and more &mdash; from government-backed programs to global accelerators actively recruiting Saudi startups, researchers, and institutions. This hub aggregates those signals in one place.</p>
         <p>Programmes are classified by origin across three tiers: <strong>Saudi-issued</strong> &mdash; programmes from Saudi institutions including CST, RDIA, Monsha'at, KAUST, KACST, and PIF-backed entities; <strong>GCC-issued</strong> &mdash; programmes from UAE, Oman, Qatar, Bahrain, and Kuwait; and <strong>Internationally issued</strong> &mdash; global programmes from international agencies, accelerators, and companies, many of which are open or accessible to Saudi-based applicants. Origin tier (who issues the programme) is distinct from applicant eligibility (who can apply), which is tracked separately in each record.</p>
         <p>This is a proprietary demo. It is <strong>not affiliated with, endorsed by, or representative of</strong> any government, authority, or program listed. Always verify details directly with the sponsoring organization.</p>
@@ -5533,7 +5539,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       <div class="about-meta-list">
         <div class="about-meta-item">
           <div class="about-meta-label">Coverage scope</div>
-          <div class="about-meta-value">Saudi-issued &middot; GCC-issued &middot; Internationally issued &mdash; across 15 key sectors. Applicant eligibility tracked per record.</div>
+          <div class="about-meta-value">Saudi-issued &middot; GCC-issued &middot; Internationally issued &mdash; across 20+ key sectors. Applicant eligibility tracked per record.</div>
         </div>
         <div class="about-meta-item">
           <div class="about-meta-label">Program types tracked</div>
@@ -5810,9 +5816,91 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
 /* ── 1. THEME TOGGLE ──────────────────────────────────────── */
 (function () {
-  /* Theme toggle removed — platform fixed to light mode */
-  document.documentElement.setAttribute('data-theme', 'light');
-  try { localStorage.removeItem('is-demo-theme'); localStorage.removeItem('oh-theme'); } catch(e){}
+  var KEY = 'oh-theme'; // 'light' | 'dark' | 'system'
+  var sunPath = 'M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42';
+  var moonPath = 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z';
+
+  function preferred() {
+    try {
+      var saved = localStorage.getItem(KEY);
+      if (saved === 'dark' || saved === 'light') return saved;
+    } catch (e) {}
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  function apply(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = document.getElementById('appThemeToggle');
+    var icon = document.getElementById('appThemeToggleIcon');
+    if (btn) {
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+      btn.setAttribute('title', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    if (icon) {
+      /* sun in dark mode, moon in light mode */
+      var path = icon.querySelector('path');
+      if (path) {
+        path.setAttribute('d', theme === 'dark' ? sunPath : moonPath);
+      }
+      /* sun icon needs a center circle */
+      var circle = icon.querySelector('circle');
+      if (theme === 'dark' && !circle) {
+        var c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        c.setAttribute('cx', '12'); c.setAttribute('cy', '12'); c.setAttribute('r', '4');
+        icon.appendChild(c);
+      } else if (theme !== 'dark' && circle) {
+        circle.remove();
+      }
+    }
+    /* Force any Chart.js instances to re-theme on next render */
+    try { window.dispatchEvent(new Event('oh:theme-changed')); } catch (e) {}
+  }
+  function save(theme) { try { localStorage.setItem(KEY, theme); } catch (e) {} }
+
+  /* Apply once on load (also handles a hard refresh in dark mode) */
+  apply(preferred());
+
+  /* Re-apply when other code overwrites the attribute (defensive — there's a
+     line elsewhere that resets data-theme to light, this catches it). */
+  new MutationObserver(function (muts) {
+    for (var i = 0; i < muts.length; i++) {
+      if (muts[i].attributeName === 'data-theme') {
+        var current = document.documentElement.getAttribute('data-theme');
+        var want = preferred();
+        if (current !== want) {
+          document.documentElement.setAttribute('data-theme', want);
+        }
+        return;
+      }
+    }
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  /* Toggle button — wire up once the DOM is ready */
+  function wire() {
+    var btn = document.getElementById('appThemeToggle');
+    if (!btn) { setTimeout(wire, 200); return; }
+    if (btn.dataset.themeWired) return;
+    btn.dataset.themeWired = '1';
+    btn.addEventListener('click', function () {
+      var current = document.documentElement.getAttribute('data-theme') || preferred();
+      var next = current === 'dark' ? 'light' : 'dark';
+      save(next);
+      apply(next);
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
+  else wire();
+
+  /* React to OS-level changes only if user hasn't explicitly chosen */
+  if (window.matchMedia) {
+    try {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+        var saved = null;
+        try { saved = localStorage.getItem(KEY); } catch (_) {}
+        if (saved === 'dark' || saved === 'light') return; /* user opted in explicitly */
+        apply(e.matches ? 'dark' : 'light');
+      });
+    } catch (_) {}
+  }
 })();
 
 
@@ -5866,7 +5954,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         <div class="ob-stat-lbl" id="obStatOppsLbl">Opportunities</div>
       </div>
       <div class="ob-stat-item">
-        <div class="ob-stat-val">15<span>+</span></div>
+        <div class="ob-stat-val" id="obStatSectors">20<span>+</span></div>
         <div class="ob-stat-lbl" id="obStatSectorsLbl">Sectors</div>
       </div>
       <div class="ob-stat-item">
@@ -6201,11 +6289,21 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         window._supabase.auth.getUser().then(function(res) {
           var user = res && res.data && res.data.user;
           if (!user) return;
-          /* Use full_name metadata first, then email prefix */
-          var name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name))
-                   || (user.email || '').split('@')[0] || 'User';
-          /* Capitalise */
-          name = name.charAt(0).toUpperCase() + name.slice(1);
+          /* Prefer first_name (set by login.html signUp), then full_name/name,
+             then a clean email prefix (strip +tag, then take chars before any dot). */
+          var md = user.user_metadata || {};
+          var name = md.first_name
+                  || md.full_name
+                  || md.name
+                  || (function() {
+                       var local = (user.email || '').split('@')[0] || 'User';
+                       /* strip +tag (e.g. claude.test+foo → claude.test) */
+                       local = local.split('+')[0];
+                       /* take the first dotted segment for a cleaner first-name (e.g. claude.qa.test → claude) */
+                       local = local.split('.')[0];
+                       return local || 'User';
+                     })();
+          name = String(name).charAt(0).toUpperCase() + String(name).slice(1);
           homeUser.textContent = name;
           /* Also sync the topbar wsUserName so they match */
           if (wsName && (wsName.textContent === 'User' || !wsName.textContent)) wsName.textContent = name;
@@ -6218,9 +6316,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       homeInitialized = true;
       var now = new Date();
       var weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+      /* Strict "open" only — matches the results-bar count + dashboard KPI,
+         so the same number shows in every place. Recurring programmes are
+         not "open today" — they reappear on a cycle. */
       var open = data.filter(function(d) {
-        var s = String(d.status || '').toLowerCase();
-        return s === 'open' || s === 'recurring' || s === 'rolling';
+        return String(d.status || '').toLowerCase() === 'open';
       });
       var newThis = data.filter(function(d) {
         return d.isNew === true && d.last_verified && new Date(d.last_verified) >= weekAgo;
@@ -7754,9 +7854,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                         : item.status === 'closed_but_recurring' ? t('Recurring')
                         : item.status === 'recurring' ? t('Recurring') : t('Closed');
 
+        /* IMPORTANT: parent #oppsTableBody is a <div> (display:grid). Using <tr>
+           here makes the HTML parser strip it on insertion, which removes the
+           .opp-card-row hook our augmentation modules rely on. */
         return `
-          <tr class="opp-card-row opp-card-row--compact" data-id="${item.id || ''}">
-            <td colspan="7" class="opp-card-cell">
+          <div class="opp-card-row opp-card-row--compact opp-card-cell" data-id="${item.id || ''}">
               <div class="occ-row">
 
                 <!-- LEFT: type pill + title + sponsor -->
@@ -7789,8 +7891,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                 </div>
 
               </div>
-            </td>
-          </tr>
+          </div>
         `;
       }).join('');
       renderPagination();
@@ -7813,8 +7914,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       const verifiedLabel = t('Last verified');
       const newLabel      = t('New');
       return `
-        <tr class="opp-card-row" data-id="${item.id || ''}">
-          <td colspan="7" class="opp-card-cell">
+        <div class="opp-card-row opp-card-cell" data-id="${item.id || ''}">
             <article class="opp-card-noimg">
               <button class="opp-select-btn" data-id="${item.id || ''}" title="${t('Add to comparison')}" aria-label="${t('Select for comparison')}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></button>
               <div class="opp-card-content">
@@ -7866,8 +7966,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
             </button>
             <div class="opp-card-image"><img src="${sectorImg(item)}" alt="" loading="lazy" onerror="this.style.display='none';this.parentNode.classList.add('opp-card-image-fallback');"/></div></article>
-          </td>
-        </tr>
+        </div>
       `;
     }).join('');
     renderPagination();
@@ -8823,7 +8922,19 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       }
       /* ── MOBILE ── */
       @media (max-width: 768px) {
-        .preset-chips-row { gap: 6px; padding: 12px 0 8px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 6px; }
+        /* width:100% + min-width:0 keep the row inside its parent's grid /
+           flex track so the horizontal scroll actually engages instead of
+           letting child chips bleed past the viewport. */
+        .preset-chips-row {
+          gap: 6px; padding: 12px 0 8px;
+          width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box;
+          overflow-x: auto;
+          flex-wrap: nowrap;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          padding-bottom: 6px;
+          mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+        }
         .preset-chips-row::-webkit-scrollbar { display: none; }
         .preset-label { display: none; }
         .preset-chip { font-size: 11px; padding: 6px 12px; flex-shrink: 0; }
@@ -11540,12 +11651,19 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       window._supabase.auth.getUser().then(function(res) {
         var user = res && res.data && res.data.user;
         if (!user) return;
-        /* Priority: 1) user-set display name in prefs, 2) OAuth full_name, 3) email prefix */
+        /* Priority: 1) prefs.displayName, 2) signUp first_name, 3) OAuth full_name/name,
+           4) cleaned email prefix (strip +tag and dotted suffixes). */
+        var md = user.user_metadata || {};
         var name = prefs.displayName
-                || (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name))
-                || (user.email || '').split('@')[0] || 'User';
+                || md.first_name
+                || md.full_name
+                || md.name
+                || (function() {
+                     var local = (user.email || '').split('@')[0] || 'User';
+                     return (local.split('+')[0].split('.')[0]) || 'User';
+                   })();
         /* Capitalise first letter */
-        name = name.charAt(0).toUpperCase() + name.slice(1);
+        name = String(name).charAt(0).toUpperCase() + String(name).slice(1);
         un.textContent = name;
         // Also update org greeting
         if (prefs.org) un.title = prefs.org;
@@ -11982,10 +12100,16 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       function applyName(user) {
         if (!user) return;
         var pref = prefs && prefs.displayName;
+        var md   = user.user_metadata || {};
         var name = pref
-                 || (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name))
-                 || (user.email || '').split('@')[0] || 'User';
-        name = name.charAt(0).toUpperCase() + name.slice(1);
+                 || md.first_name
+                 || md.full_name
+                 || md.name
+                 || (function() {
+                      var local = (user.email || '').split('@')[0] || 'User';
+                      return (local.split('+')[0].split('.')[0]) || 'User';
+                    })();
+        name = String(name).charAt(0).toUpperCase() + String(name).slice(1);
         /* BUG-011 FIX: update ALL username display elements immediately */
         var un = document.getElementById('wsUserName');
         if (un) un.textContent = name;
@@ -12412,7 +12536,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
               || document.querySelector('.app-bottom-tab[data-view="opportunities"]');
         },
         title:    ar ? 'تصفح الفرص' : 'Browse Opportunities',
-        body:     ar ? 'من هنا تصل إلى قاعدة بيانات الفرص الكاملة — أكثر من 1,000 فرصة عبر 15 قطاعاً. انقر في أي وقت للانتقال.' : 'This takes you to the full opportunity database — over 1,000 programmes across 15 sectors. Click any time to jump there.',
+        body:     ar ? 'من هنا تصل إلى قاعدة بيانات الفرص الكاملة — أكثر من 1,000 فرصة عبر 20+ قطاعاً. انقر في أي وقت للانتقال.' : 'This takes you to the full opportunity database — over 1,000 programmes across 20+ sectors. Click any time to jump there.',
         placement: 'right',
         spotlightPad: 8
       },
@@ -12428,16 +12552,29 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         spotlightPad: 8
       },
       {
-        /* Step 3 — My Workspace panel button in sidebar */
-        targetId: 'sidebarWorkspace',
+        /* Step 3 — My Workspace. Falls back to the topbar workspace button when
+           the sidebar isn't visible (mobile / narrow viewports). Without this
+           fallback the tour silently auto-skips steps 3-4 because the sidebar
+           items have 0×0 bounding rects and our zero-rect guard advances. */
+        resolveTarget: function() {
+          function visible(el) { if (!el) return null; var r = el.getBoundingClientRect(); return (r.width > 0 && r.height > 0) ? el : null; }
+          return visible(document.getElementById('sidebarWorkspace'))
+              || visible(document.getElementById('appTbWatchlist'))
+              || visible(document.querySelector('.app-bottom-tab[data-view="saved"]'));
+        },
         title:    ar ? 'مساحة العمل' : 'My Workspace',
         body:     ar ? 'افتح لوحة المتابعة في أي وقت. ستجد هنا قائمة المتابعة وعمليات البحث المحفوظة وسجل نشاطك الأخير.' : 'Open your personal panel any time. Watchlist, Saved Searches, and recent activity are all here in one place.',
         placement: 'right',
         spotlightPad: 8
       },
       {
-        /* Step 4 — Settings / Preferences button in sidebar */
-        targetId: 'appSidebarSettings',
+        /* Step 4 — Settings / Preferences. Same fallback strategy. */
+        resolveTarget: function() {
+          function visible(el) { if (!el) return null; var r = el.getBoundingClientRect(); return (r.width > 0 && r.height > 0) ? el : null; }
+          return visible(document.getElementById('appSidebarSettings'))
+              || visible(document.getElementById('appSettingsBtn'))
+              || visible(document.querySelector('[aria-label="Settings"]'));
+        },
         title:    ar ? 'الإعدادات والتفضيلات' : 'Settings & Preferences',
         body:     ar ? 'حدد دورك والقطاعات التي تهمك لتُعرض الفرص الأنسب أولاً. يمكنك أيضاً تغيير لغة الواجهة من هنا.' : 'Set your role and preferred sectors so the most relevant opportunities surface first. You can also switch the interface language here.',
         placement: 'right',
@@ -12464,12 +12601,23 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         spotlightPad: 8
       },
       {
-        /* Step 7 — The opportunity card list */
-        targetId: 'oppsTableWrapper',
+        /* Step 7 — The opportunity cards. Targets the FIRST visible card,
+           not the whole table — the wrapper is ~3,700px tall once 1,000+
+           cards stream in, which makes the spotlight cover the entire
+           screen and overflow far above and below the viewport. */
+        resolveTarget: function() {
+          /* Prefer a real rendered card; fall back to the wrapper as a last resort. */
+          var firstCard = document.querySelector('.opp-card-row')
+                      || document.querySelector('#oppsTableBody article')
+                      || document.querySelector('#oppsTableBody > div')
+                      || document.getElementById('oppsTableWrapper');
+          return firstCard;
+        },
         title:    ar ? 'قاعدة بيانات الفرص' : 'Opportunity Cards',
         body:     ar ? 'انقر على أي بطاقة لعرض التفاصيل الكاملة. استخدم أيقونة الإشارة المرجعية لحفظ الفرصة في قائمة المتابعة، أو مربع الاختيار لإضافتها إلى المقارنة.' : 'Click any card to see full details. Use the bookmark icon to save to your Watchlist, or the checkbox to add it to a side-by-side comparison.',
         placement: 'top',
-        spotlightPad: 10
+        spotlightPad: 10,
+        showArrow: true
       }
     ];
   }
@@ -12509,25 +12657,58 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     setTimeout(function() {
       var rect = target.getBoundingClientRect();
       var pad  = current.spotlightPad !== undefined ? current.spotlightPad : 6;
+      var vw  = window.innerWidth, vh = window.innerHeight;
 
       /* Safety: if element has no size (hidden/collapsed), skip to next step */
       if (rect.width === 0 && rect.height === 0) { advanceTour(1); return; }
 
-      /* Spotlight cutout */
+      /* Spotlight cutout — CAP height so a very tall target (e.g. the entire
+         opportunity-cards wrapper) doesn't paint a spotlight that's larger
+         than the viewport. We clamp the visible portion to the viewport. */
       var c = tourEl.cutout;
-      c.style.top    = (rect.top    - pad) + 'px';
-      c.style.left   = (rect.left   - pad) + 'px';
-      c.style.width  = (rect.width  + pad * 2) + 'px';
-      c.style.height = (rect.height + pad * 2) + 'px';
+      var cutTop    = rect.top - pad;
+      var cutLeft   = rect.left - pad;
+      var cutWidth  = rect.width  + pad * 2;
+      var cutHeight = rect.height + pad * 2;
+      /* If the target spills off either edge vertically, anchor to the visible
+         slice and cap height to the visible portion (with a sane minimum). */
+      var maxVisH = Math.max(60, vh - 32);
+      if (cutHeight > maxVisH) {
+        /* Re-anchor to the slice of the target currently in view */
+        var visTop = Math.max(cutTop, 8);
+        var visBot = Math.min(cutTop + cutHeight, vh - 8);
+        cutTop = visTop;
+        cutHeight = Math.max(60, visBot - visTop);
+      }
+      var maxVisW = Math.max(60, vw - 32);
+      if (cutWidth > maxVisW) {
+        var visL = Math.max(cutLeft, 8);
+        var visR = Math.min(cutLeft + cutWidth, vw - 8);
+        cutLeft = visL;
+        cutWidth = Math.max(60, visR - visL);
+      }
+      c.style.top    = cutTop    + 'px';
+      c.style.left   = cutLeft   + 'px';
+      c.style.width  = cutWidth  + 'px';
+      c.style.height = cutHeight + 'px';
       c.style.display = 'block';
 
-      /* Bouncing arrow — show only on steps that request it */
+      /* Bouncing arrow — show on every step by default, hide only when
+         explicitly disabled (current.showArrow === false). Earlier versions
+         required opt-in with current.showArrow === true and no step opted in,
+         so the arrow never appeared. */
       var arrowEl = document.getElementById('obTourArrow');
       if (arrowEl) {
-        if (current.showArrow) {
-          /* Position arrow horizontally centred above the cutout */
-          var arrowLeft = rect.left + rect.width / 2 - 16;
-          var arrowTop  = rect.top - pad - 38; /* 38px = arrow height + small gap */
+        if (current.showArrow !== false) {
+          var arrowLeft = cutLeft + cutWidth / 2 - 16;
+          var arrowTop  = cutTop - 38; /* 38px ≈ arrow height + small gap */
+          if (arrowTop < 8) {
+            /* Not enough room above — anchor below the cutout instead */
+            arrowTop = cutTop + cutHeight + 6;
+            arrowEl.classList.add('ob-tour-arrow--below');
+          } else {
+            arrowEl.classList.remove('ob-tour-arrow--below');
+          }
           arrowEl.style.left    = arrowLeft + 'px';
           arrowEl.style.top     = arrowTop  + 'px';
           arrowEl.style.display = 'block';
@@ -12536,16 +12717,22 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         }
       }
 
-      /* Tooltip positioning — measure actual size then place */
+      /* Tooltip content — write FIRST so getBoundingClientRect() returns the
+         real laid-out height. Measuring before writing would use the previous
+         step's height, which under-clamps the position and lets the tooltip
+         spill off-screen on narrow viewports. */
+      var ar = isAr();
+      tourEl.stepLabel.textContent = (ar ? 'خطوة ' : 'Step ') + (step + 1) + (ar ? ' من ' : ' of ') + steps.length;
+      tourEl.title.textContent = current.title;
+      tourEl.body.textContent  = current.body;
+
       var tt = tourEl.tooltip;
-      /* Reset position off-screen first so we can measure its real height */
       tt.style.top  = '-9999px';
       tt.style.left = '16px';
       tt.style.display = 'block';
       var ttRect = tt.getBoundingClientRect();
       var ttW = ttRect.width  || 300;
       var ttH = ttRect.height || 160;
-      var vw  = window.innerWidth, vh = window.innerHeight;
       var top, left;
       var margin = 12;
       var edgePad = 16;
@@ -12585,12 +12772,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
       tt.style.top  = top  + 'px';
       tt.style.left = left + 'px';
-
-      /* Update content */
-      var ar = isAr();
-      tourEl.stepLabel.textContent = (ar ? 'خطوة ' : 'Step ') + (step + 1) + (ar ? ' من ' : ' of ') + steps.length;
-      tourEl.title.textContent = current.title;
-      tourEl.body.textContent  = current.body;
 
       /* Dots */
       tourEl.dots.innerHTML = steps.map(function(_, i) {
@@ -12819,11 +13000,18 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (!overlay) return;
     translateModal();
 
-    /* Populate live stat from loaded dataset if available */
+    /* Populate live stats from loaded dataset if available */
     var statOpps = document.getElementById('obStatOpps');
+    var statSectors = document.getElementById('obStatSectors');
     var _ds = window.allOpportunities || window.opportunitiesData;
     if (statOpps && _ds && _ds.length > 0) {
       statOpps.innerHTML = _ds.length.toLocaleString() + '<span>+</span>';
+    }
+    if (statSectors && _ds && _ds.length > 0) {
+      var sset = {};
+      _ds.forEach(function (it) { (it.sectors || []).forEach(function (s) { sset[String(s)] = 1; }); });
+      var sc = Object.keys(sset).length;
+      if (sc > 0) statSectors.innerHTML = sc + '<span>+</span>';
     }
 
     overlay.classList.add('open');
@@ -13567,6 +13755,16 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       requestAnimationFrame(pass);
     }).observe(tbody, { childList: true });
     pass();
+    /* Also fire on data-ready / data-complete and on a short delayed retry.
+       The MutationObserver-only path sometimes misses the very first
+       innerHTML replacement when it happens synchronously inside a render
+       function call, especially across re-entrant renders during the
+       paginated streaming Supabase load. These extra triggers guarantee
+       decoration eventually runs without changing the basic flow. */
+    document.addEventListener('oh:data-ready',    function () { pass(); });
+    document.addEventListener('oh:data-complete', function () { pass(); });
+    setTimeout(pass, 1200);
+    setTimeout(pass, 3000);
     window.addEventListener('__userPrefsUpdated', function () {
       $$('.opp-card-row', tbody).forEach(function (r) { r.dataset.ohEnhanced = ''; });
       pass();
@@ -14407,6 +14605,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       requestAnimationFrame(pass);
     }).observe(tbody, { childList: true });
     pass();
+    /* Same safety triggers as Phase 1 — ensures Phase 2 chips show up
+       even if the initial innerHTML mutation was missed. */
+    document.addEventListener('oh:data-ready',    function () { pass(); });
+    document.addEventListener('oh:data-complete', function () { pass(); });
+    setTimeout(pass, 1200);
+    setTimeout(pass, 3000);
   }
 
   /* ── Sector radar (added to analytics) ────────────────── */
