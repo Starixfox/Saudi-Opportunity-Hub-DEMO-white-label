@@ -4375,7 +4375,10 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
   padding: 0 20px;
   position: sticky;
   top: 0;
-  z-index: 40;
+  /* Must stay above the sticky results-bar (z-index 101) so the
+     notifications dropdown — which is nested in the topbar's stacking
+     context — can overlay the cards/filter area below. */
+  z-index: 200;
   height: 56px;
 }
 .app-topbar-title {
