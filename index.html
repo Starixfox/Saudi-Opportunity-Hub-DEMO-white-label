@@ -4669,36 +4669,36 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   <aside class="app-sidebar" aria-label="Primary navigation">
     <div class="app-sidebar-brand">
       <span class="brand-dot" aria-hidden="true"></span>
-      <span>Opportunity Hub</span>
+      <span data-ar="مركز الفرص">Opportunity Hub</span>
     </div>
     <button class="app-nav-item" data-view="home" data-route="#home" type="button">
-      <i data-lucide="home"></i><span>Home</span>
+      <i data-lucide="home"></i><span data-ar="الرئيسية">Home</span>
     </button>
     <button class="app-nav-item" data-view="dashboard" data-route="#dashboard" type="button">
-      <i data-lucide="bar-chart-2"></i><span>Analytics</span>
+      <i data-lucide="bar-chart-2"></i><span data-ar="التحليلات">Analytics</span>
     </button>
     <button class="app-nav-item" data-view="opportunities" data-route="#opportunities" type="button">
-      <i data-lucide="search"></i><span>Opportunities</span>
+      <i data-lucide="search"></i><span data-ar="الفرص">Opportunities</span>
     </button>
     <button class="app-nav-item" data-view="sectors" data-route="#sectors" type="button">
-      <i data-lucide="layers"></i><span>Sectors</span>
+      <i data-lucide="layers"></i><span data-ar="القطاعات">Sectors</span>
     </button>
     <button class="app-nav-item" data-view="saved" data-route="#saved" type="button">
-      <i data-lucide="bookmark"></i><span>Saved</span>
+      <i data-lucide="bookmark"></i><span data-ar="المحفوظات">Saved</span>
     </button>
     <button class="app-nav-item" data-view="about" data-route="#about" type="button">
-      <i data-lucide="info"></i><span>About</span>
+      <i data-lucide="info"></i><span data-ar="حول المنصة">About</span>
     </button>
     <button class="app-nav-item" id="sidebarWorkspace" type="button" onclick="WS.openPanel('watchlist')">
-      <i data-lucide="layout-panel-left"></i><span>My Workspace</span>
+      <i data-lucide="layout-panel-left"></i><span data-ar="مساحتي">My Workspace</span>
     </button>
     <div class="app-sidebar-spacer"></div>
     <div class="app-sidebar-bottom">
       <button class="app-nav-item" id="appSidebarSettings" type="button" aria-label="Settings" onclick="WS.openSettings()">
-        <i data-lucide="settings"></i><span>Settings</span>
+        <i data-lucide="settings"></i><span data-ar="الإعدادات">Settings</span>
       </button>
       <button class="app-nav-item app-nav-item--logout" id="sidebarLogout" type="button" aria-label="Sign out">
-        <i data-lucide="log-out"></i><span>Sign out</span>
+        <i data-lucide="log-out"></i><span data-ar="تسجيل الخروج">Sign out</span>
       </button>
     </div>
   </aside>
@@ -4789,28 +4789,28 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         <!-- Greeting row -->
         <div class="home-greeting-row">
           <div class="home-greeting">
-            <div class="home-greeting-badge" id="homeTimeBadge">Good morning</div>
-            <h1 class="home-title" id="homeHeading">Welcome back, <span id="homeUsername">there</span></h1>
-            <p class="home-sub">Here is what is happening in your sectors today.</p>
+            <div class="home-greeting-badge" id="homeTimeBadge" data-ar="صباح الخير">Good morning</div>
+            <h1 class="home-title" id="homeHeading"><span data-ar="مرحباً بعودتك،">Welcome back,</span> <span id="homeUsername">there</span></h1>
+            <p class="home-sub" data-ar="إليك ما يجري في قطاعاتك اليوم.">Here is what is happening in your sectors today.</p>
           </div>
           <div class="home-quick-actions">
             <button class="home-qa-btn home-qa-btn--primary" onclick="setRoute('opportunities')" type="button">
-              <i data-lucide="search"></i> Browse Opportunities
+              <i data-lucide="search"></i><span data-ar="تصفح الفرص"> Browse Opportunities</span>
             </button>
             <button class="home-qa-btn" onclick="setRoute('dashboard')" type="button">
-              <i data-lucide="bar-chart-2"></i> Analytics
+              <i data-lucide="bar-chart-2"></i><span data-ar="التحليلات"> Analytics</span>
             </button>
             <button class="home-qa-btn" onclick="setRoute('sectors')" type="button">
-              <i data-lucide="layers"></i> Sectors
+              <i data-lucide="layers"></i><span data-ar="القطاعات"> Sectors</span>
             </button>
             <button class="home-qa-btn" onclick="WS.openPanel('watchlist')" type="button">
-              <i data-lucide="bookmark"></i> My Watchlist
+              <i data-lucide="bookmark"></i><span data-ar="قائمة المتابعة"> My Watchlist</span>
             </button>
             <button class="home-qa-btn" onclick="(function(){ window.__newThisWeekFilter=true; setRoute('opportunities'); })()" type="button">
-              <i data-lucide="sparkles"></i> New This Week
+              <i data-lucide="sparkles"></i><span data-ar="جديد هذا الأسبوع"> New This Week</span>
             </button>
             <button class="home-qa-btn" onclick="WS.openSettings()" type="button">
-              <i data-lucide="sliders-horizontal"></i> Preferences
+              <i data-lucide="sliders-horizontal"></i><span data-ar="التفضيلات"> Preferences</span>
             </button>
           </div>
         </div>
@@ -4819,15 +4819,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         <div class="home-stats-row" id="homeStatsRow">
           <div class="home-stat home-stat--green">
             <div class="home-stat-val" id="homeTotalVal">—</div>
-            <div class="home-stat-lbl">Total opportunities</div>
+            <div class="home-stat-lbl" data-ar="إجمالي الفرص">Total opportunities</div>
           </div>
           <div class="home-stat">
             <div class="home-stat-val" id="homeOpenVal">—</div>
-            <div class="home-stat-lbl">Open now</div>
+            <div class="home-stat-lbl" data-ar="مفتوحة الآن">Open now</div>
           </div>
           <div class="home-stat home-stat--gold">
             <div class="home-stat-val" id="homeNewVal">—</div>
-            <div class="home-stat-lbl">Added this week</div>
+            <div class="home-stat-lbl" data-ar="أضيفت هذا الأسبوع">Added this week</div>
           </div>
           <div class="home-stat">
             <div class="home-stat-val" id="homeWlVal">—</div>
@@ -5385,47 +5385,47 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   </section>
 
   <section id="feedback" aria-label="Contribute to the hub">
-    <div class="section-label">Contribute</div>
-    <h2 class="section-heading">Submit Feedback or Corrections</h2>
+    <div class="section-label" data-ar="المساهمة">Contribute</div>
+    <h2 class="section-heading" data-ar="أرسل ملاحظاتك أو تصحيحاتك">Submit Feedback or Corrections</h2>
     <p class="section-sub">
-      Found a missing record, outdated entry, or incorrect detail? Use this form to flag it directly to the development team. Your input shapes the next dataset release.
+      <span data-ar="هل وجدت سجلاً مفقوداً أو قديماً؟ استخدم هذا النموذج للإبلاغ عنه مباشرةً. مساهمتك تشكّل الإصدار القادم.">Found a missing record, outdated entry, or incorrect detail? Use this form to flag it directly to the development team. Your input shapes the next dataset release.</span>
     </p>
 
     <div class="feedback-container">
       <div class="feedback-card">
         <div class="feedback-banner">
           <div class="feedback-banner-text">
-            <strong>Internal feedback only.</strong> This form is for authorised reviewers and the internal team &mdash; not publicly accessible.
+            <strong data-ar="للمراجعين الداخليين فقط.">Internal feedback only.</strong> <span data-ar="هذا النموذج مخصص للمراجعين المعتمدين والفريق الداخلي فقط.">This form is for authorised reviewers and the internal team &mdash; not publicly accessible.</span>
           </div>
         </div>
 
         <form id="feedbackForm" novalidate>
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label" for="feedbackType">Type of feedback</label>
+              <label class="form-label" for="feedbackType" data-ar="نوع الملاحظة">Type of feedback</label>
               <select id="feedbackType" name="type" class="form-select">
-                <option value="new">Suggest a new opportunity</option>
-                <option value="update">Update / correct an existing record</option>
-                <option value="other">Other feedback</option>
+                <option value="new" data-ar="اقتراح فرصة جديدة">Suggest a new opportunity</option>
+                <option value="update" data-ar="تحديث / تصحيح سجل قائم">Update / correct an existing record</option>
+                <option value="other" data-ar="ملاحظة أخرى">Other feedback</option>
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label" for="feedbackContact">How can we contact you? <span style="color: var(--text-faint); font-weight: 400; text-transform: none;">(optional)</span></label>
+              <label class="form-label" for="feedbackContact" data-ar="كيف نتواصل معك؟">How can we contact you? <span style="color: var(--text-faint); font-weight: 400; text-transform: none;">(optional)</span></label>
               <input id="feedbackContact" name="contact" type="email" class="form-input" placeholder="your@email.com" data-notranslate-placeholder>
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="feedbackText">Details &mdash; links, IDs, corrections, comments</label>
+            <label class="form-label" for="feedbackText" data-ar="التفاصيل — روابط، معرّفات، تصحيحات، تعليقات">Details &mdash; links, IDs, corrections, comments</label>
             <textarea id="feedbackText" name="details" rows="4" class="form-textarea" required placeholder="e.g. SA-005 deadline updated, or 'New call from KAUST for satellite research grants&hellip;'" data-notranslate-placeholder></textarea>
           </div>
 
           <button type="submit" class="btn-submit">
-            Send feedback &rarr;
+            <span data-ar="إرسال الملاحظة ←">Send feedback &rarr;</span>
           </button>
 
           <div class="form-success" id="formSuccess">
-            &#10003; Thanks for your contribution! We'll review and update the dataset shortly.
+            <span data-ar="✓ شكراً لمساهمتك! سنراجع البيانات ونحدّثها قريباً.">&#10003; Thanks for your contribution! We'll review and update the dataset shortly.</span>
           </div>
         </form>
       </div>
@@ -5442,22 +5442,22 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   <!-- Mobile bottom tab bar (under 768px) -->
   <nav class="app-bottom-tabs" aria-label="Mobile navigation">
     <button class="app-bottom-tab" data-view="home" data-route="#home" type="button">
-      <i data-lucide="home"></i><span>Home</span>
+      <i data-lucide="home"></i><span data-ar="الرئيسية">Home</span>
     </button>
     <button class="app-bottom-tab" data-view="dashboard" data-route="#dashboard" type="button">
-      <i data-lucide="bar-chart-2"></i><span>Analytics</span>
+      <i data-lucide="bar-chart-2"></i><span data-ar="التحليلات">Analytics</span>
     </button>
     <button class="app-bottom-tab" data-view="opportunities" data-route="#opportunities" type="button">
-      <i data-lucide="search"></i><span>Opportunities</span>
+      <i data-lucide="search"></i><span data-ar="الفرص">Opportunities</span>
     </button>
     <button class="app-bottom-tab" data-view="sectors" data-route="#sectors" type="button">
-      <i data-lucide="layers"></i><span>Sectors</span>
+      <i data-lucide="layers"></i><span data-ar="القطاعات">Sectors</span>
     </button>
     <button class="app-bottom-tab" data-view="saved" data-route="#saved" type="button">
-      <i data-lucide="bookmark"></i><span>Saved</span>
+      <i data-lucide="bookmark"></i><span data-ar="المحفوظات">Saved</span>
     </button>
     <button class="app-bottom-tab" data-view="about" data-route="#about" type="button">
-      <i data-lucide="info"></i><span>About</span>
+      <i data-lucide="info"></i><span data-ar="حول المنصة">About</span>
     </button>
   </nav>
 </div><!-- /.app-shell -->
@@ -5891,7 +5891,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var badge = document.getElementById('homeTimeBadge');
     if (badge) {
       var h = new Date().getHours();
-      badge.textContent = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+      var greetEn = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+      badge.textContent = t(greetEn);
+      badge.setAttribute('data-en-greeting', greetEn);
     }
     /* Username */
     var wsName = document.getElementById('wsUserName');
@@ -7098,6 +7100,37 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     '2025 edition concluded; next cycle expected 2026': 'نسخة 2025 انتهت — الدورة القادمة 2026',
     'Finalization expected 2026': 'من المتوقع الإنهاء في 2026',
     'Batch 11 expected H1 2026; check 500 Global website': 'الدفعة 11 متوقعة النصف الأول 2026',
+    'Suggest a new opportunity': 'اقتراح فرصة جديدة',
+    'Update / correct an existing record': 'تحديث / تصحيح سجل قائم',
+    'Other feedback': 'ملاحظة أخرى',
+    'Type of feedback': 'نوع الملاحظة',
+    'How can we contact you?': 'كيف نتواصل معك؟',
+    'Send feedback': 'إرسال الملاحظة',
+    'Internal feedback only.': 'للمراجعين الداخليين فقط.',
+    'Submit Feedback or Corrections': 'أرسل ملاحظاتك أو تصحيحاتك',
+    'Contribute': 'المساهمة',
+    'Home': 'الرئيسية',
+    'Opportunities': 'الفرص',
+    'Analytics': 'التحليلات',
+    'Sectors': 'القطاعات',
+    'Saved': 'المحفوظات',
+    'About': 'حول المنصة',
+    'Settings': 'الإعدادات',
+    'Sign out': 'تسجيل الخروج',
+    'Opportunity Hub': 'مركز الفرص',
+    'Browse Opportunities': 'تصفح الفرص',
+    'My Watchlist': 'قائمة المتابعة',
+    'New This Week': 'جديد هذا الأسبوع',
+    'Preferences': 'التفضيلات',
+    'Good morning': 'صباح الخير',
+    'Good afternoon': 'مساء الخير',
+    'Good evening': 'مساء النور',
+    'Welcome back,': 'مرحباً بعودتك،',
+    'Here is what is happening in your sectors today.': 'إليك ما يجري في قطاعاتك اليوم.',
+    'Total opportunities': 'إجمالي الفرص',
+    'Open now': 'مفتوحة الآن',
+    'Added this week': 'أضيفت هذا الأسبوع',
+    'My Workspace': 'مساحتي',
   };
 
   /* t(str) — returns Arabic string if in AR mode, else original */
@@ -10072,11 +10105,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     document.querySelectorAll('[data-ar]').forEach(function(el) {
       var ar = el.getAttribute('data-ar');
       if (!ar) return;
-      /* For elements that only contain text (no child elements), swap textContent */
-      if (el.children.length === 0) {
-        origDataAr.push({ el: el, type: 'text', orig: el.textContent });
-        el.textContent = ar;
-      }
+      if (el.tagName === 'OPTION') return; /* handled below */
+      /* Store innerHTML for restore; replace content with Arabic text */
+      origDataAr.push({ el: el, type: 'html', orig: el.innerHTML });
+      el.textContent = ar;
     });
     /* 2. <option> elements with data-ar */
     document.querySelectorAll('option[data-ar]').forEach(function(opt) {
@@ -10085,11 +10117,26 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       origDataAr.push({ el: opt, type: 'text', orig: opt.textContent });
       opt.textContent = ar;
     });
+    /* 3. Elements with both data-en AND data-ar (liv2 KPIs, workspace tabs, notifications) */
+    document.querySelectorAll('[data-en][data-ar]').forEach(function(el) {
+      var ar = el.getAttribute('data-ar');
+      if (!ar) return;
+      if (el.tagName === 'OPTION') return;
+      /* Avoid double-processing if already handled in pass 1 */
+      var alreadyStored = origDataAr.some(function(item) { return item.el === el; });
+      if (alreadyStored) return;
+      origDataAr.push({ el: el, type: 'html', orig: el.innerHTML });
+      el.textContent = ar;
+    });
   }
 
   function restoreDataArElements() {
     origDataAr.forEach(function(item) {
-      if (item.type === 'text') item.el.textContent = item.orig;
+      if (item.type === 'html') {
+        item.el.innerHTML = item.orig;
+      } else {
+        item.el.textContent = item.orig;
+      }
     });
     origDataAr = [];
   }
@@ -10240,6 +10287,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     document.body.setAttribute('dir', 'ltr');
     window.__lang = 'en';   /* tells t() and all chart builders to use English */
     removeRTL();
+    /* Reset greeting badge to English */ var _gb2 = document.getElementById('homeTimeBadge'); if (_gb2) { var _eg2 = _gb2.getAttribute('data-en-greeting'); if (_eg2) _gb2.textContent = _eg2; }
 
     /* Restore data-ar elements first */
     restoreDataArElements();
@@ -10279,6 +10327,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   window.reapplyArabic = function() {
     if (!_translated) return;
     applyDataArElements();
+    /* Re-translate greeting badge (reset by initHome dynamically) */
+    var _gb = document.getElementById('homeTimeBadge');
+    if (_gb) { var _eg = _gb.getAttribute('data-en-greeting'); if (_eg) _gb.textContent = t(_eg); }
   };
 
   /* ── Wire the globe button in topbar ── */
