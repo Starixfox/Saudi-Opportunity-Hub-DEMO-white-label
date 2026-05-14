@@ -6664,40 +6664,62 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     return { data: data || [], count };
   }
 
-  async function fetchAllWithRetry() {
-    let all = [];
-    let from = 0;
-    let totalCount = null;
-    while (true) {
-      let attempt = 0;
-      let lastErr;
-      while (attempt < MAX_RETRIES) {
-        try {
-          const { data, count } = await fetchPage(from);
-          if (totalCount === null && typeof count === 'number') totalCount = count;
-          all = all.concat(data);
-          /* Done when we get an empty page or reached the total */
-          if (!data.length || (totalCount !== null && all.length >= totalCount)) return all;
-          from += PAGE;
-          break; /* page success — move to next page */
-        } catch (err) {
-          lastErr = err;
-          attempt++;
-          console.warn('[OH] Fetch attempt ' + attempt + ' failed:', err.message);
-          await new Promise(r => setTimeout(r, 800 * attempt)); /* back-off: 800ms, 1600ms, 2400ms */
-        }
+  async function fetchPageWithRetry(from) {
+    let attempt = 0, lastErr;
+    while (attempt < MAX_RETRIES) {
+      try { return await fetchPage(from); }
+      catch (err) {
+        lastErr = err; attempt++;
+        console.warn('[OH] Page fetch attempt ' + attempt + ' failed (from=' + from + '):', err.message);
+        await new Promise(r => setTimeout(r, 600 * attempt));
       }
-      if (attempt >= MAX_RETRIES) throw lastErr; /* all retries exhausted */
     }
+    throw lastErr;
   }
 
   try {
-    const all = await fetchAllWithRetry();
-    window.opportunitiesData = all;
-    console.log('[OH] Loaded ' + all.length + ' opportunities');
+    /* ── Step 1: fetch page 0 to get the total count ─── */
+    const first = await fetchPageWithRetry(0);
+    const totalCount = typeof first.count === 'number' ? first.count : null;
+    let all = first.data;
 
-    /* ── Signal all waiting modules ─────────────────────── */
-    document.dispatchEvent(new CustomEvent('oh:data-ready', { detail: { count: all.length } }));
+    /* ── Step 2: stream first page immediately so cards render now ── */
+    window.opportunitiesData = all.slice(); /* partial — triggers boot() */
+    document.dispatchEvent(new CustomEvent('oh:data-ready', { detail: { count: all.length, partial: true } }));
+    console.log('[OH] First page loaded (' + all.length + ' rows), streaming remainder…');
+
+    /* ── Step 3: fetch remaining pages in parallel ─── */
+    if (totalCount && all.length < totalCount) {
+      const remainingPages = [];
+      for (let from = PAGE; from < totalCount; from += PAGE) {
+        remainingPages.push(from);
+      }
+      /* Fetch up to 4 pages at once */
+      const CONCURRENCY = 4;
+      for (let i = 0; i < remainingPages.length; i += CONCURRENCY) {
+        const batch = remainingPages.slice(i, i + CONCURRENCY);
+        const results = await Promise.all(batch.map(from => fetchPageWithRetry(from)));
+        results.forEach(r => { all = all.concat(r.data); });
+        /* Update global data as pages arrive */
+        window.opportunitiesData = all.slice();
+      }
+    } else if (!totalCount) {
+      /* No count returned — fall back to sequential until empty page */
+      let from = PAGE;
+      while (true) {
+        const { data } = await fetchPageWithRetry(from);
+        if (!data || !data.length) break;
+        all = all.concat(data);
+        window.opportunitiesData = all.slice();
+        from += PAGE;
+      }
+    }
+
+    window.opportunitiesData = all;
+    console.log('[OH] All ' + all.length + ' opportunities loaded');
+
+    /* ── Final signal with complete dataset ─────────── */
+    document.dispatchEvent(new CustomEvent('oh:data-complete', { detail: { count: all.length } }));
 
     /* ── Refresh home stats now that data is loaded ───────── */
     /* Small delay so boot() and renderCards() finish first */
@@ -9386,6 +9408,30 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     /* Safety: stop polling after 30s regardless */
     setTimeout(function() { clearInterval(_bootPoll); }, 30000);
   }
+
+  /* When full dataset arrives, refresh cards + stats */
+  document.addEventListener('oh:data-complete', function() {
+    if (typeof renderCards === 'function') renderCards();
+    if (typeof populateDfp === 'function') populateDfp();
+    /* Refresh new-this-week count in topbar (now has full isNew data) */
+    if (window.WS && typeof window.WS.loadFromSupabase === 'function') {
+      /* updateWsBar is called inside loadFromSupabase after data merges */
+    }
+    /* Recalc home stats with full dataset */
+    var all = window.opportunitiesData || [];
+    if (all.length) {
+      var cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      var open = all.filter(function(o){ return (o.status||'').toLowerCase() === 'open'; }).length;
+      var nw   = all.filter(function(o){ return o.isNew && o.last_verified && new Date(o.last_verified) >= cutoff; }).length;
+      function _s(id,v){ var e=document.getElementById(id); if(e) e.textContent=v.toLocaleString(); }
+      _s('homeTotalVal', all.length);
+      _s('homeOpenVal',  open);
+      _s('homeNewVal',   nw);
+      _s('appTbNewCount', nw);
+      var statOpps = document.getElementById('obStatOpps');
+      if (statOpps) statOpps.innerHTML = all.length.toLocaleString() + '<span>+</span>';
+    }
+  });
 })();
 </script>
 <script>
@@ -10789,6 +10835,30 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   var KEY_NOTIFS     = 'oh-ws-notifs:'     + _uid;
   var KEY_LASTVISIT  = 'oh-ws-lastvisit:'  + _uid;
 
+  /* ── Re-key if uid was 'anon' at parse time (first OAuth login) ──
+     onAuthStateChange fires once the session resolves. We re-read
+     all storage keys and re-run loadFromSupabase so user data loads. */
+  (function watchAuthForWS() {
+    if (_uid !== 'anon') return; /* already have real uid, no need */
+    if (!window._supabase) return;
+    window._supabase.auth.onAuthStateChange(function(event, session) {
+      if (event !== 'SIGNED_IN' || !session || !session.user) return;
+      var uid = session.user.id;
+      if (!uid || uid === _uid) return;
+      /* Apply real uid and re-key all storage */
+      _uid          = uid;
+      KEY_PREFS     = 'oh-ws-prefs:'     + uid;
+      KEY_WATCHLIST = 'oh-ws-watchlist:' + uid;
+      KEY_SEARCHES  = 'oh-ws-searches:'  + uid;
+      KEY_HISTORY   = 'oh-ws-history:'   + uid;
+      KEY_NOTIFS    = 'oh-ws-notifs:'    + uid;
+      KEY_LASTVISIT = 'oh-ws-lastvisit:' + uid;
+      /* Reload persisted data for this user */
+      loadFromSupabase();
+      updateWsBar();
+    });
+  })();
+
   /* ── HELPERS ───────────────────────────────────────────── */
   function load(key, fallback) {
     try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch(e) { return fallback; }
@@ -11132,6 +11202,14 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       }).length;
     }
     if (uc) uc.textContent = newCount;
+
+    /* Directly push to topbar counters — don't wait for syncTopbarStats poll */
+    (function() {
+      function _set(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; }
+      _set('appTbWatchlistCount', watchlist.length);
+      _set('appTbSearchesCount',  searches.length);
+      _set('appTbNewCount',       newCount);
+    })();
 
     // User display name from Supabase
     if (un && window._supabase) {
