@@ -14877,5 +14877,835 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 })();
 </script>
 
+<!-- ══════════════════════════════════════════════════════════════
+     OH ENHANCEMENTS — PHASE 3
+       • Home onboarding checklist widget (4 steps, computed from state)
+       • "Best for me" sort pill (re-sorts opportunitiesData by smart-match)
+       • jsPDF export — compare modal + watchlist (real single-page PDF)
+       • Watchlist drag-and-drop reorder (between items, persisted to prefs)
+     ══════════════════════════════════════════════════════════════ -->
+<style id="oh-enh3-styles">
+  /* ── Home onboarding checklist ─────────────── */
+  .oh-enh3-checklist {
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 14px;
+    padding: 18px 20px;
+    position: relative;
+  }
+  .oh-enh3-checklist-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin-bottom: 12px;
+  }
+  .oh-enh3-checklist-title {
+    font-size: 13.5px; font-weight: 600;
+    color: var(--text, #1a1f36);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .oh-enh3-checklist-progress {
+    font-size: 11.5px; font-weight: 600;
+    color: var(--text-muted, #64748b);
+    font-variant-numeric: tabular-nums;
+  }
+  .oh-enh3-checklist-toggle {
+    background: transparent; border: 1px solid var(--border, #e2e8f0);
+    color: var(--text-muted, #64748b);
+    border-radius: 6px; padding: 4px 10px;
+    font-size: 11px; font-weight: 500; cursor: pointer;
+  }
+  .oh-enh3-checklist-toggle:hover { color: var(--green, #006C35); border-color: var(--green, #006C35); }
+  .oh-enh3-checklist-bar {
+    height: 4px; background: rgba(124,137,171,0.18);
+    border-radius: 2px; overflow: hidden; margin-bottom: 14px;
+  }
+  .oh-enh3-checklist-bar-fill {
+    height: 100%; background: linear-gradient(90deg, #006C35, #16a34a);
+    border-radius: 2px; transition: width .3s ease;
+  }
+  .oh-enh3-checklist-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+  .oh-enh3-step {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: 8px;
+    cursor: pointer; transition: background .15s;
+    border: 1px solid transparent;
+  }
+  .oh-enh3-step:hover { background: var(--surface-2, #f9fafb); border-color: var(--border, #e2e8f0); }
+  .oh-enh3-step--done { opacity: 0.55; }
+  .oh-enh3-step--done .oh-enh3-step-label { text-decoration: line-through; }
+  .oh-enh3-step-check {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 1.5px solid var(--border, #cbd5e1);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all .15s;
+    background: var(--surface, #fff);
+  }
+  .oh-enh3-step--done .oh-enh3-step-check {
+    background: var(--green, #006C35);
+    border-color: var(--green, #006C35);
+    color: #fff;
+  }
+  .oh-enh3-step-check svg { display: none; }
+  .oh-enh3-step--done .oh-enh3-step-check svg { display: block; }
+  .oh-enh3-step-label {
+    font-size: 13px;
+    color: var(--text, #1a1f36);
+    flex: 1;
+  }
+  .oh-enh3-step-arrow {
+    color: var(--text-muted, #64748b);
+    opacity: 0; transition: opacity .15s;
+  }
+  .oh-enh3-step:hover .oh-enh3-step-arrow { opacity: 1; }
+  .oh-enh3-checklist.collapsed .oh-enh3-checklist-list,
+  .oh-enh3-checklist.collapsed .oh-enh3-checklist-bar { display: none; }
+
+  /* ── Best-for-me sort pill ───────────────── */
+  .oh-enh3-best-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface-2, #f9fafb);
+    color: var(--text, #1a1f36);
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 999px;
+    padding: 7px 14px;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+    transition: all .15s;
+    margin-inline-start: 8px;
+  }
+  .oh-enh3-best-pill:hover {
+    color: var(--green, #006C35); border-color: var(--green, #006C35);
+  }
+  .oh-enh3-best-pill.active {
+    background: var(--green, #006C35);
+    color: #fff; border-color: var(--green, #006C35);
+  }
+  .oh-enh3-best-pill[disabled] {
+    opacity: 0.4; cursor: not-allowed;
+  }
+  .oh-enh3-best-pill .oh-enh3-best-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* ── PDF export buttons ──────────────────── */
+  .oh-enh3-pdf-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: transparent; color: var(--text, #1a1f36);
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12.5px; font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .oh-enh3-pdf-btn:hover {
+    color: var(--green, #006C35); border-color: var(--green, #006C35);
+    background: rgba(0,108,53,0.04);
+  }
+  .oh-enh3-pdf-btn[disabled] { opacity: 0.5; cursor: wait; }
+
+  /* ── Drag-reorder visual cues ────────────── */
+  .ws-item.oh-enh3-drag-over-top {
+    border-top: 2px solid var(--green, #006C35) !important;
+  }
+  .ws-item.oh-enh3-drag-over-bottom {
+    border-bottom: 2px solid var(--green, #006C35) !important;
+  }
+
+  @media (max-width: 600px) {
+    .oh-enh3-best-pill { padding: 6px 10px; font-size: 11px; margin-inline-start: 6px; }
+    .oh-enh3-checklist { padding: 14px 16px; }
+  }
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  function isAr() { return window.__lang === 'ar'; }
+  function T(en, ar) { return isAr() ? (ar || en) : en; }
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function toast(m) {
+    if (window.WS && window.WS.showToast) window.WS.showToast(m);
+    else if (typeof window.showToast === 'function') window.showToast(m);
+    else alert(m);
+  }
+  function getPrefs() { return window.__userPrefs || {}; }
+  function getData() { return window.opportunitiesData || window.allOpportunities || []; }
+
+  function persistPrefs() {
+    var p = window.__userPrefs = window.__userPrefs || {};
+    if (window._supabase && window._uid) {
+      try {
+        window._supabase.from('user_prefs').upsert(
+          { user_id: window._uid, prefs: p, updated_at: new Date().toISOString() },
+          { onConflict: 'user_id' }
+        ).then(function(){}, function(){});
+      } catch (_) {}
+    }
+    window.dispatchEvent(new Event('__userPrefsUpdated'));
+  }
+
+  /* ── Smart-match helpers (mirror Phase 1) ─────────────────── */
+  var ROLE_TO_PROFILE = {
+    'Startup / SME':'startup','Researcher':'researcher','University':'researcher',
+    'Government':'government','Investor':'investor','Student':'student','Corporate':'corporate'
+  };
+  function prefsForMatch() {
+    var p = getPrefs();
+    return {
+      sectors: (p.sectors||[]).map(function(s){ return String(s||'').toLowerCase().replace(/[\s\-\/]+/g,'_'); }).filter(Boolean),
+      role: p.role || '',
+      profile: ROLE_TO_PROFILE[p.role || ''] || ''
+    };
+  }
+  function computeMatch(item) {
+    var p = prefsForMatch();
+    if (!p.sectors.length && !p.profile) return null;
+    var score = 0, max = 0;
+    if (p.sectors.length) {
+      var itemSecs = (item.sectors || []).map(function(s){ return String(s).toLowerCase().replace(/[\s\-\/]+/g,'_'); });
+      var hits = p.sectors.filter(function(ps){
+        return itemSecs.some(function(is){ return is.indexOf(ps) >= 0 || ps.indexOf(is) >= 0; });
+      });
+      score += (hits.length / Math.max(1, p.sectors.length)) * 60;
+      max += 60;
+    }
+    if (p.profile) {
+      var profs = (item.profiles || []).map(function(x){ return String(x).toLowerCase(); });
+      if (profs.some(function(pf){ return pf.indexOf(p.profile) >= 0 || p.profile.indexOf(pf) >= 0; })) score += 25;
+      max += 25;
+    }
+    if ((item.status || '').toLowerCase() === 'open') score += 15;
+    max += 15;
+    return max ? Math.round((score / max) * 100) : null;
+  }
+
+  /* ════════════════════════════════════════════════════════
+     1) HOME ONBOARDING CHECKLIST WIDGET
+     ════════════════════════════════════════════════════════ */
+  function checklistState() {
+    var p = getPrefs();
+    var watchlist = (window.WS && window.WS.getWatchlist) ? window.WS.getWatchlist() : [];
+    return {
+      profileDone:    !!(p.displayName || p.role),
+      sectorsDone:    Array.isArray(p.sectors) && p.sectors.length > 0,
+      watchlistDone:  watchlist.length >= 3,
+      comparedDone:   !!p.hasCompared
+    };
+  }
+
+  function injectHomeChecklist() {
+    var view = document.getElementById('view-home');
+    if (!view) { setTimeout(injectHomeChecklist, 800); return; }
+    if (view.querySelector('.oh-enh3-checklist')) return;
+    var wrap = view.querySelector('.home-wrap');
+    if (!wrap) { setTimeout(injectHomeChecklist, 800); return; }
+
+    var checklist = document.createElement('div');
+    checklist.className = 'oh-enh3-checklist';
+    checklist.id = 'ohEnh3Checklist';
+
+    /* Insert above the home-cols if present, else after stats row */
+    var anchor = view.querySelector('.home-cols') || view.querySelector('.home-stats-row');
+    if (anchor && anchor.parentNode === wrap) wrap.insertBefore(checklist, anchor);
+    else wrap.appendChild(checklist);
+
+    renderChecklist();
+
+    /* Re-render when prefs / watchlist change */
+    window.addEventListener('__userPrefsUpdated', renderChecklist);
+    document.addEventListener('oh:data-ready', renderChecklist);
+    /* Re-render every 30s as a safety net for state changes we don't see */
+    setInterval(renderChecklist, 30000);
+  }
+
+  function renderChecklist() {
+    var el = document.getElementById('ohEnh3Checklist');
+    if (!el) return;
+    var s = checklistState();
+    var steps = [
+      { id:'profile',   done: s.profileDone,
+        label: T('Complete your profile (name + role)','أكمل ملفك الشخصي (الاسم + الدور)'),
+        action: function(){ if (window.WS && window.WS.openSettings) window.WS.openSettings(); } },
+      { id:'sectors',   done: s.sectorsDone,
+        label: T('Set your sector interests','حدد القطاعات التي تهمك'),
+        action: function(){ if (window.WS && window.WS.openSettings) window.WS.openSettings(); } },
+      { id:'watchlist', done: s.watchlistDone,
+        label: T('Save 3 opportunities to your watchlist','احفظ 3 فرص في قائمة المتابعة'),
+        action: function(){ if (typeof window.setRoute === 'function') window.setRoute('opportunities'); } },
+      { id:'compare',   done: s.comparedDone,
+        label: T('Open the comparison view','افتح صفحة المقارنة'),
+        action: function(){ if (typeof window.setRoute === 'function') window.setRoute('opportunities'); toast(T('Tick the box on 2–3 cards then click Compare','اختر 2–3 فرص ثم اضغط مقارنة')); } }
+    ];
+    var doneCount = steps.filter(function(x){ return x.done; }).length;
+    var pct = Math.round(doneCount / steps.length * 100);
+
+    /* If everything's done, collapse by default */
+    var collapsed = doneCount === steps.length;
+
+    el.classList.toggle('collapsed', collapsed);
+    el.innerHTML =
+      '<div class="oh-enh3-checklist-hdr">' +
+        '<div class="oh-enh3-checklist-title">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>' +
+          '<span>' + T('Get started','ابدأ هنا') + '</span>' +
+          '<span class="oh-enh3-checklist-progress">' + doneCount + '/' + steps.length + '</span>' +
+        '</div>' +
+        '<button type="button" class="oh-enh3-checklist-toggle" id="ohEnh3ChecklistToggle">' +
+          (collapsed ? T('Expand','عرض') : T('Hide','إخفاء')) +
+        '</button>' +
+      '</div>' +
+      '<div class="oh-enh3-checklist-bar"><div class="oh-enh3-checklist-bar-fill" style="width:' + pct + '%"></div></div>' +
+      '<ul class="oh-enh3-checklist-list">' +
+        steps.map(function(step){
+          return '<li class="oh-enh3-step' + (step.done ? ' oh-enh3-step--done' : '') + '" data-step="' + step.id + '">' +
+            '<span class="oh-enh3-step-check">' +
+              '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' +
+            '</span>' +
+            '<span class="oh-enh3-step-label">' + step.label + '</span>' +
+            (step.done ? '' :
+              '<svg class="oh-enh3-step-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>'
+            ) +
+          '</li>';
+        }).join('') +
+      '</ul>';
+
+    /* Wire actions */
+    el.querySelectorAll('.oh-enh3-step').forEach(function (li, i) {
+      li.addEventListener('click', function () { steps[i].action && steps[i].action(); });
+    });
+    var tBtn = document.getElementById('ohEnh3ChecklistToggle');
+    if (tBtn) tBtn.addEventListener('click', function () {
+      el.classList.toggle('collapsed');
+      tBtn.textContent = el.classList.contains('collapsed') ? T('Expand','عرض') : T('Hide','إخفاء');
+    });
+  }
+
+  /* Track when the user opens the compare modal — marks step 4 done */
+  function watchCompareForChecklist() {
+    var modal = document.getElementById('compareModal');
+    if (!modal) { setTimeout(watchCompareForChecklist, 800); return; }
+    new MutationObserver(function () {
+      if (modal.classList.contains('compare-modal--hidden')) return;
+      var p = getPrefs();
+      if (p.hasCompared) return;
+      p.hasCompared = true;
+      window.__userPrefs = p;
+      persistPrefs();
+    }).observe(modal, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  /* ════════════════════════════════════════════════════════
+     2) "BEST FOR ME" SORT — re-orders the dataset by smart-match
+     ════════════════════════════════════════════════════════ */
+  var bestForMeActive = false;
+  var originalDataOrder = null;  // captured once on first activate
+
+  function injectBestForMePill() {
+    var sort = document.querySelector('.sort-control');
+    if (!sort) { setTimeout(injectBestForMePill, 800); return; }
+    if (sort.parentNode.querySelector('.oh-enh3-best-pill')) return;
+
+    var pill = document.createElement('button');
+    pill.type = 'button';
+    pill.className = 'oh-enh3-best-pill';
+    pill.id = 'ohEnh3BestPill';
+    pill.innerHTML =
+      '<span class="oh-enh3-best-dot"></span>' +
+      '<span>' + T('Best for me','الأفضل لي') + '</span>';
+    sort.parentNode.insertBefore(pill, sort.nextSibling);
+
+    function refreshState() {
+      var p = prefsForMatch();
+      var canUse = p.sectors.length > 0 || !!p.profile;
+      pill.disabled = !canUse;
+      pill.title = canUse
+        ? T('Reorder opportunities by your sector and role match','إعادة ترتيب الفرص حسب التطابق')
+        : T('Set your sectors or role in Settings to enable','حدد قطاعاتك أو دورك في الإعدادات لتفعيله');
+      pill.classList.toggle('active', bestForMeActive && canUse);
+    }
+
+    pill.addEventListener('click', function () {
+      var p = prefsForMatch();
+      if (!p.sectors.length && !p.profile) {
+        toast(T('Set your sectors in Settings first','حدد قطاعاتك في الإعدادات أولاً'));
+        return;
+      }
+      bestForMeActive = !bestForMeActive;
+      applyBestForMeOrder();
+      refreshState();
+    });
+
+    refreshState();
+    window.addEventListener('__userPrefsUpdated', refreshState);
+  }
+
+  function applyBestForMeOrder() {
+    var data = getData();
+    if (!data.length) return;
+    if (!originalDataOrder) {
+      originalDataOrder = data.slice();  // snapshot the original order once
+    }
+    if (bestForMeActive) {
+      var scored = originalDataOrder.map(function (it, i) {
+        var s = computeMatch(it);
+        return { it: it, s: s == null ? -1 : s, i: i };
+      }).sort(function (a, b) {
+        if (b.s !== a.s) return b.s - a.s;
+        return a.i - b.i;          // stable: preserve original for ties
+      });
+      window.opportunitiesData = scored.map(function (x) { return x.it; });
+    } else {
+      window.opportunitiesData = originalDataOrder.slice();
+    }
+    /* Trigger re-render of cards via the existing filter pipeline.
+       The search input has an `input` listener that re-runs applyFilters,
+       which re-reads dataSource() = window.opportunitiesData. */
+    var search = document.getElementById('searchInput');
+    if (search) {
+      search.dispatchEvent(new Event('input', { bubbles: true }));
+    } else {
+      /* fallback: try sort select */
+      var sel = document.getElementById('sortSelect');
+      if (sel) sel.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    toast(bestForMeActive
+      ? T('Sorted by your match score','تم الترتيب حسب التطابق')
+      : T('Restored default order','تم استعادة الترتيب الافتراضي'));
+  }
+
+  /* ════════════════════════════════════════════════════════
+     3) jsPDF EXPORT — true single-page PDF for compare + watchlist
+     ════════════════════════════════════════════════════════ */
+  var jsPdfReady = null;
+  function loadJsPdf() {
+    if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf);
+    if (jsPdfReady) return jsPdfReady;
+    jsPdfReady = new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js';
+      s.onload = function () {
+        if (window.jspdf && window.jspdf.jsPDF) resolve(window.jspdf);
+        else reject(new Error('jsPDF failed to attach'));
+      };
+      s.onerror = function () { reject(new Error('jsPDF CDN load failed')); };
+      document.head.appendChild(s);
+    });
+    return jsPdfReady;
+  }
+
+  /* Shared PDF helpers */
+  function pdfHeader(doc, title, subtitle) {
+    /* Saudi-green band */
+    doc.setFillColor(0, 108, 53);
+    doc.rect(0, 0, doc.internal.pageSize.getWidth(), 22, 'F');
+    doc.setTextColor(255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.text(title, 14, 13);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text(subtitle, 14, 18.5);
+    doc.setTextColor(20);
+  }
+  function pdfFooter(doc) {
+    var w = doc.internal.pageSize.getWidth();
+    var h = doc.internal.pageSize.getHeight();
+    doc.setFontSize(8);
+    doc.setTextColor(140);
+    doc.text('Saudi Opportunity Hub • Generated ' + new Date().toLocaleString(), 14, h - 7);
+    doc.text(String(doc.internal.getCurrentPageInfo().pageNumber), w - 14, h - 7, { align: 'right' });
+    doc.setTextColor(20);
+  }
+  function wrap(doc, text, maxWidth) {
+    return doc.splitTextToSize(String(text == null ? '' : text), maxWidth);
+  }
+
+  /* ── Compare PDF ──────────────────────────── */
+  function exportComparePdf() {
+    var slots = document.querySelectorAll('.compare-slot');
+    var items = Array.from(slots).map(function (s) {
+      var rid = s.querySelector('[data-remove-id]') && s.querySelector('[data-remove-id]').dataset.removeId;
+      return getData().find(function (x) { return (x.id||'') === rid; });
+    }).filter(Boolean);
+    if (!items.length) { toast(T('No items to export','لا توجد عناصر للتصدير')); return; }
+
+    var pdfBtn = document.getElementById('ohEnh3CompareExport');
+    if (pdfBtn) pdfBtn.disabled = true;
+
+    loadJsPdf().then(function (lib) {
+      var doc = new lib.jsPDF({ unit: 'mm', format: 'a4', orientation: items.length >= 3 ? 'landscape' : 'portrait' });
+      pdfHeader(doc, 'Opportunity Comparison', items.length + ' opportunities · ' + new Date().toLocaleDateString());
+
+      var pageW = doc.internal.pageSize.getWidth();
+      var pageH = doc.internal.pageSize.getHeight();
+      var margin = 14;
+      var contentW = pageW - margin * 2;
+      var labelW = 36;
+      var colW = (contentW - labelW) / items.length;
+
+      /* compute best-match index */
+      var scores = items.map(computeMatch);
+      var bestIdx = -1, bestScore = -1;
+      scores.forEach(function (s, i) { if (s !== null && s > bestScore) { bestScore = s; bestIdx = i; } });
+
+      var y = 30;
+      /* Column headers */
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text(' ', margin, y);
+      items.forEach(function (it, i) {
+        var x = margin + labelW + i * colW + 2;
+        if (i === bestIdx) {
+          doc.setFillColor(0, 108, 53);
+          doc.roundedRect(x, y - 4, 22, 4.5, 1, 1, 'F');
+          doc.setTextColor(255);
+          doc.setFontSize(6);
+          doc.text('BEST MATCH', x + 11, y - 1.2, { align: 'center' });
+          doc.setTextColor(20);
+          doc.setFontSize(8);
+        }
+        var lines = wrap(doc, it.title || 'Untitled', colW - 4);
+        doc.text(lines.slice(0, 2), x, y + 3);
+      });
+      y += 12;
+
+      doc.setDrawColor(220);
+      doc.setLineWidth(0.2);
+      doc.line(margin, y - 3, margin + contentW, y - 3);
+
+      var pretty = function (s) { return String(s||'').replace(/_/g,' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); }); };
+      var rows = [
+        ['Type',         function (i) { return i.type ? pretty(i.type) : '—'; }],
+        ['Status',       function (i) { return i.status ? pretty(i.status) : '—'; }],
+        ['Country',      function (i) { return i.country || pretty(i.eligibility_region) || '—'; }],
+        ['Sector',       function (i) { return (i.sectors||[]).slice(0,3).map(pretty).join(', ') || '—'; }],
+        ['Deadline',     function (i) { return i.deadline_date || '—'; }],
+        ['Funding',      function (i) { return i.funding_amount || '—'; }],
+        ['Eligibility',  function (i) {
+          var seen = {}, ee = [].concat(i.profiles||[]).concat(i.eligibility_entities||[]).filter(function(x){
+            var k = String(x).toLowerCase(); if (seen[k]) return false; seen[k]=1; return !!x;
+          }).slice(0,3);
+          return ee.map(pretty).join(', ') || '—';
+        }],
+        ['Sponsor',      function (i) { return i.sponsor_institution || '—'; }],
+        ['Match score',  function (i) { var s = computeMatch(i); return s == null ? '—' : s + '%'; }],
+        ['Link',         function (i) { return (i.application_link || '').startsWith('http') ? i.application_link : '—'; }]
+      ];
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      rows.forEach(function (row, ri) {
+        if (y > pageH - 18) {
+          pdfFooter(doc); doc.addPage(); y = 18;
+          pdfHeader(doc, 'Opportunity Comparison (cont.)', new Date().toLocaleDateString());
+          y = 30;
+        }
+        if (ri % 2 === 1) {
+          doc.setFillColor(248, 250, 252);
+          doc.rect(margin, y - 4, contentW, 8, 'F');
+        }
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(110);
+        doc.text(row[0], margin, y + 1);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(20);
+        var maxLines = 0;
+        items.forEach(function (it, i) {
+          var x = margin + labelW + i * colW + 2;
+          if (i === bestIdx) {
+            doc.setFillColor(0, 108, 53, 0.04);  /* ignored — third arg as alpha not supported; use no fill */
+          }
+          var raw = row[1](it);
+          var lines = wrap(doc, raw, colW - 4);
+          if (lines.length > 4) { lines = lines.slice(0, 4); lines[3] = lines[3].replace(/.{0,3}$/, '…'); }
+          maxLines = Math.max(maxLines, lines.length);
+          doc.text(lines, x, y + 1);
+        });
+        y += Math.max(6, maxLines * 3.6) + 2;
+      });
+
+      pdfFooter(doc);
+      var name = 'comparison-' + new Date().toISOString().slice(0,10) + '.pdf';
+      doc.save(name);
+      toast(T('PDF saved ✓','تم حفظ PDF ✓'));
+    }).catch(function (e) {
+      console.error('[OH3] PDF export failed:', e);
+      toast(T('PDF export failed. Falling back to print.','فشل تصدير PDF. سيتم استخدام الطباعة.'));
+      window.print();
+    }).finally(function () {
+      if (pdfBtn) pdfBtn.disabled = false;
+    });
+  }
+
+  function injectComparePdfButton() {
+    var modal = document.getElementById('compareModal');
+    if (!modal) { setTimeout(injectComparePdfButton, 800); return; }
+    new MutationObserver(function () {
+      if (modal.classList.contains('compare-modal--hidden')) return;
+      var actions = modal.querySelector('.oh-enh-compare-actions');
+      if (!actions) return;
+      if (actions.querySelector('#ohEnh3CompareExport')) return;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'ohEnh3CompareExport';
+      btn.className = 'oh-enh3-pdf-btn';
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>' +
+        T('Export PDF','تصدير PDF');
+      btn.addEventListener('click', exportComparePdf);
+      actions.insertBefore(btn, actions.firstChild);
+    }).observe(modal, { attributes: true, attributeFilter: ['class'], childList: true, subtree: true });
+  }
+
+  /* ── Watchlist PDF ────────────────────────── */
+  function exportWatchlistPdf() {
+    var wl = (window.WS && window.WS.getWatchlist) ? window.WS.getWatchlist() : [];
+    if (!wl.length) { toast(T('Watchlist is empty','قائمة المتابعة فارغة')); return; }
+    var data = getData();
+    var resolved = wl.map(function (w) {
+      var item = data.find(function (d) { return (d.id||'') === (w.opp_id || w.id); }) || {};
+      return Object.assign({}, item, { _note: w.notes || '' });
+    });
+
+    var pdfBtn = document.getElementById('ohEnh3WatchlistPdf');
+    if (pdfBtn) pdfBtn.disabled = true;
+
+    loadJsPdf().then(function (lib) {
+      var doc = new lib.jsPDF({ unit: 'mm', format: 'a4' });
+      pdfHeader(doc, 'My Watchlist', resolved.length + ' opportunities · ' + new Date().toLocaleDateString());
+
+      var pageW = doc.internal.pageSize.getWidth();
+      var pageH = doc.internal.pageSize.getHeight();
+      var margin = 14;
+      var contentW = pageW - margin * 2;
+
+      var y = 28;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+
+      resolved.forEach(function (it, idx) {
+        /* page break if needed */
+        if (y > pageH - 40) { pdfFooter(doc); doc.addPage(); y = 18; pdfHeader(doc, 'My Watchlist (cont.)', new Date().toLocaleDateString()); y = 28; }
+
+        /* card box */
+        var boxStart = y;
+        doc.setDrawColor(220);
+        doc.setLineWidth(0.2);
+        var titleLines = wrap(doc, it.title || 'Untitled', contentW - 28);
+        var noteLines = it._note ? wrap(doc, '📝 ' + it._note, contentW - 6) : [];
+        var bodyHeight = titleLines.length * 4.4 + 4 + 4.5 + 4 + noteLines.length * 4 + 6;
+
+        doc.setFillColor(252);
+        doc.roundedRect(margin, y, contentW, bodyHeight, 1.5, 1.5, 'FD');
+
+        /* match badge */
+        var score = computeMatch(it);
+        if (score !== null) {
+          var col = score >= 80 ? [21, 128, 61] : score >= 60 ? [8, 145, 178] : score >= 40 ? [217, 119, 6] : [100, 116, 139];
+          doc.setFillColor(col[0], col[1], col[2]);
+          doc.roundedRect(margin + contentW - 22, y + 2.5, 20, 5, 1, 1, 'F');
+          doc.setTextColor(255);
+          doc.setFontSize(7);
+          doc.text(score + '% MATCH', margin + contentW - 12, y + 6, { align: 'center' });
+          doc.setTextColor(20);
+        }
+
+        /* title */
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10.5);
+        doc.text(titleLines, margin + 4, y + 5.5);
+        y += titleLines.length * 4.4 + 3;
+
+        /* meta line */
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(110);
+        var pretty = function (s) { return String(s||'').replace(/_/g,' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); }); };
+        var meta = [
+          it.type && pretty(it.type),
+          it.status && pretty(it.status),
+          it.country || pretty(it.eligibility_region) || '',
+          it.deadline_date && ('Deadline: ' + it.deadline_date),
+          it.funding_amount && (it.funding_amount.length > 36 ? it.funding_amount.slice(0, 36) + '…' : it.funding_amount)
+        ].filter(Boolean).join('  •  ');
+        var metaLines = wrap(doc, meta, contentW - 8);
+        doc.text(metaLines.slice(0, 2), margin + 4, y + 3);
+        y += metaLines.length * 4 + 2;
+
+        /* sponsor + link */
+        doc.setTextColor(80);
+        var sponsor = it.sponsor_institution ? 'Sponsor: ' + it.sponsor_institution : '';
+        if (sponsor) {
+          var sl = wrap(doc, sponsor, contentW - 8);
+          doc.text(sl.slice(0, 1), margin + 4, y + 3);
+          y += 4;
+        }
+        /* note */
+        if (noteLines.length) {
+          doc.setTextColor(0, 108, 53);
+          doc.text(noteLines.slice(0, 3), margin + 4, y + 4);
+          y += noteLines.length * 4 + 2;
+          doc.setTextColor(80);
+        }
+        /* link (clickable) */
+        if (it.application_link && it.application_link.startsWith('http')) {
+          doc.setTextColor(0, 108, 53);
+          var lk = it.application_link.length > 75 ? it.application_link.slice(0, 75) + '…' : it.application_link;
+          doc.textWithLink(lk, margin + 4, y + 3, { url: it.application_link });
+          y += 4;
+        }
+        doc.setTextColor(20);
+        y = boxStart + bodyHeight + 4;
+      });
+
+      pdfFooter(doc);
+      doc.save('watchlist-' + new Date().toISOString().slice(0,10) + '.pdf');
+      toast(T('Watchlist exported as PDF ✓','تم تصدير القائمة PDF ✓'));
+    }).catch(function (e) {
+      console.error('[OH3] Watchlist PDF failed:', e);
+      toast(T('PDF export failed','فشل تصدير PDF'));
+    }).finally(function () {
+      if (pdfBtn) pdfBtn.disabled = false;
+    });
+  }
+
+  function injectWatchlistPdfButton() {
+    var panel = document.getElementById('wsPanel');
+    if (!panel) { setTimeout(injectWatchlistPdfButton, 800); return; }
+    new MutationObserver(function () {
+      if (!panel.classList.contains('open')) return;
+      var activeTab = panel.querySelector('.ws-panel-tab.active');
+      if (!activeTab || activeTab.dataset.wstab !== 'watchlist') return;
+      if (panel.querySelector('#ohEnh3WatchlistPdf')) return;
+      /* Insert next to the CSV button if it exists */
+      var csv = panel.querySelector('.oh-enh-wl-csv');
+      if (!csv) return;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'ohEnh3WatchlistPdf';
+      btn.className = 'oh-enh-wl-csv';   // re-use the CSV button styling for visual consistency
+      btn.style.marginLeft = '4px';
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' +
+        '<span>' + T('Export PDF','تصدير PDF') + '</span>';
+      btn.addEventListener('click', exportWatchlistPdf);
+      csv.parentNode.insertBefore(btn, csv.nextSibling);
+    }).observe(panel, { attributes: true, attributeFilter: ['class'], childList: true, subtree: true });
+  }
+
+  /* ════════════════════════════════════════════════════════
+     4) WATCHLIST DRAG-REORDER (between items)
+     Persists per-user order in user_prefs.watchlistOrder = [opp_id,...]
+     ════════════════════════════════════════════════════════ */
+  function getOrder() {
+    var p = getPrefs();
+    return Array.isArray(p.watchlistOrder) ? p.watchlistOrder.slice() : [];
+  }
+  function setOrder(order) {
+    var p = getPrefs();
+    p.watchlistOrder = order;
+    window.__userPrefs = p;
+    persistPrefs();
+  }
+
+  function reorderWatchlistDom() {
+    var panel = document.getElementById('wsPanel');
+    if (!panel || !panel.classList.contains('open')) return;
+    var body = document.getElementById('wsPanelBody');
+    if (!body) return;
+    var items = Array.from(body.querySelectorAll('.ws-item'));
+    if (items.length < 2) return;
+    var order = getOrder();
+    if (!order.length) return;
+
+    /* Build map id->element, then re-append in saved order; new items keep their relative order at the end */
+    var byId = {};
+    items.forEach(function (it) { byId[it.dataset.id] = it; });
+    var placed = {};
+    order.forEach(function (id) {
+      if (byId[id]) {
+        body.appendChild(byId[id]);
+        placed[id] = true;
+      }
+    });
+    items.forEach(function (it) {
+      if (!placed[it.dataset.id]) body.appendChild(it);
+    });
+  }
+
+  function wireItemReorder(item) {
+    if (item.dataset.ohEnh3Reorder === '1') return;
+    item.dataset.ohEnh3Reorder = '1';
+    item.addEventListener('dragover', function (e) {
+      if (!e.dataTransfer.types.includes('text/plain')) return;
+      e.preventDefault();
+      var rect = item.getBoundingClientRect();
+      var above = (e.clientY - rect.top) < rect.height / 2;
+      item.classList.toggle('oh-enh3-drag-over-top', above);
+      item.classList.toggle('oh-enh3-drag-over-bottom', !above);
+    });
+    item.addEventListener('dragleave', function () {
+      item.classList.remove('oh-enh3-drag-over-top', 'oh-enh3-drag-over-bottom');
+    });
+    item.addEventListener('drop', function (e) {
+      var oppId = e.dataTransfer.getData('text/plain');
+      if (!oppId || oppId === item.dataset.id) {
+        item.classList.remove('oh-enh3-drag-over-top', 'oh-enh3-drag-over-bottom');
+        return;
+      }
+      e.preventDefault();
+      e.stopPropagation();        // don't bubble up to folder chip drop targets
+      var rect = item.getBoundingClientRect();
+      var above = (e.clientY - rect.top) < rect.height / 2;
+      item.classList.remove('oh-enh3-drag-over-top', 'oh-enh3-drag-over-bottom');
+
+      /* Persist new order */
+      var body = document.getElementById('wsPanelBody');
+      var all = Array.from(body.querySelectorAll('.ws-item'));
+      var ids = all.map(function (it) { return it.dataset.id; }).filter(Boolean);
+      var fromIdx = ids.indexOf(oppId);
+      var toIdx = ids.indexOf(item.dataset.id);
+      if (fromIdx < 0 || toIdx < 0) return;
+      ids.splice(fromIdx, 1);
+      ids.splice(above ? toIdx : toIdx + 1, 0, oppId);
+      setOrder(ids);
+      reorderWatchlistDom();
+      toast(T('Reordered','تم إعادة الترتيب'));
+    });
+  }
+
+  function observeWatchlistForReorder() {
+    var panel = document.getElementById('wsPanel');
+    if (!panel) { setTimeout(observeWatchlistForReorder, 800); return; }
+    var pending = false;
+    function pass() {
+      pending = false;
+      if (!panel.classList.contains('open')) return;
+      var body = document.getElementById('wsPanelBody');
+      if (!body) return;
+      body.querySelectorAll('.ws-item').forEach(wireItemReorder);
+      reorderWatchlistDom();
+    }
+    new MutationObserver(function () {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(pass);
+    }).observe(panel, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+  }
+
+  /* ── Boot ─────────────────────────────────────────────── */
+  function init() {
+    injectHomeChecklist();
+    watchCompareForChecklist();
+    injectBestForMePill();
+    injectComparePdfButton();
+    injectWatchlistPdfButton();
+    observeWatchlistForReorder();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+
 </body>
 </html>
