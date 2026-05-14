@@ -1,0 +1,5 @@
+# Saudi Opportunity Hub — private demo build
+# Not for public distribution. Discourage search-engine indexing.
+
+User-agent: *
+Disallow: /

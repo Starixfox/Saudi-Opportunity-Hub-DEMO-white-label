@@ -27,18 +27,39 @@
 })();
 </script>
 
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Saudi Opportunity Hub","url":"https://starixfox.github.io","creator":{"@type":"SoftwareApplication","name":"Perplexity Computer","url":"https://www.perplexity.ai/computer"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Saudi Opportunity Hub","url":"https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/","description":"Grants, tenders, accelerators, investment programs, and fellowships across 15 sectors in Saudi Arabia, the GCC, and internationally."}</script>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Opportunity Hub (Pilot Demo)</title>
+<title>Saudi Opportunity Hub — Grants, Tenders & Investment Programs</title>
 <meta name="description" content="Explore grants, tenders, accelerators, and investment programs across Saudi Arabia, the GCC, and global programs — spanning 15 key sectors including Energy, ICT, Healthcare, Agriculture, and more.">
 <meta name="theme-color" content="#006C35">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://images.unsplash.com data:; connect-src https://dshrbbnjahjcwxzvzygh.supabase.co wss://dshrbbnjahjcwxzvzygh.supabase.co;">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="format-detection" content="telephone=no">
+<link rel="canonical" href="https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/">
+
+<!-- Favicon (inline SVG: Saudi-green palm-style 'O' on cream) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23006C35'/><path d='M32 14a18 18 0 1 0 18 18 18 18 0 0 0-18-18zm0 6a12 12 0 1 1-12 12 12 12 0 0 1 12-12z' fill='%23fdf8f2'/><circle cx='32' cy='32' r='4' fill='%23C9A66B'/></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23006C35'/><path d='M32 14a18 18 0 1 0 18 18 18 18 0 0 0-18-18zm0 6a12 12 0 1 1-12 12 12 12 0 0 1 12-12z' fill='%23fdf8f2'/><circle cx='32' cy='32' r='4' fill='%23C9A66B'/></svg>">
+
+<!-- Open Graph / social cards -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Saudi Opportunity Hub">
+<meta property="og:description" content="Grants, tenders, accelerators and investment programs across Saudi Arabia, the GCC and internationally — across 15 key sectors.">
+<meta property="og:site_name" content="Saudi Opportunity Hub">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ar_SA">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Saudi Opportunity Hub">
+<meta name="twitter:description" content="Grants, tenders, accelerators and investment programs across Saudi Arabia, the GCC and internationally — across 15 key sectors.">
+
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://images.unsplash.com data:; connect-src https://dshrbbnjahjcwxzvzygh.supabase.co wss://dshrbbnjahjcwxzvzygh.supabase.co https://translate.googleapis.com https://formspree.io;">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script defer src="https://unpkg.com/lucide@0.263.1" onload="if(window.lucide)window.lucide.createIcons()"></script>
+<script defer src="https://unpkg.com/lucide@0.263.1" onload="window.lucide&&window.lucide.createIcons&&window.lucide.createIcons()"></script>
 <style>
 /* =============================================
    Saudi Opportunity Hub — styles.css
@@ -2666,6 +2687,24 @@ body[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
   border-width: 0;
 }
 
+/* ── SKIP-TO-CONTENT (a11y) ──────────────────── */
+/* Visible only when focused via keyboard. Jumps past the sidebar/topbar. */
+.oh-skip-link {
+  position: fixed;
+  top: -100px;
+  left: 12px;
+  z-index: 100000;
+  padding: 10px 16px;
+  background: var(--green, #006C35);
+  color: #fff;
+  font: 600 14px/1 'Inter', system-ui, sans-serif;
+  text-decoration: none;
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.25);
+  transition: top .15s ease;
+}
+.oh-skip-link:focus-visible { top: 12px; outline: 2px solid #C9A66B; outline-offset: 2px; }
+
 @keyframes skeleton-shimmer {
   0%   { background-position: -400px 0; }
   100% { background-position:  400px 0; }
@@ -4763,6 +4802,17 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 </head>
 <body>
 
+<!-- Skip-to-content link for keyboard / screen-reader users -->
+<a class="oh-skip-link" href="#view-home">Skip to main content</a>
+
+<!-- Fallback if JavaScript is disabled -->
+<noscript>
+  <div style="padding:24px 18px;margin:24px auto;max-width:640px;background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;color:#991b1b;font:14px/1.5 system-ui,sans-serif">
+    <strong style="display:block;margin-bottom:6px;font-size:15px">JavaScript is required</strong>
+    The Saudi Opportunity Hub needs JavaScript to display data from Supabase, render charts, and translate between English and Arabic. Please enable JavaScript and reload the page.
+  </div>
+</noscript>
+
 <!-- Page entrance: fade in if arriving from login -->
 <script>
 (function(){
@@ -5352,6 +5402,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         <span data-ar="حفظ البحث">Save Search</span>
       </button>
+      <button class="save-search-btn" id="exportCsvBtn" type="button" title="Download the filtered list as CSV">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span data-ar="تصدير CSV">Export CSV</span>
+      </button>
       <span class="freshness-badge" id="freshnessBadge" title="Dataset freshness">
         <span class="freshness-dot"></span>
         <span id="freshnessText">✓ Loading freshness&hellip;</span>
@@ -5924,8 +5978,20 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     return (typeof window.t === 'function') ? window.t(str) : (str || '');
   }
 
+  /* HTML-escape helper — used when inlining DB-sourced strings into innerHTML. */
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
   /* ---------------- Lucide icons (debounced) ---- */
+  /* Lucide is loaded with `defer`, so window.lucide may not yet exist when this
+     IIFE first runs during HTML parsing. Retry on a short interval until the
+     library is ready (with an upper bound), so icons get painted as soon as
+     the script finishes loading. */
   var _paintTimer = null;
+  var _paintWaitAttempts = 0;
   function paintIcons() {
     if (_paintTimer) clearInterval(_paintTimer);
     if (window.lucide && typeof window.lucide.createIcons === 'function') {
@@ -5936,7 +6002,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     _paintTimer = setInterval(function() {
       if (window.lucide && typeof window.lucide.createIcons === 'function') {
         try { window.lucide.createIcons(); } catch (e) {}
-        clearInterval(_paintTimer); _paintTimer = null; return;
+        _paintWaitAttempts = 0;
+      } else if (_paintWaitAttempts < 60) {
+        _paintWaitAttempts++;
+        paintIcons();
       }
       if (++tries > 60) { clearInterval(_paintTimer); _paintTimer = null; }
     }, 50);
@@ -6530,7 +6599,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         var sectorLabel = (ar && window.SECTOR_NAMES_AR && window.SECTOR_NAMES_AR[rawKey.toLowerCase()])
                        || (window.SECTOR_NAMES_EN && window.SECTOR_NAMES_EN[rawKey.toLowerCase()])
                        || rawKey.replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
-        btn.innerHTML = '<span>' + sectorLabel + '</span><span class="count">' + e[1] + '</span>';
+        btn.innerHTML = '<span>' + esc(sectorLabel) + '</span><span class="count">' + esc(e[1]) + '</span>';
         btn.addEventListener('click', function () {
           /* Toggle active visually */
           grid.querySelectorAll('.sector-chip').forEach(function (c) { c.classList.remove('active'); });
@@ -6807,9 +6876,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 })();
 </script>
 
-</body>
-</html>
-</body>
 <script>
 // Load opportunities from the Supabase `opportunities` table.
 // ══════════════════════════════════════════════════════════════
@@ -8071,6 +8137,43 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     renderCards();
     renderActiveChips();
   }
+
+  /* ── CSV export of currently filtered opportunities ──────────── */
+  /* Quotes every value, escapes embedded quotes by doubling them
+     (RFC 4180), prepends BOM so Excel opens UTF-8 correctly. */
+  function _csvCell(value) {
+    if (value === null || value === undefined) return '';
+    if (Array.isArray(value)) value = value.join('; ');
+    var s = String(value).replace(/"/g, '""');
+    return '"' + s + '"';
+  }
+  function exportFilteredAsCsv() {
+    var rows = (sortedData && sortedData.length) ? sortedData : filteredData;
+    if (!rows || !rows.length) {
+      if (typeof showToast === 'function') showToast('Nothing to export — adjust your filters.');
+      return;
+    }
+    var cols = ['id', 'title', 'sponsor_institution', 'type', 'status',
+                'eligibility_region', 'sectors', 'profiles', 'deadline',
+                'last_verified', 'updated_at', 'url'];
+    var header = cols.join(',');
+    var body = rows.map(function(r) {
+      return cols.map(function(c) { return _csvCell(r[c]); }).join(',');
+    }).join('\r\n');
+    var csv = '﻿' + header + '\r\n' + body;
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var stamp = new Date().toISOString().slice(0, 10);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'opportunities-' + stamp + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+    if (typeof showToast === 'function') showToast('Exported ' + rows.length + ' opportunities.');
+  }
+  window.__exportOpportunitiesCsv = exportFilteredAsCsv;
 
   function wireFilters() {
     ['searchInput','sectorFilter','countryFilter','typeFilter','statusFilter'].forEach(id => {
@@ -11947,6 +12050,14 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var ssBtn = document.getElementById('saveSearchBtn');
     ssBtn && ssBtn.addEventListener('click', saveCurrentSearch);
 
+    // ── Wire export-CSV button (handler lives in the Opportunities IIFE)
+    var csvBtn = document.getElementById('exportCsvBtn');
+    csvBtn && csvBtn.addEventListener('click', function() {
+      if (typeof window.__exportOpportunitiesCsv === 'function') {
+        window.__exportOpportunitiesCsv();
+      }
+    });
+
     // ── Wire panel close
     document.getElementById('wsPanelClose')?.addEventListener('click', closePanel);
     document.getElementById('wsPanelOverlay')?.addEventListener('click', closePanel);
@@ -12885,3 +12996,130 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   };
 })();
 </script>
+
+<!-- ══ BACK-TO-TOP BUTTON ═══════════════════════════════════════ -->
+<button type="button" id="ohBackToTop" class="oh-back-to-top" aria-label="Scroll to top" hidden>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+<style>
+.oh-back-to-top {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: var(--green, #006C35);
+  color: #fff;
+  border: none;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18), 0 2px 6px rgba(0,0,0,.10);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .18s ease, transform .18s ease, background .15s;
+  z-index: 9998;
+}
+.oh-back-to-top.visible { display: flex; opacity: 1; transform: translateY(0); }
+.oh-back-to-top:hover { background: var(--green-hover, #005229); }
+.oh-back-to-top:focus-visible { outline: 2px solid #C9A66B; outline-offset: 2px; }
+@media (max-width: 767px) {
+  .oh-back-to-top { right: 14px; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+}
+@media print { .oh-back-to-top { display: none !important; } }
+</style>
+<script>
+(function () {
+  var btn = document.getElementById('ohBackToTop');
+  if (!btn) return;
+  var scroller = document.querySelector('.app-content') || window;
+  var THRESHOLD = 480;
+  function onScroll() {
+    var y = scroller === window ? window.scrollY : scroller.scrollTop;
+    if (y > THRESHOLD) {
+      btn.hidden = false;
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+      // Keep `hidden` removed once visible at least once so the CSS transition can run.
+    }
+  }
+  scroller.addEventListener('scroll', onScroll, { passive: true });
+  btn.addEventListener('click', function () {
+    if (scroller === window) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      scroller.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
+})();
+</script>
+
+<!-- ══ GLOBAL ERROR REPORTER ═══════════════════════════════════ -->
+<!-- Captures uncaught errors and unhandled promise rejections; logs to console
+     with a tagged prefix so production support can find them quickly. Replace
+     the console.error with a Sentry/Rollbar call when one is configured. -->
+<script>
+(function () {
+  function report(kind, error, source) {
+    try {
+      var msg = (error && (error.message || error.reason || error)) || 'unknown';
+      var stack = (error && error.stack) || '';
+      console.error('[OH:' + kind + ']', msg, source ? '(' + source + ')' : '', stack);
+    } catch (_) {}
+  }
+  window.addEventListener('error', function (e) { report('error', e.error || e, e.filename); });
+  window.addEventListener('unhandledrejection', function (e) { report('promise', e.reason); });
+})();
+</script>
+
+<!-- ══ PRINT STYLESHEET ════════════════════════════════════════ -->
+<style media="print">
+  /* Hide all interactive chrome when printing. */
+  .app-sidebar,
+  .app-sidebar-overlay,
+  .app-topbar,
+  .app-bottom-tabs,
+  .ws-panel,
+  .ws-panel-overlay,
+  .settings-modal-overlay,
+  .home-quick-actions,
+  .results-bar,
+  .filter-bar,
+  .filter-bar-row,
+  #activeFilterChips,
+  #pagination,
+  .ob-tour,
+  .ob-tour-overlay,
+  .ob-welcome-overlay,
+  .oh-back-to-top,
+  .notif-dropdown,
+  .save-search-btn,
+  .saved-workspace-btn,
+  .view-toggle,
+  .sort-control { display: none !important; }
+
+  body, html { background: #fff !important; color: #111 !important; }
+  .app-shell, .app-content { display: block !important; padding: 0 !important; }
+  .app-view { page-break-after: always; }
+  a { color: #111 !important; text-decoration: underline; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #555; }
+
+  /* Show opportunity URLs and details in a printable, readable form. */
+  .opportunity-card,
+  [data-opp-id] {
+    page-break-inside: avoid;
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    margin: 0 0 12px !important;
+    padding: 12px !important;
+  }
+</style>
+
+</body>
+</html>
