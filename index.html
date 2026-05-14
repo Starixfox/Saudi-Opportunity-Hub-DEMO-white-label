@@ -7100,6 +7100,14 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     '2025 edition concluded; next cycle expected 2026': 'نسخة 2025 انتهت — الدورة القادمة 2026',
     'Finalization expected 2026': 'من المتوقع الإنهاء في 2026',
     'Batch 11 expected H1 2026; check 500 Global website': 'الدفعة 11 متوقعة النصف الأول 2026',
+    'Browse Opportunities': 'تصفح الفرص',
+    'Dashboard & Analytics': 'لوحة التحكم والتحليلات',
+    'My Workspace': 'مساحة العمل',
+    'Settings & Preferences': 'الإعدادات والتفضيلات',
+    'Search & Filter': 'البحث والتصفية',
+    'Save Your Search': 'احفظ بحثك',
+    'Opportunity Cards': 'بطاقات الفرص',
+
     'Suggest a new opportunity': 'اقتراح فرصة جديدة',
     'Update / correct an existing record': 'تحديث / تصحيح سجل قائم',
     'Other feedback': 'ملاحظة أخرى',
@@ -11585,67 +11593,70 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var ar = isAr();
     return [
       {
-        /* 1 — Workspace bar (just below navbar) */
-        targetId: 'wsBar',
-        title:    ar ? 'شريط مساحة العمل' : 'Your Workspace Bar',
-        body:     ar ? 'هذا الشريط يُظهر لك إحصائياتك الشخصية — عدد الفرص المحفوظة، عمليات البحث، والجديد منذ زيارتك الأخيرة. يظهر فقط بعد تسجيل الدخول.' : "This bar shows your personal stats — saved opportunities, searches, and what's new since your last visit. It only appears after you sign in.",
-        placement: 'bottom'
-      },
-      {
-        /* 2 — Watchlist stat (inside wsBar) */
-        targetId: 'wsWatchlistStat',
-        title:    ar ? 'قائمة المتابعة' : 'Watchlist',
-        body:     ar ? 'انقر على أيقونة الإشارة المرجعية على أي بطاقة فرصة لحفظها هنا. راجعها لاحقاً وتابع المواعيد النهائية دون أن تضيع.' : 'Click the bookmark icon on any opportunity card to save it here. Review it later and track deadlines without losing your place.',
-        placement: 'bottom'
-      },
-      {
-        /* 3 — My Workspace panel button (inside wsBar) */
-        targetId: 'wsOpenPanelBtn',
-        title:    ar ? 'مساحة العمل الكاملة' : 'My Workspace Panel',
-        body:     ar ? 'انقر هنا في أي وقت لفتح قائمة المتابعة وعمليات البحث المحفوظة وسجل النشاط الأخير — كل شيء في لوحة واحدة.' : 'Click here any time to open your Watchlist, Saved Searches, and recent activity — all in one side panel.',
-        placement: 'bottom'
-      },
-      {
-        /* 4 — Settings button (inside wsBar) */
-        targetId: 'wsSettingsBtn',
-        title:    ar ? 'تخصيص مساحة العمل' : 'Personalise Your Workspace',
-        body:     ar ? 'حدد دورك والقطاعات التي تهمك لتظهر الفرص الأنسب أولاً. يمكنك أيضاً ضبط تفضيلات التنبيهات.' : 'Set your role and sectors so the most relevant opportunities surface first. You can also configure alert preferences here.',
-        placement: 'bottom'
-      },
-      {
-        /* 5 — Save search button (results bar, above cards) */
-        targetId: 'saveSearchBtn',
-        title:    ar ? 'حفظ البحث' : 'Save Your Search',
-        body:     ar ? 'اضبط الفلاتر ثم انقر هذا الزر لحفظ مجموعة الفلاتر. في المرة القادمة أعد تطبيقها بنقرة واحدة.' : 'Set your filters then click this to save the combination. Next visit you can re-apply the exact same filters in one click.',
-        placement: 'bottom'
-      },
-      {
-        /* 6 — Opportunity cards database */
-        targetId: 'oppsTableWrapper',
-        title:    ar ? 'قاعدة بيانات الفرص' : 'The Opportunity Database',
-        body:     ar ? 'أكثر من 1,000 فرصة عبر 15 قطاعاً. استخدم الفلاتر للتضييق وانقر على أي بطاقة للتفاصيل الكاملة. استخدم أيقونة الإشارة لحفظ الفرصة في قائمتك.' : 'Over 1,000 opportunities across 15 sectors. Use filters to narrow down and click any card for full details. Use the bookmark icon to save an opportunity to your Watchlist.',
-        placement: 'top'
-      },
-      {
-        /* 7 — Compare button on a card */
-        targetId: '__firstCompareBtn',
-        title:    ar ? 'أضف إلى المقارنة' : 'Add to Comparison',
-        body:     ar ? 'انقر على مربع الاختيار في الزاوية العلوية من أي بطاقة لإضافتها للمقارنة. يمكنك تحديد حتى 3 فرص.' : 'Click the checkbox in the top corner of any opportunity card to select it for comparison. Pick up to 3.',
-        placement: 'top',
-        spotlightPad: 14,
-        showArrow: true,
+        /* Step 1 — Sidebar nav: highlight the Opportunities nav button */
         resolveTarget: function() {
-          /* Target the checkbox in the top-right corner of the first main opportunity card */
-          return document.querySelector('.opp-select-btn');
+          return document.querySelector('.app-nav-item[data-view="opportunities"]')
+              || document.querySelector('.app-bottom-tab[data-view="opportunities"]');
+        },
+        title:    ar ? 'تصفح الفرص' : 'Browse Opportunities',
+        body:     ar ? 'من هنا تصل إلى قاعدة بيانات الفرص الكاملة — أكثر من 1,000 فرصة عبر 15 قطاعاً. انقر في أي وقت للانتقال.' : 'This takes you to the full opportunity database — over 1,000 programmes across 15 sectors. Click any time to jump there.',
+        placement: 'right',
+        spotlightPad: 8
+      },
+      {
+        /* Step 2 — Analytics nav */
+        resolveTarget: function() {
+          return document.querySelector('.app-nav-item[data-view="dashboard"]')
+              || document.querySelector('.app-bottom-tab[data-view="dashboard"]');
+        },
+        title:    ar ? 'لوحة التحكم والتحليلات' : 'Dashboard & Analytics',
+        body:     ar ? 'اطلع على نظرة حية عن توزيع الفرص بالقطاع والنوع والمنطقة من خلال المخططات البيانية.' : 'See a live overview of opportunities by sector, type, and region — interactive charts updated from the live dataset.',
+        placement: 'right',
+        spotlightPad: 8
+      },
+      {
+        /* Step 3 — My Workspace panel button in sidebar */
+        targetId: 'sidebarWorkspace',
+        title:    ar ? 'مساحة العمل' : 'My Workspace',
+        body:     ar ? 'افتح لوحة المتابعة في أي وقت. ستجد هنا قائمة المتابعة وعمليات البحث المحفوظة وسجل نشاطك الأخير.' : 'Open your personal panel any time. Watchlist, Saved Searches, and recent activity are all here in one place.',
+        placement: 'right',
+        spotlightPad: 8
+      },
+      {
+        /* Step 4 — Settings / Preferences button in sidebar */
+        targetId: 'appSidebarSettings',
+        title:    ar ? 'الإعدادات والتفضيلات' : 'Settings & Preferences',
+        body:     ar ? 'حدد دورك والقطاعات التي تهمك لتُعرض الفرص الأنسب أولاً. يمكنك أيضاً تغيير لغة الواجهة من هنا.' : 'Set your role and preferred sectors so the most relevant opportunities surface first. You can also switch the interface language here.',
+        placement: 'right',
+        spotlightPad: 8
+      },
+      {
+        /* Step 5 — Search input on Opportunities page (navigate there first) */
+        targetId: 'searchInput',
+        title:    ar ? 'ابحث عن فرصتك' : 'Search & Filter',
+        body:     ar ? 'اكتب اسم الجهة أو القطاع أو الكلمة المفتاحية للبحث. استخدم الفلاتر الأسفل لتضييق النتائج بالقطاع أو المنطقة أو الحالة.' : 'Type a sponsor name, sector, or keyword to search. Use the filters below to narrow by sector, region, programme type, or status.',
+        placement: 'bottom',
+        spotlightPad: 8,
+        beforeShow: function() {
+          /* Navigate to opportunities view so the search input is visible */
+          if (typeof setRoute === 'function') setRoute('opportunities');
         }
       },
       {
-        /* 8 — Compare tray at bottom */
-        targetId: 'compareTray',
-        title:    ar ? 'شريط المقارنة' : 'The Comparison Tray',
-        body:     ar ? 'بعد إضافة فرصتين أو أكثر يظهر هذا الشريط أسفل الصفحة. انقر «مقارنة» لعرضها جنباً إلى جنب ومقارنة التفاصيل والمواعيد والتمويل.' : 'Once you add 2 or more opportunities this tray appears at the bottom. Click Compare to view them side-by-side and compare details, deadlines, and funding.',
+        /* Step 6 — Save search button */
+        targetId: 'saveSearchBtn',
+        title:    ar ? 'احفظ بحثك' : 'Save Your Search',
+        body:     ar ? 'بعد ضبط الفلاتر، انقر هذا الزر لحفظها. في زيارتك القادمة أعد تطبيق نفس الفلاتر بنقرة واحدة من مساحة العمل.' : 'Once you have set up your filters, click this to save them. On your next visit re-apply the exact same combination in one click from My Workspace.',
+        placement: 'bottom',
+        spotlightPad: 8
+      },
+      {
+        /* Step 7 — The opportunity card list */
+        targetId: 'oppsTableWrapper',
+        title:    ar ? 'قاعدة بيانات الفرص' : 'Opportunity Cards',
+        body:     ar ? 'انقر على أي بطاقة لعرض التفاصيل الكاملة. استخدم أيقونة الإشارة المرجعية لحفظ الفرصة في قائمة المتابعة، أو مربع الاختيار لإضافتها إلى المقارنة.' : 'Click any card to see full details. Use the bookmark icon to save to your Watchlist, or the checkbox to add it to a side-by-side comparison.',
         placement: 'top',
-        showTray: true
+        spotlightPad: 10
       }
     ];
   }
@@ -11658,6 +11669,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var steps   = tourSteps();
     var current = steps[step];
     if (!current) return;
+
+    /* Run beforeShow hook (e.g. navigate to a view) before measuring */
+    if (typeof current.beforeShow === 'function') {
+      current.beforeShow();
+    }
 
     var target = current.resolveTarget
       ? current.resolveTarget()
