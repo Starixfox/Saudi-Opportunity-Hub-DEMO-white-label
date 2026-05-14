@@ -6600,48 +6600,113 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 </body>
 <script>
 // Load opportunities from the Supabase `opportunities` table.
-// Reuses the existing window._supabase client initialized at the top of the
-// page (which already handles auth + the anon key).
+// ══════════════════════════════════════════════════════════════
+// Supabase opportunity loader
+// — Paginated fetch (1000 rows/page)
+// — Auto-retry up to 3 times with exponential back-off
+// — Shows skeleton loading state in cards area
+// — Dispatches 'oh:data-ready' event on success so other modules
+//   (onboarding, boot, analytics) can react without polling
+// ══════════════════════════════════════════════════════════════
 (async function loadOpportunitiesFromSupabase() {
-  // Wait for the Supabase client to be ready (it's set up synchronously near
-  // the top of <head>, but be defensive in case load order changes).
+  // ── Show loading skeleton immediately ──────────────────────
+  function showSkeleton() {
+    const body = document.getElementById('oppsTableBody');
+    const count = document.getElementById('resultsCount');
+    if (count) count.innerHTML = '<span style="color:var(--text-muted)">Loading opportunities…</span>';
+    if (body) {
+      body.innerHTML = Array.from({ length: 6 }).map(() => `
+        <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;
+                    padding:20px;margin-bottom:12px;animation:oh-shimmer 1.4s ease-in-out infinite alternate;">
+          <div style="height:14px;width:55%;background:var(--surface-3);border-radius:6px;margin-bottom:10px;"></div>
+          <div style="height:11px;width:80%;background:var(--surface-3);border-radius:6px;margin-bottom:8px;"></div>
+          <div style="height:11px;width:40%;background:var(--surface-3);border-radius:6px;"></div>
+        </div>`).join('');
+    }
+  }
+
+  // ── Shimmer keyframes (injected once) ─────────────────────
+  if (!document.getElementById('oh-shimmer-style')) {
+    const s = document.createElement('style');
+    s.id = 'oh-shimmer-style';
+    s.textContent = '@keyframes oh-shimmer { from { opacity:0.6; } to { opacity:1; } }';
+    document.head.appendChild(s);
+  }
+
+  // ── Wait for Supabase client ───────────────────────────────
   for (let i = 0; i < 50 && !window._supabase; i++) {
     await new Promise(r => setTimeout(r, 100));
   }
   if (!window._supabase) {
-    console.error('Supabase client not initialized; cannot load opportunities');
+    console.error('[OH] Supabase client not initialized');
+    const body = document.getElementById('oppsTableBody');
+    if (body) body.innerHTML = '<p style="color:var(--text-muted);padding:2rem;text-align:center">Could not reach database. Please refresh.</p>';
     return;
   }
 
-  try {
-    const PAGE = 1000;
+  showSkeleton();
+
+  // ── Fetch with retry ──────────────────────────────────────
+  const MAX_RETRIES = 3;
+  const PAGE = 1000;
+  const COLS = 'id,title,description_short,type,sponsor_institution,country,' +
+               'eligibility_region,eligibility_entities,funding_amount,funding_type,' +
+               'application_link,deadline_date,status,language,notes,last_verified,' +
+               'profiles,sectors,isNew,created_at';
+
+  async function fetchPage(from) {
+    const { data, error, count } = await window._supabase
+      .from('opportunities')
+      .select(COLS, { count: 'exact' })
+      .order('id', { ascending: true })
+      .range(from, from + PAGE - 1);
+    if (error) throw error;
+    return { data: data || [], count };
+  }
+
+  async function fetchAllWithRetry() {
     let all = [];
     let from = 0;
+    let totalCount = null;
     while (true) {
-      const { data, error, count } = await window._supabase
-        .from('opportunities')
-        .select(
-          'id,title,description_short,type,sponsor_institution,country,' +
-          'eligibility_region,eligibility_entities,funding_amount,funding_type,' +
-          'application_link,deadline_date,status,language,notes,last_verified,' +
-          'profiles,sectors,isNew,created_at',
-          { count: 'exact' }
-        )
-        .order('id', { ascending: true })
-        .range(from, from + PAGE - 1);
-      if (error) throw error;
-      all = all.concat(data || []);
-      if (!data || !data.length || (typeof count === 'number' && all.length >= count)) break;
-      from += PAGE;
+      let attempt = 0;
+      let lastErr;
+      while (attempt < MAX_RETRIES) {
+        try {
+          const { data, count } = await fetchPage(from);
+          if (totalCount === null && typeof count === 'number') totalCount = count;
+          all = all.concat(data);
+          /* Done when we get an empty page or reached the total */
+          if (!data.length || (totalCount !== null && all.length >= totalCount)) return all;
+          from += PAGE;
+          break; /* page success — move to next page */
+        } catch (err) {
+          lastErr = err;
+          attempt++;
+          console.warn('[OH] Fetch attempt ' + attempt + ' failed:', err.message);
+          await new Promise(r => setTimeout(r, 800 * attempt)); /* back-off: 800ms, 1600ms, 2400ms */
+        }
+      }
+      if (attempt >= MAX_RETRIES) throw lastErr; /* all retries exhausted */
     }
+  }
+
+  try {
+    const all = await fetchAllWithRetry();
     window.opportunitiesData = all;
-    console.log('Loaded ' + all.length + ' opportunities from Supabase');
+    console.log('[OH] Loaded ' + all.length + ' opportunities');
+
+    /* ── Signal all waiting modules ─────────────────────── */
+    document.dispatchEvent(new CustomEvent('oh:data-ready', { detail: { count: all.length } }));
+
   } catch (e) {
-    console.error('Failed to load opportunities from Supabase:', e);
-    const el = document.getElementById('resultsCount');
-    if (el) el.textContent = 'Failed to load opportunities.';
+    console.error('[OH] Failed to load opportunities after retries:', e);
+    const el   = document.getElementById('resultsCount');
     const body = document.getElementById('oppsTableBody');
-    if (body) body.innerHTML = '<p style="color:red;padding:2rem">Could not load opportunities from the database. Please try again later.</p>';
+    if (el)   el.innerHTML = '<span style="color:#ff6b6b">Failed to load — <button onclick="location.reload()" style="color:#ff6b6b;text-decoration:underline;background:none;border:none;cursor:pointer;font-size:inherit">Retry</button></span>';
+    if (body) body.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-muted)">' +
+      '<p style="font-size:15px;margin-bottom:12px">Could not load opportunities from the database.</p>' +
+      '<button onclick="location.reload()" style="padding:10px 20px;background:var(--green);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">Retry</button></div>';
   }
 })();
 </script>
@@ -9269,15 +9334,39 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   /* Re-populate on language switch */
   window.__populateDfp = populateDfp;
 
-  const wait = setInterval(() => {
+  /* ── Data-ready handler ──────────────────────────────────────
+     Fires immediately if data is already loaded, otherwise waits
+     for the 'oh:data-ready' event dispatched by the Supabase loader.
+     Polling fallback ensures nothing hangs if event fires before
+     this listener is registered (race condition on fast connections).
+  ── */
+  function _onDataReady() {
     if (Array.isArray(window.opportunitiesData) || Array.isArray(window.allOpportunities)) {
-      clearInterval(wait);
       boot();
-      window.__renderCards = renderCards; // expose for language toggle
-      window.t = t;                       // expose for script 4 panel (openPanel uses t())
-      populateDfp();                      // fill Data Freshness panel
+      window.__renderCards = renderCards;
+      window.t = t;
+      populateDfp();
     }
-  }, 200);
+  }
+
+  /* Check immediately (data may already be loaded on page revisit) */
+  if (Array.isArray(window.opportunitiesData) || Array.isArray(window.allOpportunities)) {
+    _onDataReady();
+  } else {
+    /* Listen for the event from the Supabase loader */
+    document.addEventListener('oh:data-ready', _onDataReady, { once: true });
+
+    /* Polling fallback — in case event was missed (sub-200ms race) */
+    var _bootPoll = setInterval(function() {
+      if (Array.isArray(window.opportunitiesData) || Array.isArray(window.allOpportunities)) {
+        clearInterval(_bootPoll);
+        _onDataReady();
+      }
+    }, 300);
+
+    /* Safety: stop polling after 30s regardless */
+    setTimeout(function() { clearInterval(_bootPoll); }, 30000);
+  }
 })();
 </script>
 <script>
@@ -12020,6 +12109,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   }
 
   function startTour() {
+    /* Wire up DOM references once */
     if (!tourEl.cutout) {
       tourEl.cutout    = document.getElementById('obTourCutout');
       tourEl.tooltip   = document.getElementById('obTourTooltip');
@@ -12035,10 +12125,22 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       tourEl.prev.addEventListener('click', function() { advanceTour(-1); });
       tourEl.skip.addEventListener('click', endTour);
     }
+
+    /* Guard: if tour elements don't exist in DOM, abort silently */
+    if (!tourEl.cutout || !tourEl.tooltip) {
+      console.warn('Tour elements not found in DOM — aborting tour');
+      return;
+    }
+
+    /* Navigate to home view so sidebar nav items are always visible */
+    if (typeof setRoute === 'function') setRoute('home');
+
     tourActive = true;
     tourStep   = 0;
     document.body.style.overflow = '';
-    positionTour(0);
+
+    /* Small delay after view switch so layout settles before measuring */
+    setTimeout(function() { positionTour(0); }, 180);
   }
 
   /* ── Toast helper (independent of WS module timing) ──────── */
@@ -12213,29 +12315,42 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var modalShown = localStorage.getItem(KEY_OB_MODAL);
     var tourDone   = localStorage.getItem(KEY_OB_DONE);
 
-    /* Wait for session guard to confirm logged-in state.
-       Detection: Supabase sets homeUsername to the user's name (not 'there')
-       once the session resolves, OR the app-view becomes visible.
-       Fallback: show after 3 seconds regardless, since wsBar is always hidden. */
-    var attempts = 0;
-    var checkLogin = setInterval(function() {
-      attempts++;
-      /* Check if the user is logged in: home view is active OR username resolved */
-      var homeView  = document.getElementById('view-home');
-      var userSpan  = document.getElementById('homeUsername');
-      var appShell  = document.querySelector('.app-shell');
-      var isLoggedIn = (homeView && homeView.classList.contains('app-view--active'))
-                    || (userSpan && userSpan.textContent && userSpan.textContent !== 'there' && userSpan.textContent !== 'User')
-                    || (appShell && appShell.getAttribute('data-ready') === '1')
-                    || attempts > 10; /* fallback after ~4s */
-      if (isLoggedIn && !modalShown) {
-        clearInterval(checkLogin);
+    /* ── Login detection ──────────────────────────────────────────
+       The app redirects to login.html if no session exists, so by
+       the time this code runs the user IS logged in. We just need to
+       wait for the initial view render to settle before showing the
+       modal (so it doesn't flash before the UI is ready).
+       Strategy:
+         1. Listen for the custom 'oh:data-ready' event fired by the
+            Supabase loader — guarantees data is loaded before modal.
+         2. Fallback poll every 400ms up to 20s; check for the home
+            view being active (class 'active', not 'app-view--active').
+       ─────────────────────────────────────────────────────────── */
+    if (!modalShown) {
+      var _modalFired = false;
+      function _triggerModal() {
+        if (_modalFired) return;
+        _modalFired = true;
         localStorage.setItem(KEY_OB_MODAL, '1');
-        setTimeout(showWelcomeModal, 800);
-      } else if (attempts > 30 || (isLoggedIn && modalShown)) {
-        clearInterval(checkLogin);
+        setTimeout(showWelcomeModal, 600);
       }
-    }, 400);
+
+      /* Primary: fire when data is ready (event dispatched by Supabase loader) */
+      document.addEventListener('oh:data-ready', _triggerModal, { once: true });
+
+      /* Fallback: poll for the home view being rendered */
+      var _fbAttempts = 0;
+      var _fbTimer = setInterval(function() {
+        _fbAttempts++;
+        var homeView = document.getElementById('view-home');
+        var isReady  = (homeView && homeView.classList.contains('active'))
+                    || _fbAttempts > 50; /* 20s hard fallback */
+        if (isReady) {
+          clearInterval(_fbTimer);
+          setTimeout(_triggerModal, 800);
+        }
+      }, 400);
+    }
   }
 
   if (document.readyState === 'loading') {
