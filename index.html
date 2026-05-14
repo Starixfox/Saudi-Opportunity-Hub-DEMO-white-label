@@ -19,6 +19,9 @@
     if (!session) {
       window.location.href = 'login.html';
     }
+  }).catch(function(err) {
+    console.warn('[Auth] getSession error:', err);
+    window.location.href = 'login.html';
   });
 })();
 </script>
@@ -34,7 +37,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
 /* =============================================
@@ -4941,11 +4943,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
             <div class="home-stat-lbl" data-ar="أضيفت هذا الأسبوع">Added this week</div>
           </div>
           <div class="home-stat">
-            <div class="home-stat-val" id="homeWlVal">—</div>
+            <div class="home-stat-val" id="homeWlVal">0</div>
             <div class="home-stat-lbl">In your watchlist</div>
           </div>
           <div class="home-stat">
-            <div class="home-stat-val" id="homeSectorVal">—</div>
+            <div class="home-stat-val" id="homeSectorVal">0</div>
             <div class="home-stat-lbl">Sectors tracked</div>
           </div>
         </div>
@@ -5949,7 +5951,16 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     });
     var titleEl = document.getElementById('appTopbarTitle');
     if (titleEl) titleEl.textContent = TITLES[view] || 'Opportunity Hub';
-    if (view === 'dashboard' && !chartsInitialized) initDashboard();
+    if (view === 'dashboard') {
+      if (!chartsInitialized) {
+        initDashboard();
+      } else {
+        /* Re-visit: rebuild charts so they repaint correctly after tab switch */
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() { rebuildCharts(); });
+        });
+      }
+    }
     if (view === 'home') initHome();
     if (view === 'sectors') renderSectorChips();
     if (view === 'saved') renderSavedList();
@@ -6078,16 +6089,37 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       badge.textContent = t(greetEn);
       badge.setAttribute('data-en-greeting', greetEn);
     }
-    /* Username */
+    /* Username — BUG-004 FIX: also try Supabase getUser for first-name resolution */
     var wsName = document.getElementById('wsUserName');
     var homeUser = document.getElementById('homeUsername');
-    if (homeUser && wsName && wsName.textContent && wsName.textContent !== 'User') {
-      homeUser.textContent = wsName.textContent;
-    } else if (homeUser) {
-      /* Try to get display name from prefs */
+    (function resolveHomeUsername() {
+      /* 1. Try WS display name (already resolved after login) */
+      if (wsName && wsName.textContent && wsName.textContent !== 'User') {
+        if (homeUser) homeUser.textContent = wsName.textContent;
+        return;
+      }
+      /* 2. Try user prefs */
       var prefs = window.__userPrefs;
-      if (prefs && prefs.displayName) homeUser.textContent = prefs.displayName;
-    }
+      if (prefs && prefs.displayName) {
+        if (homeUser) homeUser.textContent = prefs.displayName;
+        return;
+      }
+      /* 3. Async fallback — resolve from Supabase auth directly */
+      if (window._supabase && homeUser) {
+        window._supabase.auth.getUser().then(function(res) {
+          var user = res && res.data && res.data.user;
+          if (!user) return;
+          /* Use full_name metadata first, then email prefix */
+          var name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name))
+                   || user.email.split('@')[0];
+          /* Capitalise */
+          name = name.charAt(0).toUpperCase() + name.slice(1);
+          homeUser.textContent = name;
+          /* Also sync the topbar wsUserName so they match */
+          if (wsName && (wsName.textContent === 'User' || !wsName.textContent)) wsName.textContent = name;
+        }).catch(function(){});
+      }
+    })();
     /* Stats + lists */
     waitForData(function(data) {
       homeInitialized = true;
@@ -6125,6 +6157,30 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
       paintIcons();
     });
+
+    /* BUG-002/003 FIX: Safety fallback — if data is still loading after 8s,
+       show friendly empty states instead of infinite 'Loading...' */
+    setTimeout(function() {
+      var newListEl = document.getElementById('homeNewList');
+      if (newListEl && newListEl.querySelector('.home-list-loading')) {
+        /* Data still not loaded — check if we can force-render from whatever is available */
+        var d = getData();
+        if (d && d.length) {
+          /* Data is there but callback hasn't fired yet — trigger manually */
+          var weekAgo2 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+          var newThis2 = d.filter(function(x){ return x.isNew === true && x.last_verified && new Date(x.last_verified) >= weekAgo2; });
+          renderHomeOppList('homeNewList', newThis2.slice(0, 8), true);
+          var sm2 = {};
+          d.forEach(function(x){ (x.sectors||[]).forEach(function(s){ sm2[s]=(sm2[s]||0)+1; }); });
+          renderHomeSectorChips(sm2);
+        } else {
+          /* Genuine slow load or error — show graceful empty state */
+          newListEl.innerHTML = '<div class="home-list-loading" style="color:var(--text-faint)">No newly flagged opportunities this week.</div>';
+          var scEl = document.getElementById('homeSectorChips');
+          if (scEl && scEl.querySelector('.home-list-loading')) scEl.innerHTML = '<div class="home-list-loading" style="color:var(--text-faint)">Sectors will appear once data loads.</div>';
+        }
+      }
+    }, 8000);
   }
 
   function renderHomeOppList(elId, items, showNewBadge) {
@@ -6207,8 +6263,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     el.innerHTML = entries.slice(0, 16).map(function(e) {
       var key = e[0];
       var isActive = prefSectors.indexOf(key.toLowerCase().replace(/[\s\-\/]+/g,'_')) !== -1;
+      /* BUG-013 FIX: use proper sector display label */
+      var arMode = document.body && document.body.dir === 'rtl';
+      var sLabel = (arMode && window.SECTOR_NAMES_AR && window.SECTOR_NAMES_AR[key.toLowerCase()])
+                 || (window.SECTOR_NAMES_EN && window.SECTOR_NAMES_EN[key.toLowerCase()])
+                 || key.replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
       return '<button class="home-sector-chip' + (isActive ? ' active' : '') + '" data-sector="' + key + '" type="button">' +
-        key.charAt(0).toUpperCase() + key.slice(1) +
+        sLabel +
         ' <span class="chip-count">' + e[1] + '</span>' +
       '</button>';
     }).join('');
@@ -6273,14 +6334,27 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var sectorMap = tally(data, 'sectors');
       var countryMap = tally(data, 'country');
       var openCount = data.filter(function (d) {
-        var s = String(d.status || '').toLowerCase();
-        return s.indexOf('open') !== -1 || s.indexOf('recurring') !== -1 || s.indexOf('rolling') !== -1;
+        var s = String(d.status || '').toLowerCase().replace(/_/g, '');
+        /* BUG-006 FIX: Match only truly-active statuses.
+           'closed_but_recurring' contains 'open'=false & 'recurring'=true but IS closed.
+           Treat: 'open' and pure 'recurring'/'rolling' as active; 'closed_but_recurring' as NOT open. */
+        if (s === 'open') return true;
+        if (s === 'recurring' || s === 'rolling') return true;
+        if (s.indexOf('closedbutrecurring') !== -1 || s.indexOf('closed') !== -1) return false;
+        return s.indexOf('open') !== -1;
       }).length;
       set('kpiTotal', data.length.toLocaleString());
       set('kpiOpen', openCount.toLocaleString());
       set('kpiSectors', Object.keys(sectorMap).length.toLocaleString());
       set('kpiCountries', Object.keys(countryMap).length.toLocaleString());
-      rebuildCharts();
+      /* BUG-001 FIX: defer chart rendering by 2 frames so the dashboard
+         view's display:block has been painted before Chart.js reads canvas
+         dimensions. Without this, canvases have width=0 and charts are blank. */
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          rebuildCharts();
+        });
+      });
     });
   }
 
@@ -6350,7 +6424,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         btn.className = 'sector-chip';
         btn.type = 'button';
         btn.setAttribute('data-sector', e[0]);
-        btn.innerHTML = '<span>' + e[0] + '</span><span class="count">' + e[1] + '</span>';
+        /* BUG-013 FIX: use proper sector display label (e.g. 'Real Estate' not 'realestate') */
+        var rawKey = e[0];
+        var ar = document.body && document.body.dir === 'rtl';
+        var sectorLabel = (ar && window.SECTOR_NAMES_AR && window.SECTOR_NAMES_AR[rawKey.toLowerCase()])
+                       || (window.SECTOR_NAMES_EN && window.SECTOR_NAMES_EN[rawKey.toLowerCase()])
+                       || rawKey.replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+        btn.innerHTML = '<span>' + sectorLabel + '</span><span class="count">' + e[1] + '</span>';
         btn.addEventListener('click', function () {
           /* Toggle active visually */
           grid.querySelectorAll('.sector-chip').forEach(function (c) { c.classList.remove('active'); });
@@ -9905,6 +9985,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     realestate:'\u0627\u0644\u0639\u0642\u0627\u0631\u0627\u062a', space:'\u0627\u0644\u0641\u0636\u0627\u0621', sports:'\u0627\u0644\u0631\u064a\u0627\u0636\u0629',
     technology:'\u0627\u0644\u062a\u0643\u0646\u0648\u0644\u0648\u062c\u064a\u0627', tourism:'\u0627\u0644\u0633\u064a\u0627\u062d\u0629', transport:'\u0627\u0644\u0646\u0642\u0644', other:'\u0623\u062e\u0631\u0649'
   };
+  /* BUG-013 FIX: expose sector name maps globally so other IIFEs can use them */
+  window.SECTOR_NAMES_EN = SECTOR_NAMES_EN;
+  window.SECTOR_NAMES_AR = SECTOR_NAMES_AR;
 
   /* map prefs.role strings -> profile keys used in data */
   var ROLE_TO_PROFILE = {
@@ -10536,7 +10619,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                 n.textContent = n.textContent.replace(t, ar);
                 saveCache();
               }
-            });
+            }).catch(function(){});
           });
         });
       });
@@ -10616,6 +10699,8 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
     /* Rebuild charts with Arabic labels now that __lang is 'ar' */
     if (typeof window.rebuildChartsAr === 'function') window.rebuildChartsAr();
+    /* BUG-010 FIX: re-render workspace panel so it uses Arabic text */
+    if (window.WS && typeof window.WS.refreshPanel === 'function') window.WS.refreshPanel();
 
     try { localStorage.setItem(LANG_KEY, 'ar'); } catch(e) {}
   }
@@ -10658,6 +10743,8 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
     /* Rebuild charts with English labels */
     if (typeof window.rebuildChartsAr === 'function') window.rebuildChartsAr();
+    /* BUG-010 FIX: re-render workspace panel so it uses English text */
+    if (window.WS && typeof window.WS.refreshPanel === 'function') window.WS.refreshPanel();
 
     var langLabel = document.getElementById('appLangLabel');
     if (langLabel) langLabel.textContent = 'العربية';
@@ -10883,14 +10970,14 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var rows = wl.map(function(w){
         return { user_id: _uid, opp_id: w.id, title: w.title||'', sector: w.sector||'', type: w.type||'', notes: w.notes||'', saved_at: w.savedAt || new Date().toISOString() };
       });
-      _db.from('user_watchlist').upsert(rows, { onConflict: 'user_id,opp_id' }).then(function(){});
-    });
+      _db.from('user_watchlist').upsert(rows, { onConflict: 'user_id,opp_id' }).then(function(){}).catch(function(e){ console.warn('[WS] upsert watchlist error:', e); });
+    }).catch(function(e){ console.warn('[WS] delete watchlist error:', e); });
   }
 
   /* Push prefs to Supabase */
   function dbSavePrefs(p) {
     if (!_db || !_uid || _uid === 'anon') return;
-    _db.from('user_prefs').upsert({ user_id: _uid, prefs: p, updated_at: new Date().toISOString() }, { onConflict: 'user_id' }).then(function(){});
+    _db.from('user_prefs').upsert({ user_id: _uid, prefs: p, updated_at: new Date().toISOString() }, { onConflict: 'user_id' }).then(function(){}).catch(function(e){ console.warn('[WS] upsert prefs error:', e); });
   }
 
   /* Push searches to Supabase (replace all rows) */
@@ -10901,8 +10988,8 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var rows = ss.map(function(s){
         return { user_id: _uid, search_data: s, saved_at: s.savedAt || new Date().toISOString() };
       });
-      _db.from('user_searches').insert(rows).then(function(){});
-    });
+      _db.from('user_searches').insert(rows).then(function(){}).catch(function(e){ console.warn('[WS] insert searches error:', e); });
+    }).catch(function(e){ console.warn('[WS] delete searches error:', e); });
   }
 
   /* Pull all user data from Supabase on login and merge into localStorage */
@@ -10923,7 +11010,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       save(KEY_WATCHLIST, watchlist);
       syncBookmarkButtons();
       updateWsBar();
-    });
+    }).catch(function(e){ console.warn('[WS] load watchlist error:', e); });
     /* Prefs */
     _db.from('user_prefs').select('prefs').eq('user_id', _uid).single().then(function(res){
       if (res.error || !res.data || !res.data.prefs) return;
@@ -11357,7 +11444,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
               .update({ notes: noteText })
               .eq('user_id', _uid)
               .eq('opp_id', id)
-              .then(function(){});
+              .then(function(){}).catch(function(e){ console.warn('[WS] note save error:', e); });
           }
           area.classList.remove('open');
           var pencil = body.querySelector('.ws-note-btn[data-noteid="' + id + '"]');
@@ -11628,7 +11715,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       openSettings:      openSettings,
       showToast:         showToast,
       loadFromSupabase:  loadFromSupabase,
-      getWatchlist:      function() { return watchlist; }
+      getWatchlist:      function() { return watchlist; },
+      /* BUG-010 FIX: re-render panel body in correct language after lang switch */
+      refreshPanel:      function() {
+        var panel = document.getElementById('wsPanel');
+        if (panel && panel.classList.contains('open')) renderPanelBody();
+      }
     };
 
     updateWsBar();
@@ -11637,6 +11729,38 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     hookDetailPanel();
     /* Pull persisted data from Supabase on every login */
     loadFromSupabase();
+
+    /* BUG-011/BUG-004 FIX: ensure username is always resolved, even on first OAuth login
+       where getUser() in updateWsBar may fire before session is ready. */
+    (function wireUsernameResolution() {
+      function applyName(user) {
+        if (!user) return;
+        var pref = prefs && prefs.displayName;
+        var name = pref
+                 || (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name))
+                 || user.email.split('@')[0];
+        name = name.charAt(0).toUpperCase() + name.slice(1);
+        var un = document.getElementById('wsUserName');
+        if (un) un.textContent = name;
+        /* Also push to home greeting if still default */
+        var homeUser = document.getElementById('homeUsername');
+        if (homeUser && (homeUser.textContent === 'there' || homeUser.textContent === 'User')) {
+          homeUser.textContent = name;
+        }
+      }
+      /* Listen for auth state so this fires reliably on first login */
+      if (window._supabase) {
+        window._supabase.auth.onAuthStateChange(function(event, session) {
+          if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session && session.user) {
+            applyName(session.user);
+          }
+        });
+        /* Also resolve immediately in case already logged in */
+        window._supabase.auth.getUser().then(function(res) {
+          applyName(res && res.data && res.data.user);
+        }).catch(function(){});
+      }
+    })();
 
     // ── Wire notification bell
     var notifBtn  = document.getElementById('notifBtn');
@@ -11850,11 +11974,45 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   var cl = loadCL();
 
   /* Mark returned as done once they visit again */
-  var _visitKey = 'oh-ob-visits:anon'; /* updated when _obUid resolves */
-  var visits = parseInt(localStorage.getItem(_visitKey) || '0', 10);
-  visits++;
-  localStorage.setItem(_visitKey, visits);
+  var _visitKey = 'oh-ob-visits:anon';
+  /* BUG FIX: _visitKey was never re-keyed when uid resolved. Track visits properly per user.
+     Update the key and re-apply when _obUid becomes available. */
+  function countVisit(key) {
+    var v = parseInt(localStorage.getItem(key) || '0', 10);
+    v++;
+    localStorage.setItem(key, v);
+    return v;
+  }
+  var visits = countVisit(_visitKey);
   if (visits >= 2) { cl.returned = true; saveCL(cl); }
+  /* Resolve visit key once real uid is known */
+  (function reKeyVisits() {
+    function applyVisitUid(uid) {
+      if (!uid || uid === 'anon') return;
+      var realKey = 'oh-ob-visits:' + uid;
+      if (realKey === _visitKey) return;
+      /* Migrate: delete anon count, re-count under real key */
+      _visitKey = realKey;
+      var rv = parseInt(localStorage.getItem(realKey) || '0', 10);
+      rv++;
+      localStorage.setItem(realKey, rv);
+      if (rv >= 2 && !cl.returned) { cl.returned = true; saveCL(cl); }
+    }
+    try {
+      var raw = localStorage.getItem('sb-dshrbbnjahjcwxzvzygh-auth-token');
+      if (raw) {
+        var p = JSON.parse(raw);
+        var uid = (p && p.user && p.user.id) ? p.user.id : null;
+        if (uid) { applyVisitUid(uid); return; }
+      }
+    } catch(e) {}
+    if (window._supabase) {
+      window._supabase.auth.getUser().then(function(res) {
+        var uid = res && res.data && res.data.user && res.data.user.id;
+        if (uid) applyVisitUid(uid);
+      }).catch(function(){});
+    }
+  })();
 
   /* ── Checklist items definition ─────────────────────────── */
   function clItems() {
@@ -12395,6 +12553,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (skipBtn)  skipBtn.textContent  = 'تخطي الآن';
   }
 
+  var _obModalListenersWired = false;
   function showWelcomeModal() {
     var overlay = document.getElementById('obOverlay');
     if (!overlay) return;
@@ -12402,21 +12561,27 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
     /* Populate live stat from loaded dataset if available */
     var statOpps = document.getElementById('obStatOpps');
-    if (statOpps && window.allOpportunities && window.allOpportunities.length > 0) {
-      var total = window.allOpportunities.length;
-      statOpps.innerHTML = total.toLocaleString() + '<span>+</span>';
+    var _ds = window.allOpportunities || window.opportunitiesData;
+    if (statOpps && _ds && _ds.length > 0) {
+      statOpps.innerHTML = _ds.length.toLocaleString() + '<span>+</span>';
     }
 
     overlay.classList.add('open');
 
-    document.getElementById('obStartTourBtn').addEventListener('click', function() {
-      overlay.classList.remove('open');
-      setTimeout(startTour, 380);
-    });
-    document.getElementById('obSkipTourBtn').addEventListener('click', function() {
-      overlay.classList.remove('open');
-      localStorage.setItem(KEY_OB_DONE, '1');
-    });
+    /* BUG FIX: only wire listeners once to prevent duplicate handler accumulation */
+    if (!_obModalListenersWired) {
+      _obModalListenersWired = true;
+      var startBtn = document.getElementById('obStartTourBtn');
+      var skipBtn  = document.getElementById('obSkipTourBtn');
+      if (startBtn) startBtn.addEventListener('click', function() {
+        overlay.classList.remove('open');
+        setTimeout(startTour, 380);
+      });
+      if (skipBtn) skipBtn.addEventListener('click', function() {
+        overlay.classList.remove('open');
+        localStorage.setItem(KEY_OB_DONE, '1');
+      });
+    }
   }
 
   /* ── Init ──────────────────────────────────────────────────── */
