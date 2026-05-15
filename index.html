@@ -93,15 +93,15 @@
   --sidebar-bg:           #0f172a;
   --sidebar-text:         #94a3b8;
   --sidebar-text-active:  #ffffff;
-  --sidebar-active-bg:    rgba(99, 102, 241, 0.15);
-  --sidebar-active-border:#6366f1;
+  --sidebar-active-bg:    rgba(0, 108, 53, 0.15);
+  --sidebar-active-border:#006C35;
   --sidebar-logo-color:   #ffffff;
 
-  /* Brand accent — indigo */
-  --accent:        #6366f1;
-  --accent-hover:  #4f46e5;
-  --accent-light:  rgba(99, 102, 241, 0.10);
-  --accent-glow:   rgba(99, 102, 241, 0.25);
+  /* Brand accent — Saudi green */
+  --accent:        #006C35;
+  --accent-hover:  #005228;
+  --accent-light:  rgba(0, 108, 53, 0.10);
+  --accent-glow:   rgba(0, 108, 53, 0.25);
 
   /* Status */
   --status-open:        #10b981;
@@ -128,7 +128,7 @@
   --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
   --shadow-lg: 0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.05);
   --shadow-xl: 0 20px 25px rgba(0,0,0,0.10), 0 8px 10px rgba(0,0,0,0.06);
-  --shadow-focus: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  --shadow-focus: 0 0 0 3px rgba(0, 108, 53, 0.25);
 }
 
 /* Dark-mode counterpart — no toggle UI today, but variables retained
@@ -6275,7 +6275,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 }
 .app-sidebar-brand .brand-dot {
   background: var(--accent);
-  box-shadow: 0 0 0 3px rgba(99,102,241,0.20), 0 0 12px var(--accent-glow);
+  box-shadow: 0 0 0 3px rgba(0,108,53,0.20), 0 0 12px var(--accent-glow);
 }
 .app-nav-item {
   color: var(--sidebar-text);
@@ -6516,11 +6516,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 }
 .oh-enh-match,
 .oh-enh-match-compact {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+  background: linear-gradient(135deg, #006C35 0%, #00a550 100%) !important;
   color: #ffffff !important;
   border: none !important;
   border-radius: 999px !important;
-  box-shadow: 0 2px 6px rgba(99,102,241,0.30);
+  box-shadow: 0 2px 6px rgba(0,108,53,0.30);
   font-weight: 600;
 }
 .oh-enh-match svg,
@@ -6584,7 +6584,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 }
 .oh4-sector-bar { background: var(--bg-elevated); }
 .oh4-sector-bar-fill {
-  background: linear-gradient(90deg, var(--accent) 0%, #818cf8 100%);
+  background: linear-gradient(90deg, var(--accent) 0%, #00a550 100%);
 }
 .oh4-sector-arrow { color: var(--accent); }
 .oh4-sector-card::before { background: var(--accent); }
@@ -6646,8 +6646,8 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 /* ── 13. ONBOARDING CHECKLIST ──────────────────────────── */
 .ob-card,
 .onboarding-checklist {
-  background: linear-gradient(135deg, var(--accent-light), rgba(139,92,246,0.06));
-  border: 1px solid rgba(99,102,241,0.20);
+  background: linear-gradient(135deg, var(--accent-light), rgba(0,108,53,0.06));
+  border: 1px solid rgba(0,108,53,0.20);
   border-radius: 14px;
   padding: 18px 20px;
 }
@@ -8128,10 +8128,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
   /* ---------------- Dashboard / KPIs / Charts ---------------- */
   var chartRefs = {};
-  /* GREEN kept as a name for backward compat; value updated to the v2 indigo accent. */
-  var GREEN = '#6366f1';
-  /* v2 unified series palette — indigo → violet → cyan → emerald → amber → orange → red → pink → lime → teal. */
-  var PALETTE = ['#6366f1','#8b5cf6','#06b6d4','#10b981','#f59e0b','#f97316','#ef4444','#ec4899','#84cc16','#14b8a6'];
+  /* GREEN — Saudi green brand accent. */
+  var GREEN = '#006C35';
+  /* v2 unified series palette — Saudi-green primary, then violet → cyan → emerald → amber → orange → red → pink → lime → teal. */
+  var PALETTE = ['#006C35','#8b5cf6','#06b6d4','#10b981','#f59e0b','#f97316','#ef4444','#ec4899','#84cc16','#14b8a6'];
 
   function tally(arr, key) {
     var m = {};
@@ -12363,7 +12363,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
   /* v2 unified series palette — kept in sync with the global PALETTE above. */
   var CHART_COLORS = [
-    '#6366f1','#8b5cf6','#06b6d4','#10b981',
+    '#006C35','#8b5cf6','#06b6d4','#10b981',
     '#f59e0b','#f97316','#ef4444','#ec4899','#84cc16','#14b8a6'
   ];
 
