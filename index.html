@@ -7356,6 +7356,353 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   }
 }
 
+/* ── FOLDERS — Phase B ────────────────────────────────────── */
+.folders-root { display: flex; flex-direction: column; gap: 1rem; }
+.folders-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.folders-btn-new, .folders-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  background: var(--accent, #006C35);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.folders-btn-new:hover, .folders-btn:hover { background: #005228; }
+.folders-btn-pdf { background: #475569; }
+.folders-btn-pdf:hover { background: #334155; }
+.folders-count {
+  font-size: 0.75rem;
+  color: var(--text-muted, #94a3b8);
+  font-weight: 500;
+}
+.folders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.75rem;
+}
+.folder-card {
+  background: var(--bg-surface, #fff);
+  border: 1px solid var(--border-default, #e2e8f0);
+  border-radius: 12px;
+  padding: 0.875rem 1rem;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+.folder-card:hover {
+  box-shadow: var(--shadow-md, 0 4px 6px rgba(0,0,0,0.07));
+  border-color: var(--accent, #006C35);
+  transform: translateY(-1px);
+}
+.folder-card-top { display: flex; gap: 0.75rem; align-items: center; }
+.folder-card-icon {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+.folder-card-body { min-width: 0; flex: 1; }
+.folder-card-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.folder-card-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted, #94a3b8);
+  margin-top: 0.125rem;
+}
+.folder-card-actions {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border-subtle, rgba(226,232,240,0.6));
+  padding-top: 0.5rem;
+}
+.folder-action-btn {
+  font-size: 0.6875rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-elevated, #f1f5f9);
+  color: var(--text-secondary, #475569);
+  border: 1px solid var(--border-default, #e2e8f0);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.folder-action-btn:hover { background: var(--accent, #006C35); color: #fff; border-color: var(--accent, #006C35); }
+.folder-action-delete:hover { background: rgba(239,68,68,0.12); color: #ef4444; border-color: #ef4444; }
+.folders-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.875rem;
+}
+
+/* Folder detail */
+.folder-detail { display: flex; flex-direction: column; gap: 0.875rem; }
+.folder-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.625rem;
+  border-bottom: 1px solid var(--border-default, #e2e8f0);
+}
+.folder-back-btn {
+  background: none;
+  border: 1px solid var(--border-default, #e2e8f0);
+  padding: 0.375rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  color: var(--text-secondary, #475569);
+  cursor: pointer;
+}
+.folder-back-btn:hover { background: var(--bg-elevated, #f1f5f9); color: var(--text-primary, #0f172a); }
+.folder-detail-title { display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 0; }
+.folder-detail-icon { font-size: 1.25rem; }
+.folder-detail-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.folder-detail-count {
+  font-size: 0.75rem;
+  color: var(--text-muted, #94a3b8);
+  background: var(--bg-elevated, #f1f5f9);
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+}
+.folder-detail-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.folder-items-list { display: flex; flex-direction: column; gap: 0.375rem; }
+.folder-item-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  background: var(--bg-surface, #fff);
+  border: 1px solid var(--border-default, #e2e8f0);
+  border-radius: 10px;
+}
+.folder-item-info { flex: 1; min-width: 0; }
+.folder-item-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+  margin-bottom: 0.125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.folder-item-meta {
+  font-size: 0.6875rem;
+  color: var(--text-muted, #94a3b8);
+}
+.folder-item-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.folder-item-remove:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
+.folder-items-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.875rem;
+}
+
+/* New-folder modal */
+.folder-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,0.6);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: viewFadeIn 200ms cubic-bezier(0.16,1,0.3,1);
+}
+.folder-modal {
+  background: var(--bg-surface, #fff);
+  border-radius: 14px;
+  padding: 1.5rem;
+  width: min(420px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+}
+.folder-modal-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  margin-bottom: 1rem;
+}
+.folder-modal-field { margin-bottom: 1rem; }
+.folder-modal-field label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary, #475569);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.375rem;
+}
+.folder-modal-field input[type="text"] {
+  width: 100%;
+  padding: 0.5625rem 0.875rem;
+  border: 1px solid var(--border-default, #e2e8f0);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background: var(--bg-surface, #fff);
+  color: var(--text-primary, #0f172a);
+  font-family: inherit;
+}
+.folder-modal-field input[type="text"]:focus {
+  outline: none;
+  border-color: var(--accent, #006C35);
+  box-shadow: 0 0 0 3px rgba(0,108,53,0.12);
+}
+.folder-icon-picker, .folder-color-picker {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+.folder-icon-chip {
+  width: 36px; height: 36px;
+  border: 1px solid var(--border-default, #e2e8f0);
+  background: var(--bg-surface, #fff);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.125rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+.folder-icon-chip:hover { background: var(--bg-elevated, #f1f5f9); }
+.folder-icon-chip.selected {
+  border-color: var(--accent, #006C35);
+  background: rgba(0,108,53,0.08);
+}
+.folder-color-swatch {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+.folder-color-swatch:hover { transform: scale(1.1); }
+.folder-color-swatch.selected {
+  border-color: var(--text-primary, #0f172a);
+  transform: scale(1.15);
+}
+.folder-modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}
+.folder-modal-cancel, .folder-modal-create {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border-default, #e2e8f0);
+}
+.folder-modal-cancel {
+  background: var(--bg-surface, #fff);
+  color: var(--text-secondary, #475569);
+}
+.folder-modal-cancel:hover { background: var(--bg-elevated, #f1f5f9); }
+.folder-modal-create {
+  background: var(--accent, #006C35);
+  color: #fff;
+  border-color: var(--accent, #006C35);
+}
+.folder-modal-create:hover { background: #005228; }
+
+/* Detail-panel "Add to Folder" dropdown */
+.opp-folder-wrap { display: inline-block; position: relative; }
+.opp-folder-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: var(--bg-elevated, #f1f5f9);
+  color: var(--text-primary, #0f172a);
+  border: 1px solid var(--border-default, #e2e8f0);
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.opp-folder-btn:hover {
+  background: var(--accent, #006C35);
+  color: #fff;
+  border-color: var(--accent, #006C35);
+}
+.opp-folder-dropdown {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  min-width: 220px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--bg-surface, #fff);
+  border: 1px solid var(--border-default, #e2e8f0);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  z-index: 1100;
+  padding: 0.375rem;
+}
+.opp-folder-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  color: var(--text-primary, #0f172a);
+}
+.opp-folder-dropdown-item:hover { background: var(--bg-elevated, #f1f5f9); }
+.opp-folder-empty {
+  padding: 0.75rem 0.625rem;
+  font-size: 0.75rem;
+  color: var(--text-muted, #94a3b8);
+  text-align: center;
+}
+
 </style>
 
 </head>
@@ -8387,6 +8734,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     <button class="ws-panel-close" id="wsPanelClose" aria-label="Close workspace panel">&times;</button>
   </div>
   <div class="ws-panel-tabs">
+    <button class="ws-panel-tab" data-wstab="folders" data-en="📂 Folders" data-ar="📂 المجلدات">📂 Folders</button>
     <button class="ws-panel-tab active" data-wstab="watchlist" data-en="Watchlist" data-ar="قائمة المتابعة">Watchlist</button>
     <button class="ws-panel-tab" data-wstab="searches" data-en="Saved Searches" data-ar="البحوث المحفوظة">Saved Searches</button>
     <button class="ws-panel-tab" data-wstab="history" data-en="Recent" data-ar="الأخيرة">Recent</button>
@@ -13257,6 +13605,30 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     panelLink.href = validLink ? item.application_link : '#';
     panelLink.style.display = validLink ? '' : 'none';
 
+    /* Add-to-folder button + dropdown — Phase B Folders.
+       Inserts once into .panel-footer and updates data-opp-id per open. */
+    (function () {
+      var footer = panel.querySelector('.panel-footer');
+      if (!footer) return;
+      var wrap = footer.querySelector('#oppFolderWrap');
+      if (!wrap) {
+        wrap = document.createElement('div');
+        wrap.className = 'opp-folder-wrap';
+        wrap.id = 'oppFolderWrap';
+        wrap.innerHTML =
+          '<button class="opp-folder-btn" id="addToFolderBtn" type="button">' +
+            '<span>📂</span><span class="opp-folder-btn-label">Add to Folder</span>' +
+          '</button>' +
+          '<div class="opp-folder-dropdown" id="oppFolderDropdown" style="display:none"></div>';
+        footer.appendChild(wrap);
+      }
+      var btn = wrap.querySelector('#addToFolderBtn');
+      var lbl = wrap.querySelector('.opp-folder-btn-label');
+      var ar = (document.documentElement.dir === 'rtl' || document.body.classList.contains('rtl'));
+      if (lbl) lbl.textContent = ar ? 'أضف إلى مجلد' : 'Add to Folder';
+      if (btn) btn.setAttribute('data-opp-id', String(item.id || ''));
+    })();
+
     panel.classList.add('open');
     panel.setAttribute('aria-hidden', 'false');
     panel.setAttribute('role', 'dialog');
@@ -13287,6 +13659,72 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   if (panelClose) panelClose.addEventListener('click', closePanel);
   if (overlay)    overlay.addEventListener('click', closePanel);
   document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePanel(); });
+
+  // Add-to-Folder dropdown — Phase B Folders. Delegated so it works after
+  // each panel re-render (button is created once, but folder list is fresh).
+  document.addEventListener('click', function (e) {
+    var trigger = e.target.closest('#addToFolderBtn');
+    if (!trigger) return;
+    e.stopPropagation();
+    var dropdown = document.getElementById('oppFolderDropdown');
+    if (!dropdown) return;
+    if (dropdown.style.display !== 'none') { dropdown.style.display = 'none'; return; }
+    var supa = window._supabase;
+    var sess = window.__ohSession;
+    if (!supa || !sess) return;
+    var ar = (document.documentElement.dir === 'rtl' || document.body.classList.contains('rtl'));
+    dropdown.innerHTML = '<div class="opp-folder-empty">' + (ar ? 'جارٍ التحميل…' : 'Loading…') + '</div>';
+    dropdown.style.display = 'block';
+
+    supa.from('user_folders').select('id, name, name_ar, icon').eq('user_id', sess.user.id).order('created_at', { ascending: false }).then(function (res) {
+      var folders = (res && res.data) || [];
+      if (!folders.length) {
+        dropdown.innerHTML = '<div class="opp-folder-empty">' + (ar ? 'لا توجد مجلدات بعد — أنشئ واحداً في مساحة العمل' : 'No folders yet — create one in Workspace') + '</div>';
+      } else {
+        var esc = function (s) {
+          return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        };
+        dropdown.innerHTML = folders.map(function (f) {
+          var n = (ar && f.name_ar) ? f.name_ar : f.name;
+          return '<div class="opp-folder-dropdown-item" data-folder-id="' + esc(f.id) + '" data-folder-name="' + esc(n) + '">' +
+            '<span>' + esc(f.icon || '📁') + '</span>' +
+            '<span>' + esc(n) + '</span>' +
+          '</div>';
+        }).join('');
+        dropdown.querySelectorAll('.opp-folder-dropdown-item').forEach(function (item) {
+          item.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            var oppId = (document.getElementById('addToFolderBtn') || {}).getAttribute && document.getElementById('addToFolderBtn').getAttribute('data-opp-id');
+            if (!oppId) return;
+            var fname = item.getAttribute('data-folder-name');
+            supa.from('folder_items').insert({ folder_id: item.getAttribute('data-folder-id'), opp_id: oppId }).then(function (r) {
+              dropdown.style.display = 'none';
+              if (r && r.error && r.error.code === '23505') {
+                if (window.WS && window.WS.showToast) {
+                  window.WS.showToast(ar ? ('الفرصة موجودة في "' + fname + '"') : ('Already in "' + fname + '"'));
+                }
+              } else if (!(r && r.error)) {
+                if (window.WS && window.WS.showToast) {
+                  window.WS.showToast(ar ? ('تمت الإضافة إلى "' + fname + '" ✓') : ('Added to "' + fname + '" ✓'));
+                }
+              } else {
+                console.warn('[Folders] insert error:', r.error);
+              }
+            });
+          });
+        });
+      }
+    });
+  });
+
+  /* Close folder dropdown on outside click */
+  document.addEventListener('click', function (e) {
+    var dd = document.getElementById('oppFolderDropdown');
+    if (!dd || dd.style.display === 'none') return;
+    if (dd.contains(e.target)) return;
+    if (e.target.closest('#addToFolderBtn')) return;
+    dd.style.display = 'none';
+  });
 
   // Wire "View Insights" button clicks via event delegation
   document.addEventListener('click', function(e) {
@@ -14968,6 +15406,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           '</div>' +
         '</div>';
       }).join('');
+    } else if (activeTab === 'folders') {
+      loadFoldersTab();
+      return;
     } else if (activeTab === 'pipeline') {
       var ar = document.body.dir === 'rtl';
       body.innerHTML =
@@ -15095,6 +15536,412 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         }).catch(function (e) { console.warn('[WS] pipeline opps load error:', e); });
       })
       .catch(function (e) { console.warn('[WS] pipeline watchlist load error:', e); });
+  }
+
+  /* ── FOLDERS — Phase B ───────────────────────────────────────
+     User-created collections of opportunities, with CSV/PDF export.
+     Tables: user_folders, folder_items (RLS = own rows only). */
+  function fldIsRTL() {
+    return document.documentElement.dir === 'rtl' || document.body.classList.contains('rtl');
+  }
+  function fldEsc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function loadFoldersTab() {
+    var body = document.getElementById('wsPanelBody');
+    if (!body) return;
+    body.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-muted)">' + (fldIsRTL() ? 'جارٍ التحميل…' : 'Loading…') + '</div>';
+    renderFolderList(body);
+  }
+
+  function renderFolderList(body) {
+    var supa = _db || window._supabase;
+    var uid  = _uid;
+    if (!supa || !uid || uid === 'anon') {
+      body.innerHTML = '<p style="padding:1rem">' + (fldIsRTL() ? 'سجّل الدخول لاستخدام المجلدات.' : 'Sign in to use folders.') + '</p>';
+      return;
+    }
+    supa.from('user_folders')
+      .select('id, name, name_ar, icon, color, created_at')
+      .eq('user_id', uid)
+      .order('created_at', { ascending: false })
+      .then(function (res) {
+        var folders = (res && res.data) || [];
+        var ids = folders.map(function (f) { return f.id; });
+        var afterCounts = function (countMap) {
+          var ar = fldIsRTL();
+          var cards = folders.map(function (f) {
+            var n = (ar && f.name_ar) ? f.name_ar : f.name;
+            var cnt = countMap[f.id] || 0;
+            var countLabel = ar
+              ? (cnt + ' فرصة')
+              : (cnt + ' opportunit' + (cnt === 1 ? 'y' : 'ies'));
+            return '<div class="folder-card" data-folder-id="' + fldEsc(f.id) + '" data-folder-name="' + fldEsc(n) + '">' +
+              '<div class="folder-card-top">' +
+                '<div class="folder-card-icon" style="background:' + fldEsc(f.color || '#006C35') + '22">' + fldEsc(f.icon || '📁') + '</div>' +
+                '<div class="folder-card-body">' +
+                  '<div class="folder-card-name">' + fldEsc(n) + '</div>' +
+                  '<div class="folder-card-meta">' + fldEsc(countLabel) + '</div>' +
+                '</div>' +
+              '</div>' +
+              '<div class="folder-card-actions">' +
+                '<button class="folder-action-btn folder-action-export-csv" data-id="' + fldEsc(f.id) + '" data-name="' + fldEsc(n) + '">⬇ CSV</button>' +
+                '<button class="folder-action-btn folder-action-export-pdf" data-id="' + fldEsc(f.id) + '" data-name="' + fldEsc(n) + '">⬇ PDF</button>' +
+                '<button class="folder-action-btn folder-action-delete"     data-id="' + fldEsc(f.id) + '" data-name="' + fldEsc(n) + '">🗑</button>' +
+              '</div>' +
+            '</div>';
+          }).join('');
+
+          body.innerHTML =
+            '<div class="folders-root">' +
+              '<div class="folders-toolbar">' +
+                '<button class="folders-btn-new" id="foldersNewBtn">' +
+                  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+                  '<span>' + (ar ? 'مجلد جديد' : 'New Folder') + '</span>' +
+                '</button>' +
+                '<div class="folders-count">' + folders.length + ' ' + (ar ? 'مجلد' : ('folder' + (folders.length !== 1 ? 's' : ''))) + '</div>' +
+              '</div>' +
+              '<div class="folders-grid">' + cards + '</div>' +
+              (folders.length ? '' :
+                '<div class="folders-empty">' +
+                  '<div style="font-size:2.5rem;margin-bottom:0.75rem">📂</div>' +
+                  '<p>' + (ar ? 'لا توجد مجلدات بعد. أنشئ مجلداً لتنظيم فرصك.' : 'No folders yet. Create one to organize your opportunities.') + '</p>' +
+                '</div>') +
+            '</div>';
+
+          body.querySelectorAll('.folder-card').forEach(function (card) {
+            card.addEventListener('click', function (e) {
+              if (e.target.closest('.folder-card-actions')) return;
+              renderFolderDetail(body, card.getAttribute('data-folder-id'), card.getAttribute('data-folder-name'));
+            });
+          });
+          body.querySelectorAll('.folder-action-export-csv').forEach(function (btn) {
+            btn.addEventListener('click', function (e) { e.stopPropagation(); folderExportCSV(btn.getAttribute('data-id'), btn.getAttribute('data-name')); });
+          });
+          body.querySelectorAll('.folder-action-export-pdf').forEach(function (btn) {
+            btn.addEventListener('click', function (e) { e.stopPropagation(); folderExportPDF(btn.getAttribute('data-id'), btn.getAttribute('data-name')); });
+          });
+          body.querySelectorAll('.folder-action-delete').forEach(function (btn) {
+            btn.addEventListener('click', function (e) { e.stopPropagation(); deleteFolder(btn.getAttribute('data-id'), btn.getAttribute('data-name'), body); });
+          });
+          var newBtn = document.getElementById('foldersNewBtn');
+          if (newBtn) newBtn.addEventListener('click', function () { showNewFolderModal(body); });
+        };
+
+        if (!ids.length) { afterCounts({}); return; }
+        supa.from('folder_items').select('folder_id').in('folder_id', ids).then(function (cr) {
+          var countMap = {};
+          ((cr && cr.data) || []).forEach(function (r) {
+            countMap[r.folder_id] = (countMap[r.folder_id] || 0) + 1;
+          });
+          afterCounts(countMap);
+        }).catch(function () { afterCounts({}); });
+      })
+      .catch(function (e) { console.warn('[WS] folders load error:', e); });
+  }
+
+  function renderFolderDetail(body, folderId, fallbackName) {
+    var supa = _db || window._supabase;
+    var ar = fldIsRTL();
+    body.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-muted)">' + (ar ? 'جارٍ التحميل…' : 'Loading…') + '</div>';
+
+    supa.from('user_folders').select('id, name, name_ar, icon, color').eq('id', folderId).single().then(function (fr) {
+      var folder = fr && fr.data;
+      var displayName = (ar && folder && folder.name_ar) ? folder.name_ar : ((folder && folder.name) || fallbackName);
+
+      supa.from('folder_items').select('opp_id, added_at').eq('folder_id', folderId).order('added_at', { ascending: false }).then(function (ir) {
+        var items = (ir && ir.data) || [];
+        var go = function (oppRows) {
+          var rowsHTML = oppRows.length ? oppRows.map(function (o) {
+            var sectorTxt = Array.isArray(o.sectors) ? o.sectors.join(', ') : (o.sector || '');
+            var bits = [o.type, sectorTxt, o.deadline_date ? ((ar ? 'الموعد: ' : 'Deadline: ') + o.deadline_date) : null].filter(Boolean);
+            return '<div class="folder-item-row" data-opp-id="' + fldEsc(o.id) + '">' +
+              '<div class="folder-item-info">' +
+                '<div class="folder-item-title">' + fldEsc(o.title || (ar ? 'بدون عنوان' : 'Untitled')) + '</div>' +
+                '<div class="folder-item-meta">' + fldEsc(bits.join(' · ')) + '</div>' +
+              '</div>' +
+              '<button class="folder-item-remove" data-folder-id="' + fldEsc(folderId) + '" data-opp-id="' + fldEsc(o.id) + '" title="' + (ar ? 'إزالة' : 'Remove') + '">✕</button>' +
+            '</div>';
+          }).join('') : (
+            '<div class="folder-items-empty">' +
+              '<div style="font-size:2rem;margin-bottom:0.5rem">📭</div>' +
+              '<p>' + (ar ? 'هذا المجلد فارغ. أضف فرصاً من بطاقات الفرص.' : 'This folder is empty. Add opportunities from any opportunity card via the 📂 Add to Folder button.') + '</p>' +
+            '</div>'
+          );
+
+          body.innerHTML =
+            '<div class="folder-detail">' +
+              '<div class="folder-detail-header">' +
+                '<button class="folder-back-btn" id="folderBackBtn">' + (ar ? 'رجوع →' : '← Back') + '</button>' +
+                '<div class="folder-detail-title">' +
+                  '<span class="folder-detail-icon">' + fldEsc((folder && folder.icon) || '📁') + '</span>' +
+                  '<span class="folder-detail-name">' + fldEsc(displayName) + '</span>' +
+                  '<span class="folder-detail-count">' + oppRows.length + ' ' + (ar ? 'فرصة' : 'items') + '</span>' +
+                '</div>' +
+                '<div class="folder-detail-actions">' +
+                  '<button class="folders-btn folders-btn-csv" data-id="' + fldEsc(folderId) + '" data-name="' + fldEsc(displayName) + '">⬇ ' + (ar ? 'تصدير CSV' : 'Export CSV') + '</button>' +
+                  '<button class="folders-btn folders-btn-pdf" data-id="' + fldEsc(folderId) + '" data-name="' + fldEsc(displayName) + '">⬇ ' + (ar ? 'تصدير PDF' : 'Export PDF') + '</button>' +
+                '</div>' +
+              '</div>' +
+              '<div class="folder-items-list">' + rowsHTML + '</div>' +
+            '</div>';
+
+          var back = document.getElementById('folderBackBtn');
+          if (back) back.addEventListener('click', function () { renderFolderList(body); });
+          body.querySelectorAll('.folder-item-remove').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var fid = btn.getAttribute('data-folder-id');
+              var oid = btn.getAttribute('data-opp-id');
+              supa.from('folder_items').delete().eq('folder_id', fid).eq('opp_id', oid).then(function () {
+                var row = btn.closest('.folder-item-row');
+                if (row) row.remove();
+                var cnt = body.querySelectorAll('.folder-item-row').length;
+                var countEl = body.querySelector('.folder-detail-count');
+                if (countEl) countEl.textContent = cnt + ' ' + (ar ? 'فرصة' : 'items');
+              });
+            });
+          });
+          var csvBtn = body.querySelector('.folders-btn-csv');
+          if (csvBtn) csvBtn.addEventListener('click', function () { folderExportCSV(csvBtn.getAttribute('data-id'), csvBtn.getAttribute('data-name')); });
+          var pdfBtn = body.querySelector('.folders-btn-pdf');
+          if (pdfBtn) pdfBtn.addEventListener('click', function () { folderExportPDF(pdfBtn.getAttribute('data-id'), pdfBtn.getAttribute('data-name')); });
+        };
+
+        if (!items.length) { go([]); return; }
+        supa.from('opportunities')
+          .select('id, title, type, sectors, deadline_date, status, funding_amount, funding_type, application_link, description_short, sponsor_institution')
+          .in('id', items.map(function (i) { return i.opp_id; }))
+          .then(function (or_) {
+            var oppMap = {};
+            ((or_ && or_.data) || []).forEach(function (o) { oppMap[o.id] = o; });
+            go(items.map(function (i) { return oppMap[i.opp_id]; }).filter(Boolean));
+          });
+      });
+    });
+  }
+
+  function showNewFolderModal(body) {
+    var icons = ['📁','📂','⭐','🎯','💼','🏗','🌱','🔬','💡','🏆','📊','🤝'];
+    var colors = [
+      { hex: '#006C35', label: 'Saudi Green' },
+      { hex: '#1e40af', label: 'Blue' },
+      { hex: '#7c3aed', label: 'Purple' },
+      { hex: '#b45309', label: 'Amber' },
+      { hex: '#be123c', label: 'Rose' },
+      { hex: '#0f766e', label: 'Teal' }
+    ];
+    var ar = fldIsRTL();
+    var selectedIcon = '📁';
+    var selectedColor = '#006C35';
+
+    var overlay = document.createElement('div');
+    overlay.className = 'folder-modal-overlay';
+    overlay.id = 'folderModalOverlay';
+    overlay.innerHTML =
+      '<div class="folder-modal" role="dialog" aria-label="' + (ar ? 'إنشاء مجلد' : 'Create Folder') + '">' +
+        '<div class="folder-modal-title">' + (ar ? 'إنشاء مجلد جديد' : 'Create New Folder') + '</div>' +
+        '<div class="folder-modal-field">' +
+          '<label for="folderNameInput">' + (ar ? 'الاسم' : 'Name') + '</label>' +
+          '<input type="text" id="folderNameInput" maxlength="50" placeholder="' + (ar ? 'مثال: منح رؤية 2030' : 'e.g. Vision 2030 Grants') + '" autocomplete="off" />' +
+        '</div>' +
+        '<div class="folder-modal-field">' +
+          '<label>' + (ar ? 'اسم بديل (اختياري)' : 'Arabic Name <span style="color:var(--text-muted);font-weight:400">(optional)</span>') + '</label>' +
+          '<input type="text" id="folderNameArInput" maxlength="50" placeholder="' + (ar ? 'اسم المجلد بالعربية' : 'Arabic folder name') + '" dir="rtl" autocomplete="off" />' +
+        '</div>' +
+        '<div class="folder-modal-field">' +
+          '<label>' + (ar ? 'الرمز' : 'Icon') + '</label>' +
+          '<div class="folder-icon-picker">' +
+            icons.map(function (ic) { return '<button class="folder-icon-chip' + (ic === '📁' ? ' selected' : '') + '" data-icon="' + ic + '" type="button">' + ic + '</button>'; }).join('') +
+          '</div>' +
+        '</div>' +
+        '<div class="folder-modal-field">' +
+          '<label>' + (ar ? 'اللون' : 'Color') + '</label>' +
+          '<div class="folder-color-picker">' +
+            colors.map(function (c) { return '<button class="folder-color-swatch' + (c.hex === '#006C35' ? ' selected' : '') + '" style="background:' + c.hex + '" data-color="' + c.hex + '" title="' + c.label + '" type="button" aria-label="' + c.label + '"></button>'; }).join('') +
+          '</div>' +
+        '</div>' +
+        '<div class="folder-modal-actions">' +
+          '<button class="folder-modal-cancel" id="folderModalCancel" type="button">' + (ar ? 'إلغاء' : 'Cancel') + '</button>' +
+          '<button class="folder-modal-create" id="folderModalCreate" type="button">' + (ar ? 'إنشاء' : 'Create') + '</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(overlay);
+    var nameInput = document.getElementById('folderNameInput');
+    if (nameInput) nameInput.focus();
+
+    overlay.querySelectorAll('.folder-icon-chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        overlay.querySelectorAll('.folder-icon-chip').forEach(function (c) { c.classList.remove('selected'); });
+        chip.classList.add('selected');
+        selectedIcon = chip.getAttribute('data-icon');
+      });
+    });
+    overlay.querySelectorAll('.folder-color-swatch').forEach(function (sw) {
+      sw.addEventListener('click', function () {
+        overlay.querySelectorAll('.folder-color-swatch').forEach(function (s) { s.classList.remove('selected'); });
+        sw.classList.add('selected');
+        selectedColor = sw.getAttribute('data-color');
+      });
+    });
+    document.getElementById('folderModalCancel').addEventListener('click', function () { overlay.remove(); });
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.remove(); });
+
+    document.getElementById('folderModalCreate').addEventListener('click', function () {
+      var name = (nameInput.value || '').trim();
+      var nameAr = (document.getElementById('folderNameArInput').value || '').trim();
+      if (!name) { nameInput.style.borderColor = '#ef4444'; nameInput.focus(); return; }
+      nameInput.style.borderColor = '';
+      var supa = _db || window._supabase;
+      supa.from('user_folders').insert({
+        user_id: _uid, name: name, name_ar: nameAr || null,
+        icon: selectedIcon, color: selectedColor
+      }).then(function (res) {
+        if (res && res.error) { console.error('[WS] folder create error:', res.error); return; }
+        overlay.remove();
+        renderFolderList(body);
+        if (typeof addNotif === 'function') {
+          addNotif(ar ? 'تم إنشاء المجلد' : 'Folder created',
+                   ar ? ('تم إنشاء "' + name + '" بنجاح') : ('"' + name + '" is ready'));
+        }
+      });
+    });
+    nameInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') document.getElementById('folderModalCreate').click();
+    });
+  }
+
+  function deleteFolder(folderId, folderName, body) {
+    var ar = fldIsRTL();
+    var msg = ar
+      ? ('هل تريد حذف "' + folderName + '"؟ سيتم حذف جميع العناصر.')
+      : ('Delete "' + folderName + '"? All items inside will be removed.');
+    if (!confirm(msg)) return;
+    var supa = _db || window._supabase;
+    supa.from('user_folders').delete().eq('id', folderId).then(function () {
+      renderFolderList(body);
+    });
+  }
+
+  function folderExportCSV(folderId, folderName) {
+    var supa = _db || window._supabase;
+    supa.from('folder_items').select('opp_id').eq('folder_id', folderId).then(function (ir) {
+      var items = (ir && ir.data) || [];
+      if (!items.length) { alert(fldIsRTL() ? 'هذا المجلد فارغ.' : 'This folder is empty.'); return; }
+      supa.from('opportunities')
+        .select('id, title, type, sectors, deadline_date, funding_amount, funding_type, status, application_link, description_short, sponsor_institution, country, eligibility_region, eligibility_entities, last_verified')
+        .in('id', items.map(function (i) { return i.opp_id; }))
+        .then(function (or_) {
+          var rows = (or_ && or_.data) || [];
+          var headers = ['ID','Title','Type','Sectors','Deadline','Funding Amount','Funding Type','Status','URL','Description','Sponsor','Country','Eligibility Region','Eligibility Entities','Last Verified'];
+          var esc = function (v) {
+            if (v == null) return '';
+            if (Array.isArray(v)) v = v.join('; ');
+            return '"' + String(v).replace(/"/g, '""') + '"';
+          };
+          var csvRows = rows.map(function (o) {
+            return [o.id, o.title, o.type, o.sectors, o.deadline_date, o.funding_amount, o.funding_type, o.status, o.application_link, o.description_short, o.sponsor_institution, o.country, o.eligibility_region, o.eligibility_entities, o.last_verified].map(esc).join(',');
+          });
+          var csv = [headers.join(',')].concat(csvRows).join('\n');
+          var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+          var a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = (folderName || 'folder').replace(/[^a-z0-9؀-ۿ]/gi, '_') + '_opportunities.csv';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 100);
+        });
+    });
+  }
+
+  function folderExportPDF(folderId, folderName) {
+    var supa = _db || window._supabase;
+    supa.from('folder_items').select('opp_id').eq('folder_id', folderId).then(function (ir) {
+      var items = (ir && ir.data) || [];
+      if (!items.length) { alert(fldIsRTL() ? 'هذا المجلد فارغ.' : 'This folder is empty.'); return; }
+      supa.from('opportunities')
+        .select('id, title, type, sectors, deadline_date, funding_amount, funding_type, status, application_link, description_short, sponsor_institution')
+        .in('id', items.map(function (i) { return i.opp_id; }))
+        .then(function (or_) {
+          var opps = (or_ && or_.data) || [];
+          var today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+          var safeName = fldEsc(folderName || 'Folder');
+
+          var cardsHTML = opps.map(function (o) {
+            var sectorTxt = Array.isArray(o.sectors) ? o.sectors.join(', ') : (o.sector || '');
+            var badges = [
+              o.type           ? '<span class="badge">' + fldEsc(o.type) + '</span>' : '',
+              sectorTxt        ? '<span class="badge">' + fldEsc(sectorTxt) + '</span>' : '',
+              o.status         ? '<span class="badge badge-status">' + fldEsc(o.status) + '</span>' : '',
+              o.deadline_date  ? '<span class="badge deadline">📅 ' + fldEsc(o.deadline_date) + '</span>' : '',
+              o.funding_amount ? '<span class="badge amount">💰 ' + fldEsc(o.funding_amount) + (o.funding_type ? ' (' + fldEsc(o.funding_type) + ')' : '') + '</span>' : ''
+            ].filter(Boolean).join('');
+            return '<div class="opp-card">' +
+              '<div class="opp-title">' + fldEsc(o.title || 'Untitled') + '</div>' +
+              (o.sponsor_institution ? '<div class="opp-sponsor">' + fldEsc(o.sponsor_institution) + '</div>' : '') +
+              (badges ? '<div class="badges">' + badges + '</div>' : '') +
+              (o.description_short ? '<div class="opp-desc">' + fldEsc(o.description_short) + '</div>' : '') +
+              (o.application_link ? '<div class="opp-url">🔗 ' + fldEsc(o.application_link) + '</div>' : '') +
+            '</div>';
+          }).join('');
+
+          var html = '<!DOCTYPE html>' +
+'<html lang="en">' +
+'<head>' +
+  '<meta charset="UTF-8">' +
+  '<title>' + safeName + ' — Opportunity Report</title>' +
+  '<link rel="preconnect" href="https://fonts.googleapis.com">' +
+  '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">' +
+  '<style>' +
+    '*{box-sizing:border-box;margin:0;padding:0}' +
+    'body{font-family:\'Inter\',sans-serif;color:#0f172a;padding:2rem;max-width:860px;margin:0 auto;font-size:14px;line-height:1.5}' +
+    '.report-header{border-bottom:3px solid #006C35;padding-bottom:1rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap}' +
+    '.report-brand{display:flex;align-items:center;gap:0.5rem}' +
+    '.report-brand-dot{width:12px;height:12px;background:#006C35;border-radius:50%}' +
+    '.report-brand-name{font-weight:700;font-size:14px;color:#006C35;letter-spacing:0.02em}' +
+    '.report-title{font-size:1.5rem;font-weight:700;margin-top:0.5rem;color:#0f172a}' +
+    '.report-meta{font-size:12px;color:#64748b;margin-top:0.25rem}' +
+    '.report-summary{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:0.875rem 1rem;margin-bottom:1.5rem;font-size:13px;color:#475569}' +
+    '.opp-card{border:1px solid #e2e8f0;border-radius:10px;padding:1rem 1.125rem;margin-bottom:0.75rem;page-break-inside:avoid;background:#fff}' +
+    '.opp-title{font-size:15px;font-weight:700;color:#0f172a;margin-bottom:0.25rem}' +
+    '.opp-sponsor{font-size:12px;color:#64748b;font-weight:500;margin-bottom:0.5rem}' +
+    '.badges{display:flex;flex-wrap:wrap;gap:0.375rem;margin:0.5rem 0}' +
+    '.badge{font-size:11px;font-weight:600;padding:0.125rem 0.5rem;border-radius:999px;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0}' +
+    '.badge.deadline{background:rgba(245,158,11,0.10);color:#b45309;border-color:rgba(245,158,11,0.25)}' +
+    '.badge.amount{background:rgba(0,108,53,0.08);color:#006C35;border-color:rgba(0,108,53,0.20)}' +
+    '.badge.badge-status{background:rgba(16,185,129,0.10);color:#059669;border-color:rgba(16,185,129,0.25)}' +
+    '.opp-desc{font-size:13px;color:#334155;margin-top:0.5rem;line-height:1.55}' +
+    '.opp-url{font-size:12px;color:#0f766e;margin-top:0.5rem;word-break:break-all}' +
+    '.report-footer{margin-top:2rem;padding-top:1rem;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;text-align:center}' +
+    '@media print{body{padding:1rem}.opp-card{break-inside:avoid;page-break-inside:avoid}a{color:#0f766e;text-decoration:none}}' +
+  '</style>' +
+'</head>' +
+'<body>' +
+  '<div class="report-header">' +
+    '<div>' +
+      '<div class="report-brand"><span class="report-brand-dot"></span><span class="report-brand-name">SAUDI OPPORTUNITY HUB</span></div>' +
+      '<div class="report-title">' + safeName + '</div>' +
+      '<div class="report-meta">Opportunity report · ' + opps.length + ' record' + (opps.length === 1 ? '' : 's') + ' · Generated ' + today + '</div>' +
+    '</div>' +
+  '</div>' +
+  '<div class="report-summary">This report contains opportunities curated in the "' + safeName + '" folder. Verify deadlines and eligibility directly with the sponsoring organization.</div>' +
+  cardsHTML +
+  '<div class="report-footer">Generated by Saudi Opportunity Hub · contact@midnightspace.io</div>' +
+  '<scr' + 'ipt>window.addEventListener("load",function(){setTimeout(function(){window.print();},400);});</scr' + 'ipt>' +
+'</body>' +
+'</html>';
+
+          /* Open via Blob URL — avoids document.write */
+          var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+          var url = URL.createObjectURL(blob);
+          var w = window.open(url, '_blank');
+          if (!w) { alert(fldIsRTL() ? 'يرجى السماح بالنوافذ المنبثقة لتصدير PDF.' : 'Please allow pop-ups to export PDF.'); URL.revokeObjectURL(url); return; }
+          setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+        });
+    });
   }
 
   /* ── SETTINGS ─────────────────────────────────────────────── */
