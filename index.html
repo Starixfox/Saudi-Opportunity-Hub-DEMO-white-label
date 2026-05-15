@@ -18055,18 +18055,18 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     /* Initial pass in case the watchlist is already on screen */
     injectWatchlistFolderButtons();
 
-    /* Delegated click — toggle dropdown, load folders, insert on pick */
+    /* Delegated click — toggle dropdown, load folders, insert on pick.
+       Option A: dropdown lives on document.body (fixed-positioned) so a row
+       click cannot bubble through the button and re-trigger the toggle. */
     document.addEventListener('click', function (e) {
-      /* 1. Click on a folder button → open/close its dropdown */
+      /* 1. Click on a folder button → open/close the dropdown */
       var trigger = e.target.closest('.ws-item-folder-btn');
       if (trigger) {
         e.stopPropagation();
-        var existing = trigger.querySelector('.ws-item-folder-dropdown');
-        /* Close any other open dropdowns first */
-        document.querySelectorAll('.ws-item-folder-dropdown').forEach(function (d) {
-          if (d !== existing) d.remove();
-        });
-        if (existing) { existing.remove(); return; }
+        /* Toggle: close any open dropdown; if one was open, we're done. */
+        var anyOpen = document.querySelector('.ws-item-folder-dropdown');
+        document.querySelectorAll('.ws-item-folder-dropdown').forEach(function (d) { d.remove(); });
+        if (anyOpen) return;
 
         var supa = window._supabase;
         var sess = window.__ohSession;
@@ -18075,9 +18075,18 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         var dd = document.createElement('div');
         dd.className = 'ws-item-folder-dropdown';
         dd.innerHTML = '<div class="ws-item-folder-dropdown-empty">' + (ar ? 'جارٍ التحميل…' : 'Loading…') + '</div>';
-        trigger.appendChild(dd);
+
+        /* Fixed-position to viewport so it can't be clipped by overflow on
+           .ws-panel / #wsPanelBody, and so it isn't a child of the button. */
+        var rect = trigger.getBoundingClientRect();
+        dd.style.position = 'fixed';
+        dd.style.top = (rect.bottom + 4) + 'px';
+        dd.style.right = (window.innerWidth - rect.right) + 'px';
+        dd.style.left = 'auto';
+        document.body.appendChild(dd);
 
         var oppId = trigger.getAttribute('data-opp-id');
+        dd.dataset.oppId = oppId;
         supa.from('user_folders').select('id, name, name_ar, icon').eq('user_id', sess.user.id).order('created_at', { ascending: false }).then(function (res) {
           var folders = (res && res.data) || [];
           if (!folders.length) {
@@ -18103,8 +18112,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       if (pick) {
         e.stopPropagation();
         var dd2 = pick.closest('.ws-item-folder-dropdown');
-        var btnEl = dd2 && dd2.parentElement;
-        var oid = btnEl && btnEl.getAttribute('data-opp-id');
+        var oid = dd2 && dd2.dataset.oppId;
         var fname = pick.getAttribute('data-folder-name');
         var fid = pick.getAttribute('data-folder-id');
         var supa2 = window._supabase;
@@ -18123,7 +18131,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         return;
       }
 
-      /* 3. Click outside → close any open watchlist-folder dropdown */
+      /* 3. Click outside → close any open watchlist-folder dropdown.
+         Skip if the click landed inside a dropdown's empty padding (would
+         otherwise close the menu before the user can read it). */
+      if (e.target.closest('.ws-item-folder-dropdown')) return;
       document.querySelectorAll('.ws-item-folder-dropdown').forEach(function (d) { d.remove(); });
     });
   }
