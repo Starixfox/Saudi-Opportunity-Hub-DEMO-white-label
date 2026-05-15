@@ -19,7 +19,24 @@
     var session = result.data && result.data.session;
     if (!session) {
       window.location.href = 'login.html';
+      return;
     }
+    // ── Admin role check — drives the admin sidebar entry + #admin view
+    window.__ohSession = session;
+    _supabase
+      .from('user_prefs')
+      .select('role')
+      .eq('user_id', session.user.id)
+      .single()
+      .then(function(res) {
+        var isAdmin = !!(res && res.data && res.data.role === 'admin');
+        window.__ohIsAdmin = isAdmin;
+        try { window.dispatchEvent(new CustomEvent('oh:role-ready', { detail: { isAdmin: isAdmin } })); } catch (e) {}
+      })
+      .catch(function() {
+        window.__ohIsAdmin = false;
+        try { window.dispatchEvent(new CustomEvent('oh:role-ready', { detail: { isAdmin: false } })); } catch (e) {}
+      });
   }).catch(function(err) {
     console.warn('[Auth] getSession error:', err);
     window.location.href = 'login.html';
@@ -6876,6 +6893,303 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   .about-wl-section { padding: 1.25rem; }
 }
 
+/* ── ADMIN DASHBOARD ───────────────────────────────────────── */
+.app-nav-item--admin {
+  background: rgba(239,68,68,0.10) !important;
+  color: #ef4444 !important;
+}
+.app-nav-item--admin [data-lucide],
+.app-nav-item--admin svg { color: #ef4444 !important; }
+.app-nav-item--admin:hover {
+  background: rgba(239,68,68,0.18) !important;
+  color: #dc2626 !important;
+}
+.app-nav-item--admin.active {
+  background: rgba(239,68,68,0.22) !important;
+  color: #dc2626 !important;
+}
+#view-admin .admin-wrap {
+  padding: 1.5rem;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+#view-admin .view-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  letter-spacing: -0.02em;
+  margin: 0.25rem 0 0;
+}
+#view-admin .section-overline {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #ef4444;
+  text-transform: uppercase;
+}
+.admin-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.admin-header-meta {
+  font-size: 0.8125rem;
+  color: var(--text-muted, #94a3b8);
+  background: var(--bg-elevated, #f1f5f9);
+  padding: 0.375rem 0.875rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-default, #e2e8f0);
+}
+.admin-header-meta strong { color: var(--text-primary, #0f172a); font-weight: 600; }
+.admin-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.admin-kpi-card {
+  background: var(--bg-surface, #fff);
+  border: 1px solid var(--border-default, #e2e8f0);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+.admin-kpi-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.admin-kpi-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted, #94a3b8);
+  margin-top: 0.5rem;
+}
+.admin-tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 2px solid var(--border-default, #e2e8f0);
+  margin-bottom: 1.25rem;
+}
+.admin-tab {
+  padding: 0.625rem 1.125rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted, #94a3b8);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.admin-tab.active {
+  color: var(--accent, #006C35);
+  border-bottom-color: var(--accent, #006C35);
+  font-weight: 600;
+}
+.admin-toolbar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+.admin-search-input {
+  flex: 1;
+  max-width: 340px;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid var(--border-default, #e2e8f0);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background: var(--bg-surface, #fff);
+  color: var(--text-primary, #0f172a);
+}
+.admin-search-input:focus {
+  outline: none;
+  border-color: var(--accent, #006C35);
+  box-shadow: 0 0 0 3px rgba(0,108,53,0.12);
+}
+.admin-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border-default, #e2e8f0);
+  border-radius: 10px;
+  background: var(--bg-surface, #fff);
+}
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+.admin-table th {
+  background: var(--bg-elevated, #f1f5f9);
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-default, #e2e8f0);
+  white-space: nowrap;
+}
+.admin-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-subtle, rgba(226,232,240,0.6));
+  color: var(--text-primary, #0f172a);
+  vertical-align: middle;
+}
+.admin-table tr:last-child td { border-bottom: none; }
+.admin-table tr:hover td { background: var(--bg-elevated, #f1f5f9); }
+.admin-table .adm-cell-title {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-table .adm-cell-id {
+  font-family: 'JetBrains Mono', monospace, ui-monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted, #94a3b8);
+}
+.adm-action-btn {
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-muted, #94a3b8);
+  transition: background 0.15s, color 0.15s;
+  display: inline-flex;
+  align-items: center;
+}
+.adm-action-btn:hover {
+  background: var(--bg-elevated, #f1f5f9);
+  color: var(--text-primary, #0f172a);
+}
+.adm-action-btn.delete:hover {
+  background: rgba(239,68,68,0.08);
+  color: #ef4444;
+}
+.adm-action-btn [data-lucide], .adm-action-btn svg {
+  width: 14px; height: 14px;
+}
+.adm-status-pill {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+.adm-status-pill.open { background: rgba(16,185,129,0.10); color: #059669; }
+.adm-status-pill.closed { background: rgba(239,68,68,0.10); color: #dc2626; }
+.adm-status-pill.recurring { background: rgba(245,158,11,0.10); color: #d97706; }
+.admin-pagination {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  align-items: center;
+  font-size: 0.8125rem;
+  color: var(--text-muted, #94a3b8);
+}
+.admin-pagination button {
+  padding: 0.375rem 0.875rem;
+  background: var(--bg-surface, #fff);
+  border: 1px solid var(--border-default, #e2e8f0);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  color: var(--text-primary, #0f172a);
+  transition: background 0.15s, border-color 0.15s;
+}
+.admin-pagination button:hover:not(:disabled) {
+  background: var(--bg-elevated, #f1f5f9);
+  border-color: var(--accent, #006C35);
+}
+.admin-pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.admin-form-card {
+  background: var(--bg-surface, #fff);
+  border: 1px solid var(--border-default, #e2e8f0);
+  border-radius: 14px;
+  padding: 1.75rem 2rem;
+  max-width: 860px;
+  box-shadow: var(--shadow-sm);
+}
+.admin-form-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  margin: 0 0 1.25rem;
+}
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.admin-field { display: flex; flex-direction: column; gap: 0.375rem; }
+.admin-field-full { grid-column: 1 / -1; }
+.admin-field label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary, #475569);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.admin-field input,
+.admin-field select,
+.admin-field textarea {
+  padding: 0.5625rem 0.875rem;
+  border: 1px solid var(--border-default, #e2e8f0);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background: var(--bg-surface, #fff);
+  color: var(--text-primary, #0f172a);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+.admin-field input:focus,
+.admin-field select:focus,
+.admin-field textarea:focus {
+  outline: none;
+  border-color: var(--accent, #006C35);
+  box-shadow: 0 0 0 3px rgba(0,108,53,0.12);
+}
+.admin-form-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}
+.admin-form-result {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  min-height: 1.5rem;
+}
+.admin-form-result.success { color: #006C35; }
+.admin-form-result.error { color: #ef4444; }
+@media (max-width: 768px) {
+  .admin-kpi-row { grid-template-columns: 1fr 1fr; }
+  .admin-form-grid { grid-template-columns: 1fr; }
+  .admin-field-full { grid-column: 1; }
+}
+@media (max-width: 480px) {
+  .admin-kpi-row { grid-template-columns: 1fr; }
+}
+
 </style>
 
 </head>
@@ -6934,6 +7248,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     </button>
     <button class="app-nav-item" data-view="about" data-route="#about" type="button">
       <i data-lucide="info"></i><span data-ar="حول المنصة">About</span>
+    </button>
+    <button class="app-nav-item app-nav-item--admin" id="sidebarAdmin" data-view="admin" data-route="#admin" type="button" style="display:none">
+      <i data-lucide="shield"></i><span data-ar="الإدارة">Admin</span>
     </button>
     <button class="app-nav-item" id="sidebarWorkspace" type="button" onclick="WS.openPanel('watchlist')">
       <i data-lucide="layers"></i><span data-ar="مساحتي">My Workspace</span>
@@ -7713,6 +8030,164 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       </div>
     </section>
 
+    <!-- VIEW: ADMIN — only rendered for users with role=admin -->
+    <section class="app-view" id="view-admin" aria-label="Admin Dashboard">
+      <div class="admin-wrap">
+        <div class="admin-header">
+          <div>
+            <div class="section-overline">OPERATOR ACCESS</div>
+            <h1 class="view-title">Admin Dashboard</h1>
+          </div>
+          <div class="admin-header-meta">
+            Logged in as <strong id="admin-user-email">&mdash;</strong>
+          </div>
+        </div>
+
+        <div class="admin-kpi-row">
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-value" id="adm-total">&mdash;</div>
+            <div class="admin-kpi-label">Total Records</div>
+          </div>
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-value" id="adm-open">&mdash;</div>
+            <div class="admin-kpi-label">Open Now</div>
+          </div>
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-value" id="adm-users">&mdash;</div>
+            <div class="admin-kpi-label">Registered Users</div>
+          </div>
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-value" id="adm-watchlist">&mdash;</div>
+            <div class="admin-kpi-label">Total Saves</div>
+          </div>
+        </div>
+
+        <div class="admin-tabs" role="tablist">
+          <button class="admin-tab active" data-admtab="opportunities" type="button">Opportunities</button>
+          <button class="admin-tab" data-admtab="users" type="button">Users</button>
+          <button class="admin-tab" data-admtab="add" type="button">+ Add New</button>
+        </div>
+
+        <div class="admin-tab-panel" id="adm-tab-opportunities">
+          <div class="admin-toolbar">
+            <input type="text" id="adm-search" placeholder="Search records&hellip;" class="admin-search-input" autocomplete="off">
+            <button class="btn-primary" id="adm-export-csv" type="button">Export CSV</button>
+          </div>
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="adm-opp-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Title</th>
+                  <th>Sector</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Deadline</th>
+                  <th>Last Verified</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adm-opp-tbody"></tbody>
+            </table>
+          </div>
+          <div class="admin-pagination" id="adm-pagination"></div>
+        </div>
+
+        <div class="admin-tab-panel" id="adm-tab-users" style="display:none">
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="adm-users-table">
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Display Name</th>
+                  <th>Role</th>
+                  <th>Sectors</th>
+                  <th>Joined</th>
+                </tr>
+              </thead>
+              <tbody id="adm-users-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="admin-tab-panel" id="adm-tab-add" style="display:none">
+          <div class="admin-form-card">
+            <h3 class="admin-form-title">Add New Opportunity</h3>
+            <div class="admin-form-grid">
+              <div class="admin-field">
+                <label for="adm-f-title">Title *</label>
+                <input type="text" id="adm-f-title" placeholder="Opportunity title">
+              </div>
+              <div class="admin-field">
+                <label for="adm-f-sponsor">Sponsor / Institution *</label>
+                <input type="text" id="adm-f-sponsor" placeholder="e.g. MISA, Monsha'at">
+              </div>
+              <div class="admin-field">
+                <label for="adm-f-type">Type *</label>
+                <select id="adm-f-type">
+                  <option value="">Select type&hellip;</option>
+                  <option>Grant</option>
+                  <option>Tender</option>
+                  <option>Accelerator</option>
+                  <option>Fellowship</option>
+                  <option>Investment Program</option>
+                  <option>Loan</option>
+                  <option>Partnership</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="admin-field">
+                <label for="adm-f-sector">Sector *</label>
+                <input type="text" id="adm-f-sector" placeholder="e.g. Technology, Energy">
+              </div>
+              <div class="admin-field">
+                <label for="adm-f-region">Region</label>
+                <select id="adm-f-region">
+                  <option value="">Select&hellip;</option>
+                  <option>Saudi Arabia</option>
+                  <option>GCC</option>
+                  <option>Global</option>
+                </select>
+              </div>
+              <div class="admin-field">
+                <label for="adm-f-status">Status</label>
+                <select id="adm-f-status">
+                  <option value="Open">Open</option>
+                  <option value="Closed">Closed</option>
+                  <option value="Recurring">Recurring</option>
+                </select>
+              </div>
+              <div class="admin-field">
+                <label for="adm-f-deadline">Deadline</label>
+                <input type="date" id="adm-f-deadline">
+              </div>
+              <div class="admin-field">
+                <label for="adm-f-funding">Funding Amount</label>
+                <input type="text" id="adm-f-funding" placeholder="e.g. Up to SAR 500,000">
+              </div>
+              <div class="admin-field admin-field-full">
+                <label for="adm-f-desc">Description</label>
+                <textarea id="adm-f-desc" rows="4" placeholder="Brief description of the opportunity&hellip;"></textarea>
+              </div>
+              <div class="admin-field">
+                <label for="adm-f-url">Website URL</label>
+                <input type="url" id="adm-f-url" placeholder="https://&hellip;">
+              </div>
+              <div class="admin-field">
+                <label for="adm-f-eligibility">Eligibility (comma-separated)</label>
+                <input type="text" id="adm-f-eligibility" placeholder="Startup, SME, Researcher">
+              </div>
+            </div>
+            <div class="admin-form-actions">
+              <button class="btn-secondary" id="adm-f-reset" type="button">Clear form</button>
+              <button class="btn-primary" id="adm-f-submit" type="button">Add to Database</button>
+            </div>
+            <div id="adm-f-result" class="admin-form-result" role="status" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </div><!-- /.app-content -->
 
   <!-- Mobile bottom tab bar (under 768px) -->
@@ -8097,14 +8572,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
      at each call site below via lucide.createIcons(). */
 
   /* ---------------- View routing ---------------- */
-  var VIEWS = ['home', 'dashboard', 'opportunities', 'sectors', 'saved', 'about'];
+  var VIEWS = ['home', 'dashboard', 'opportunities', 'sectors', 'saved', 'about', 'admin'];
   var TITLES = {
     home: 'Home',
     dashboard: 'Dashboard',
     opportunities: 'Opportunities',
     sectors: 'Sectors',
     saved: 'Watchlist',
-    about: 'About'
+    about: 'About',
+    admin: 'Admin'
   };
   var DEFAULT_VIEW = 'home';
   var chartsInitialized = false;
@@ -8112,11 +8588,14 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
   function getViewFromHash() {
     var raw = (window.location.hash || '').replace(/^#/, '').toLowerCase();
+    /* Non-admins land on home if they hit #admin directly */
+    if (raw === 'admin' && !window.__ohIsAdmin) return DEFAULT_VIEW;
     return VIEWS.indexOf(raw) !== -1 ? raw : DEFAULT_VIEW;
   }
 
   function showView(view) {
     if (VIEWS.indexOf(view) === -1) view = DEFAULT_VIEW;
+    if (view === 'admin' && !window.__ohIsAdmin) view = DEFAULT_VIEW;
     VIEWS.forEach(function (v) {
       var el = document.getElementById('view-' + v);
       if (el) el.classList.toggle('active', v === view);
@@ -8141,6 +8620,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (view === 'home') initHome();
     if (view === 'sectors') renderSectorChips();
     if (view === 'saved') renderSavedList();
+    if (view === 'admin' && typeof window.loadAdminView === 'function') window.loadAdminView();
     lucide.createIcons();
     try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch (e) { window.scrollTo(0, 0); }
   }
@@ -8970,6 +9450,352 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   /* Expose routing helpers globally so inline onclick attributes work */
   window.setRoute = setRoute;
   window.showView = showView;
+
+  /* ==================================================================
+     ADMIN DASHBOARD — only active for users with role=admin.
+     KPIs, opportunities table (search + paginate + edit/delete),
+     users list, add-new form, and CSV export.
+     ================================================================== */
+  (function () {
+    var ADM_PAGE_SIZE = 25;
+    var admState = { page: 0, search: '', rows: [], total: 0 };
+
+    function $$(id) { return document.getElementById(id); }
+    function db()   { return window._supabase || null; }
+
+    function escAdm(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function fmtDate(d) {
+      if (!d) return '—';
+      var dt = new Date(d);
+      if (isNaN(dt)) return String(d);
+      return dt.toISOString().slice(0, 10);
+    }
+    function statusPill(s) {
+      var v = String(s || '').toLowerCase();
+      var cls = (v === 'open') ? 'open' : (v === 'closed') ? 'closed' : (v === 'recurring') ? 'recurring' : '';
+      return '<span class="adm-status-pill ' + cls + '">' + escAdm(s || '—') + '</span>';
+    }
+
+    function revealAdminNav() {
+      var btn = $$('sidebarAdmin');
+      if (btn && window.__ohIsAdmin) btn.style.display = '';
+    }
+    if (window.__ohIsAdmin === true) revealAdminNav();
+    window.addEventListener('oh:role-ready', function (e) {
+      if (e && e.detail && e.detail.isAdmin) revealAdminNav();
+    });
+
+    function loadKPIs() {
+      var _db = db();
+      if (!_db) return;
+      _db.from('opportunities').select('id', { count: 'exact', head: true }).then(function (r) {
+        var v = $$('adm-total'); if (v) v.textContent = (r && r.count != null) ? r.count.toLocaleString() : '—';
+      });
+      _db.from('opportunities').select('id', { count: 'exact', head: true }).eq('status', 'Open').then(function (r) {
+        var v = $$('adm-open'); if (v) v.textContent = (r && r.count != null) ? r.count.toLocaleString() : '—';
+      });
+      _db.from('user_prefs').select('user_id', { count: 'exact', head: true }).then(function (r) {
+        var v = $$('adm-users'); if (v) v.textContent = (r && r.count != null) ? r.count.toLocaleString() : '—';
+      });
+      _db.from('user_watchlist').select('id', { count: 'exact', head: true }).then(function (r) {
+        var v = $$('adm-watchlist'); if (v) v.textContent = (r && r.count != null) ? r.count.toLocaleString() : '—';
+      }).catch(function () {
+        var v = $$('adm-watchlist'); if (v) v.textContent = '—';
+      });
+    }
+
+    function loadOppPage() {
+      var _db = db();
+      if (!_db) return;
+      var from = admState.page * ADM_PAGE_SIZE;
+      var to   = from + ADM_PAGE_SIZE - 1;
+      var q = _db.from('opportunities').select('*', { count: 'exact' }).order('id', { ascending: true }).range(from, to);
+      if (admState.search && admState.search.trim()) {
+        q = q.ilike('title', '%' + admState.search.trim() + '%');
+      }
+      q.then(function (res) {
+        admState.rows  = (res && res.data) || [];
+        admState.total = (res && res.count != null) ? res.count : admState.rows.length;
+        renderOppRows();
+        renderPagination();
+      }).catch(function (e) { console.warn('[admin] opp load error', e); });
+    }
+
+    function renderOppRows() {
+      var tbody = $$('adm-opp-tbody');
+      if (!tbody) return;
+      if (!admState.rows.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:1.5rem;color:var(--text-muted);">No records found.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = admState.rows.map(function (r) {
+        var sectors = Array.isArray(r.sectors) ? r.sectors.join(', ') : (r.sector || r.sectors || '—');
+        return '<tr data-id="' + escAdm(r.id) + '">' +
+          '<td class="adm-cell-id">' + escAdm(r.id) + '</td>' +
+          '<td class="adm-cell-title" title="' + escAdm(r.title || '') + '">' + escAdm(r.title || '—') + '</td>' +
+          '<td>' + escAdm(sectors) + '</td>' +
+          '<td>' + escAdm(r.type || '—') + '</td>' +
+          '<td>' + statusPill(r.status) + '</td>' +
+          '<td>' + escAdm(fmtDate(r.deadline_date)) + '</td>' +
+          '<td>' + escAdm(fmtDate(r.last_verified)) + '</td>' +
+          '<td>' +
+            '<button class="adm-action-btn adm-edit" data-id="' + escAdm(r.id) + '" type="button" aria-label="Edit"><i data-lucide="pencil"></i></button>' +
+            '<button class="adm-action-btn delete adm-delete" data-id="' + escAdm(r.id) + '" type="button" aria-label="Delete"><i data-lucide="trash-2"></i></button>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+      if (window.lucide && lucide.createIcons) lucide.createIcons();
+    }
+
+    function renderPagination() {
+      var p = $$('adm-pagination');
+      if (!p) return;
+      var totalPages = Math.max(1, Math.ceil(admState.total / ADM_PAGE_SIZE));
+      var cur = admState.page + 1;
+      p.innerHTML =
+        '<span>Page ' + cur + ' of ' + totalPages + ' · ' + admState.total.toLocaleString() + ' records</span>' +
+        '<button id="adm-prev" type="button"' + (admState.page === 0 ? ' disabled' : '') + '>Prev</button>' +
+        '<button id="adm-next" type="button"' + (cur >= totalPages ? ' disabled' : '') + '>Next</button>';
+      var prev = $$('adm-prev'); if (prev) prev.addEventListener('click', function () { if (admState.page > 0) { admState.page--; loadOppPage(); } });
+      var nxt  = $$('adm-next'); if (nxt)  nxt.addEventListener('click',  function () { if (cur < totalPages)   { admState.page++; loadOppPage(); } });
+    }
+
+    function deleteOpp(id) {
+      var _db = db();
+      if (!_db) return;
+      if (!confirm('Delete record ' + id + '? This cannot be undone.')) return;
+      _db.from('opportunities').delete().eq('id', id).then(function (r) {
+        if (r && r.error) { alert('Delete failed: ' + r.error.message); return; }
+        loadOppPage();
+        loadKPIs();
+      });
+    }
+
+    function inlineEdit(rec, tr) {
+      if (!tr) return;
+      var sectorsStr = Array.isArray(rec.sectors) ? rec.sectors.join(', ') : (rec.sector || '');
+      tr.innerHTML =
+        '<td class="adm-cell-id">' + escAdm(rec.id) + '</td>' +
+        '<td><input class="admin-search-input adm-edit-title"  value="' + escAdm(rec.title || '') + '" style="max-width:none;width:100%"></td>' +
+        '<td><input class="admin-search-input adm-edit-sector" value="' + escAdm(sectorsStr) + '" style="max-width:none;width:100%"></td>' +
+        '<td><input class="admin-search-input adm-edit-type"   value="' + escAdm(rec.type || '') + '" style="max-width:none;width:100%"></td>' +
+        '<td><select class="admin-search-input adm-edit-status">' +
+          ['Open','Closed','Recurring'].map(function (s) {
+            return '<option' + (s === rec.status ? ' selected' : '') + '>' + s + '</option>';
+          }).join('') +
+        '</select></td>' +
+        '<td><input type="date" class="admin-search-input adm-edit-deadline" value="' + escAdm(fmtDate(rec.deadline_date)) + '"></td>' +
+        '<td>' + escAdm(fmtDate(rec.last_verified)) + '</td>' +
+        '<td>' +
+          '<button class="adm-action-btn adm-save"   data-id="' + escAdm(rec.id) + '" type="button" aria-label="Save"><i data-lucide="check"></i></button>' +
+          '<button class="adm-action-btn adm-cancel" data-id="' + escAdm(rec.id) + '" type="button" aria-label="Cancel"><i data-lucide="x"></i></button>' +
+        '</td>';
+      if (window.lucide && lucide.createIcons) lucide.createIcons();
+      var save = tr.querySelector('.adm-save');
+      var cancel = tr.querySelector('.adm-cancel');
+      if (cancel) cancel.addEventListener('click', function () { loadOppPage(); });
+      if (save) save.addEventListener('click', function () {
+        var patch = {
+          title: tr.querySelector('.adm-edit-title').value,
+          sectors: tr.querySelector('.adm-edit-sector').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean),
+          type: tr.querySelector('.adm-edit-type').value,
+          status: tr.querySelector('.adm-edit-status').value,
+          deadline_date: tr.querySelector('.adm-edit-deadline').value || null,
+          last_verified: new Date().toISOString().slice(0, 10)
+        };
+        var _db = db();
+        _db.from('opportunities').update(patch).eq('id', rec.id).then(function (r) {
+          if (r && r.error) { alert('Update failed: ' + r.error.message); return; }
+          loadOppPage();
+          loadKPIs();
+        });
+      });
+    }
+
+    function loadUsers() {
+      var _db = db();
+      var tbody = $$('adm-users-tbody');
+      if (!_db || !tbody) return;
+      _db.from('user_prefs').select('user_id, role, prefs, updated_at').limit(200).then(function (res) {
+        var rows = (res && res.data) || [];
+        if (!rows.length) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--text-muted);">No users.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = rows.map(function (u) {
+          var prefs = u.prefs || {};
+          var name = prefs.displayName || prefs.name || '—';
+          var sectors = Array.isArray(prefs.sectors) ? prefs.sectors.join(', ') : '—';
+          return '<tr>' +
+            '<td class="adm-cell-id">' + escAdm(u.user_id) + '</td>' +
+            '<td>' + escAdm(name) + '</td>' +
+            '<td>' + escAdm(u.role || 'user') + '</td>' +
+            '<td>' + escAdm(sectors) + '</td>' +
+            '<td>' + escAdm(fmtDate(u.updated_at)) + '</td>' +
+          '</tr>';
+        }).join('');
+      });
+    }
+
+    function resetForm() {
+      ['adm-f-title','adm-f-sponsor','adm-f-type','adm-f-sector','adm-f-region','adm-f-deadline','adm-f-funding','adm-f-desc','adm-f-url','adm-f-eligibility'].forEach(function (id) {
+        var el = $$(id); if (el) el.value = '';
+      });
+      var st = $$('adm-f-status'); if (st) st.value = 'Open';
+    }
+
+    function submitNew() {
+      var _db = db();
+      if (!_db) return;
+      var title    = ($$('adm-f-title')       || {}).value || '';
+      var sponsor  = ($$('adm-f-sponsor')     || {}).value || '';
+      var type     = ($$('adm-f-type')        || {}).value || '';
+      var sector   = ($$('adm-f-sector')      || {}).value || '';
+      var region   = ($$('adm-f-region')      || {}).value || '';
+      var status   = ($$('adm-f-status')      || {}).value || 'Open';
+      var deadline = ($$('adm-f-deadline')    || {}).value || null;
+      var funding  = ($$('adm-f-funding')     || {}).value || '';
+      var descr    = ($$('adm-f-desc')        || {}).value || '';
+      var url      = ($$('adm-f-url')         || {}).value || '';
+      var elig     = ($$('adm-f-eligibility') || {}).value || '';
+      var result   = $$('adm-f-result');
+
+      function showMsg(msg, ok) {
+        if (!result) return;
+        result.className = 'admin-form-result ' + (ok ? 'success' : 'error');
+        result.textContent = msg;
+      }
+
+      if (!title.trim() || !sponsor.trim() || !type || !sector.trim()) {
+        showMsg('Please fill all required fields (marked *).', false);
+        return;
+      }
+
+      _db.from('opportunities').select('id').then(function (r) {
+        var maxN = 0;
+        ((r && r.data) || []).forEach(function (row) {
+          var m = String(row.id || '').match(/^SA-(\d+)$/i);
+          if (m) { var n = parseInt(m[1], 10); if (n > maxN) maxN = n; }
+        });
+        var newId = 'SA-' + String(maxN + 1).padStart(4, '0');
+        var rec = {
+          id: newId,
+          title: title.trim(),
+          sponsor_institution: sponsor.trim(),
+          type: type,
+          sectors: sector.split(',').map(function (s) { return s.trim(); }).filter(Boolean),
+          eligibility_region: region || null,
+          status: status,
+          deadline_date: deadline || null,
+          funding_amount: funding || null,
+          description_short: descr || null,
+          application_link: url || null,
+          eligibility_entities: elig.trim() || null,
+          last_verified: new Date().toISOString().slice(0, 10)
+        };
+        _db.from('opportunities').insert(rec).then(function (ins) {
+          if (ins && ins.error) { showMsg('Insert failed: ' + ins.error.message, false); return; }
+          showMsg('Added ' + newId + ' successfully.', true);
+          resetForm();
+          loadKPIs();
+          loadOppPage();
+        });
+      });
+    }
+
+    function exportCSV() {
+      var _db = db();
+      if (!_db) return;
+      var btn = $$('adm-export-csv');
+      if (btn) btn.disabled = true;
+      _db.from('opportunities').select('*').then(function (res) {
+        if (btn) btn.disabled = false;
+        var rows = (res && res.data) || [];
+        if (!rows.length) { alert('No records to export.'); return; }
+        var cols = Object.keys(rows[0]);
+        var csv = cols.join(',') + '\n' + rows.map(function (r) {
+          return cols.map(function (c) {
+            var v = r[c];
+            if (v == null) return '';
+            if (typeof v === 'object') v = JSON.stringify(v);
+            v = String(v).replace(/"/g, '""');
+            return /[",\n]/.test(v) ? '"' + v + '"' : v;
+          }).join(',');
+        }).join('\n');
+        var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'opportunities-export.csv';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 100);
+      });
+    }
+
+    function switchTab(name) {
+      document.querySelectorAll('#view-admin .admin-tab').forEach(function (t) {
+        t.classList.toggle('active', t.getAttribute('data-admtab') === name);
+      });
+      document.querySelectorAll('#view-admin .admin-tab-panel').forEach(function (p) {
+        p.style.display = (p.id === 'adm-tab-' + name) ? '' : 'none';
+      });
+      if (name === 'users') loadUsers();
+    }
+
+    var _admWired = false;
+    function wireAdmin() {
+      if (_admWired) return;
+      _admWired = true;
+      document.querySelectorAll('#view-admin .admin-tab').forEach(function (t) {
+        t.addEventListener('click', function () { switchTab(t.getAttribute('data-admtab')); });
+      });
+      var searchTimer = null;
+      var search = $$('adm-search');
+      if (search) {
+        search.addEventListener('input', function () {
+          clearTimeout(searchTimer);
+          searchTimer = setTimeout(function () {
+            admState.search = search.value;
+            admState.page = 0;
+            loadOppPage();
+          }, 300);
+        });
+      }
+      var tbody = $$('adm-opp-tbody');
+      if (tbody) {
+        tbody.addEventListener('click', function (e) {
+          var del = e.target.closest('.adm-delete');
+          var ed  = e.target.closest('.adm-edit');
+          if (del) { deleteOpp(del.getAttribute('data-id')); return; }
+          if (ed) {
+            var id = ed.getAttribute('data-id');
+            var rec = admState.rows.find(function (r) { return String(r.id) === String(id); });
+            if (rec) inlineEdit(rec, ed.closest('tr'));
+          }
+        });
+      }
+      var sub = $$('adm-f-submit');     if (sub) sub.addEventListener('click', submitNew);
+      var rst = $$('adm-f-reset');      if (rst) rst.addEventListener('click', resetForm);
+      var csv = $$('adm-export-csv');   if (csv) csv.addEventListener('click', exportCSV);
+    }
+
+    function loadAdminView() {
+      if (!window.__ohIsAdmin) return;
+      var emailEl = $$('admin-user-email');
+      if (emailEl) {
+        var s = window.__ohSession;
+        emailEl.textContent = (s && s.user && s.user.email) || '—';
+      }
+      wireAdmin();
+      loadKPIs();
+      loadOppPage();
+    }
+    window.loadAdminView = loadAdminView;
+  })();
 
 })();
 </script>
