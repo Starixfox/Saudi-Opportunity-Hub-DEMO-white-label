@@ -2129,9 +2129,14 @@ body.panel-open { overflow: hidden; }
    Light backgrounds, government-portal feel
    ============================================= */
 
-/* ── IS THEME: Force light + IS palette ─────── */
-html[data-theme="light"],
-:root {
+/* ── IS THEME: Light + IS palette (scoped to data-theme="light") ─────── */
+/* IMPORTANT: Do NOT include :root in this selector. The default :root tokens
+   at line 109 declare the dark palette (matching [data-theme="dark"]). If we
+   re-include :root here, this block wins on source-order tie-break and the
+   dark theme can never take effect — toggling theme does nothing visible.
+   The <html> element starts with data-theme="light" so the light palette
+   still applies by default. */
+html[data-theme="light"] {
   /* IS Brand Colors */
   --is-green:        #006C35;
   --is-green-hover:  #005229;
@@ -2215,8 +2220,8 @@ body::before { display: none; }
    Mid:    #fde8c8  (soft peach-amber)
    Peak:   #fdf0da  (light golden-orange)
    Edge:   #eef7ee  (barely-visible mint-green whisper)
-*/
-body {
+   Scoped to light theme so dark-mode background tokens can actually paint. */
+[data-theme="light"] body {
   background-color: #fff4e8 !important;
   background-image: linear-gradient(135deg,
     #fff4e8 0%,
@@ -2225,6 +2230,11 @@ body {
     #f5f7ee 82%,
     #eef7ee 100%) !important;
   background-attachment: fixed !important;
+  min-height: 100vh;
+}
+[data-theme="dark"] body {
+  background-color: var(--bg) !important;
+  background-image: none !important;
   min-height: 100vh;
 }
 #opportunities {
@@ -2282,12 +2292,12 @@ main {
 /* ── IS NAVBAR OVERRIDES ─────────────────────── */
 .navbar {
   height: 68px;
-  background: #ffffff !important;
   border-bottom: 2px solid #006C35 !important;
   box-shadow: 0 2px 8px rgba(0,108,53,0.08);
   padding: 0 32px;
 }
 [data-theme="light"] .navbar { background: #ffffff !important; }
+[data-theme="dark"]  .navbar { background: var(--bg-deep) !important; }
 
 /* Navbar: no shrink — results bar uses top:0 */
 
