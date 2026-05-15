@@ -4823,15 +4823,24 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 .app-sidebar-close {
   position: absolute; top: 10px; right: 10px;
   width: 32px; height: 32px;
+  min-width: 44px; min-height: 44px;
   display: none; align-items: center; justify-content: center;
   background: transparent; border: 1px solid var(--border);
   border-radius: var(--radius-sm); color: var(--text-muted);
   cursor: pointer; font-size: 18px; line-height: 1;
   transition: all var(--transition);
+  z-index: 10;
+  flex-shrink: 0;
 }
 .app-sidebar-close:hover { background: var(--surface-2); color: var(--text); }
 @media (max-width: 767px) {
   .app-sidebar.mobile-open .app-sidebar-close { display: flex; }
+  /* Drawer needs to be re-shown when explicitly opened — overrides the
+     blanket "hide sidebar on mobile" rule lower in the cascade. */
+  .app-sidebar.mobile-open { display: flex !important; }
+  /* Push the brand + nav links below the absolutely-positioned close button
+     so they never overlap the tap target. */
+  .app-sidebar.mobile-open .app-sidebar-brand { margin-top: 44px; }
 }
 /* Logout nav item */
 .app-nav-item--logout:hover { background: rgba(239,68,68,0.08) !important; color: #ef4444 !important; }
@@ -7182,6 +7191,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 }
 @media (max-width: 480px) {
   .admin-kpi-row { grid-template-columns: 1fr; }
+}
+
+/* ── MOBILE NAVBAR: hide compass icon — caused topbar overflow ── */
+@media (max-width: 768px) {
+  .app-topbar-title > [data-lucide="compass"] {
+    display: none !important;
+  }
 }
 
 /* ── PRODUCT TOUR MODAL — prevent step content cutoff ───────── */
