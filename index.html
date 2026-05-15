@@ -15903,87 +15903,200 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
   function folderExportPDF(folderId, folderName) {
     var supa = _db || window._supabase;
+    var ar = fldIsRTL();
+
     supa.from('folder_items').select('opp_id').eq('folder_id', folderId).then(function (ir) {
       var items = (ir && ir.data) || [];
-      if (!items.length) { alert(fldIsRTL() ? 'هذا المجلد فارغ.' : 'This folder is empty.'); return; }
+      if (!items.length) { alert(ar ? 'هذا المجلد فارغ.' : 'This folder is empty.'); return; }
+
       supa.from('opportunities')
-        .select('id, title, type, sectors, deadline_date, funding_amount, funding_type, status, application_link, description_short, sponsor_institution')
+        .select('id, title, type, sectors, profiles, deadline_date, funding_amount, funding_type, status, application_link, description_short, sponsor_institution, country, eligibility_region')
         .in('id', items.map(function (i) { return i.opp_id; }))
         .then(function (or_) {
           var opps = (or_ && or_.data) || [];
-          var today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
-          var safeName = fldEsc(folderName || 'Folder');
+          if (typeof loadJsPdf !== 'function') { alert('PDF library unavailable.'); return; }
 
-          var cardsHTML = opps.map(function (o) {
-            var sectorTxt = Array.isArray(o.sectors) ? o.sectors.join(', ') : (o.sector || '');
-            var badges = [
-              o.type           ? '<span class="badge">' + fldEsc(o.type) + '</span>' : '',
-              sectorTxt        ? '<span class="badge">' + fldEsc(sectorTxt) + '</span>' : '',
-              o.status         ? '<span class="badge badge-status">' + fldEsc(o.status) + '</span>' : '',
-              o.deadline_date  ? '<span class="badge deadline">📅 ' + fldEsc(o.deadline_date) + '</span>' : '',
-              o.funding_amount ? '<span class="badge amount">💰 ' + fldEsc(o.funding_amount) + (o.funding_type ? ' (' + fldEsc(o.funding_type) + ')' : '') + '</span>' : ''
-            ].filter(Boolean).join('');
-            return '<div class="opp-card">' +
-              '<div class="opp-title">' + fldEsc(o.title || 'Untitled') + '</div>' +
-              (o.sponsor_institution ? '<div class="opp-sponsor">' + fldEsc(o.sponsor_institution) + '</div>' : '') +
-              (badges ? '<div class="badges">' + badges + '</div>' : '') +
-              (o.description_short ? '<div class="opp-desc">' + fldEsc(o.description_short) + '</div>' : '') +
-              (o.application_link ? '<div class="opp-url">🔗 ' + fldEsc(o.application_link) + '</div>' : '') +
-            '</div>';
-          }).join('');
+          loadJsPdf().then(function (lib) {
+            var doc = new lib.jsPDF({ unit: 'mm', format: 'a4' });
+            var pageW = doc.internal.pageSize.getWidth();
+            var pageH = doc.internal.pageSize.getHeight();
+            var margin = 14;
+            var contentW = pageW - margin * 2;
 
-          var html = '<!DOCTYPE html>' +
-'<html lang="en">' +
-'<head>' +
-  '<meta charset="UTF-8">' +
-  '<title>' + safeName + ' — Opportunity Report</title>' +
-  '<link rel="preconnect" href="https://fonts.googleapis.com">' +
-  '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">' +
-  '<style>' +
-    '*{box-sizing:border-box;margin:0;padding:0}' +
-    'body{font-family:\'Inter\',sans-serif;color:#0f172a;padding:2rem;max-width:860px;margin:0 auto;font-size:14px;line-height:1.5}' +
-    '.report-header{border-bottom:3px solid #006C35;padding-bottom:1rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap}' +
-    '.report-brand{display:flex;align-items:center;gap:0.5rem}' +
-    '.report-brand-dot{width:12px;height:12px;background:#006C35;border-radius:50%}' +
-    '.report-brand-name{font-weight:700;font-size:14px;color:#006C35;letter-spacing:0.02em}' +
-    '.report-title{font-size:1.5rem;font-weight:700;margin-top:0.5rem;color:#0f172a}' +
-    '.report-meta{font-size:12px;color:#64748b;margin-top:0.25rem}' +
-    '.report-summary{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:0.875rem 1rem;margin-bottom:1.5rem;font-size:13px;color:#475569}' +
-    '.opp-card{border:1px solid #e2e8f0;border-radius:10px;padding:1rem 1.125rem;margin-bottom:0.75rem;page-break-inside:avoid;background:#fff}' +
-    '.opp-title{font-size:15px;font-weight:700;color:#0f172a;margin-bottom:0.25rem}' +
-    '.opp-sponsor{font-size:12px;color:#64748b;font-weight:500;margin-bottom:0.5rem}' +
-    '.badges{display:flex;flex-wrap:wrap;gap:0.375rem;margin:0.5rem 0}' +
-    '.badge{font-size:11px;font-weight:600;padding:0.125rem 0.5rem;border-radius:999px;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0}' +
-    '.badge.deadline{background:rgba(245,158,11,0.10);color:#b45309;border-color:rgba(245,158,11,0.25)}' +
-    '.badge.amount{background:rgba(0,108,53,0.08);color:#006C35;border-color:rgba(0,108,53,0.20)}' +
-    '.badge.badge-status{background:rgba(16,185,129,0.10);color:#059669;border-color:rgba(16,185,129,0.25)}' +
-    '.opp-desc{font-size:13px;color:#334155;margin-top:0.5rem;line-height:1.55}' +
-    '.opp-url{font-size:12px;color:#0f766e;margin-top:0.5rem;word-break:break-all}' +
-    '.report-footer{margin-top:2rem;padding-top:1rem;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;text-align:center}' +
-    '@media print{body{padding:1rem}.opp-card{break-inside:avoid;page-break-inside:avoid}a{color:#0f766e;text-decoration:none}}' +
-  '</style>' +
-'</head>' +
-'<body>' +
-  '<div class="report-header">' +
-    '<div>' +
-      '<div class="report-brand"><span class="report-brand-dot"></span><span class="report-brand-name">SAUDI OPPORTUNITY HUB</span></div>' +
-      '<div class="report-title">' + safeName + '</div>' +
-      '<div class="report-meta">Opportunity report · ' + opps.length + ' record' + (opps.length === 1 ? '' : 's') + ' · Generated ' + today + '</div>' +
-    '</div>' +
-  '</div>' +
-  '<div class="report-summary">This report contains opportunities curated in the "' + safeName + '" folder. Verify deadlines and eligibility directly with the sponsoring organization.</div>' +
-  cardsHTML +
-  '<div class="report-footer">Generated by Saudi Opportunity Hub · contact@midnightspace.io</div>' +
-  '<scr' + 'ipt>window.addEventListener("load",function(){setTimeout(function(){window.print();},400);});</scr' + 'ipt>' +
-'</body>' +
-'</html>';
+            /* ── Strip emoji / non-Latin chars jsPDF's built-in fonts can't draw. */
+            function clean(s) {
+              if (s == null) return '';
+              return String(s).replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').replace(/\s+/g, ' ').trim();
+            }
+            function wrap(text, maxW, size) {
+              doc.setFontSize(size);
+              return doc.splitTextToSize(clean(text), maxW);
+            }
+            function hexRGB(hex) {
+              var h = hex.replace('#', '');
+              return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+            }
 
-          /* Open via Blob URL — avoids document.write */
-          var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-          var url = URL.createObjectURL(blob);
-          var w = window.open(url, '_blank');
-          if (!w) { alert(fldIsRTL() ? 'يرجى السماح بالنوافذ المنبثقة لتصدير PDF.' : 'Please allow pop-ups to export PDF.'); URL.revokeObjectURL(url); return; }
-          setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+            /* ── Footer drawn on every page */
+            function drawFooter(pageNum, totalPages) {
+              doc.setFont('helvetica', 'normal');
+              doc.setFontSize(8);
+              doc.setTextColor(148, 163, 184);
+              doc.text('Saudi Opportunity Hub  ·  contact@midnightspace.io', margin, pageH - 6);
+              doc.text('Page ' + pageNum + ' / ' + totalPages, pageW - margin, pageH - 6, { align: 'right' });
+            }
+
+            /* ── Header band on first page */
+            doc.setFillColor(0, 108, 53);
+            doc.rect(0, 0, pageW, 16, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(11);
+            doc.setTextColor(255, 255, 255);
+            doc.text('SAUDI OPPORTUNITY HUB', margin, 10);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            doc.text('contact@midnightspace.io', pageW - margin, 10, { align: 'right' });
+
+            var y = 24;
+            doc.setTextColor(15, 23, 42);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.text(clean(folderName || 'Folder'), margin, y);
+            y += 6;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(100, 116, 139);
+            var today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+            doc.text(opps.length + ' opportunit' + (opps.length === 1 ? 'y' : 'ies') + '  .  Generated ' + today, margin, y);
+            y += 3;
+
+            doc.setDrawColor(0, 108, 53);
+            doc.setLineWidth(0.5);
+            doc.line(margin, y, pageW - margin, y);
+            y += 7;
+
+            /* ── Per-opportunity card */
+            opps.forEach(function (o) {
+              var score = (typeof window.computeMatch === 'function') ? window.computeMatch(o) : null;
+              var sectorTxt = Array.isArray(o.sectors) ? o.sectors.join(', ') : (o.sectors || '');
+              var titleW = contentW - 4 - (score !== null ? 24 : 0);
+
+              var titleLines = wrap(o.title || 'Untitled', titleW, 11);
+              var subtitleParts = [];
+              if (o.sponsor_institution) subtitleParts.push(clean(o.sponsor_institution));
+              if (o.type)               subtitleParts.push(clean(o.type));
+              if (sectorTxt)            subtitleParts.push(clean(sectorTxt));
+              var subtitle = subtitleParts.join('  .  ');
+              var subLines = subtitle ? wrap(subtitle, contentW - 4, 9) : [];
+
+              var metaParts = [];
+              if (o.status)         metaParts.push((o.status || '').toUpperCase());
+              if (o.deadline_date)  metaParts.push('Deadline: ' + clean(o.deadline_date));
+              if (o.funding_amount) metaParts.push('Funding: ' + clean(o.funding_amount) + (o.funding_type ? ' (' + clean(o.funding_type) + ')' : ''));
+              if (o.eligibility_region) metaParts.push('Region: ' + clean(o.eligibility_region));
+              var metaLines = metaParts.length ? wrap(metaParts.join('  .  '), contentW - 4, 9) : [];
+
+              var descLines = o.description_short ? wrap(o.description_short, contentW - 4, 9) : [];
+              var linkLines = o.application_link  ? wrap(o.application_link,  contentW - 4, 9) : [];
+
+              /* Compute card height (mm). 2mm top + 5mm per title line + 4.5mm per sub/meta/desc/link line + 2mm bottom + 4mm spacing */
+              var cardHeight = 4
+                + titleLines.length * 5
+                + (subLines.length  ? subLines.length  * 4.5 + 1 : 0)
+                + (metaLines.length ? metaLines.length * 4.5 + 1 : 0)
+                + (descLines.length ? descLines.length * 4.5 + 2 : 0)
+                + (linkLines.length ? linkLines.length * 4.5 + 1 : 0)
+                + 4;
+
+              /* Page break if card won't fit (leave 12mm for footer) */
+              if (y + cardHeight > pageH - 12) {
+                doc.addPage();
+                y = 18;
+              }
+
+              /* Card background + border */
+              doc.setFillColor(255, 255, 255);
+              doc.setDrawColor(226, 232, 240);
+              doc.setLineWidth(0.2);
+              doc.roundedRect(margin, y, contentW, cardHeight, 2, 2, 'FD');
+
+              var innerX = margin + 3;
+              var innerY = y + 5;
+
+              /* Score badge (top-right) */
+              if (score !== null) {
+                var rgb = hexRGB((typeof window.matchColor === 'function') ? window.matchColor(score) : '#64748b');
+                doc.setFillColor(rgb[0], rgb[1], rgb[2]);
+                doc.roundedRect(margin + contentW - 22, y + 2, 19, 6.5, 1.5, 1.5, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(8);
+                doc.text(score + '% match', margin + contentW - 12.5, y + 6.5, { align: 'center' });
+              }
+
+              /* Title */
+              doc.setFont('helvetica', 'bold');
+              doc.setFontSize(11);
+              doc.setTextColor(15, 23, 42);
+              doc.text(titleLines, innerX, innerY);
+              innerY += titleLines.length * 5;
+
+              /* Sponsor + type + sector subtitle */
+              if (subLines.length) {
+                innerY += 1;
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                doc.setTextColor(100, 116, 139);
+                doc.text(subLines, innerX, innerY);
+                innerY += subLines.length * 4.5;
+              }
+
+              /* Status / deadline / funding meta line */
+              if (metaLines.length) {
+                innerY += 1;
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(9);
+                doc.setTextColor(0, 108, 53);
+                doc.text(metaLines, innerX, innerY);
+                innerY += metaLines.length * 4.5;
+              }
+
+              /* Description */
+              if (descLines.length) {
+                innerY += 2;
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                doc.setTextColor(51, 65, 85);
+                doc.text(descLines, innerX, innerY);
+                innerY += descLines.length * 4.5;
+              }
+
+              /* Application link */
+              if (linkLines.length) {
+                innerY += 1;
+                doc.setFont('helvetica', 'italic');
+                doc.setFontSize(9);
+                doc.setTextColor(15, 118, 110);
+                doc.text(linkLines, innerX, innerY);
+              }
+
+              y += cardHeight + 3;
+            });
+
+            /* Footer on every page */
+            var totalPages = doc.internal.getNumberOfPages();
+            for (var p = 1; p <= totalPages; p++) {
+              doc.setPage(p);
+              drawFooter(p, totalPages);
+            }
+
+            var safeName = String(folderName || 'folder').replace(/[^a-z0-9؀-ۿ]/gi, '_');
+            doc.save(safeName + '_opportunities.pdf');
+          }).catch(function (err) {
+            console.warn('[WS] folder PDF export failed:', err);
+            alert(ar ? 'فشل تصدير PDF — حاول مرة أخرى.' : 'PDF export failed — please try again.');
+          });
         });
     });
   }
@@ -17462,6 +17575,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   function matchColor(score) {
     return score >= 80 ? '#15803d' : score >= 60 ? '#0891b2' : score >= 40 ? '#d97706' : '#64748b';
   }
+  /* Expose so other modules (WS folder PDF export) can compute the same score */
+  window.computeMatch = computeMatch;
+  window.matchColor   = matchColor;
 
   /* ── Card decoration ──────────────────────────────────── */
   function decorate(row) {
