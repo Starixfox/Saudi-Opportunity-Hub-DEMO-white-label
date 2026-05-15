@@ -16908,6 +16908,57 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
        .home-stat-val, .kpi-value, .oh4-stat-val) {
   font-variant-numeric: tabular-nums;
 }
+
+
+/* ── D8: MOTION (subset) ─────────────────────── */
+/* Tactile press feedback on interactive elements. */
+:where(.btn-primary, .btn-secondary, .app-nav-item, .app-tb-icon-btn,
+       .home-qa-btn, .app-bottom-tab, .app-tb-stat, .la-btn,
+       .bookmark-btn, .la-bookmark-btn, .home-card-see-all,
+       .oh4-sort-pill, .saved-workspace-btn, .home-sector-chip,
+       .sector-chip, .ws-panel-tab, .app-tb-lang-btn) {
+  transition: background-color var(--dur-base) var(--ease-standard),
+              color var(--dur-base) var(--ease-standard),
+              border-color var(--dur-base) var(--ease-standard),
+              transform var(--dur-fast) var(--ease-standard),
+              box-shadow var(--dur-base) var(--ease-standard);
+}
+
+:where(.btn-primary:active, .btn-secondary:active, .app-nav-item:active,
+       .app-tb-icon-btn:active, .home-qa-btn:active, .app-bottom-tab:active,
+       .app-tb-stat:active, .la-btn:active, .bookmark-btn:active,
+       .la-bookmark-btn:active, .home-card-see-all:active,
+       .oh4-sort-pill:active, .saved-workspace-btn:active,
+       .home-sector-chip:active, .sector-chip:active,
+       .ws-panel-tab:active, .app-tb-lang-btn:active) {
+  transform: scale(0.97);
+}
+
+/* Bookmark bounce refinement (replaces inline class flash) */
+@keyframes phaseD-bookmark-pop {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.32); }
+  100% { transform: scale(1); }
+}
+.la-bookmark-btn.la-saved [data-lucide],
+.bookmark-btn.bookmarked [data-lucide] {
+  animation: phaseD-bookmark-pop 280ms var(--ease-emphasis);
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.btn-primary, .btn-secondary, .app-nav-item, .app-tb-icon-btn,
+         .home-qa-btn, .app-bottom-tab, .app-tb-stat, .la-btn,
+         .bookmark-btn, .la-bookmark-btn, .home-card-see-all,
+         .oh4-sort-pill, .saved-workspace-btn, .home-sector-chip,
+         .sector-chip, .ws-panel-tab, .app-tb-lang-btn) {
+    transition: none;
+  }
+  .la-bookmark-btn.la-saved [data-lucide],
+  .bookmark-btn.bookmarked [data-lucide] {
+    animation: none;
+  }
+}
 </style>
 
 </body>
