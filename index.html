@@ -10869,10 +10869,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         else if (!isNaN(Number(value))) currentPage = Number(value);
         renderCards();
         (function () {
-          var target = document.getElementById('opportunities') || document.querySelector('.filter-bar') || document.querySelector('.table-wrapper');
+          var target = document.getElementById('resultsBar') ||
+                       document.querySelector('.results-bar') ||
+                       document.querySelector('.filter-bar');
           if (target) {
-            var navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')) || 64;
-            var top = target.getBoundingClientRect().top + window.scrollY - navH - 12;
+            var navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')) || 60;
+            var top = target.getBoundingClientRect().top + window.scrollY - navH - 8;
             try { window.scrollTo({ top: top, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, top); }
           }
         })();
