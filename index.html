@@ -5000,7 +5000,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   }
 
   /* === Compare side-by-side table === */
-  .oh-enh-compare-table-wrap { overflow-x: auto; margin: 8px 0; -webkit-overflow-scrolling: touch; }
+  .oh-enh-compare-table-wrap { overflow-x: auto; overflow-y: visible; margin: 8px 0; -webkit-overflow-scrolling: touch; }
   .oh-enh-compare-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 480px; }
   .oh-enh-compare-table th, .oh-enh-compare-table td {
     text-align: start; padding: 12px 14px;
@@ -5014,11 +5014,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     background: var(--surface-2, #f9fafb);
     width: 140px;
   }
-  .oh-enh-ct-col { position: relative; padding-top: 22px !important; }
+  .oh-enh-ct-col { position: relative; padding-top: 28px !important; overflow: visible; }
   .oh-enh-ct-title { font-size: 13.5px; font-weight: 600; line-height: 1.35; color: var(--text, #1a1f36); }
   .oh-enh-ct-badge {
-    position: absolute; top: 0; inset-inline-start: 14px;
-    transform: translateY(-50%);
+    position: absolute; top: 6px; inset-inline-start: 14px;
+    transform: none;
     background: var(--green, #006C35); color: #fff;
     font-size: 9.5px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.08em;
