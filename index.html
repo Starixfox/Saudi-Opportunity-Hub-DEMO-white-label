@@ -4883,7 +4883,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         <i data-lucide="menu"></i>
       </button>
       <i data-lucide="compass"></i>
-      <span id="appTopbarTitle">Dashboard</span>
+      <nav class="app-topbar-crumb" aria-label="breadcrumb">
+        <span class="app-topbar-crumb-current" id="appTopbarTitle">Home</span>
+      </nav>
     </div>
     <div class="app-topbar-actions">
       <!-- Workspace stats inline -->
@@ -17064,7 +17066,120 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 @media (prefers-reduced-motion: reduce) {
   .app-nav-item::before { transition: none; }
 }
+
+
+/* ── D3: TOPBAR REFINEMENT ────────────────────── */
+.app-topbar {
+  /* Replace solid bottom border with a hairline shadow */
+  border-bottom: none;
+  box-shadow: 0 1px 0 var(--divider);
+  /* Smooth transition between idle and scrolled state */
+  transition: background-color var(--dur-base) var(--ease-standard),
+              box-shadow var(--dur-base) var(--ease-standard),
+              backdrop-filter var(--dur-base) var(--ease-standard);
+  z-index: 50;
+  position: relative;
+}
+
+/* Frosted-on-scroll — toggled by JS adding .is-scrolled */
+.app-topbar.is-scrolled {
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  background: color-mix(in oklch, var(--surface) 84%, transparent);
+  box-shadow: 0 1px 0 var(--divider),
+              0 4px 16px rgba(15, 23, 42, 0.04);
+}
+[data-theme="dark"] .app-topbar.is-scrolled {
+  background: color-mix(in oklch, var(--surface) 78%, transparent);
+  box-shadow: 0 1px 0 var(--divider),
+              0 4px 16px rgba(0, 0, 0, 0.30);
+}
+
+/* Title cluster: menu btn + compass icon + breadcrumb */
+.app-topbar-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  min-width: 0;
+  flex: 1;
+}
+.app-topbar-title > [data-lucide] {
+  width: 16px;
+  height: 16px;
+  color: var(--green);
+  flex-shrink: 0;
+}
+
+/* Breadcrumb (single-current variant for non-nested views) */
+.app-topbar-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+.app-topbar-crumb-parent {
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.app-topbar-crumb-sep {
+  color: var(--text-faint);
+  font-weight: 400;
+  flex-shrink: 0;
+}
+.app-topbar-crumb-current {
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Action cluster — tighter rhythm */
+.app-topbar-actions {
+  gap: 4px;
+}
+.app-topbar-divider {
+  height: 22px;
+  width: 1px;
+  background: var(--divider);
+  margin: 0 6px;
+  flex-shrink: 0;
+}
 </style>
+
+<script id="phase-d-foundation-js">
+/* Phase D — Foundation: topbar frosted-on-scroll toggle.
+   rAF-throttled; respects prefers-reduced-motion. */
+(function () {
+  'use strict';
+  var topbar = document.querySelector('.app-topbar');
+  if (!topbar) return;
+  var ticking = false;
+  var threshold = 4;
+  function update() {
+    var scrolled = (window.scrollY || document.documentElement.scrollTop || 0) > threshold;
+    topbar.classList.toggle('is-scrolled', scrolled);
+    ticking = false;
+  }
+  function onScroll() {
+    if (!ticking) {
+      window.requestAnimationFrame(update);
+      ticking = true;
+    }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  update();
+})();
+</script>
 
 </body>
 </html>
