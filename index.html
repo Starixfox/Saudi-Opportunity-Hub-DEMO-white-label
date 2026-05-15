@@ -80,6 +80,8 @@
 <!-- Lucide: synchronous load, explicit UMD path. Icons are painted at the
      end of <body> via lucide.createIcons() so the DOM is fully built. -->
 <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+<!-- jsPDF: pre-loaded so PDF exports do not rely on dynamic injection -->
+<script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <style>
 /* =============================================
    Saudi Opportunity Hub — single consolidated stylesheet
@@ -15914,9 +15916,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         .in('id', items.map(function (i) { return i.opp_id; }))
         .then(function (or_) {
           var opps = (or_ && or_.data) || [];
-          if (typeof loadJsPdf !== 'function') { alert('PDF library unavailable.'); return; }
+          var _loadPdf = (typeof loadJsPdf === 'function') ? loadJsPdf : window.loadJsPdf;
+          if (typeof _loadPdf !== 'function') { alert('PDF library unavailable.'); return; }
 
-          loadJsPdf().then(function (lib) {
+          _loadPdf().then(function (lib) {
             var doc = new lib.jsPDF({ unit: 'mm', format: 'a4' });
             var pageW = doc.internal.pageSize.getWidth();
             var pageH = doc.internal.pageSize.getHeight();
@@ -19268,18 +19271,30 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   function loadJsPdf() {
     if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf);
     if (jsPdfReady) return jsPdfReady;
+    /* The pre-loaded <script defer> in <head> may still be parsing —
+       poll briefly for window.jspdf before falling back to dynamic injection. */
     jsPdfReady = new Promise(function (resolve, reject) {
-      var s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js';
-      s.onload = function () {
-        if (window.jspdf && window.jspdf.jsPDF) resolve(window.jspdf);
-        else reject(new Error('jsPDF failed to attach'));
-      };
-      s.onerror = function () { reject(new Error('jsPDF CDN load failed')); };
-      document.head.appendChild(s);
+      var attempts = 0;
+      (function poll() {
+        if (window.jspdf && window.jspdf.jsPDF) { resolve(window.jspdf); return; }
+        if (++attempts > 30) { /* ~3s — assume defer load failed; inject manually */
+          var s = document.createElement('script');
+          s.src = 'https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js';
+          s.onload = function () {
+            if (window.jspdf && window.jspdf.jsPDF) resolve(window.jspdf);
+            else reject(new Error('jsPDF failed to attach'));
+          };
+          s.onerror = function () { reject(new Error('jsPDF CDN load failed')); };
+          document.head.appendChild(s);
+          return;
+        }
+        setTimeout(poll, 100);
+      })();
     });
     return jsPdfReady;
   }
+  /* Expose so other modules (WS folder PDF export) can use it */
+  window.loadJsPdf = loadJsPdf;
 
   /* Shared PDF helpers */
   function pdfHeader(doc, title, subtitle) {
