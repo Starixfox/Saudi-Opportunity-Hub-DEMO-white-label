@@ -17611,6 +17611,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
        the description (renderCards already includes profiles in that chip row).
        Smart-match badge above is kept; chips appear once per card. */
 
+    /* Idempotency: drop any previously injected top-bar before re-injecting. */
+    var existingTop = content.querySelector('.oh-enh-top');
+    if (existingTop) existingTop.remove();
+
     if (topPieces.length) {
       var top = document.createElement('div');
       top.className = 'oh-enh-top';
@@ -17619,6 +17623,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     }
 
     /* Urgency bar — inserted after the stats row */
+    var existingUrg = content.querySelector('.oh-enh-urgency');
+    if (existingUrg) existingUrg.remove();
+
     var days = daysUntil(item);
     var urg = urgencyLevel(days);
     if (urg) {
@@ -17657,6 +17664,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (row.dataset.ohEnhanced === '1') return;
     var chips = row.querySelector('.occ-chips');
     if (chips) {
+      /* Idempotency: clear any previously injected match pill first. */
+      var existingPill = chips.querySelector('.oh-enh-match-compact');
+      if (existingPill) existingPill.remove();
+
       var score = computeMatch(item);
       if (score !== null) {
         var col = matchColor(score);
