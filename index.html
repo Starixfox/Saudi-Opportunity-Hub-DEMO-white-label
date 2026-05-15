@@ -16809,5 +16809,45 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 })();
 </script>
 
+<!-- ============================================================
+     Phase D — Foundation (PR 1 of 2) — 2026-05
+     Consolidated visual polish layer. Adds tokens, unifies type,
+     refines sidebar + topbar, polishes interaction motion.
+     No DB or feature changes. Light-mode primary; dark tokens
+     retained for forward-compat if theme toggle is ever restored.
+     ============================================================ -->
+<style id="phase-d-foundation">
+/* ── TOKEN EXTENSIONS ────────────────────────── */
+:root {
+  /* Motion */
+  --ease-emphasis: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+
+  /* Page rhythm */
+  --page-pad-x: clamp(20px, 3vw, 32px);
+  --page-pad-y: 28px;
+  --page-max: 1280px;
+
+  /* Card surface — consolidates radius/shadow chaos */
+  --radius-card: 14px;
+  --card-bg: var(--surface);
+  --card-border: var(--border);
+  --card-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --card-shadow-hover: 0 8px 24px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04);
+
+  /* Sidebar indicator */
+  --indicator-w: 4px;
+  --indicator-grad: linear-gradient(180deg, var(--green) 0%, color-mix(in oklch, var(--green) 70%, transparent) 100%);
+}
+
+[data-theme="dark"] {
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.40), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --card-shadow-hover: 0 10px 28px rgba(0, 0, 0, 0.50), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+</style>
+
 </body>
 </html>
