@@ -9003,6 +9003,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                   <th>Display Name</th>
                   <th>Role</th>
                   <th>Sectors</th>
+                  <th>Theme</th>
                   <th>Joined</th>
                 </tr>
               </thead>
@@ -10530,26 +10531,80 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var _db = db();
       var tbody = $$('adm-users-tbody');
       if (!_db || !tbody) return;
-      _db.from('user_prefs').select('user_id, role, prefs, updated_at').limit(200).then(function (res) {
+      _db.from('user_prefs').select('user_id, role, prefs, theme, updated_at').limit(200).then(function (res) {
         var rows = (res && res.data) || [];
         if (!rows.length) {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--text-muted);">No users.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:var(--text-muted);">No users.</td></tr>';
           return;
         }
+        var themes = window.OH_THEMES || {};
+        var themeKeys = Object.keys(themes).filter(function (k) { return k !== 'default'; });
         tbody.innerHTML = rows.map(function (u) {
           var prefs = u.prefs || {};
           var name = prefs.displayName || prefs.name || '—';
           var sectors = Array.isArray(prefs.sectors) ? prefs.sectors.join(', ') : '—';
+          /* Theme dropdown — owner-only edits via gated change handler */
+          var dotColor = (u.theme && themes[u.theme]) ? themes[u.theme].accent : '#94a3b8';
+          var dotTitle = (u.theme && themes[u.theme]) ? themes[u.theme].label.split('—')[0].trim() : 'Default';
+          var themeCell = window.__ohIsSuperAdmin
+            ? ('<select class="oh-admin-user-theme-select" data-uid="' + escAdm(u.user_id || '') + '" ' +
+                 'style="font-size:11px;padding:2px 6px;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;min-width:110px;">' +
+                 '<option value="">— default —</option>' +
+                 themeKeys.map(function (k) {
+                   var t = themes[k];
+                   var sel = (u.theme === k) ? ' selected' : '';
+                   return '<option value="' + k + '"' + sel + '>' + escAdm(t.label.split('—')[0].trim()) + '</option>';
+                 }).join('') +
+               '</select>' +
+               '<span class="oh-theme-dot" title="' + escAdm(dotTitle) + '" style="display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:5px;vertical-align:middle;background:' + dotColor + ';"></span>')
+            : ('<span class="oh-theme-dot" title="' + escAdm(dotTitle) + '" style="display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle;background:' + dotColor + ';"></span>' + escAdm(dotTitle));
           return '<tr>' +
             '<td class="adm-cell-id">' + escAdm(u.user_id) + '</td>' +
             '<td>' + escAdm(name) + '</td>' +
             '<td>' + escAdm(u.role || 'user') + '</td>' +
             '<td>' + escAdm(sectors) + '</td>' +
+            '<td>' + themeCell + '</td>' +
             '<td>' + escAdm(fmtDate(u.updated_at)) + '</td>' +
           '</tr>';
         }).join('');
       });
     }
+
+    /* Owner-only: persist theme assignment when the dropdown changes.
+       Delegated so it works after every loadUsers() re-render. */
+    document.addEventListener('change', function (e) {
+      var sel = e.target.closest('.oh-admin-user-theme-select');
+      if (!sel) return;
+      if (!window.__ohIsSuperAdmin) return;
+      var supa = window._supabase;
+      if (!supa) return;
+      var uid = sel.getAttribute('data-uid');
+      var themeKey = sel.value || null;
+      var themes = window.OH_THEMES || {};
+      var t = themeKey && themes[themeKey];
+      var themeName = t ? t.label.split('—')[0].trim() : 'Default';
+      if (!uid) return;
+      supa.from('user_prefs').update({ theme: themeKey }).eq('user_id', uid).then(function (res) {
+        if (res && res.error) {
+          if (window.WS && window.WS.showToast) window.WS.showToast('Failed to save theme: ' + res.error.message);
+          return;
+        }
+        if (window.WS && window.WS.showToast) window.WS.showToast('Theme set to ' + themeName + ' for this user ✓');
+        /* Update the row's confirmation dot */
+        var dot = sel.parentElement.querySelector('.oh-theme-dot');
+        if (!dot) {
+          dot = document.createElement('span');
+          dot.className = 'oh-theme-dot';
+          dot.style.cssText = 'display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:5px;vertical-align:middle;transition:background 0.2s;';
+          sel.parentElement.appendChild(dot);
+        }
+        dot.style.background = t ? t.accent : '#94a3b8';
+        dot.title = themeName;
+        /* If the owner just changed their own theme, apply it live */
+        var myUid = window.__ohSession && window.__ohSession.user && window.__ohSession.user.id;
+        if (uid === myUid && typeof window.applyTheme === 'function') window.applyTheme(themeKey || 'default');
+      });
+    });
 
     function resetForm() {
       ['adm-f-title','adm-f-sponsor','adm-f-type','adm-f-sector','adm-f-region','adm-f-deadline','adm-f-funding','adm-f-desc','adm-f-url','adm-f-eligibility'].forEach(function (id) {
@@ -10804,10 +10859,39 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         html += '</div>';
       });
       html += '</div></div>';
+
+      /* Users by assigned theme — populated async after insert */
+      html += '<div style="margin-top:32px;">';
+      html += '<h3 style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.06em;">👥 Users by Assigned Theme</h3>';
+      html += '<div id="ohTmUserSummary" style="font-size:12px;color:var(--text-muted);">Loading…</div>';
+      html += '</div>';
+
       html += '</div>';
 
       panel.innerHTML = html;
       panel.dataset.ohTmRendered = '1';
+
+      /* Populate the user-by-theme summary */
+      (function () {
+        var supa = window._supabase;
+        if (!supa) return;
+        supa.from('user_prefs').select('user_id, theme').not('theme', 'is', null).limit(100).then(function (res) {
+          var summary = document.getElementById('ohTmUserSummary');
+          if (!summary) return;
+          var rows = (res && res.data) || [];
+          if (!rows.length) { summary.textContent = 'No users have been assigned a custom theme yet.'; return; }
+          summary.innerHTML = rows.map(function (r) {
+            var t = window.OH_THEMES && window.OH_THEMES[r.theme];
+            var color = t ? t.accent : '#94a3b8';
+            var label = t ? t.label.split('—')[0].trim() : r.theme;
+            return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--divider);">' +
+              '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + color + ';flex-shrink:0;"></span>' +
+              '<span style="font-family:monospace;font-size:10.5px;color:var(--text-faint);min-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escAttr(r.user_id) + '</span>' +
+              '<span style="font-weight:600;color:var(--text);">' + escAttr(label) + '</span>' +
+            '</div>';
+          }).join('');
+        });
+      })();
 
       /* Logo broken-image fallback — JS-set handler so the security hook
          doesn't strip an inline onerror attribute. Replaces the broken img
@@ -15400,8 +15484,19 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       .catch(function (e) { console.warn('[WS] deadline alert error:', e); });
   }
     /* Prefs */
-    _db.from('user_prefs').select('prefs').eq('user_id', _uid).single().then(function(res){
-      if (res.error || !res.data || !res.data.prefs) return;
+    _db.from('user_prefs').select('prefs, theme').eq('user_id', _uid).single().then(function(res){
+      if (res.error || !res.data) return;
+      /* Apply admin-assigned institution theme. Priority: URL param > admin
+         assignment > localStorage > default. URL ?theme=xxx wins so demo
+         links keep working regardless of who is signed in. */
+      try {
+        var urlTheme = new URLSearchParams(window.location.search).get('theme');
+        var adminTheme = res.data.theme;
+        if (!urlTheme && adminTheme && window.OH_THEMES && window.OH_THEMES[adminTheme] && typeof window.applyTheme === 'function') {
+          window.applyTheme(adminTheme);
+        }
+      } catch (e) {}
+      if (!res.data.prefs) return;
       var remote = res.data.prefs;
       /* Only overwrite if remote is newer / more complete */
       var merged = Object.assign({}, remote, prefs);
