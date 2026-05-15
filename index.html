@@ -6773,22 +6773,14 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
 /* ── 17. MOBILE (≤768px) ───────────────────────────────── */
 @media (max-width: 768px) {
-  .app-sidebar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    top: auto;
-    height: 56px;
-    width: 100%;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-around;
-    padding: 0 8px;
-    border-top: 1px solid rgba(255,255,255,0.08);
-    border-right: none;
-    z-index: 90;
-    overflow-x: auto;
+  /* Sidebar hidden on mobile — bottom-tab-bar is the mobile nav */
+  .app-sidebar, .sidebar, #sidebar {
+    display: none !important;
+  }
+  .main-content, .content-area, #main-content, .app-content {
+    padding-bottom: 72px !important;
+    margin-left: 0 !important;
+    width: 100% !important;
   }
   .app-sidebar-brand,
   .app-sidebar-bottom,
@@ -7188,6 +7180,45 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 }
 @media (max-width: 480px) {
   .admin-kpi-row { grid-template-columns: 1fr; }
+}
+
+/* ── PRODUCT TOUR MODAL — prevent step content cutoff ───────── */
+.tour-modal, [class*="tour-modal"], [id*="tour-modal"] {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(520px, 90vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  z-index: 9999;
+}
+/* Same vertical-overflow fix for the existing JS-positioned tour tooltip */
+.ob-tour-tooltip {
+  max-height: 85vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+@media (max-width: 768px) {
+  .tour-modal, [class*="tour-modal"], [id*="tour-modal"] {
+    top: auto;
+    bottom: 80px;
+    left: 1rem;
+    right: 1rem;
+    transform: none;
+    width: auto;
+    max-height: 65vh;
+  }
+  .ob-tour-tooltip {
+    max-height: 65vh;
+  }
+}
+.tour-step img, .tour-step video, .tour-step iframe {
+  max-height: 180px;
+  object-fit: cover;
+  width: 100%;
+  border-radius: 8px;
 }
 
 </style>
@@ -14187,7 +14218,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (!_db || !_uid || _uid === 'anon') return;
     /* Watchlist */
     _db.from('user_watchlist').select('*').eq('user_id', _uid).then(function(res){
-      if (res.error || !res.data || !res.data.length) return;
+      if (res.error || !res.data || !res.data.length) { checkDeadlineAlerts(); return; }
       var remote = res.data.map(function(r){
         return { id: r.opp_id, title: r.title, sector: r.sector, type: r.type, notes: r.notes||'', savedAt: r.saved_at };
       });
@@ -14200,7 +14231,53 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       save(KEY_WATCHLIST, watchlist);
       syncBookmarkButtons();
       updateWsBar();
+      checkDeadlineAlerts();
     }).catch(function(e){ console.warn('[WS] load watchlist error:', e); });
+
+  /* ── DEADLINE ALERTS — Phase B ──────────────────────────────
+     For watchlist items with deadlines in the next 7 days, drop a
+     notification. Tracks "seen" IDs in localStorage keyed by date so
+     the same alert isn't re-fired on every page load. */
+  function checkDeadlineAlerts() {
+    if (!_db || !_uid || _uid === 'anon') return;
+    if (!watchlist || !watchlist.length) return;
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    var todayKey = today.toISOString().slice(0, 10);
+    var in7 = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+    var ids = watchlist.map(function (w) { return w.id; }).filter(Boolean);
+    if (!ids.length) return;
+    var SEEN_KEY = 'oh-deadline-seen';
+    var seen;
+    try { seen = JSON.parse(localStorage.getItem(SEEN_KEY) || '{}'); } catch (e) { seen = {}; }
+    /* Reset cache if it's a new day */
+    if (seen.__date !== todayKey) seen = { __date: todayKey };
+    var ar = (document.body && document.body.dir === 'rtl');
+    _db.from('opportunities')
+      .select('id, title, deadline_date, status')
+      .in('id', ids)
+      .eq('status', 'Open')
+      .not('deadline_date', 'is', null)
+      .lte('deadline_date', in7.toISOString().slice(0, 10))
+      .gte('deadline_date', todayKey)
+      .then(function (res) {
+        var rows = (res && res.data) || [];
+        if (!rows.length) return;
+        rows.forEach(function (opp) {
+          if (seen[opp.id]) return;
+          var d = new Date(opp.deadline_date);
+          var daysLeft = Math.max(0, Math.ceil((d - today) / 86400000));
+          var icon = daysLeft <= 3 ? '🔴' : '🟡';
+          var dayWord = ar ? (daysLeft === 1 ? 'يوم' : 'أيام') : ('day' + (daysLeft !== 1 ? 's' : ''));
+          var title = ar
+            ? (icon + ' الموعد النهائي خلال ' + daysLeft + ' ' + dayWord)
+            : (icon + ' Deadline in ' + daysLeft + ' ' + dayWord);
+          addNotif(title, opp.title || '');
+          seen[opp.id] = true;
+        });
+        try { localStorage.setItem(SEEN_KEY, JSON.stringify(seen)); } catch (e) {}
+      })
+      .catch(function (e) { console.warn('[WS] deadline alert error:', e); });
+  }
     /* Prefs */
     _db.from('user_prefs').select('prefs').eq('user_id', _uid).single().then(function(res){
       if (res.error || !res.data || !res.data.prefs) return;
