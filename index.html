@@ -4837,10 +4837,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   .app-sidebar.mobile-open .app-sidebar-close { display: flex; }
   /* Drawer needs to be re-shown when explicitly opened — overrides the
      blanket "hide sidebar on mobile" rule lower in the cascade. */
-  .app-sidebar.mobile-open { display: flex !important; }
-  /* Push the brand + nav links below the absolutely-positioned close button
-     so they never overlap the tap target. */
-  .app-sidebar.mobile-open .app-sidebar-brand { margin-top: 44px; }
+  .app-sidebar.mobile-open { display: flex !important; padding-top: 60px !important; }
 }
 /* Logout nav item */
 .app-nav-item--logout:hover { background: rgba(239,68,68,0.08) !important; color: #ef4444 !important; }
