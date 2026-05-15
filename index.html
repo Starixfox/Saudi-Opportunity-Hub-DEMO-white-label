@@ -72,7 +72,10 @@ window.OH_THEMES = {
     tagline: 'Aligned with Vision 2030',
     taglineAr: 'متوافق مع رؤية 2030',
     navName: 'Opportunity Hub',
-    navNameAr: 'منصة الفرص'
+    navNameAr: 'منصة الفرص',
+    logo: null,
+    logoDark: null,
+    logoHeight: 28
   },
   'misa': {
     label: 'MISA — Ministry of Investment',
@@ -85,7 +88,10 @@ window.OH_THEMES = {
     tagline: 'Ministry of Investment — Saudi Arabia',
     taglineAr: 'وزارة الاستثمار — المملكة العربية السعودية',
     navName: 'MISA Intelligence',
-    navNameAr: 'ذكاء الفرص — هيئة الاستثمار'
+    navNameAr: 'ذكاء الفرص — هيئة الاستثمار',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Ministry_of_Investment_Saudi_Arabia_Logo.svg/320px-Ministry_of_Investment_Saudi_Arabia_Logo.svg.png',
+    logoDark: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Ministry_of_Investment_Saudi_Arabia_Logo.svg/320px-Ministry_of_Investment_Saudi_Arabia_Logo.svg.png',
+    logoHeight: 32
   },
   'monshaat': {
     label: "Monsha'at — SME Authority",
@@ -98,7 +104,10 @@ window.OH_THEMES = {
     tagline: "Saudi SME & Entrepreneurship Authority",
     taglineAr: 'الهيئة العامة للمنشآت الصغيرة والمتوسطة',
     navName: "Monsha'at Hub",
-    navNameAr: 'منصة منشآت'
+    navNameAr: 'منصة منشآت',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Monshaat_Logo.svg/320px-Monshaat_Logo.svg.png',
+    logoDark: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Monshaat_Logo.svg/320px-Monshaat_Logo.svg.png',
+    logoHeight: 30
   },
   'adio': {
     label: 'ADIO — Abu Dhabi Investment Office',
@@ -111,7 +120,10 @@ window.OH_THEMES = {
     tagline: 'Abu Dhabi Investment Office',
     taglineAr: 'مكتب أبوظبي للاستثمار',
     navName: 'ADIO Intelligence',
-    navNameAr: 'منصة أبوظبي للفرص'
+    navNameAr: 'منصة أبوظبي للفرص',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/ADIO_Logo.svg/320px-ADIO_Logo.svg.png',
+    logoDark: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/ADIO_Logo.svg/320px-ADIO_Logo.svg.png',
+    logoHeight: 28
   },
   'neom': {
     label: 'NEOM — The Line Investment Zone',
@@ -124,7 +136,10 @@ window.OH_THEMES = {
     tagline: 'Building the future. NEOM.',
     taglineAr: 'نبني المستقبل. نيوم.',
     navName: 'NEOM Opportunity Hub',
-    navNameAr: 'منصة نيوم للفرص'
+    navNameAr: 'منصة نيوم للفرص',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/NEOM_logo.svg/320px-NEOM_logo.svg.png',
+    logoDark: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/NEOM_logo.svg/320px-NEOM_logo.svg.png',
+    logoHeight: 22
   },
   'sdb': {
     label: 'Saudi Development Bank',
@@ -137,7 +152,10 @@ window.OH_THEMES = {
     tagline: 'Financing the Future of Saudi Arabia',
     taglineAr: 'تمويل مستقبل المملكة',
     navName: 'SDB Intelligence',
-    navNameAr: 'بنك التنمية — منصة الفرص'
+    navNameAr: 'بنك التنمية — منصة الفرص',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Saudi_Development_Bank_Logo.svg/320px-Saudi_Development_Bank_Logo.svg.png',
+    logoDark: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Saudi_Development_Bank_Logo.svg/320px-Saudi_Development_Bank_Logo.svg.png',
+    logoHeight: 30
   }
 };
 
@@ -170,6 +188,44 @@ window.applyTheme = function (key) {
     brandSpan.textContent = isAr ? t.navNameAr : t.navName;
     brandSpan.setAttribute('data-ar', t.navNameAr);
     brandSpan.setAttribute('data-en', t.navName);
+  }
+
+  /* ── Logo swap (institution image replaces brand-dot + text) */
+  var navLogo     = document.querySelector('.app-sidebar-brand');
+  var navLogoText = brandSpan;
+  var brandDot    = navLogo && navLogo.querySelector('.brand-dot');
+  var isDark      = document.documentElement.getAttribute('data-theme') === 'dark';
+  var logoUrl     = isDark ? (t.logoDark || t.logo) : t.logo;
+
+  if (logoUrl && navLogo) {
+    var navLogoImg = document.getElementById('ohThemeLogoImg');
+    if (!navLogoImg) {
+      navLogoImg = document.createElement('img');
+      navLogoImg.id = 'ohThemeLogoImg';
+      navLogoImg.style.cssText = 'width:auto;object-fit:contain;display:block;';
+      navLogo.insertBefore(navLogoImg, navLogo.firstChild);
+    }
+    navLogoImg.src = logoUrl;
+    navLogoImg.alt = t.label;
+    navLogoImg.style.height = (t.logoHeight || 28) + 'px';
+    navLogoImg.style.display = 'block';
+    if (brandDot)    brandDot.style.display = 'none';
+    if (navLogoText) navLogoText.style.display = 'none';
+    /* Broken image → restore text + dot */
+    navLogoImg.onerror = function () {
+      this.style.display = 'none';
+      if (brandDot)    brandDot.style.display = '';
+      if (navLogoText) {
+        navLogoText.style.display = '';
+        navLogoText.textContent = (document.documentElement.lang === 'ar' || document.body.dir === 'rtl') ? t.navNameAr : t.navName;
+      }
+    };
+  } else {
+    /* No logo URL — restore platform brand-dot + text */
+    var themeImg = document.getElementById('ohThemeLogoImg');
+    if (themeImg) themeImg.style.display = 'none';
+    if (brandDot)    brandDot.style.display = '';
+    if (navLogoText) navLogoText.style.display = '';
   }
 
   /* Page title */
@@ -236,7 +292,7 @@ window.applyTheme = function (key) {
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23006C35'/><path d='M32 14a18 18 0 1 0 18 18 18 18 0 0 0-18-18zm0 6a12 12 0 1 1-12 12 12 12 0 0 1 12-12z' fill='%23fdf8f2'/><circle cx='32' cy='32' r='4' fill='%23C9A66B'/></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23006C35'/><path d='M32 14a18 18 0 1 0 18 18 18 18 0 0 0-18-18zm0 6a12 12 0 1 1-12 12 12 12 0 0 1 12-12z' fill='%23fdf8f2'/><circle cx='32' cy='32' r='4' fill='%23C9A66B'/></svg>">
 
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://images.unsplash.com data:; connect-src https://dshrbbnjahjcwxzvzygh.supabase.co wss://dshrbbnjahjcwxzvzygh.supabase.co https://translate.googleapis.com https://formspree.io; manifest-src 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://images.unsplash.com https://upload.wikimedia.org https://cdn.brandfetch.io data:; connect-src https://dshrbbnjahjcwxzvzygh.supabase.co wss://dshrbbnjahjcwxzvzygh.supabase.co https://translate.googleapis.com https://formspree.io; manifest-src 'self';">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -10713,9 +10769,18 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         var t = themes[key];
         var isActive = key === active;
         html += '<div class="oh-tm-card' + (isActive ? ' oh-tm-card--active' : '') + '" data-theme-key="' + escAttr(key) + '" style="--card-accent:' + escAttr(t.accent) + '">';
-        html += '<div class="oh-tm-card-swatch" style="background:' + escAttr(t.accent) + ';"></div>';
+        if (t.logo) {
+          html += '<div class="oh-tm-card-logo" style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;width:54px;height:36px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">';
+          html += '<img src="' + escAttr(t.logo) + '" alt="' + escAttr(t.label) + '" data-fallback-color="' + escAttr(t.accent) + '" class="oh-tm-card-logo-img" style="max-width:48px;max-height:28px;object-fit:contain;">';
+          html += '</div>';
+        } else {
+          html += '<div class="oh-tm-card-swatch" style="background:' + escAttr(t.accent) + ';border-radius:8px;width:54px;height:36px;flex-shrink:0;"></div>';
+        }
         html += '<div class="oh-tm-card-body">';
-        html += '<div class="oh-tm-card-name">' + escAttr(t.label) + '</div>';
+        html += '<div class="oh-tm-card-name" style="display:flex;align-items:center;gap:6px;">';
+        html += '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + escAttr(t.accent) + ';flex-shrink:0;"></span>';
+        html += '<span style="overflow:hidden;text-overflow:ellipsis;">' + escAttr(t.label) + '</span>';
+        html += '</div>';
         html += '<div class="oh-tm-card-sub">' + escAttr(t.accent) + '</div>';
         html += '<div class="oh-tm-card-tagline">' + escAttr(t.tagline) + '</div>';
         html += '</div>';
@@ -10743,6 +10808,20 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
       panel.innerHTML = html;
       panel.dataset.ohTmRendered = '1';
+
+      /* Logo broken-image fallback — JS-set handler so the security hook
+         doesn't strip an inline onerror attribute. Replaces the broken img
+         with a colored swatch matching the theme accent. */
+      panel.querySelectorAll('.oh-tm-card-logo-img').forEach(function (img) {
+        img.addEventListener('error', function () {
+          var holder = img.parentElement;
+          if (!holder) return;
+          var color = img.getAttribute('data-fallback-color') || '#94a3b8';
+          holder.style.background = color;
+          holder.style.border = 'none';
+          img.remove();
+        });
+      });
 
       /* Card click → applyTheme (delegated; works even after re-renders) */
       panel.addEventListener('click', function (e) {
