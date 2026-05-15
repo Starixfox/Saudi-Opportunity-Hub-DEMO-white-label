@@ -8,6 +8,14 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Session guard: redirect to login if not authenticated -->
 <script>
+// ── Super-admin / owner gate — only this UID gets the Theme Manager
+window.__OH_OWNER_UID = '72f017e5-b4f0-4ef2-9083-65e3d9961548';
+window.__ohIsSuperAdmin = false;
+function checkSuperAdmin(uid) {
+  window.__ohIsSuperAdmin = !!(uid && uid === window.__OH_OWNER_UID);
+  return window.__ohIsSuperAdmin;
+}
+
 (function() {
   var SUPA_URL = 'https://dshrbbnjahjcwxzvzygh.supabase.co';
   var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzaHJiYm5qYWhqY3d4enZ6eWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE3OTgsImV4cCI6MjA5NDA1Nzc5OH0.OpUGgfL91m7STsZpE6fnX281KN_Ge8oytR-2lM-3qTo';
@@ -23,6 +31,8 @@
     }
     // ── Admin role check — drives the admin sidebar entry + #admin view
     window.__ohSession = session;
+    /* Resolve super-admin flag immediately from the session UID. */
+    checkSuperAdmin(session.user && session.user.id);
     _supabase
       .from('user_prefs')
       .select('role')
@@ -31,16 +41,170 @@
       .then(function(res) {
         var isAdmin = !!(res && res.data && res.data.role === 'admin');
         window.__ohIsAdmin = isAdmin;
-        try { window.dispatchEvent(new CustomEvent('oh:role-ready', { detail: { isAdmin: isAdmin } })); } catch (e) {}
+        /* Re-confirm super-admin flag with the freshly-resolved user. */
+        checkSuperAdmin(session.user && session.user.id);
+        try { window.dispatchEvent(new CustomEvent('oh:role-ready', { detail: { isAdmin: isAdmin, isSuperAdmin: window.__ohIsSuperAdmin } })); } catch (e) {}
       })
       .catch(function() {
         window.__ohIsAdmin = false;
-        try { window.dispatchEvent(new CustomEvent('oh:role-ready', { detail: { isAdmin: false } })); } catch (e) {}
+        try { window.dispatchEvent(new CustomEvent('oh:role-ready', { detail: { isAdmin: false, isSuperAdmin: window.__ohIsSuperAdmin } })); } catch (e) {}
       });
   }).catch(function(err) {
     console.warn('[Auth] getSession error:', err);
     window.location.href = 'login.html';
   });
+})();
+
+/* ════════════════════════════════════════════════════════════
+   WHITE-LABEL THEME REGISTRY + applyTheme()
+   Public: applyTheme() is callable anywhere (URL ?theme=xxx is a
+   legitimate demo feature). The *management UI* is owner-gated.
+   ════════════════════════════════════════════════════════════ */
+window.OH_THEMES = {
+  'default': {
+    label: 'Saudi Opportunity Hub (Default)',
+    labelAr: 'منصة الفرص السعودية',
+    accent: '#006C35',
+    accentHover: '#005228',
+    accentLight: 'rgba(0,108,53,0.10)',
+    accentGlow: 'rgba(0,108,53,0.25)',
+    accentDim: 'rgba(0,108,53,0.08)',
+    tagline: 'Aligned with Vision 2030',
+    taglineAr: 'متوافق مع رؤية 2030',
+    navName: 'Opportunity Hub',
+    navNameAr: 'منصة الفرص'
+  },
+  'misa': {
+    label: 'MISA — Ministry of Investment',
+    labelAr: 'هيئة الاستثمار — وزارة الاستثمار',
+    accent: '#1B4F8A',
+    accentHover: '#163F6E',
+    accentLight: 'rgba(27,79,138,0.10)',
+    accentGlow: 'rgba(27,79,138,0.25)',
+    accentDim: 'rgba(27,79,138,0.08)',
+    tagline: 'Ministry of Investment — Saudi Arabia',
+    taglineAr: 'وزارة الاستثمار — المملكة العربية السعودية',
+    navName: 'MISA Intelligence',
+    navNameAr: 'ذكاء الفرص — هيئة الاستثمار'
+  },
+  'monshaat': {
+    label: "Monsha'at — SME Authority",
+    labelAr: 'منشآت — الهيئة العامة للمنشآت',
+    accent: '#C25A06',
+    accentHover: '#9E4804',
+    accentLight: 'rgba(194,90,6,0.10)',
+    accentGlow: 'rgba(194,90,6,0.25)',
+    accentDim: 'rgba(194,90,6,0.08)',
+    tagline: "Saudi SME & Entrepreneurship Authority",
+    taglineAr: 'الهيئة العامة للمنشآت الصغيرة والمتوسطة',
+    navName: "Monsha'at Hub",
+    navNameAr: 'منصة منشآت'
+  },
+  'adio': {
+    label: 'ADIO — Abu Dhabi Investment Office',
+    labelAr: 'مكتب أبوظبي للاستثمار',
+    accent: '#006C96',
+    accentHover: '#005577',
+    accentLight: 'rgba(0,108,150,0.10)',
+    accentGlow: 'rgba(0,108,150,0.25)',
+    accentDim: 'rgba(0,108,150,0.08)',
+    tagline: 'Abu Dhabi Investment Office',
+    taglineAr: 'مكتب أبوظبي للاستثمار',
+    navName: 'ADIO Intelligence',
+    navNameAr: 'منصة أبوظبي للفرص'
+  },
+  'neom': {
+    label: 'NEOM — The Line Investment Zone',
+    labelAr: 'نيوم — منطقة الاستثمار',
+    accent: '#00B4D8',
+    accentHover: '#0096B4',
+    accentLight: 'rgba(0,180,216,0.10)',
+    accentGlow: 'rgba(0,180,216,0.25)',
+    accentDim: 'rgba(0,180,216,0.08)',
+    tagline: 'Building the future. NEOM.',
+    taglineAr: 'نبني المستقبل. نيوم.',
+    navName: 'NEOM Opportunity Hub',
+    navNameAr: 'منصة نيوم للفرص'
+  },
+  'sdb': {
+    label: 'Saudi Development Bank',
+    labelAr: 'بنك التنمية السعودي',
+    accent: '#7B2D8B',
+    accentHover: '#61226E',
+    accentLight: 'rgba(123,45,139,0.10)',
+    accentGlow: 'rgba(123,45,139,0.25)',
+    accentDim: 'rgba(123,45,139,0.08)',
+    tagline: 'Financing the Future of Saudi Arabia',
+    taglineAr: 'تمويل مستقبل المملكة',
+    navName: 'SDB Intelligence',
+    navNameAr: 'بنك التنمية — منصة الفرص'
+  }
+};
+
+window.__ohActiveTheme = 'default';
+
+window.applyTheme = function (key) {
+  var t = window.OH_THEMES[key] || window.OH_THEMES['default'];
+  var r = document.documentElement;
+
+  /* Legacy --green* tokens (original brand palette) */
+  r.style.setProperty('--green',           t.accent);
+  r.style.setProperty('--green-hover',     t.accentHover);
+  r.style.setProperty('--green-highlight', t.accentLight);
+  r.style.setProperty('--green-glow',      t.accentGlow);
+  r.style.setProperty('--green-dim',       t.accentDim);
+  /* New design-system --accent* tokens (used by Phase D + admin views) */
+  r.style.setProperty('--accent',          t.accent);
+  r.style.setProperty('--accent-hover',    t.accentHover);
+  r.style.setProperty('--accent-light',    t.accentLight);
+  r.style.setProperty('--accent-glow',     t.accentGlow);
+  /* Sidebar active-state + focus ring derive from the same accent */
+  r.style.setProperty('--sidebar-active-bg',     t.accentLight);
+  r.style.setProperty('--sidebar-active-border', t.accent);
+  r.style.setProperty('--shadow-focus',          '0 0 0 3px ' + t.accentGlow);
+
+  /* Brand text in the sidebar (data-ar holds Arabic) */
+  var brandSpan = document.querySelector('.app-sidebar-brand span[data-ar]');
+  if (brandSpan) {
+    var isAr = document.documentElement.lang === 'ar' || document.body.dir === 'rtl';
+    brandSpan.textContent = isAr ? t.navNameAr : t.navName;
+    brandSpan.setAttribute('data-ar', t.navNameAr);
+    brandSpan.setAttribute('data-en', t.navName);
+  }
+
+  /* Page title */
+  document.title = t.label + ' — Intelligence Platform';
+
+  /* Hero/dash tagline if any matching element exists (graceful no-op otherwise) */
+  var tagEl = document.querySelector('.hero-tagline, .hero-sub, .hero-subtitle, .dash-sub');
+  if (tagEl) {
+    var isAr2 = document.documentElement.lang === 'ar' || document.body.dir === 'rtl';
+    tagEl.textContent = isAr2 ? t.taglineAr : t.tagline;
+  }
+
+  window.__ohActiveTheme = key;
+  try { localStorage.setItem('oh_theme', key); } catch(e) {}
+
+  /* Refresh the admin theme manager UI if open */
+  document.querySelectorAll('.oh-tm-card.oh-tm-card--active').forEach(function (c) {
+    c.classList.remove('oh-tm-card--active');
+  });
+  document.querySelectorAll('.oh-tm-card-check').forEach(function (c) { c.textContent = ''; });
+  var newCard = document.querySelector('.oh-tm-card[data-theme-key="' + key + '"]');
+  if (newCard) {
+    newCard.classList.add('oh-tm-card--active');
+    var chk = newCard.querySelector('.oh-tm-card-check');
+    if (chk) chk.textContent = '✓';
+  }
+};
+
+/* Restore on load — also support ?theme=xxx URL param for shareable demo links */
+(function () {
+  try {
+    var urlTheme = new URLSearchParams(window.location.search).get('theme');
+    var saved = localStorage.getItem('oh_theme') || 'default';
+    window.applyTheme(urlTheme || saved);
+  } catch(e) { window.applyTheme('default'); }
 })();
 </script>
 
@@ -7762,6 +7926,115 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   text-align: center;
 }
 
+/* ═══════════════════════════
+   SUPER-ADMIN THEME MANAGER
+   ═══════════════════════════ */
+.admin-tab--owner {
+  border-left: 2px solid var(--green, var(--accent, #006C35));
+  color: var(--green, var(--accent, #006C35)) !important;
+}
+.oh-tm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.oh-tm-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--surface, #fff);
+  border: 1.5px solid var(--border, #e2e8f0);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.18s, box-shadow 0.18s, transform 0.15s;
+  position: relative;
+}
+.oh-tm-card:hover {
+  border-color: var(--card-accent, var(--green, var(--accent, #006C35)));
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+}
+.oh-tm-card--active {
+  border-color: var(--card-accent, var(--green, var(--accent, #006C35)));
+  background: color-mix(in oklch, var(--surface, #fff) 94%, var(--card-accent, var(--green, #006C35)) 6%);
+  box-shadow: 0 0 0 3px color-mix(in oklch, transparent 80%, var(--card-accent, var(--green, #006C35)) 20%);
+}
+.oh-tm-card-swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.oh-tm-card-body {
+  flex: 1;
+  min-width: 0;
+}
+.oh-tm-card-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text, #0f172a);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.oh-tm-card-sub {
+  font-size: 10.5px;
+  color: var(--text-faint, #94a3b8);
+  font-family: monospace;
+  margin-bottom: 3px;
+}
+.oh-tm-card-tagline {
+  font-size: 11px;
+  color: var(--text-muted, #64748b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.oh-tm-card-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid var(--border, #e2e8f0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  transition: background 0.18s, border-color 0.18s;
+}
+.oh-tm-card--active .oh-tm-card-check {
+  background: var(--card-accent, var(--green, var(--accent, #006C35)));
+  border-color: var(--card-accent, var(--green, var(--accent, #006C35)));
+}
+
+/* Government polish layer */
+.hero-title, .section-title, .section-heading, h1, h2 {
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+.kpi-value, .stat-number, .dash-kpi-val {
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.la-card, .opp-card-noimg {
+  transition: box-shadow 0.18s ease, transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+.la-card:hover, .opp-card-noimg:hover {
+  box-shadow: 0 8px 28px rgba(0,0,0,0.10);
+  transform: translateY(-2px);
+}
+.filter-bar {
+  box-shadow: none !important;
+  border-bottom: 1px solid var(--border, #e2e8f0) !important;
+}
+
 </style>
 
 </head>
@@ -10374,8 +10647,129 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       wireAdmin();
       loadKPIs();
       loadOppPage();
+      /* Owner-only: inject the 🎨 Theme Manager tab + panel */
+      injectThemeManagerTab();
     }
     window.loadAdminView = loadAdminView;
+
+    /* ════════════════════════════════════════════════════════
+       SUPER-ADMIN: White-Label Theme Manager
+       Hard-gated by window.__ohIsSuperAdmin (owner UID only).
+       ════════════════════════════════════════════════════════ */
+    function injectThemeManagerTab() {
+      if (!window.__ohIsSuperAdmin) return;
+      var tabsBar = document.querySelector('#view-admin .admin-tabs');
+      if (!tabsBar) return;
+      if (tabsBar.querySelector('[data-admtab="theme-manager"]')) return;
+
+      var tab = document.createElement('button');
+      tab.type = 'button';
+      tab.className = 'admin-tab admin-tab--owner';
+      tab.setAttribute('data-admtab', 'theme-manager');
+      tab.innerHTML = '🎨 Theme Manager';
+      tabsBar.appendChild(tab);
+
+      /* Inject the empty panel that switchTab will show/hide automatically */
+      var wrap = document.querySelector('#view-admin .admin-wrap');
+      if (wrap && !document.getElementById('adm-tab-theme-manager')) {
+        var panel = document.createElement('div');
+        panel.className = 'admin-tab-panel';
+        panel.id = 'adm-tab-theme-manager';
+        panel.style.display = 'none';
+        wrap.appendChild(panel);
+      }
+
+      /* Tab click — mirrors switchTab() since switchTab is closure-scoped */
+      tab.addEventListener('click', function () {
+        document.querySelectorAll('#view-admin .admin-tab').forEach(function (t) {
+          t.classList.toggle('active', t.getAttribute('data-admtab') === 'theme-manager');
+        });
+        document.querySelectorAll('#view-admin .admin-tab-panel').forEach(function (p) {
+          p.style.display = (p.id === 'adm-tab-theme-manager') ? '' : 'none';
+        });
+        renderThemeManager();
+      });
+    }
+
+    function renderThemeManager() {
+      if (!window.__ohIsSuperAdmin) return;
+      var panel = document.getElementById('adm-tab-theme-manager');
+      if (!panel) return;
+      if (panel.dataset.ohTmRendered === '1') return; /* render once; applyTheme refreshes the active state */
+
+      var active = window.__ohActiveTheme || 'default';
+      var themes = window.OH_THEMES || {};
+
+      function escAttr(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
+      var html = '<div id="ohThemeManagerPanel" style="padding: 24px 0;">';
+      html += '<div style="margin-bottom:24px;">';
+      html += '<h2 style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;">🎨 White-Label Theme Manager</h2>';
+      html += '<p style="font-size:13px;color:var(--text-muted);max-width:560px;">Switch the platform\'s brand identity for each institution demo. Changes apply instantly across the entire UI. Share a demo link with <code style="font-size:11px;background:var(--surface-2);padding:1px 5px;border-radius:4px;">?demo=1&amp;theme=misa</code> to send a pre-branded view.</p>';
+      html += '</div>';
+
+      html += '<div class="oh-tm-grid">';
+      Object.keys(themes).forEach(function (key) {
+        var t = themes[key];
+        var isActive = key === active;
+        html += '<div class="oh-tm-card' + (isActive ? ' oh-tm-card--active' : '') + '" data-theme-key="' + escAttr(key) + '" style="--card-accent:' + escAttr(t.accent) + '">';
+        html += '<div class="oh-tm-card-swatch" style="background:' + escAttr(t.accent) + ';"></div>';
+        html += '<div class="oh-tm-card-body">';
+        html += '<div class="oh-tm-card-name">' + escAttr(t.label) + '</div>';
+        html += '<div class="oh-tm-card-sub">' + escAttr(t.accent) + '</div>';
+        html += '<div class="oh-tm-card-tagline">' + escAttr(t.tagline) + '</div>';
+        html += '</div>';
+        html += '<div class="oh-tm-card-check">' + (isActive ? '✓' : '') + '</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+
+      html += '<div style="margin-top:32px;padding:20px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;max-width:680px;">';
+      html += '<h3 style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.06em;">📎 Shareable Demo Links</h3>';
+      html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+      Object.keys(themes).forEach(function (key) {
+        var t = themes[key];
+        var url = window.location.origin + window.location.pathname + '?demo=1&theme=' + key;
+        var shortLabel = t.label.split('—')[0].trim();
+        html += '<div style="display:flex;align-items:center;gap:10px;font-size:12px;">';
+        html += '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + escAttr(t.accent) + ';flex-shrink:0;"></span>';
+        html += '<span style="font-weight:600;color:var(--text);min-width:180px;">' + escAttr(shortLabel) + '</span>';
+        html += '<code class="oh-tm-share-url" data-url="' + escAttr(url) + '" style="flex:1;font-size:10.5px;color:var(--text-muted);background:var(--surface);padding:3px 8px;border-radius:4px;border:1px solid var(--border);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escAttr(url) + '</code>';
+        html += '<button class="oh-tm-share-copy" data-url="' + escAttr(url) + '" style="font-size:10px;padding:3px 10px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);cursor:pointer;white-space:nowrap;">Copy</button>';
+        html += '</div>';
+      });
+      html += '</div></div>';
+      html += '</div>';
+
+      panel.innerHTML = html;
+      panel.dataset.ohTmRendered = '1';
+
+      /* Card click → applyTheme (delegated; works even after re-renders) */
+      panel.addEventListener('click', function (e) {
+        var card = e.target.closest('.oh-tm-card');
+        if (card && !e.target.closest('.oh-tm-card-check')) {
+          window.applyTheme(card.getAttribute('data-theme-key'));
+          return;
+        }
+        var copy = e.target.closest('.oh-tm-share-copy');
+        if (copy) {
+          var url = copy.getAttribute('data-url');
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(function () {
+              if (window.WS && window.WS.showToast) window.WS.showToast('Link copied!');
+            }, function () { window.prompt('Copy this link:', url); });
+          } else {
+            window.prompt('Copy this link:', url);
+          }
+        }
+      });
+    }
+
+    /* Inject as soon as we know the user is super-admin (covers the case where
+       the role-ready event fires before the admin view has been opened). */
+    window.addEventListener('oh:role-ready', function (e) {
+      if (e && e.detail && e.detail.isSuperAdmin) injectThemeManagerTab();
+    });
   })();
 
 })();
