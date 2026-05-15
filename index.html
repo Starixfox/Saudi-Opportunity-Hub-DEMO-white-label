@@ -7703,6 +7703,50 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   text-align: center;
 }
 
+/* Watchlist item folder button + dropdown */
+.ws-item-folder-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border, #e2e8f0);
+  background: transparent;
+  color: var(--text-faint, #94a3b8);
+  font-size: 13px; cursor: pointer; flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  position: relative;
+}
+.ws-item-folder-btn:hover {
+  background: var(--surface-3, #f0f4f9);
+  color: var(--text, #1a1f36);
+  border-color: var(--green, #006C35);
+}
+.ws-item-folder-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 180px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-lg, 10px);
+  box-shadow: var(--shadow-lg);
+  z-index: 400;
+  overflow: hidden;
+  padding: 4px 0;
+}
+.ws-item-folder-dropdown-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  font-size: 13px; color: var(--text, #1a1f36);
+  cursor: pointer; white-space: nowrap;
+  transition: background 0.12s;
+}
+.ws-item-folder-dropdown-item:hover { background: var(--surface-2, #f9fafb); }
+.ws-item-folder-dropdown-empty {
+  padding: 10px 12px;
+  font-size: 12px; color: var(--text-faint, #94a3b8);
+  text-align: center;
+}
+
 </style>
 
 </head>
@@ -17963,6 +18007,127 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     obs.observe(modal, { attributes: true, attributeFilter: ['class', 'style', 'hidden'] });
   }
 
+  /* ── Watchlist row "Add to folder" 📂 buttons ────────────
+     Per-item folder picker so users can route saved items into folders
+     without opening the detail panel. Mirrors the same pattern as the
+     detail-panel "#addToFolderBtn" handler. */
+  function injectWatchlistFolderButtons() {
+    var panel = document.getElementById('wsPanel');
+    if (!panel) return;
+    var body  = document.getElementById('wsPanelBody');
+    if (!body) return;
+    /* Only on the Watchlist tab */
+    var activeTab = panel.querySelector('.ws-panel-tab.active');
+    if (!activeTab || activeTab.dataset.wstab !== 'watchlist') return;
+    var supa = window._supabase;
+    var sess = window.__ohSession;
+    if (!supa || !sess || !sess.user || !sess.user.id) return;
+
+    body.querySelectorAll('.ws-item').forEach(function (item) {
+      if (item.querySelector('.ws-item-folder-btn')) return;
+      var oppId = item.dataset.id || item.dataset.oppId || item.getAttribute('data-id');
+      if (!oppId) return;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ws-item-folder-btn';
+      btn.title = 'Add to folder';
+      btn.setAttribute('aria-label', 'Add to folder');
+      btn.textContent = '📂';
+      btn.setAttribute('data-opp-id', oppId);
+      var actions = item.querySelector('.ws-item-actions, .ws-item-meta, .oh-enh-wl-item-actions');
+      (actions || item).appendChild(btn);
+    });
+  }
+
+  /* Bootstrap once: observe wsPanelBody for re-renders (tab switches,
+     bookmark add/remove) and re-inject buttons; also wire one delegated
+     click handler that opens/closes the per-item folder dropdown. */
+  function bootstrapWatchlistFolderButtons() {
+    var panel = document.getElementById('wsPanel');
+    var body  = document.getElementById('wsPanelBody');
+    if (!panel || !body) { setTimeout(bootstrapWatchlistFolderButtons, 600); return; }
+
+    /* Re-inject whenever the panel body re-renders */
+    var obs = new MutationObserver(function () {
+      injectWatchlistFolderButtons();
+    });
+    obs.observe(body, { childList: true, subtree: false });
+    /* Initial pass in case the watchlist is already on screen */
+    injectWatchlistFolderButtons();
+
+    /* Delegated click — toggle dropdown, load folders, insert on pick */
+    document.addEventListener('click', function (e) {
+      /* 1. Click on a folder button → open/close its dropdown */
+      var trigger = e.target.closest('.ws-item-folder-btn');
+      if (trigger) {
+        e.stopPropagation();
+        var existing = trigger.querySelector('.ws-item-folder-dropdown');
+        /* Close any other open dropdowns first */
+        document.querySelectorAll('.ws-item-folder-dropdown').forEach(function (d) {
+          if (d !== existing) d.remove();
+        });
+        if (existing) { existing.remove(); return; }
+
+        var supa = window._supabase;
+        var sess = window.__ohSession;
+        if (!supa || !sess) return;
+        var ar = (document.documentElement.dir === 'rtl' || document.body.classList.contains('rtl'));
+        var dd = document.createElement('div');
+        dd.className = 'ws-item-folder-dropdown';
+        dd.innerHTML = '<div class="ws-item-folder-dropdown-empty">' + (ar ? 'جارٍ التحميل…' : 'Loading…') + '</div>';
+        trigger.appendChild(dd);
+
+        var oppId = trigger.getAttribute('data-opp-id');
+        supa.from('user_folders').select('id, name, name_ar, icon').eq('user_id', sess.user.id).order('created_at', { ascending: false }).then(function (res) {
+          var folders = (res && res.data) || [];
+          if (!folders.length) {
+            dd.innerHTML = '<div class="ws-item-folder-dropdown-empty">' + (ar ? 'لا توجد مجلدات بعد' : 'No folders yet — create one in 📂 Folders') + '</div>';
+            return;
+          }
+          var esc = function (s) {
+            return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+          };
+          dd.innerHTML = folders.map(function (f) {
+            var n = (ar && f.name_ar) ? f.name_ar : f.name;
+            return '<div class="ws-item-folder-dropdown-item" data-folder-id="' + esc(f.id) + '" data-folder-name="' + esc(n) + '">' +
+              '<span>' + esc(f.icon || '📁') + '</span>' +
+              '<span>' + esc(n) + '</span>' +
+            '</div>';
+          }).join('');
+        });
+        return;
+      }
+
+      /* 2. Click on a dropdown item → insert into folder_items */
+      var pick = e.target.closest('.ws-item-folder-dropdown-item');
+      if (pick) {
+        e.stopPropagation();
+        var dd2 = pick.closest('.ws-item-folder-dropdown');
+        var btnEl = dd2 && dd2.parentElement;
+        var oid = btnEl && btnEl.getAttribute('data-opp-id');
+        var fname = pick.getAttribute('data-folder-name');
+        var fid = pick.getAttribute('data-folder-id');
+        var supa2 = window._supabase;
+        if (!oid || !fid || !supa2) { if (dd2) dd2.remove(); return; }
+        var ar2 = (document.documentElement.dir === 'rtl' || document.body.classList.contains('rtl'));
+        supa2.from('folder_items').insert({ folder_id: fid, opp_id: oid }).then(function (r) {
+          if (dd2) dd2.remove();
+          if (r && r.error && r.error.code === '23505') {
+            if (window.WS && window.WS.showToast) window.WS.showToast(ar2 ? ('الفرصة موجودة في "' + fname + '"') : ('Already in "' + fname + '"'));
+          } else if (!(r && r.error)) {
+            if (window.WS && window.WS.showToast) window.WS.showToast(ar2 ? ('تمت الإضافة إلى "' + fname + '" ✓') : ('Added to "' + fname + '" ✓'));
+          } else {
+            console.warn('[WL→Folder] insert error:', r.error);
+          }
+        });
+        return;
+      }
+
+      /* 3. Click outside → close any open watchlist-folder dropdown */
+      document.querySelectorAll('.ws-item-folder-dropdown').forEach(function (d) { d.remove(); });
+    });
+  }
+
   /* ── Boot ──────────────────────────────────────────── */
   function init() {
     observeCards();
@@ -17971,6 +18136,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     injectWatchlistCsv();
     injectNotifPrefs();
     handleDeepLink();
+    bootstrapWatchlistFolderButtons();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
