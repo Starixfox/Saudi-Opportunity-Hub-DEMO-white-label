@@ -8120,6 +8120,199 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   border-bottom: 1px solid var(--border, #e2e8f0) !important;
 }
 
+/* ── Onboarding wizard ────────────────────────────────────── */
+.ob-progress-wrap {
+  padding: 16px 28px 0;
+  position: relative;
+}
+.ob-progress-bar-track {
+  height: 3px;
+  background: var(--border, #e2e8f0);
+  border-radius: 99px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.ob-progress-bar {
+  height: 3px;
+  background: var(--green, #006C35);
+  border-radius: 99px;
+  transition: width 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.ob-progress-steps {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  margin-bottom: 4px;
+}
+.ob-progress-step {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--surface-2, #f1f5f9);
+  border: 2px solid var(--border, #e2e8f0);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+  color: var(--text-faint, #94a3b8);
+  transition: all 0.25s ease;
+}
+.ob-progress-step.active {
+  background: var(--green, #006C35);
+  border-color: var(--green, #006C35);
+  color: #fff;
+}
+.ob-progress-step.done {
+  background: var(--green, #006C35);
+  border-color: var(--green, #006C35);
+  color: #fff;
+  font-size: 0;
+}
+.ob-progress-step.done::before { content: '✓'; font-size: 11px; }
+
+.ob-step-panel { display: flex; flex-direction: column; }
+
+/* Step 2: Profile form */
+.ob-profile-form {
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.ob-form-group { display: flex; flex-direction: column; gap: 6px; }
+.ob-form-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.ob-form-input {
+  padding: 10px 14px;
+  border: 1.5px solid var(--border, #e2e8f0);
+  border-radius: 8px;
+  background: var(--surface, #fff);
+  color: var(--text, #1a1f36);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.18s;
+}
+.ob-form-input:focus {
+  outline: none;
+  border-color: var(--green, #006C35);
+  box-shadow: 0 0 0 3px var(--green-highlight, rgba(0,108,53,0.10));
+}
+.ob-sector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+.ob-sector-chip {
+  padding: 7px 10px;
+  border: 1.5px solid var(--border, #e2e8f0);
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted, #64748b);
+  background: var(--surface, #fff);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+  user-select: none;
+}
+.ob-sector-chip.selected {
+  background: var(--green, #006C35);
+  border-color: var(--green, #006C35);
+  color: #fff;
+}
+.ob-sector-chip:hover:not(.selected) {
+  border-color: var(--green, #006C35);
+  color: var(--green, #006C35);
+}
+
+/* Step 3: Preferences */
+.ob-pref-list {
+  padding: 20px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.ob-pref-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--surface-2, #f9fafb);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 10px;
+  gap: 16px;
+}
+.ob-pref-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ob-pref-title { font-size: 13px; font-weight: 700; color: var(--text, #1a1f36); }
+.ob-pref-sub { font-size: 11.5px; color: var(--text-muted, #64748b); }
+.ob-toggle {
+  position: relative; width: 40px; height: 22px; flex-shrink: 0;
+  display: inline-block;
+}
+.ob-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.ob-toggle-track {
+  position: absolute; inset: 0;
+  background: var(--border, #cbd5e0);
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ob-toggle input:checked + .ob-toggle-track { background: var(--green, #006C35); }
+.ob-toggle-track::after {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  top: 3px; left: 3px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.ob-toggle input:checked + .ob-toggle-track::after { transform: translateX(18px); }
+
+/* Step 4: Ready */
+.ob-ready {
+  padding: 28px 28px 20px;
+  text-align: center;
+}
+.ob-ready-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  display: block;
+}
+.ob-ready-title {
+  font-size: 20px; font-weight: 800;
+  color: var(--text, #1a1f36);
+  margin-bottom: 8px;
+}
+.ob-ready-sub {
+  font-size: 13px;
+  color: var(--text-muted, #64748b);
+  max-width: 36ch;
+  margin: 0 auto 20px;
+  line-height: 1.6;
+}
+.ob-ready-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--surface-2, #f9fafb);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 10px;
+}
+.ob-ready-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12.5px;
+}
+.ob-ready-row-icon { color: var(--green, #006C35); font-size: 14px; }
+.ob-ready-row-label { color: var(--text-muted); min-width: 80px; }
+.ob-ready-row-val { color: var(--text); font-weight: 600; }
+
 </style>
 
 </head>
@@ -9367,6 +9560,20 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 <div class="ob-overlay" id="obOverlay" role="dialog" aria-modal="true" aria-label="Welcome to Opportunity Hub">
   <div class="ob-modal" id="obModal">
 
+    <!-- ── Wizard progress bar ── -->
+    <div class="ob-progress-wrap" id="obProgressWrap">
+      <div class="ob-progress-bar-track"><div class="ob-progress-bar" id="obProgressBar" style="width:25%"></div></div>
+      <div class="ob-progress-steps" id="obProgressSteps">
+        <span class="ob-progress-step active" data-step="1">1</span>
+        <span class="ob-progress-step" data-step="2">2</span>
+        <span class="ob-progress-step" data-step="3">3</span>
+        <span class="ob-progress-step" data-step="4">4</span>
+      </div>
+    </div>
+
+    <!-- ── Step 1: Welcome (existing content, wrapped) ── -->
+    <div class="ob-step-panel" id="obStep1Panel">
+
     <!-- ── Hero header ── -->
     <div class="ob-hero">
       <div class="ob-hero-eyebrow" id="obEyebrow">Saudi Opportunity Hub</div>
@@ -9458,6 +9665,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       </button>
       <button class="ob-btn-skip" id="obSkipTourBtn">Skip for now</button>
     </div>
+
+    </div><!-- /#obStep1Panel -->
+
+    <div class="ob-step-panel" id="obStep2Panel" style="display:none;"></div>
+    <div class="ob-step-panel" id="obStep3Panel" style="display:none;"></div>
+    <div class="ob-step-panel" id="obStep4Panel" style="display:none;"></div>
 
   </div>
 </div>
@@ -17486,6 +17699,254 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
   var tourActive = false;
   var tourStep   = 0;
+
+  /* ── Onboarding wizard state ── */
+  var wizard = {
+    step: 1,
+    totalSteps: 4,
+    profile: { displayName: '', role: '', sectors: [] },
+    prefs:   { language: 'en', notifications: true }
+  };
+  var ROLE_OPTIONS = [
+    { value: 'investor',     label: 'Investor',            labelAr: 'مستثمر' },
+    { value: 'entrepreneur', label: 'Entrepreneur',        labelAr: 'رائد أعمال' },
+    { value: 'researcher',   label: 'Researcher',          labelAr: 'باحث' },
+    { value: 'government',   label: 'Government Official', labelAr: 'مسؤول حكومي' },
+    { value: 'corporate',    label: 'Corporate',           labelAr: 'شركة' },
+    { value: 'consultant',   label: 'Consultant',          labelAr: 'مستشار' },
+    { value: 'student',      label: 'Student',             labelAr: 'طالب' },
+    { value: 'ngo',          label: 'NGO / Non-profit',    labelAr: 'منظمة غير ربحية' }
+  ];
+  var SECTOR_OPTIONS = [
+    'Energy', 'ICT', 'Healthcare', 'Financial Services',
+    'Real Estate', 'Agriculture', 'Tourism', 'Education',
+    'Transport', 'Industrial', 'Innovation', 'Mining',
+    'Environment', 'Space', 'Defence'
+  ];
+
+  function escWiz(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function closeObModal() {
+    var overlay = document.getElementById('obOverlay');
+    if (overlay) {
+      overlay.classList.remove('open');
+      if (window.__releaseFocus) window.__releaseFocus(overlay);
+    }
+  }
+
+  function wizardGoTo(step) {
+    if (step < 1 || step > wizard.totalSteps) return;
+    for (var i = 1; i <= wizard.totalSteps; i++) {
+      var p = document.getElementById('obStep' + i + 'Panel');
+      if (p) p.style.display = 'none';
+    }
+    var target = document.getElementById('obStep' + step + 'Panel');
+    if (!target) return;
+    if (step === 2) renderStep2(target);
+    if (step === 3) renderStep3(target);
+    if (step === 4) renderStep4(target);
+    target.style.display = 'flex';
+    wizard.step = step;
+
+    var bar = document.getElementById('obProgressBar');
+    if (bar) bar.style.width = ((step / wizard.totalSteps) * 100) + '%';
+    document.querySelectorAll('.ob-progress-step').forEach(function (el) {
+      var s = parseInt(el.getAttribute('data-step'), 10);
+      el.classList.remove('active', 'done');
+      if (s < step) el.classList.add('done');
+      else if (s === step) el.classList.add('active');
+    });
+
+    var modal = document.getElementById('obModal');
+    if (modal) modal.scrollTop = 0;
+  }
+
+  function renderStep2(panel) {
+    if (panel.dataset.rendered) return;
+    panel.dataset.rendered = '1';
+    var ar = isAr();
+    var existing = window.__userPrefs || window.__ohPrefs || {};
+    if (existing.displayName && !wizard.profile.displayName) wizard.profile.displayName = existing.displayName;
+    if (existing.role && !wizard.profile.role) wizard.profile.role = existing.role;
+    if (Array.isArray(existing.sectors) && !wizard.profile.sectors.length) wizard.profile.sectors = existing.sectors.slice();
+
+    panel.innerHTML =
+      '<div class="ob-profile-form">' +
+        '<div style="margin-bottom:4px;">' +
+          '<div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">' + (ar ? 'الخطوة 2 من 4' : 'Step 2 of 4') + '</div>' +
+          '<div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px;">' + (ar ? 'أخبرنا عنك' : 'Tell us about you') + '</div>' +
+          '<div style="font-size:13px;color:var(--text-muted);">' + (ar ? 'يساعدنا ذلك في تخصيص الفرص المناسبة لك' : 'This helps us surface the most relevant opportunities for you') + '</div>' +
+        '</div>' +
+        '<div class="ob-form-group">' +
+          '<label class="ob-form-label" for="obNameInput">' + (ar ? 'الاسم الكامل' : 'Display Name') + '</label>' +
+          '<input class="ob-form-input" id="obNameInput" type="text" placeholder="' + (ar ? 'مثال: محمد العمري' : 'e.g. Mohammed Al-Omari') + '" value="' + escWiz(wizard.profile.displayName) + '" autocomplete="name">' +
+        '</div>' +
+        '<div class="ob-form-group">' +
+          '<label class="ob-form-label" for="obRoleSelect">' + (ar ? 'دورك / مجالك' : 'Your Role') + '</label>' +
+          '<select class="ob-form-input" id="obRoleSelect">' +
+            '<option value="">' + (ar ? '— اختر دورك —' : '— Select your role —') + '</option>' +
+            ROLE_OPTIONS.map(function (r) {
+              return '<option value="' + r.value + '"' + (wizard.profile.role === r.value ? ' selected' : '') + '>' + (ar ? r.labelAr : r.label) + '</option>';
+            }).join('') +
+          '</select>' +
+        '</div>' +
+        '<div class="ob-form-group">' +
+          '<div class="ob-form-label">' + (ar ? 'القطاعات التي تهمك' : 'Sectors you care about') + '</div>' +
+          '<div class="ob-sector-grid" id="obSectorGrid">' +
+            SECTOR_OPTIONS.map(function (s) {
+              var sel = wizard.profile.sectors.indexOf(s) !== -1;
+              return '<div class="ob-sector-chip' + (sel ? ' selected' : '') + '" data-sector="' + escWiz(s) + '">' + escWiz(s) + '</div>';
+            }).join('') +
+          '</div>' +
+          '<div style="font-size:11px;color:var(--text-faint);margin-top:4px;">' + (ar ? 'اختر قطاعاً واحداً أو أكثر' : 'Select one or more') + '</div>' +
+        '</div>' +
+        '<div class="ob-modal-actions" style="padding:0;background:none;border:none;">' +
+          '<button class="ob-btn-primary" id="obStep2Next" type="button">' + (ar ? 'التالي ←' : 'Next →') + '</button>' +
+          '<button class="ob-btn-skip" id="obStep2Back" type="button">' + (ar ? '→ السابق' : '← Back') + '</button>' +
+        '</div>' +
+      '</div>';
+
+    panel.querySelectorAll('.ob-sector-chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var s = chip.getAttribute('data-sector');
+        chip.classList.toggle('selected');
+        var idx = wizard.profile.sectors.indexOf(s);
+        if (idx === -1) wizard.profile.sectors.push(s);
+        else wizard.profile.sectors.splice(idx, 1);
+      });
+    });
+    document.getElementById('obStep2Next').addEventListener('click', function () {
+      wizard.profile.displayName = (document.getElementById('obNameInput').value || '').trim();
+      wizard.profile.role = document.getElementById('obRoleSelect').value;
+      wizardGoTo(3);
+    });
+    document.getElementById('obStep2Back').addEventListener('click', function () { wizardGoTo(1); });
+  }
+
+  function renderStep3(panel) {
+    if (panel.dataset.rendered) return;
+    panel.dataset.rendered = '1';
+    var ar = isAr();
+    panel.innerHTML =
+      '<div class="ob-pref-list">' +
+        '<div style="margin-bottom:8px;">' +
+          '<div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">' + (ar ? 'الخطوة 3 من 4' : 'Step 3 of 4') + '</div>' +
+          '<div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px;">' + (ar ? 'تفضيلاتك' : 'Your Preferences') + '</div>' +
+          '<div style="font-size:13px;color:var(--text-muted);">' + (ar ? 'يمكنك تغيير هذه الإعدادات لاحقاً' : 'You can change these anytime in Settings') + '</div>' +
+        '</div>' +
+        '<div class="ob-pref-row">' +
+          '<div class="ob-pref-info">' +
+            '<div class="ob-pref-title">' + (ar ? 'اللغة' : 'Language') + '</div>' +
+            '<div class="ob-pref-sub">' + (ar ? 'اختر لغة الواجهة' : 'Choose interface language') + '</div>' +
+          '</div>' +
+          '<select class="ob-form-input" id="obLangSelect" style="width:auto;padding:6px 12px;font-size:13px;">' +
+            '<option value="en"' + (wizard.prefs.language !== 'ar' ? ' selected' : '') + '>English</option>' +
+            '<option value="ar"' + (wizard.prefs.language === 'ar' ? ' selected' : '') + '>العربية</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="ob-pref-row">' +
+          '<div class="ob-pref-info">' +
+            '<div class="ob-pref-title">' + (ar ? 'الإشعارات' : 'Email Notifications') + '</div>' +
+            '<div class="ob-pref-sub">' + (ar ? 'تنبيهات عند إضافة فرص جديدة' : 'Alerts when new opportunities are added') + '</div>' +
+          '</div>' +
+          '<label class="ob-toggle">' +
+            '<input type="checkbox" id="obNotifToggle"' + (wizard.prefs.notifications ? ' checked' : '') + '>' +
+            '<div class="ob-toggle-track"></div>' +
+          '</label>' +
+        '</div>' +
+        '<div class="ob-pref-row">' +
+          '<div class="ob-pref-info">' +
+            '<div class="ob-pref-title">' + (ar ? 'الفرص المخصصة' : 'Personalised Feed') + '</div>' +
+            '<div class="ob-pref-sub">' + (ar ? 'عرض الفرص الأنسب لقطاعاتك أولاً' : 'Show opportunities matching your sectors first') + '</div>' +
+          '</div>' +
+          '<label class="ob-toggle">' +
+            '<input type="checkbox" id="obPersonalToggle" checked>' +
+            '<div class="ob-toggle-track"></div>' +
+          '</label>' +
+        '</div>' +
+        '<div class="ob-modal-actions" style="padding:0;background:none;border:none;margin-top:8px;">' +
+          '<button class="ob-btn-primary" id="obStep3Next" type="button">' + (ar ? 'التالي ←' : 'Next →') + '</button>' +
+          '<button class="ob-btn-skip" id="obStep3Back" type="button">' + (ar ? '→ السابق' : '← Back') + '</button>' +
+        '</div>' +
+      '</div>';
+
+    document.getElementById('obStep3Next').addEventListener('click', function () {
+      wizard.prefs.language = document.getElementById('obLangSelect').value;
+      wizard.prefs.notifications = document.getElementById('obNotifToggle').checked;
+      saveWizardProfile();
+      wizardGoTo(4);
+    });
+    document.getElementById('obStep3Back').addEventListener('click', function () { wizardGoTo(2); });
+  }
+
+  function renderStep4(panel) {
+    /* Re-render every visit so the summary reflects the latest values */
+    var ar = isAr();
+    var name = wizard.profile.displayName || (ar ? 'مرحباً' : 'You');
+    var sectorStr = wizard.profile.sectors.length
+      ? wizard.profile.sectors.slice(0, 3).join(', ') + (wizard.profile.sectors.length > 3 ? ' +' + (wizard.profile.sectors.length - 3) : '')
+      : (ar ? 'لم يتم التحديد' : 'Not set');
+    var roleLabel = wizard.profile.role ? (ROLE_OPTIONS.find(function (r) { return r.value === wizard.profile.role; }) || { label: wizard.profile.role, labelAr: wizard.profile.role }) : null;
+    var roleText = roleLabel ? (ar ? roleLabel.labelAr : roleLabel.label) : '—';
+
+    panel.innerHTML =
+      '<div class="ob-ready">' +
+        '<span class="ob-ready-icon">🚀</span>' +
+        '<div class="ob-ready-title">' + (ar ? ('أنت جاهز، ' + escWiz(name) + '!') : ('You\'re all set, ' + escWiz(name) + '!')) + '</div>' +
+        '<div class="ob-ready-sub">' + (ar ? 'تم حفظ ملفك الشخصي. خذ جولة سريعة لاكتشاف المنصة.' : 'Your profile has been saved. Take a quick tour to discover the platform.') + '</div>' +
+        '<div class="ob-ready-summary">' +
+          '<div class="ob-ready-row"><span class="ob-ready-row-icon">👤</span><span class="ob-ready-row-label">' + (ar ? 'الاسم' : 'Name') + '</span><span class="ob-ready-row-val">' + escWiz(wizard.profile.displayName || '—') + '</span></div>' +
+          '<div class="ob-ready-row"><span class="ob-ready-row-icon">💼</span><span class="ob-ready-row-label">' + (ar ? 'الدور' : 'Role') + '</span><span class="ob-ready-row-val">' + escWiz(roleText) + '</span></div>' +
+          '<div class="ob-ready-row"><span class="ob-ready-row-icon">📊</span><span class="ob-ready-row-label">' + (ar ? 'القطاعات' : 'Sectors') + '</span><span class="ob-ready-row-val">' + escWiz(sectorStr) + '</span></div>' +
+          '<div class="ob-ready-row"><span class="ob-ready-row-icon">🌐</span><span class="ob-ready-row-label">' + (ar ? 'اللغة' : 'Language') + '</span><span class="ob-ready-row-val">' + (wizard.prefs.language === 'ar' ? 'العربية' : 'English') + '</span></div>' +
+        '</div>' +
+        '<div class="ob-modal-actions" style="padding:0;background:none;border:none;">' +
+          '<button class="ob-btn-primary" id="obStep4Tour" type="button">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>' +
+            '<span>' + (ar ? 'ابدأ الجولة' : 'Start the tour') + '</span>' +
+          '</button>' +
+          '<button class="ob-btn-skip" id="obStep4Skip" type="button">' + (ar ? 'تخطي الجولة' : 'Skip tour') + '</button>' +
+        '</div>' +
+      '</div>';
+
+    document.getElementById('obStep4Tour').addEventListener('click', function () {
+      try { localStorage.setItem(KEY_OB_DONE, '1'); } catch (e) {}
+      closeObModal();
+      setTimeout(startTour, 300);
+    });
+    document.getElementById('obStep4Skip').addEventListener('click', function () {
+      try { localStorage.setItem(KEY_OB_DONE, '1'); } catch (e) {}
+      closeObModal();
+    });
+  }
+
+  function saveWizardProfile() {
+    var supa = window._supabase;
+    var uid  = window.__ohSession && window.__ohSession.user && window.__ohSession.user.id;
+    if (!supa || !uid) return;
+    var existing = window.__userPrefs || window.__ohPrefs || {};
+    var updated  = Object.assign({}, existing, {
+      displayName:   wizard.profile.displayName || existing.displayName || '',
+      role:          wizard.profile.role || existing.role || '',
+      sectors:       wizard.profile.sectors.length ? wizard.profile.sectors : (existing.sectors || []),
+      lang:          wizard.prefs.language,
+      notifications: wizard.prefs.notifications
+    });
+    if (wizard.prefs.language === 'ar' && typeof switchLang === 'function') switchLang('ar');
+    var homeUser = document.getElementById('homeUserName');
+    if (homeUser && wizard.profile.displayName) homeUser.textContent = wizard.profile.displayName;
+    window.__userPrefs = updated;
+    window.__ohPrefs = updated;
+    supa.from('user_prefs')
+      .upsert({ user_id: uid, prefs: updated }, { onConflict: 'user_id' })
+      .then(function (res) {
+        if (res && res.error) console.warn('[OB wizard] prefs save error:', res.error.message);
+      });
+  }
   var tourEl     = { cutout: null, tooltip: null, next: null, prev: null, skip: null, stepLabel: null, title: null, body: null, dots: null };
 
   function positionTour(step) {
@@ -17879,22 +18340,22 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     overlay.classList.add('open');
     if (window.__trapFocus) window.__trapFocus(overlay);
 
+    /* Initialise the wizard at step 1 every time the modal opens */
+    wizardGoTo(1);
+
     /* BUG FIX: only wire listeners once to prevent duplicate handler accumulation */
     if (!_obModalListenersWired) {
       _obModalListenersWired = true;
       var startBtn = document.getElementById('obStartTourBtn');
       var skipBtn  = document.getElementById('obSkipTourBtn');
-      function _closeModal() {
-        overlay.classList.remove('open');
-        if (window.__releaseFocus) window.__releaseFocus(overlay);
-      }
+      /* Step 1 CTA → enter the wizard at Step 2 (profile setup) */
       if (startBtn) startBtn.addEventListener('click', function() {
-        _closeModal();
-        setTimeout(startTour, 380);
+        wizardGoTo(2);
       });
+      /* Step 1 skip → close modal, mark onboarding done */
       if (skipBtn) skipBtn.addEventListener('click', function() {
-        _closeModal();
-        localStorage.setItem(KEY_OB_DONE, '1');
+        try { localStorage.setItem(KEY_OB_DONE, '1'); } catch (e) {}
+        closeObModal();
       });
     }
   }
@@ -17928,7 +18389,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       if (_modalFired || !_authResolved || !_dataReady) return;
       /* Re-read keys now that _obUid is resolved */
       var modalShown = localStorage.getItem(KEY_OB_MODAL);
-      if (modalShown) return; /* already seen */
+      /* Profile-incomplete users see the wizard again even if they previously
+         dismissed the welcome modal — Phase D Step-2 enforcement. */
+      var prefs = window.__userPrefs || window.__ohPrefs || {};
+      var profileIncomplete = !(prefs && prefs.displayName && prefs.role);
+      if (modalShown && !profileIncomplete) return;
       _modalFired = true;
       localStorage.setItem(KEY_OB_MODAL, '1');
       setTimeout(showWelcomeModal, 500);
