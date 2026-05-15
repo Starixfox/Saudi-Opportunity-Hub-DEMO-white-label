@@ -8017,6 +8017,29 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   background: color-mix(in oklch, var(--surface, #fff) 94%, var(--card-accent, var(--green, #006C35)) 6%);
   box-shadow: 0 0 0 3px color-mix(in oklch, transparent 80%, var(--card-accent, var(--green, #006C35)) 20%);
 }
+.oh-tm-card-logo {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px;
+  width: 54px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: background 0.18s;
+}
+[data-theme="dark"] .oh-tm-card-logo {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+.oh-tm-card-logo-img {
+  max-width: 46px;
+  max-height: 26px;
+  object-fit: contain;
+  display: block;
+}
 .oh-tm-card-swatch {
   width: 36px;
   height: 36px;
@@ -10825,7 +10848,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         var isActive = key === active;
         html += '<div class="oh-tm-card' + (isActive ? ' oh-tm-card--active' : '') + '" data-theme-key="' + escAttr(key) + '" style="--card-accent:' + escAttr(t.accent) + '">';
         if (t.logo) {
-          html += '<div class="oh-tm-card-logo" style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;width:54px;height:36px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">';
+          html += '<div class="oh-tm-card-logo">';
           html += '<img src="' + escAttr(t.logo) + '" alt="' + escAttr(t.label) + '" data-fallback-color="' + escAttr(t.accent) + '" class="oh-tm-card-logo-img" style="max-width:48px;max-height:28px;object-fit:contain;">';
           html += '</div>';
         } else {
@@ -10897,15 +10920,38 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
          doesn't strip an inline onerror attribute. Replaces the broken img
          with a colored swatch matching the theme accent. */
       panel.querySelectorAll('.oh-tm-card-logo-img').forEach(function (img) {
-        img.addEventListener('error', function () {
-          var holder = img.parentElement;
-          if (!holder) return;
-          var color = img.getAttribute('data-fallback-color') || '#94a3b8';
-          holder.style.background = color;
-          holder.style.border = 'none';
-          img.remove();
+        // If image already failed before listener attached (cached 404)
+        if (img.complete && img.naturalWidth === 0) {
+          replaceWithSwatch(img);
+          return;
+        }
+        img.addEventListener('error', function () { replaceWithSwatch(img); });
+        img.addEventListener('load', function () {
+          // On success: keep grey bg so white logos are visible
+          var container = img.closest('.oh-tm-card-logo');
+          if (container) container.style.background = '#f1f5f9';
         });
       });
+
+      function replaceWithSwatch(img) {
+        var container = img.closest('.oh-tm-card-logo, div');
+        if (!container) return;
+        var accent = img.getAttribute('data-fallback-color') || '#94a3b8';
+        // Replace the whole container with a colored swatch
+        container.style.background = accent;
+        container.style.border = 'none';
+        container.style.borderRadius = '8px';
+        img.style.display = 'none';
+        // Add institution initial as text fallback
+        var initial = (img.alt || '?').charAt(0).toUpperCase();
+        if (!container.querySelector('.oh-tm-swatch-initial')) {
+          var span = document.createElement('span');
+          span.className = 'oh-tm-swatch-initial';
+          span.style.cssText = 'font-size:14px;font-weight:800;color:#fff;letter-spacing:-0.02em;';
+          span.textContent = initial;
+          container.appendChild(span);
+        }
+      }
 
       /* Card click → applyTheme (delegated; works even after re-renders) */
       panel.addEventListener('click', function (e) {
