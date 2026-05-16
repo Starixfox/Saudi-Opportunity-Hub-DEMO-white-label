@@ -3591,6 +3591,7 @@ body.page-entering {
   top: calc(var(--nav-height) + 4px);
   right: 0;
   width: 340px;
+  max-width: calc(100vw - 16px);
   max-height: 460px;
   overflow-y: auto;
   background: var(--surface);
@@ -3602,6 +3603,19 @@ body.page-entering {
   flex-direction: column;
 }
 .notif-dropdown.open { display: flex; }
+/* On phones, anchor the dropdown to the viewport (not the bell button)
+   so it can't be pushed off the left edge. */
+@media (max-width: 767px) {
+  .notif-dropdown {
+    position: fixed;
+    top: calc(var(--nav-height, 60px) + 4px);
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-width: none;
+    max-height: calc(100vh - var(--nav-height, 60px) - 16px);
+  }
+}
 .notif-dropdown-header {
   display: flex;
   align-items: center;
