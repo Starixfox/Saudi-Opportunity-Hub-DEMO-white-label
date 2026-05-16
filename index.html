@@ -4945,12 +4945,20 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   padding: 18px 20px;
   box-shadow: var(--shadow-sm);
   transition: transform var(--transition), box-shadow var(--transition);
+  /* Override the earlier `display: flex` (which was tuned for a
+     kpi-icon / kpi-body markup that the dashboard does not use).
+     The dashboard markup is label → value → hint stacked, so flex
+     was packing them horizontally and clipping the number on narrow
+     screens. min-width: 0 + overflow-wrap keep long numbers in-card. */
+  display: block;
+  min-width: 0;
+  overflow: hidden;
 }
 .kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .kpi-label { color: var(--text-muted); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
 .kpi-label svg, .kpi-label [data-lucide] { width: 14px; height: 14px; color: var(--green); }
-.kpi-value { font-family: var(--font-display); font-size: 32px; font-weight: 700; color: var(--text); margin-top: 8px; line-height: 1.1; }
-.kpi-hint { font-size: 12px; color: var(--text-faint); margin-top: 4px; }
+.kpi-value { font-family: var(--font-display); font-size: 32px; font-weight: 700; color: var(--text); margin-top: 8px; line-height: 1.1; overflow-wrap: anywhere; word-break: break-word; }
+.kpi-hint { font-size: 12px; color: var(--text-faint); margin-top: 4px; overflow-wrap: anywhere; }
 .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
 .chart-card {
   background: var(--surface);
