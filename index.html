@@ -17627,10 +17627,14 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var ar = isAr();
     return [
       {
-        /* Step 1 — Sidebar nav: highlight the Opportunities nav button */
+        /* Step 1 — Sidebar nav: highlight the Opportunities nav button.
+           Use the same `visible()` guard as steps 3-4 so on mobile (where
+           the sidebar is `display: none`) we fall through to the bottom-tab
+           variant instead of silently auto-skipping. */
         resolveTarget: function() {
-          return document.querySelector('.app-nav-item[data-view="opportunities"]')
-              || document.querySelector('.app-bottom-tab[data-view="opportunities"]');
+          function visible(el) { if (!el) return null; var r = el.getBoundingClientRect(); return (r.width > 0 && r.height > 0) ? el : null; }
+          return visible(document.querySelector('.app-nav-item[data-view="opportunities"]'))
+              || visible(document.querySelector('.app-bottom-tab[data-view="opportunities"]'));
         },
         title:    ar ? 'تصفح الفرص' : 'Browse Opportunities',
         body:     ar ? 'من هنا تصل إلى قاعدة بيانات الفرص الكاملة — أكثر من 1,000 فرصة عبر 20+ قطاعاً. انقر في أي وقت للانتقال.' : 'This takes you to the full opportunity database — over 1,000 programmes across 20+ sectors. Click any time to jump there.',
@@ -17638,10 +17642,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         spotlightPad: 8
       },
       {
-        /* Step 2 — Analytics nav */
+        /* Step 2 — Analytics nav. Same `visible()` fallback as Step 1. */
         resolveTarget: function() {
-          return document.querySelector('.app-nav-item[data-view="dashboard"]')
-              || document.querySelector('.app-bottom-tab[data-view="dashboard"]');
+          function visible(el) { if (!el) return null; var r = el.getBoundingClientRect(); return (r.width > 0 && r.height > 0) ? el : null; }
+          return visible(document.querySelector('.app-nav-item[data-view="dashboard"]'))
+              || visible(document.querySelector('.app-bottom-tab[data-view="dashboard"]'));
         },
         title:    ar ? 'لوحة التحكم والتحليلات' : 'Dashboard & Analytics',
         body:     ar ? 'اطلع على نظرة حية عن توزيع الفرص بالقطاع والنوع والمنطقة من خلال المخططات البيانية.' : 'See a live overview of opportunities by sector, type, and region — interactive charts updated from the live dataset.',
@@ -18003,35 +18008,33 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var rect = target.getBoundingClientRect();
       var pad  = current.spotlightPad !== undefined ? current.spotlightPad : 6;
       var vw  = window.innerWidth, vh = window.innerHeight;
+      var edgePad = 16;
 
       /* Safety: if element has no size (hidden/collapsed), skip to next step */
       if (rect.width === 0 && rect.height === 0) { advanceTour(1); return; }
 
-      /* Spotlight cutout — CAP height so a very tall target (e.g. the entire
-         opportunity-cards wrapper) doesn't paint a spotlight that's larger
-         than the viewport. We clamp the visible portion to the viewport. */
+      /* Spotlight cutout — compute raw bounds then clamp into the viewport in
+         BOTH dimensions, not only when the target itself is larger than the
+         viewport. Without this, a sidebar item near the top/left edge could
+         produce a cutout with negative top/left (sliding off the screen) even
+         though the target's own size is small. */
       var c = tourEl.cutout;
       var cutTop    = rect.top - pad;
       var cutLeft   = rect.left - pad;
       var cutWidth  = rect.width  + pad * 2;
       var cutHeight = rect.height + pad * 2;
-      /* If the target spills off either edge vertically, anchor to the visible
-         slice and cap height to the visible portion (with a sane minimum). */
-      var maxVisH = Math.max(60, vh - 32);
-      if (cutHeight > maxVisH) {
-        /* Re-anchor to the slice of the target currently in view */
-        var visTop = Math.max(cutTop, 8);
-        var visBot = Math.min(cutTop + cutHeight, vh - 8);
-        cutTop = visTop;
-        cutHeight = Math.max(60, visBot - visTop);
-      }
-      var maxVisW = Math.max(60, vw - 32);
-      if (cutWidth > maxVisW) {
-        var visL = Math.max(cutLeft, 8);
-        var visR = Math.min(cutLeft + cutWidth, vw - 8);
-        cutLeft = visL;
-        cutWidth = Math.max(60, visR - visL);
-      }
+
+      /* Clamp the cutout rectangle to the visible viewport. */
+      var visTop = Math.max(cutTop, 8);
+      var visBot = Math.min(cutTop + cutHeight, vh - 8);
+      cutTop = visTop;
+      cutHeight = Math.max(40, visBot - visTop);
+
+      var visL = Math.max(cutLeft, 8);
+      var visR = Math.min(cutLeft + cutWidth, vw - 8);
+      cutLeft = visL;
+      cutWidth = Math.max(40, visR - visL);
+
       c.style.top    = cutTop    + 'px';
       c.style.left   = cutLeft   + 'px';
       c.style.width  = cutWidth  + 'px';
@@ -18054,6 +18057,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           } else {
             arrowEl.classList.remove('ob-tour-arrow--below');
           }
+          /* Clamp arrow into viewport — it can't help if it's off-screen. */
+          arrowLeft = Math.max(8, Math.min(arrowLeft, vw - 40));
+          arrowTop  = Math.max(8, Math.min(arrowTop,  vh - 40));
           arrowEl.style.left    = arrowLeft + 'px';
           arrowEl.style.top     = arrowTop  + 'px';
           arrowEl.style.display = 'block';
@@ -18080,7 +18086,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var ttH = ttRect.height || 160;
       var top, left;
       var margin = 12;
-      var edgePad = 16;
 
       var spaceBelow = vh - (rect.bottom + pad) - margin;
       var spaceAbove = rect.top - pad - margin;
@@ -18106,14 +18111,14 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       /* Clamp vertical so tooltip is never off-screen */
       top = Math.max(edgePad, Math.min(top, vh - ttH - edgePad));
 
-      /* Horizontal: centre on element, clamp to viewport edges.
-         On narrow screens CSS overrides left to 16px so this is just a fallback. */
-      if (vw <= 600) {
-        left = edgePad;
-      } else {
-        left = rect.left + rect.width / 2 - ttW / 2;
-        left = Math.max(edgePad, Math.min(left, vw - ttW - edgePad));
-      }
+      /* Horizontal: centre on target, then clamp into the viewport at any
+         screen width. Previously the narrow-screen branch pinned left=16
+         which is fine, but the wide-screen branch could still place the
+         tooltip with `left + ttW > vw` on very narrow tablets if ttW grew
+         (e.g. translated text). One clamp covers every case. */
+      left = rect.left + rect.width / 2 - ttW / 2;
+      var maxLeft = Math.max(edgePad, vw - ttW - edgePad);
+      left = Math.max(edgePad, Math.min(left, maxLeft));
 
       tt.style.top  = top  + 'px';
       tt.style.left = left + 'px';
