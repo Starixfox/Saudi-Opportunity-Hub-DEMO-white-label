@@ -8506,22 +8506,22 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
             <p class="home-sub" data-ar="إليك ما يجري في قطاعاتك اليوم.">Here is what is happening in your sectors today.</p>
           </div>
           <div class="home-quick-actions">
-            <button class="home-qa-btn home-qa-btn--primary" onclick="setRoute('opportunities')" type="button">
+            <button class="home-qa-btn home-qa-btn--primary" data-tour-action="opportunities" onclick="setRoute('opportunities')" type="button">
               <i data-lucide="search"></i><span data-ar="تصفح الفرص"> Browse Opportunities</span>
             </button>
-            <button class="home-qa-btn" onclick="setRoute('dashboard')" type="button">
+            <button class="home-qa-btn" data-tour-action="dashboard" onclick="setRoute('dashboard')" type="button">
               <i data-lucide="bar-chart-2"></i><span data-ar="التحليلات"> Analytics</span>
             </button>
-            <button class="home-qa-btn" onclick="setRoute('sectors')" type="button">
+            <button class="home-qa-btn" data-tour-action="sectors" onclick="setRoute('sectors')" type="button">
               <i data-lucide="layers"></i><span data-ar="القطاعات"> Sectors</span>
             </button>
-            <button class="home-qa-btn" onclick="WS.openPanel('watchlist')" type="button">
+            <button class="home-qa-btn" data-tour-action="watchlist" onclick="WS.openPanel('watchlist')" type="button">
               <i data-lucide="bookmark"></i><span data-ar="قائمة المتابعة"> My Watchlist</span>
             </button>
             <button class="home-qa-btn" onclick="(function(){ window.__newThisWeekFilter=true; setRoute('opportunities'); })()" type="button">
               <i data-lucide="sparkles"></i><span data-ar="جديد هذا الأسبوع"> New This Week</span>
             </button>
-            <button class="home-qa-btn" onclick="WS.openSettings()" type="button">
+            <button class="home-qa-btn" data-tour-action="settings" onclick="WS.openSettings()" type="button">
               <i data-lucide="sliders-horizontal"></i><span data-ar="التفضيلات"> Preferences</span>
             </button>
           </div>
@@ -17627,13 +17627,16 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var ar = isAr();
     return [
       {
-        /* Step 1 — Sidebar nav: highlight the Opportunities nav button.
-           Use the same `visible()` guard as steps 3-4 so on mobile (where
-           the sidebar is `display: none`) we fall through to the bottom-tab
-           variant instead of silently auto-skipping. */
+        /* Step 1 — Highlight "Browse Opportunities". Prefer the large
+           quick-action button right on the home page (where the tour
+           starts via setRoute('home')) because it is prominent and
+           obviously labelled. Fall back to the sidebar nav-item on
+           desktop, then the bottom-tab on mobile if the home button
+           is somehow off-screen. */
         resolveTarget: function() {
           function visible(el) { if (!el) return null; var r = el.getBoundingClientRect(); return (r.width > 0 && r.height > 0) ? el : null; }
-          return visible(document.querySelector('.app-nav-item[data-view="opportunities"]'))
+          return visible(document.querySelector('.home-qa-btn[data-tour-action="opportunities"]'))
+              || visible(document.querySelector('.app-nav-item[data-view="opportunities"]'))
               || visible(document.querySelector('.app-bottom-tab[data-view="opportunities"]'));
         },
         title:    ar ? 'تصفح الفرص' : 'Browse Opportunities',
@@ -17642,10 +17645,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         spotlightPad: 8
       },
       {
-        /* Step 2 — Analytics nav. Same `visible()` fallback as Step 1. */
+        /* Step 2 — Highlight Analytics. Same priority chain as Step 1. */
         resolveTarget: function() {
           function visible(el) { if (!el) return null; var r = el.getBoundingClientRect(); return (r.width > 0 && r.height > 0) ? el : null; }
-          return visible(document.querySelector('.app-nav-item[data-view="dashboard"]'))
+          return visible(document.querySelector('.home-qa-btn[data-tour-action="dashboard"]'))
+              || visible(document.querySelector('.app-nav-item[data-view="dashboard"]'))
               || visible(document.querySelector('.app-bottom-tab[data-view="dashboard"]'));
         },
         title:    ar ? 'لوحة التحكم والتحليلات' : 'Dashboard & Analytics',
@@ -17654,13 +17658,14 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         spotlightPad: 8
       },
       {
-        /* Step 3 — My Workspace. Falls back to the topbar workspace button when
-           the sidebar isn't visible (mobile / narrow viewports). Without this
-           fallback the tour silently auto-skips steps 3-4 because the sidebar
-           items have 0×0 bounding rects and our zero-rect guard advances. */
+        /* Step 3 — My Workspace. Prefer the home page's "My Watchlist"
+           quick-action button (visible and prominent), then the sidebar
+           workspace item, the topbar watchlist counter, and finally
+           the mobile bottom-tab. */
         resolveTarget: function() {
           function visible(el) { if (!el) return null; var r = el.getBoundingClientRect(); return (r.width > 0 && r.height > 0) ? el : null; }
-          return visible(document.getElementById('sidebarWorkspace'))
+          return visible(document.querySelector('.home-qa-btn[data-tour-action="watchlist"]'))
+              || visible(document.getElementById('sidebarWorkspace'))
               || visible(document.getElementById('appTbWatchlist'))
               || visible(document.querySelector('.app-bottom-tab[data-view="saved"]'));
         },
@@ -17670,10 +17675,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         spotlightPad: 8
       },
       {
-        /* Step 4 — Settings / Preferences. Same fallback strategy. */
+        /* Step 4 — Settings / Preferences. Prefer the home quick-action
+           "Preferences" button, then the sidebar / topbar variants. */
         resolveTarget: function() {
           function visible(el) { if (!el) return null; var r = el.getBoundingClientRect(); return (r.width > 0 && r.height > 0) ? el : null; }
-          return visible(document.getElementById('appSidebarSettings'))
+          return visible(document.querySelector('.home-qa-btn[data-tour-action="settings"]'))
+              || visible(document.getElementById('appSidebarSettings'))
+              || visible(document.getElementById('appTbSettings'))
               || visible(document.getElementById('appSettingsBtn'))
               || visible(document.querySelector('[aria-label="Settings"]'));
         },
