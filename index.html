@@ -11494,30 +11494,21 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   function renderAnalytics() { renderSectorPopularity(); renderMostSaved(); }
 
   /* ── 3. User List ──────────────────────────────────────────
-     PREVIOUS BUG: queried user_prefs and selected a `created_at`
-     column that doesn't exist on user_prefs. Supabase rejected the
-     query, results[0].data was null, the table fell through to
-     "No users" despite 14 profile rows existing.
+     Source: public.profiles (extended by migration to include email,
+     display_name, last_active, role on top of the original first_name /
+     last_name / organisation). The admxBumpLastActive() upsert below
+     keeps email / display_name / last_active fresh on every page load
+     for any authed user, so this table reflects real activity even for
+     users who never edit their profile manually.
 
-     NEW APPROACH: query the public.profiles table (id uuid →
-     auth.users(id), first_name, last_name, organisation, created_at,
-     updated_at). Joins user_prefs in-memory for role + display name
-     override, and user_watchlist for per-user saves count. Cannot
-     hit auth.users directly because that requires the SERVICE ROLE
-     key — the browser only has the anon key.
+     SELECT * pulls every column so newly-added profile fields (e.g. a
+     future `organisation` enrichment) flow through without code edits.
+     The user_watchlist join is in-memory for the per-user Saves count.
 
-     If the existing profiles RLS policy is "user can read own row
-     only" the admin will get back just their own profile. To list
-     everyone the project needs (run once in Supabase SQL editor):
-
-       CREATE POLICY "Admin can read all profiles"
-         ON public.profiles FOR SELECT USING (true);
-
-     Optional extended schema the spec proposed (also one-off SQL):
-       ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email text;
-       ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS last_active timestamptz DEFAULT now();
-     Code below tolerates these columns being absent — it falls
-     back to updated_at as the last-active proxy. */
+     RLS — applied via migration:
+       INSERT WITH CHECK (auth.uid() = id)  — upsert own row only
+       UPDATE USING/WITH CHECK same          — touch own row only
+       SELECT USING (true)                   — admin lists everyone */
   async function renderUsersExt() {
     var el = document.getElementById('admx-users');
     if (!el) return;
@@ -11526,55 +11517,50 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     el.innerHTML = '<p class="admx-empty">Loading&hellip;</p>';
     try {
       var results = await Promise.all([
-        supa.from('profiles').select('id, first_name, last_name, organisation, created_at, updated_at').order('created_at', { ascending: false }).limit(500),
-        supa.from('user_prefs').select('user_id, role, prefs, updated_at').limit(500),
+        supa.from('profiles').select('*').order('created_at', { ascending: false }).limit(500),
         supa.from('user_watchlist').select('user_id').limit(10000)
       ]);
       var profiles = (results[0] && results[0].data) || [];
-      var prefs    = (results[1] && results[1].data) || [];
-      var saves    = (results[2] && results[2].data) || [];
-      /* FALLBACK: if profiles read returned empty (likely RLS — the policy
-         restricts the admin to their own row), at least show the
-         logged-in admin so the table isn't blank. The admin should run
-         the SELECT policy above to see all users. */
+      var saves    = (results[1] && results[1].data) || [];
+      /* RLS fallback: if SELECT returned nothing, the admin's own session
+         is the only thing we know about. Surface that so the table isn't
+         blank and the admin sees the hint. */
       if (!profiles.length) {
         var sess = window.__ohSession;
         if (sess && sess.user) {
           profiles = [{
             id: sess.user.id,
-            first_name: '(you — RLS hiding others)',
-            last_name: '',
-            organisation: '',
+            email: sess.user.email,
+            display_name: '(you — RLS hiding others)',
             created_at: sess.user.created_at || null,
-            updated_at: new Date().toISOString()
+            last_active: new Date().toISOString(),
+            role: 'admin'
           }];
         }
       }
-      var prefsByUid = {};
-      prefs.forEach(function(p) { if (p.user_id) prefsByUid[p.user_id] = p; });
       var savesByUid = {};
       saves.forEach(function(r) { if (r.user_id) savesByUid[r.user_id] = (savesByUid[r.user_id] || 0) + 1; });
-      var html = '<table class="admin-table"><thead><tr><th>Name</th><th>Organisation</th><th>Role</th><th>Joined</th><th>Last Active</th><th style="text-align:right">Saves</th></tr></thead><tbody>';
+      var html = '<table class="admin-table"><thead><tr><th>Display Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Last Active</th><th style="text-align:right">Saves</th></tr></thead><tbody>';
       if (!profiles.length) {
-        html += '<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No profile rows visible (check RLS policy). See SQL comment in source for the SELECT-all policy to apply.</td></tr>';
+        html += '<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No profile rows visible (check RLS policy). The migration sets <code>SELECT USING (true)</code>; if this row appears, the policy did not apply.</td></tr>';
       } else {
         profiles.forEach(function(p) {
-          var pref = prefsByUid[p.id] || {};
-          var fullName = ((p.first_name || '') + ' ' + (p.last_name || '')).trim();
-          var displayName = (pref.prefs && (pref.prefs.displayName || pref.prefs.name)) || fullName || '—';
-          var role = pref.role || 'user';
-          var joined = p.created_at ? new Date(p.created_at).toISOString().slice(0, 10) : '—';
-          /* "Last Active" prefers user_prefs.updated_at (touched on prefs
-             saves) over profiles.updated_at (touched on the upsert from
-             admxBumpLastActive below); take whichever is more recent. */
-          var lastActiveSrc = null;
-          if (pref.updated_at) lastActiveSrc = pref.updated_at;
-          if (p.updated_at && (!lastActiveSrc || p.updated_at > lastActiveSrc)) lastActiveSrc = p.updated_at;
-          var active = lastActiveSrc ? new Date(lastActiveSrc).toISOString().slice(0, 10) : '—';
-          var saveCount = savesByUid[p.id] || 0;
+          /* display_name comes from admxBumpLastActive (user_metadata.full_name
+             or email prefix). Falls back to first/last name from manual
+             profile edits, then email prefix as last resort. */
+          var fullName    = ((p.first_name || '') + ' ' + (p.last_name || '')).trim();
+          var emailPrefix = (p.email || '').split('@')[0];
+          var displayName = p.display_name || fullName || emailPrefix || '—';
+          var role        = p.role || 'user';
+          var joined      = p.created_at  ? new Date(p.created_at).toISOString().slice(0, 10) : '—';
+          /* Prefer last_active (set on every login), fall back to updated_at
+             for pre-migration rows that haven't been touched yet. */
+          var activeSrc   = p.last_active || p.updated_at || null;
+          var active      = activeSrc ? new Date(activeSrc).toISOString().slice(0, 10) : '—';
+          var saveCount   = savesByUid[p.id] || 0;
           html += '<tr>' +
             '<td>' + esc(displayName) + '</td>' +
-            '<td>' + esc(p.organisation || '—') + '</td>' +
+            '<td style="font-size:12px;color:var(--text-muted)">' + esc(p.email || '—') + '</td>' +
             '<td>' + esc(role) + '</td>' +
             '<td>' + esc(joined) + '</td>' +
             '<td>' + esc(active) + '</td>' +
@@ -11589,21 +11575,26 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     }
   }
 
-  /* Touch the current user's profiles row so the "Last Active" column on
-     the admin user list stays meaningful. Runs for every logged-in user,
-     not just admins (the listener registration is below the bootstrap
-     gate). Silent on failure — RLS may forbid the upsert for users who
-     don't yet have a profile row + don't have INSERT permission, in
-     which case there's nothing to show on the admin side either. */
+  /* Upsert the current user's profile row on every page load so the
+     admin Users tab has fresh email / display_name / last_active values.
+     Runs for ALL logged-in users (registration is below the admin
+     bootstrap gate). Silent on failure — RLS policies "Users can upsert
+     own profile" + "Users can update own profile" should permit this
+     for any authed user against their own row only. */
   async function admxBumpLastActive() {
     try {
       var supa = window._supabase; if (!supa) return;
       var sess = window.__ohSession;
       var user = sess && sess.user;
       if (!user || !user.id) return;
+      var meta = user.user_metadata || {};
+      var emailPrefix = (user.email || '').split('@')[0] || '';
+      var displayName = meta.full_name || meta.name || emailPrefix || null;
       await supa.from('profiles').upsert({
         id: user.id,
-        updated_at: new Date().toISOString()
+        email: user.email || null,
+        display_name: displayName,
+        last_active: new Date().toISOString()
       }, { onConflict: 'id' });
     } catch (e) { /* RLS / network — silent */ }
   }
@@ -12385,11 +12376,27 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (e && e.detail && e.detail.isAdmin) bootstrap();
   });
 
-  /* Separately from admin bootstrap: bump profiles.updated_at for ANY
-     logged-in user on session ready, so the admin Users tab can show a
-     meaningful "Last Active" date. Listener is not gated on isAdmin. */
+  /* Separately from admin bootstrap: bump profiles row for ANY logged-in
+     user on session ready (refreshes email / display_name / last_active),
+     so the admin Users tab reflects real activity even for users who
+     never edit their profile manually. Listener is not gated on isAdmin. */
   window.addEventListener('oh:role-ready', function() { admxBumpLastActive(); });
   if (window.__ohSession && window.__ohSession.user) admxBumpLastActive();
+
+  /* Wire save / unsave / compare / view logging for ALL logged-in users,
+     not just admins. Idempotent — __admxWrapped flags inside
+     wireActivityHooks make repeat calls safe. Triggers on role-ready and
+     polls briefly for WS in case the WS IIFE finishes after this one. */
+  function _admxWireHooksWhenReady() {
+    if (window.WS && window.WS.toggleBookmark) wireActivityHooks();
+  }
+  window.addEventListener('oh:role-ready', _admxWireHooksWhenReady);
+  _admxWireHooksWhenReady();
+  (function pollWS(attempts) {
+    if (attempts > 30) return;                /* give up after ~15 seconds */
+    if (window.WS && window.WS.toggleBookmark) { wireActivityHooks(); return; }
+    setTimeout(function() { pollWS(attempts + 1); }, 500);
+  })(0);
 })();
 </script>
 
