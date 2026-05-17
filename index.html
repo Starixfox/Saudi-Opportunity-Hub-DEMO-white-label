@@ -11379,7 +11379,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           '<p class="admx-empty">Records with a free-text deadline (e.g. "Rolling") are not counted as expired.</p>' +
         '</div>' +
         '<div class="admx-section"><h3 class="admx-title">Broken Link Checker</h3>' +
-          '<p class="admx-empty" style="margin-bottom:10px">Checked via <code>api.allorigins.win</code> proxy &mdash; full check takes ~5&ndash;10 minutes for 1,110 URLs. Backup: weekly server-side cron in <code>.github/workflows/link-check.yml</code>.</p>' +
+          '<p class="admx-empty" style="margin-bottom:10px">Tries 3 public proxies in order: <code>corsproxy.io</code> &rarr; <code>allorigins.win</code> &rarr; <code>thingproxy.freeboard.io</code>. Full check takes ~5&ndash;10 minutes for 1,110 URLs. Backup: weekly server-side cron in <code>.github/workflows/link-check.yml</code>.</p>' +
           '<div class="admx-actions">' +
             '<button class="btn-primary" id="admx-link-check" type="button">Check All URLs</button>' +
             '<span id="admx-link-progress" class="admin-form-result"></span>' +
@@ -11808,24 +11808,40 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     });
   }
 
-  /* ── 11. Broken Link Checker (proxy-based real reachability) ───
+  /* ── 11. Broken Link Checker (multi-proxy fallback) ───────────
      Direct fetch() from the GitHub Pages origin fails CORS for every
-     third-party host. allorigins.win proxies the request server-side
-     and returns the destination's HTTP status in data.status.http_code,
-     which is what we classify on. 5-concurrent batches with 300ms
-     between batches to avoid rate-limiting the public proxy. */
+     third-party host. We chain through three public proxies; the
+     first one that returns a non-zero HTTP status wins, and we record
+     which proxy succeeded so failures vs proxy-rate-limits can be
+     distinguished in the results. 5-concurrent batches with 300ms
+     between batches to be a polite caller. */
+  function _admxTimeoutSignal(ms) {
+    return (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? { signal: AbortSignal.timeout(ms) } : {};
+  }
   async function checkUrl(url) {
-    try {
-      var proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
-      var signal = (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? AbortSignal.timeout(10000) : undefined;
-      var res = await fetch(proxyUrl, signal ? { signal: signal } : {});
-      if (!res.ok) return 0;
-      var body = await res.json();
-      if (body && body.status && typeof body.status.http_code === 'number') return body.status.http_code;
-      return body && body.contents ? 200 : 0;
-    } catch (e) {
-      return 0;
+    var proxies = [
+      { name: 'corsproxy', fn: async function() {
+          var r = await fetch('https://corsproxy.io/?url=' + encodeURIComponent(url), _admxTimeoutSignal(8000));
+          return r.status;
+      }},
+      { name: 'allorigins', fn: async function() {
+          var r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url), _admxTimeoutSignal(8000));
+          if (!r.ok) return 0;
+          var d = await r.json();
+          return (d && d.status && d.status.http_code) || (d && d.contents ? 200 : 0);
+      }},
+      { name: 'thingproxy', fn: async function() {
+          var r = await fetch('https://thingproxy.freeboard.io/fetch/' + url, _admxTimeoutSignal(8000));
+          return r.status;
+      }}
+    ];
+    for (var i = 0; i < proxies.length; i++) {
+      try {
+        var status = await proxies[i].fn();
+        if (status > 0) return { code: status, proxy: proxies[i].name };
+      } catch (e) { /* try next proxy */ }
     }
+    return { code: 0, proxy: null };
   }
   async function checkLinks() {
     var out   = document.getElementById('admx-link-progress');
@@ -11869,14 +11885,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     for (var i = 0; i < records.length; i += BATCH) {
       var batch = records.slice(i, i + BATCH);
       var settled = await Promise.allSettled(batch.map(function(r) {
-        return checkUrl(r.url).then(function(code) { return { rec: r, code: code }; });
+        return checkUrl(r.url).then(function(out) { return { rec: r, code: out.code, proxy: out.proxy }; });
       }));
-      settled.forEach(function(s) {
-        var v = (s.status === 'fulfilled') ? s.value : { rec: batch[settled.indexOf(s)], code: 0 };
+      settled.forEach(function(s, k) {
+        var v = (s.status === 'fulfilled') ? s.value : { rec: batch[k], code: 0, proxy: null };
         var c = v.code;
-        if (c >= 200 && c < 400)       reachable.push(v.rec);
-        else if (c >= 500 && c < 600)  serverErr.push({ rec: v.rec, code: c });
-        else                           broken.push({ rec: v.rec, code: c });
+        var bucketItem = { rec: v.rec, code: c, proxy: v.proxy };
+        if (c >= 200 && c < 400)       reachable.push(bucketItem);
+        else if (c >= 500 && c < 600)  serverErr.push(bucketItem);
+        else                           broken.push(bucketItem);
         done++;
       });
       updateProgress();
@@ -11896,13 +11913,17 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       html += '</details>';
       return html;
     }
+    function proxyTag(name) {
+      if (!name) return '<span style="color:var(--text-muted,#94a3b8);font-size:10px;margin-left:6px">all proxies failed</span>';
+      return '<span style="color:var(--text-muted,#94a3b8);font-size:10px;margin-left:6px">via ' + esc(name) + '</span>';
+    }
     function brokenRow(r) {
       return '<li><strong>' + esc(r.rec.title || '(untitled)') + '</strong>' +
         ' <button class="btn-secondary admx-edit-link" type="button" data-id="' + esc(r.rec.id) + '" style="font-size:11px;padding:2px 8px;margin-left:8px">Edit</button>' +
-        '<br><small>' + esc(r.rec.url) + ' &mdash; status: ' + (r.code || 'no response / timeout') + '</small></li>';
+        '<br><small>' + esc(r.rec.url) + ' &mdash; status: ' + (r.code || 'no response / timeout') + '</small>' + proxyTag(r.proxy) + '</li>';
     }
     function reachableRow(r) {
-      return '<li><strong>' + esc(r.title || '(untitled)') + '</strong><br><small>' + esc(r.url) + '</small></li>';
+      return '<li><strong>' + esc(r.rec.title || '(untitled)') + '</strong>' + proxyTag(r.proxy) + '<br><small>' + esc(r.rec.url) + '</small></li>';
     }
 
     resEl.innerHTML =
