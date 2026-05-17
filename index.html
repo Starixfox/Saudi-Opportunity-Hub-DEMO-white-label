@@ -11469,10 +11469,29 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var supa = db();
     if (!supa) { el.innerHTML = '<p class="admx-empty">Supabase not ready.</p>'; return; }
     el.innerHTML = '<p class="admx-empty">Loading&hellip;</p>';
-    supa.from('user_watchlist').select('opportunity_id').limit(10000).then(function(res) {
+    /* Bug fix: the column on user_watchlist is `opp_id`, not
+       `opportunity_id`. Previous query selected a non-existent column,
+       Supabase returned an error, counts stayed empty, table fell
+       through to "No saves recorded yet." — even though
+       select('id', { count: 'exact', head: true }) was correctly
+       reporting 26 rows in the TOTAL SAVES KPI (that count is column-
+       name-independent). Also pull title + sector from user_watchlist
+       so archived / unloaded opportunities still show meaningful info. */
+    supa.from('user_watchlist').select('opp_id, title, sector').limit(10000).then(function(res) {
+      if (res && res.error) {
+        el.innerHTML = '<p class="admx-empty" style="color:#dc2626">Failed: ' + esc(res.error.message) + '</p>';
+        return;
+      }
       var rows = (res && res.data) || [];
-      var counts = {};
-      rows.forEach(function(r) { if (r.opportunity_id) counts[r.opportunity_id] = (counts[r.opportunity_id] || 0) + 1; });
+      var counts = {}, snapshot = {};
+      rows.forEach(function(r) {
+        if (!r.opp_id) return;
+        counts[r.opp_id] = (counts[r.opp_id] || 0) + 1;
+        /* Capture the most-recent title/sector snapshot per opp_id for
+           fallback display when the opportunity isn't in the in-memory
+           data() (e.g. archived rows are filtered out by the loader). */
+        if (!snapshot[r.opp_id]) snapshot[r.opp_id] = { title: r.title || null, sector: r.sector || null };
+      });
       var topIds = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; }).slice(0, 10);
       var byId = {};
       data().forEach(function(it) { byId[String(it.id)] = it; });
@@ -11481,8 +11500,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         html += '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No saves recorded yet.</td></tr>';
       } else {
         topIds.forEach(function(id, i) {
-          var it = byId[String(id)] || { title: '(record id ' + id + ')', sectors: [] };
-          html += '<tr><td>' + (i + 1) + '</td><td>' + esc(it.title || '—') + '</td><td>' + esc((it.sectors || [])[0] || '—') + '</td><td style="text-align:right;font-weight:600">' + counts[id] + '</td></tr>';
+          var it   = byId[String(id)];
+          var snap = snapshot[id] || {};
+          var title  = (it && it.title)          || snap.title  || '(record id ' + id + ')';
+          var sector = (it && (it.sectors || [])[0]) || snap.sector || '—';
+          html += '<tr><td>' + (i + 1) + '</td><td>' + esc(title) + '</td><td>' + esc(sector) + '</td><td style="text-align:right;font-weight:600">' + counts[id] + '</td></tr>';
         });
       }
       html += '</tbody></table>';
