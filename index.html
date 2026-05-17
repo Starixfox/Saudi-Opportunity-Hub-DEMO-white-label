@@ -9194,10 +9194,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
             <div class="admin-kpi-label">Total Records</div>
           </div>
           <div class="admin-kpi-card">
-            <div class="admin-kpi-value" id="adm-open">&mdash;</div>
-            <div class="admin-kpi-label">Open Now</div>
-          </div>
-          <div class="admin-kpi-card">
             <div class="admin-kpi-value" id="adm-users">&mdash;</div>
             <div class="admin-kpi-label">Registered Users</div>
           </div>
@@ -10685,9 +10681,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       if (!_db) return;
       _db.from('opportunities').select('id', { count: 'exact', head: true }).then(function (r) {
         var v = $$('adm-total'); if (v) v.textContent = (r && r.count != null) ? r.count.toLocaleString() : '—';
-      });
-      _db.from('opportunities').select('id', { count: 'exact', head: true }).eq('status', 'Open').then(function (r) {
-        var v = $$('adm-open'); if (v) v.textContent = (r && r.count != null) ? r.count.toLocaleString() : '—';
       });
       _db.from('user_prefs').select('user_id', { count: 'exact', head: true }).then(function (r) {
         var v = $$('adm-users'); if (v) v.textContent = (r && r.count != null) ? r.count.toLocaleString() : '—';
