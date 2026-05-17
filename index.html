@@ -9906,13 +9906,67 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     return d.getTime() >= (Date.now() - 7 * 24 * 60 * 60 * 1000);
   };
 
-  /* Canonical sector key for dedup / bucketing. Without this, the sector
-     bucket map saw "Energy" / "energy" / "Energy " / "energy_" as different
-     keys and the sector grid showed duplicates with split counts. Mirrors the
-     normalization sectorMeta() already does for SECTOR_META lookup so display
-     labels still resolve. */
+  /* Canonicalize a sector to one of the 15 platform canonical names.
+     Source data is messy — incoming opportunities use variants like
+     "Technology", "Banking", "Maritime", "Hydrogen" that conceptually
+     belong to the canonical set. This map collapses them at read time
+     (Supabase data is left untouched per spec). Lookups are
+     case/whitespace-insensitive and tolerate snake_case keys too. */
+  var SECTOR_CANONICAL_MAP = {
+    /* → ICT */
+    'technology': 'ICT', 'tech': 'ICT', 'information technology': 'ICT',
+    'telecommunications': 'ICT', 'digital': 'ICT', 'ai': 'ICT', 'space': 'ICT',
+    /* → Industrial */
+    'defense': 'Industrial', 'defence': 'Industrial', 'manufacturing': 'Industrial',
+    'infrastructure': 'Industrial',
+    /* → Real Estate */
+    'construction': 'Real Estate',
+    /* → Transport */
+    'logistics': 'Transport', 'aviation': 'Transport', 'maritime': 'Transport',
+    /* → Financial Services */
+    'finance': 'Financial Services', 'fintech': 'Financial Services',
+    'banking': 'Financial Services', 'investment': 'Financial Services',
+    /* → Healthcare */
+    'life sciences': 'Healthcare', 'biotech': 'Healthcare', 'medical': 'Healthcare',
+    /* → Environment */
+    'water': 'Environment',
+    /* → Energy */
+    'clean energy': 'Energy', 'renewables': 'Energy', 'solar': 'Energy',
+    'hydrogen': 'Energy',
+    /* → Agriculture */
+    'food': 'Agriculture', 'agritech': 'Agriculture',
+    /* → Tourism */
+    'hospitality': 'Tourism', 'entertainment': 'Tourism', 'sports': 'Tourism',
+    /* → Innovation */
+    'research': 'Innovation', 'science': 'Innovation', 'entrepreneurship': 'Innovation',
+    'accelerator': 'Innovation',
+    /* Identity / case-variant mappings — also catches the sectorFilter
+       dropdown values ('realestate', 'financial' etc.) so filter matching
+       collapses to the same canonical form on both sides. */
+    'energy': 'Energy', 'ict': 'ICT', 'healthcare': 'Healthcare',
+    'real estate': 'Real Estate', 'real_estate': 'Real Estate', 'realestate': 'Real Estate',
+    'financial services': 'Financial Services', 'financial_services': 'Financial Services', 'financial': 'Financial Services',
+    'agriculture': 'Agriculture', 'tourism': 'Tourism', 'industrial': 'Industrial',
+    'education': 'Education', 'transport': 'Transport', 'innovation': 'Innovation',
+    'environment': 'Environment', 'pharma': 'Pharma', 'pharmaceutical': 'Pharma',
+    'pharmaceuticals': 'Pharma', 'chemicals': 'Chemicals', 'chemical': 'Chemicals',
+    'mining': 'Mining'
+  };
+  window.__canonicalizeSector = function(raw) {
+    var trimmed = String(raw == null ? '' : raw).trim();
+    if (!trimmed) return '';
+    /* Lower + collapse underscores/whitespace for the lookup key */
+    var lc = trimmed.toLowerCase().replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+    return SECTOR_CANONICAL_MAP[lc] || trimmed;
+  };
+  /* Bucketing key — canonicalize first, then lowercase + underscore.
+     Mirrors what sectorMeta() does for SECTOR_META lookup so display
+     labels still resolve through the existing pipeline. Without the
+     canonicalize step, "Technology" and "ICT" sat in separate buckets
+     and the Sectors page showed 35 entries instead of ≤15. */
   window.__normalizeSectorKey = function(raw) {
-    return String(raw == null ? '' : raw).trim().toLowerCase().replace(/[\s\-\/]+/g, '_');
+    var canonical = window.__canonicalizeSector(raw);
+    return canonical.trim().toLowerCase().replace(/[\s\-\/]+/g, '_');
   };
 
   /* ---------------- Dashboard / KPIs / Charts ---------------- */
@@ -12759,9 +12813,20 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   }
 
   var _filterCache = {};
+  /* Sector filter values from the dropdown ('realestate', 'financial', 'ict'…)
+     are run through __canonicalizeSector first so they collapse to the same
+     canonical key the data side will produce. Without this, picking
+     "Real Estate" in the dropdown ('realestate') wouldn't match items whose
+     sectors include "Construction" (which canonicalizes to "Real Estate"
+     → 'real_estate'). */
+  function _canonSecKey(v) {
+    var canon = (window.__canonicalizeSector ? window.__canonicalizeSector(v) : v);
+    return norm(canon || v);
+  }
   function _readFilters() {
     _filterCache.q = norm(document.getElementById('searchInput')?.value);
-    _filterCache.sector = norm(document.getElementById('sectorFilter')?.value || 'all');
+    var sectorRaw = document.getElementById('sectorFilter')?.value || 'all';
+    _filterCache.sector = sectorRaw === 'all' ? 'all' : _canonSecKey(sectorRaw);
     _filterCache.country = norm(document.getElementById('countryFilter')?.value || 'all');
     _filterCache.type = norm(document.getElementById('typeFilter')?.value || 'all');
     _filterCache.status = norm(document.getElementById('statusFilter')?.value || 'all');
@@ -12780,7 +12845,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     ].filter(Boolean).join(' ').toLowerCase();
 
     if (q && !haystack.includes(q)) return false;
-    if (sector !== 'all' && !(Array.isArray(item.sectors) && item.sectors.map(norm).includes(sector))) return false;
+    if (sector !== 'all' && !(Array.isArray(item.sectors) && item.sectors.map(_canonSecKey).includes(sector))) return false;
     if (country !== 'all' && regionGroup(item) !== country) return false;
     if (type !== 'all' && norm(item.type) !== type) return false;
     if (status !== 'all') {
@@ -12878,14 +12943,24 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       // Date label — prefer last_verified, fallback to deadline, then "Recently added"
       var dateLabel = item.last_verified || item.deadline_date || t('Recently added');
 
-      // Sectors chips (max 3)
+      // Sectors chips (max 3) — canonicalize so "Technology" / "Banking" /
+      // etc. render as their canonical "ICT" / "Financial Services" labels,
+      // and so "Tech" + "Technology" both collapse to one chip.
       var sectorHtml = '';
       if (item.sectors && item.sectors.length) {
-        sectorHtml = '<div class="la-card-sectors">' +
-          item.sectors.slice(0, 3).map(function(s){
-            return '<span class="la-sector-chip">' + pretty(s) + '</span>';
-          }).join('') +
-        '</div>';
+        var canonSet = {};
+        item.sectors.forEach(function(s) {
+          var c = (window.__canonicalizeSector ? window.__canonicalizeSector(s) : pretty(s));
+          if (c) canonSet[c] = true;
+        });
+        var canonSectors = Object.keys(canonSet).slice(0, 3);
+        if (canonSectors.length) {
+          sectorHtml = '<div class="la-card-sectors">' +
+            canonSectors.map(function(c){
+              return '<span class="la-sector-chip">' + c + '</span>';
+            }).join('') +
+          '</div>';
+        }
       }
 
       // Short description
@@ -13482,7 +13557,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     tbody.innerHTML = pageItems.map(item => {
       const region = regionGroup(item);
       const regionLabel = t({ saudi: 'Saudi Arabia', gcc: 'GCC', global: 'Global' }[region] || region);
-      const chips = [pretty(item.funding_type), ...(item.profiles || []).slice(0,2).map(pretty), ...(item.sectors || []).slice(0,2).map(pretty)].filter(Boolean).slice(0,5);
+      /* Sector chips canonicalized so display + dedup is consistent with
+         the rest of the app (Sectors page, Analytics, filter dropdown). */
+      const _canonSec = window.__canonicalizeSector || pretty;
+      const _canonSecList = Array.from(new Set((item.sectors || []).map(_canonSec).filter(Boolean))).slice(0,2);
+      const chips = [pretty(item.funding_type), ...(item.profiles || []).slice(0,2).map(pretty), ..._canonSecList].filter(Boolean).slice(0,5);
       const typeStr   = t(pretty(item.type || 'Other'));
       const countryStr = t(item.country || pretty(item.eligibility_region) || 'Global');
       const statusStr  = t(pretty(item.status || 'Unknown'));
@@ -15889,7 +15968,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       field(t('Deadline'), item.deadline_date) +
       field(t('Last verified'), item.last_verified) +
       field(t('Language'), item.language) +
-      (item.sectors && item.sectors.length ? field(t('Sectors'), item.sectors.map(pretty).join(', ')) : '') +
+      (item.sectors && item.sectors.length ? field(t('Sectors'), Array.from(new Set(item.sectors.map(window.__canonicalizeSector || pretty).filter(Boolean))).join(', ')) : '') +
       (item.profiles && item.profiles.length ? field(t('Audience'), item.profiles.map(pretty).join(', ')) : '');
 
     var validLink = item.application_link && item.application_link !== '#' && item.application_link.startsWith('http');
