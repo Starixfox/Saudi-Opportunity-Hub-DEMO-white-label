@@ -17691,15 +17691,29 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         spotlightPad: 8
       },
       {
-        /* Step 5 — Search input on Opportunities page (navigate there first) */
-        targetId: 'searchInput',
+        /* Step 5 — Search & Filter bar on Opportunities page. Target the whole
+           .filter-bar[role="search"] container (label + input + sector / country /
+           type / status dropdowns) rather than just #searchInput — the input alone
+           is a narrow strip so the spotlight looked misaligned and the user read it
+           as appearing "below" the actual filter row. */
+        resolveTarget: function() {
+          function visible(el) { if (!el) return null; var r = el.getBoundingClientRect(); return (r.width > 0 && r.height > 0) ? el : null; }
+          return visible(document.querySelector('.filter-bar[role="search"]'))
+              || visible(document.querySelector('[role="search"]'))
+              || visible(document.getElementById('searchInput'));
+        },
         title:    ar ? 'ابحث عن فرصتك' : 'Search & Filter',
         body:     ar ? 'اكتب اسم الجهة أو القطاع أو الكلمة المفتاحية للبحث. استخدم الفلاتر الأسفل لتضييق النتائج بالقطاع أو المنطقة أو الحالة.' : 'Type a sponsor name, sector, or keyword to search. Use the filters below to narrow by sector, region, programme type, or status.',
         placement: 'bottom',
         spotlightPad: 8,
         beforeShow: function() {
-          /* Navigate to opportunities view so the search input is visible */
-          if (typeof setRoute === 'function') setRoute('opportunities');
+          /* Pass replace:true so setRoute takes the branch that calls showView()
+             synchronously (line ~9811) instead of routing through the async
+             hashchange event. Without this, the opportunities view is still hidden
+             when resolveTarget() / scrollIntoView() run a few lines below, the
+             scroll is a no-op, and the subsequent window.scrollTo({top:0}) inside
+             showView leaves the filter bar wherever it naturally falls. */
+          if (typeof setRoute === 'function') setRoute('opportunities', true);
         }
       },
       {
