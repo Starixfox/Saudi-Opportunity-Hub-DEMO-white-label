@@ -12626,6 +12626,14 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       .opp-card-action-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: 12px; font-weight: 600; border-radius: 999px; border: 1.5px solid rgba(255,255,255,.22); background: rgba(255,255,255,.08); color: rgba(255,255,255,.90); cursor: pointer; white-space: nowrap; transition: background 0.15s, border-color 0.15s, color 0.15s; }
       .opp-card-action-btn:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.40); color: #fff; }
       .opp-card-action-btn svg { flex-shrink: 0; }
+      /* The Save pill also carries .card-bookmark-btn so WS.syncBookmarkButtons()
+         (which queries .card-bookmark-btn[data-id]) can flip the .bookmarked
+         class for free. But .card-bookmark-btn at line ~3673 hardcodes
+         position:absolute / top / right / 30x30, which would tear the pill
+         out of the action row and pin it as a tiny square in the top-right of
+         the card (over the image overlay). Override those here — combined
+         selector is more specific than the lone .card-bookmark-btn rule. */
+      .opp-card-action-btn.card-bookmark-btn { position: static; top: auto; right: auto; width: auto; height: auto; }
       /* Saved state — driven by .bookmarked class that WS.syncBookmarkButtons()
          toggles on every .card-bookmark-btn[data-id] on each render. */
       .opp-card-action-btn.opp-card-save-btn.bookmarked { background: rgba(201,166,107,.18); border-color: rgba(201,166,107,.55); color: #C9A66B; }
