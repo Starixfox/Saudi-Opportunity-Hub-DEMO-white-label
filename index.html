@@ -13595,11 +13595,23 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           margin-top: 2px;
         }
         .opp-card-badges { flex-wrap: wrap; }
+        /* Save + Compare share row 1 (flex: 1 each so they split 50/50);
+           Go to Website (.opp-card-link) keeps width:100% below so it wraps
+           onto its own row 2. flex-wrap: wrap is what enables the 2-row layout. */
         .opp-card-btns {
           display: flex;
-          flex-direction: column;
+          flex-direction: row;
+          flex-wrap: wrap;
           gap: 8px;
           width: 100%;
+        }
+        .opp-card-btns .opp-card-action-btn {
+          flex: 1 1 calc(50% - 4px);
+          min-width: 0;
+          justify-content: center;
+          min-height: 44px;
+          font-size: 13px;
+          padding: 10px 16px;
         }
         .opp-insights-btn,
         .opp-card-link,
