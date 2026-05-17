@@ -9870,6 +9870,22 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     setTimeout(function () { waitForData(cb, tries + 1); }, 200);
   }
 
+  /* SINGLE source of truth for "added this week" / "new this week".
+     Previously inlined in 7 places with subtly different checks — some used
+     `item.isNew === true` (strict), others `item.isNew` (truthy). When the
+     Supabase column returned anything other than a JS boolean (e.g. 1, "true"),
+     the strict sites under-counted and the truthy sites over-counted, so the
+     home KPI showed one number (set by the truthy oh:data-complete listener)
+     while the widget below showed another (rendered earlier by the strict
+     _renderHomeStats). Routed everything through this helper. */
+  window.__isNewThisWeek = function(item) {
+    if (!item || !item.isNew) return false;            /* truthy — matches 1/"true"/true */
+    if (!item.last_verified) return false;
+    var d = new Date(item.last_verified);
+    if (isNaN(d.getTime())) return false;
+    return d.getTime() >= (Date.now() - 7 * 24 * 60 * 60 * 1000);
+  };
+
   /* ---------------- Dashboard / KPIs / Charts ---------------- */
   var chartRefs = {};
   /* GREEN — Saudi green brand accent. */
@@ -9984,17 +10000,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     function _renderHomeStats(data) {
       if (!data || !data.length) return;
       homeInitialized = true;
-      var now = new Date();
-      var weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
       /* Strict "open" only — matches the results-bar count + dashboard KPI,
          so the same number shows in every place. Recurring programmes are
          not "open today" — they reappear on a cycle. */
       var open = data.filter(function(d) {
         return String(d.status || '').toLowerCase() === 'open';
       });
-      var newThis = data.filter(function(d) {
-        return d.isNew === true && d.last_verified && new Date(d.last_verified) >= weekAgo;
-      });
+      var newThis = data.filter(window.__isNewThisWeek);
       var sectorMap = {};
       data.forEach(function(d) {
         (d.sectors || []).forEach(function(s) { sectorMap[s] = (sectorMap[s] || 0) + 1; });
@@ -10059,8 +10071,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         var d = getData();
         if (d && d.length) {
           /* Data is there but callback hasn't fired yet — trigger manually */
-          var weekAgo2 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-          var newThis2 = d.filter(function(x){ return x.isNew === true && x.last_verified && new Date(x.last_verified) >= weekAgo2; });
+          var newThis2 = d.filter(window.__isNewThisWeek);
           renderHomeOppList('homeNewList', newThis2.slice(0, 8), true);
           var sm2 = {};
           d.forEach(function(x){ (x.sectors||[]).forEach(function(s){ sm2[s]=(sm2[s]||0)+1; }); });
@@ -10075,6 +10086,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     }, 4000);
   }
 
+  /* Exposed on window so the oh:data-complete listener in a sibling IIFE
+     can refresh the "New this week" widget with the same item set the
+     home KPI is counting — otherwise the KPI gets bumped to the full-data
+     count while the widget stays frozen at the partial-data render. */
+  window.__renderHomeNewList = function(items) { renderHomeOppList('homeNewList', items, true); };
   function renderHomeOppList(elId, items, showNewBadge) {
     var el = document.getElementById(elId);
     if (!el) return;
@@ -11358,10 +11374,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       /* Update home stat cards */
       var total = all.length;
       var open  = all.filter(function(o) { return (o.status || '').toLowerCase() === 'open'; }).length;
-      var thisWeek = (function() {
-        var cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        return all.filter(function(o) { return o.isNew && o.last_verified && new Date(o.last_verified) >= cutoff; }).length;
-      })();
+      var thisWeek = all.filter(window.__isNewThisWeek).length;
       function setEl(id, val) { var el = document.getElementById(id); if (el) el.textContent = val.toLocaleString(); }
       setEl('homeTotalVal', total);
       setEl('homeOpenVal',  open);
@@ -14033,8 +14046,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
        because created_at reflects Supabase insert time (all rows
        inserted in one batch share the same date), not publish date.
        We use last_verified as the data-currency signal instead:
-       - addedWeek  = isNew===true AND last_verified within 7 days
-       - updatedWeek = last_verified within 7 days (any row) */
+       - addedWeek  = window.__isNewThisWeek(item)  (isNew + last_verified within 7d)
+       - updatedWeek = last_verified within 7 days (any row)
+       addedWeek MUST go through the shared helper or it drifts from the
+       home KPI / widget — see helper definition near getData(). */
     var sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     var addedWeek = 0, updatedWeek = 0, latestVerified = null;
     data.forEach(function(item) {
@@ -14043,10 +14058,8 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var dv = new Date(verifiedStr);
       if (isNaN(dv)) return;
       if (dv > latestVerified || !latestVerified) latestVerified = dv;
-      if (dv >= sevenDaysAgo) {
-        updatedWeek++;
-        if (item.isNew) addedWeek++;
-      }
+      if (dv >= sevenDaysAgo) updatedWeek++;
+      if (window.__isNewThisWeek && window.__isNewThisWeek(item)) addedWeek++;
     });
 
     /* Format the most-recent verified date compactly */
@@ -14181,14 +14194,24 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     /* Recalc home stats with full dataset */
     var all = window.opportunitiesData || [];
     if (all.length) {
-      var cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       var open = all.filter(function(o){ return (o.status||'').toLowerCase() === 'open'; }).length;
-      var nw   = all.filter(function(o){ return o.isNew && o.last_verified && new Date(o.last_verified) >= cutoff; }).length;
+      /* Use the SAME helper that fed homeNewList during initHome — otherwise
+         the KPI count and the widget list filter use different definitions
+         and the two numbers diverge (the original "91 vs 56" bug). */
+      var newList = all.filter(window.__isNewThisWeek);
+      var nw = newList.length;
       function _s(id,v){ var e=document.getElementById(id); if(e) e.textContent=v.toLocaleString(); }
       _s('homeTotalVal', all.length);
       _s('homeOpenVal',  open);
       _s('homeNewVal',   nw);
       _s('appTbNewCount', nw);
+      /* Re-render the "New this week" widget too. initHome rendered it once
+         with whatever partial data was loaded then; without this call the
+         list is frozen while the KPI gets bumped by the full dataset — which
+         is what made the KPI and widget look out of sync. */
+      if (typeof window.__renderHomeNewList === 'function') {
+        window.__renderHomeNewList(newList.slice(0, 8));
+      }
       var statOpps = document.getElementById('obStatOpps');
       if (statOpps) statOpps.innerHTML = all.length.toLocaleString() + '<span>+</span>';
     }
@@ -14943,8 +14966,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     /* —— KPI row: always uses global data —— */
     var total    = data.length;
     var open     = data.filter(function(r){ return r.status==='open'; }).length;
-    var cutoff   = Date.now() - 7*24*60*60*1000;
-    var newCount = data.filter(function(r){ return r.isNew===true && r.last_verified && new Date(r.last_verified).getTime()>=cutoff; }).length;
+    /* Shared helper — must match the home KPI / widget so all "Added This Week"
+       counters across the app show the same number. */
+    var newCount = data.filter(window.__isNewThisWeek).length;
     var sectorSet= {};
     data.forEach(function(r){ (r.sectors||[]).forEach(function(s){ if(s) sectorSet[s]=true; }); });
 
@@ -16114,14 +16138,8 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     // "New this week" = isNew flag AND last_verified within the last 7 days
     var newCount = 0;
     var _dataset = window.opportunitiesData || window.allOpportunities || window._wsDataset || null;
-    if (_dataset) {
-      var _sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      newCount = _dataset.filter(function(item) {
-        if (!item.isNew) return false;
-        if (!item.last_verified) return false;
-        var d = new Date(item.last_verified);
-        return !isNaN(d) && d >= _sevenDaysAgo;
-      }).length;
+    if (_dataset && window.__isNewThisWeek) {
+      newCount = _dataset.filter(window.__isNewThisWeek).length;
     }
     if (uc) uc.textContent = newCount;
 
