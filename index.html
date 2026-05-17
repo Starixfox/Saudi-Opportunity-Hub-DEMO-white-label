@@ -11618,8 +11618,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         descHtml +
         sectorHtml +
         '<div class="la-card-actions">' +
-          '<button class="la-btn la-btn-primary opp-insights-btn" data-id="' + esc(item.id||'') + '" data-title="' + (item.title||'').replace(/"/g,'&quot;') + '">' + viewLabel + '</button>' +
-          '<button class="la-btn la-bookmark-btn' + bmSavedCls + '" data-id="' + esc(item.id||'') + '" data-title="' + (item.title||'').replace(/"/g,'&quot;') + '" data-sector="' + esc((item.sectors&&item.sectors[0])||'') + '" data-type="' + esc(item.type||'') + '" onclick="window._laSave&&window._laSave(this)">' + bmLabel + '</button>' +
           '<button class="la-btn la-btn-icon" title="' + compareLabel + '" onclick="window._laCompare&&window._laCompare(this)" data-cmpid="' + esc(item.id||'') + '" data-cmptitle="' + (item.title||'').replace(/"/g,'&quot;') + '">' +
             '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>' +
           '</button>' +
@@ -12191,7 +12189,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       return `
         <div class="opp-card-row opp-card-cell" data-id="${item.id || ''}">
             <article class="opp-card-noimg">
-              <button class="opp-select-btn" data-id="${item.id || ''}" title="${t('Add to comparison')}" aria-label="${t('Select for comparison')}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></button>
               <div class="opp-card-content">
                 <h3 class="opp-card-title">${highlightTerm(item.title || t('Untitled'), searchTerm)}</h3>
                 <div class="opp-card-meta">
@@ -12241,9 +12238,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                 </div>
                 <div class="opp-card-sponsor">${item.sponsor_institution ? `<strong>${t('Sponsor:')}</strong> ${esc(item.sponsor_institution)}` : ''}</div>
               </div>
-            <button class="card-bookmark-btn opp-card-bookmark-edge" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" data-sector="${(item.sectors&&item.sectors[0])||''}" data-type="${item.type||''}" onclick="WS&&WS.toggleBookmark(this)" title="Save to Watchlist" aria-label="Save to Watchlist" data-label-en="Save to Watchlist" data-label-ar="حفظ في قائمة المتابعة" data-saved-en="Saved ✓" data-saved-ar="تم الحفظ ✓">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-            </button>
             <div class="opp-card-image"><img src="${sectorImg(item)}" alt="" loading="lazy" onerror="this.style.display='none';this.parentNode.classList.add('opp-card-image-fallback');"/></div></article>
         </div>
       `;
