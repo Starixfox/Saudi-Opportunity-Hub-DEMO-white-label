@@ -11529,56 +11529,108 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (!el) return;
     var supa = db();
     if (!supa) { el.innerHTML = '<p class="admx-empty">Supabase not ready.</p>'; return; }
-    el.innerHTML = '<p class="admx-empty">Loading&hellip;</p>';
+    /* Only show "Loading…" on the very first render — the 60s auto-refresh
+       shouldn't flicker the table away every minute. */
+    if (!el.querySelector('table')) el.innerHTML = '<p class="admx-empty">Loading&hellip;</p>';
     try {
+      /* UNION user ids across every table that holds per-user data so
+         users who registered before the profiles row was extended (or
+         who simply never signed in after the email/display_name/last_active
+         columns were added) still appear. profiles has email/display_name/
+         role/etc.; user_prefs has sectors/theme/role; user_watchlist and
+         user_folders are pure id sources for the union.
+         Column-name notes: user_prefs has updated_at (no created_at),
+         user_watchlist has saved_at, user_folders has created_at — we use
+         whichever is earliest as the "Joined" date when profiles has none. */
       var results = await Promise.all([
-        supa.from('profiles').select('*').order('created_at', { ascending: false }).limit(500),
-        supa.from('user_watchlist').select('user_id').limit(10000)
+        supa.from('profiles').select('*').limit(500),
+        supa.from('user_prefs').select('user_id, prefs, updated_at, role, theme').limit(500),
+        supa.from('user_watchlist').select('user_id, saved_at').limit(10000),
+        supa.from('user_folders').select('user_id, created_at').limit(500)
       ]);
-      var profiles = (results[0] && results[0].data) || [];
-      var saves    = (results[1] && results[1].data) || [];
-      /* RLS fallback: if SELECT returned nothing, the admin's own session
-         is the only thing we know about. Surface that so the table isn't
-         blank and the admin sees the hint. */
-      if (!profiles.length) {
+      var profiles  = (results[0] && results[0].data) || [];
+      var prefs     = (results[1] && results[1].data) || [];
+      var watchlist = (results[2] && results[2].data) || [];
+      var folders   = (results[3] && results[3].data) || [];
+
+      var userMap = {};
+      function touch(uid) {
+        if (!uid) return null;
+        if (!userMap[uid]) userMap[uid] = { id: uid, profile: null, pref: null, firstSeen: null };
+        return userMap[uid];
+      }
+      function noteFirstSeen(u, ts) {
+        if (!u || !ts) return;
+        if (!u.firstSeen || ts < u.firstSeen) u.firstSeen = ts;
+      }
+      profiles.forEach(function(p)  { var u = touch(p.id);      if (u) { u.profile = p;  noteFirstSeen(u, p.created_at); } });
+      prefs.forEach(function(r)     { var u = touch(r.user_id); if (u) { u.pref    = r;  noteFirstSeen(u, r.updated_at); } });
+      watchlist.forEach(function(r) { var u = touch(r.user_id); if (u) { noteFirstSeen(u, r.saved_at); } });
+      folders.forEach(function(r)   { var u = touch(r.user_id); if (u) { noteFirstSeen(u, r.created_at); } });
+
+      var users = Object.keys(userMap).map(function(uid) { return userMap[uid]; });
+
+      /* RLS fallback: if every table came back empty (most likely owner-only
+         SELECT policies still in effect on one of them), at least show the
+         logged-in admin so the table isn't blank. */
+      if (!users.length) {
         var sess = window.__ohSession;
         if (sess && sess.user) {
-          profiles = [{
+          users = [{
             id: sess.user.id,
-            email: sess.user.email,
-            display_name: '(you — RLS hiding others)',
-            created_at: sess.user.created_at || null,
-            last_active: new Date().toISOString(),
-            role: 'admin'
+            profile: { id: sess.user.id, email: sess.user.email, display_name: '(you — RLS hiding others)', role: 'admin', created_at: sess.user.created_at || null },
+            pref: null,
+            firstSeen: sess.user.created_at || null
           }];
         }
       }
-      var savesByUid = {};
-      saves.forEach(function(r) { if (r.user_id) savesByUid[r.user_id] = (savesByUid[r.user_id] || 0) + 1; });
-      var html = '<table class="admin-table"><thead><tr><th>Display Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Last Active</th><th style="text-align:right">Saves</th><th style="width:110px"></th></tr></thead><tbody>';
-      if (!profiles.length) {
-        html += '<tr><td colspan="7" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No profile rows visible (check RLS policy). The migration sets <code>SELECT USING (true)</code>; if this row appears, the policy did not apply.</td></tr>';
+
+      /* Sort newest-joined first (firstSeen DESC) — strings sort
+         lexicographically which works for ISO-8601 timestamps. */
+      users.sort(function(a, b) {
+        if (!a.firstSeen && !b.firstSeen) return 0;
+        if (!a.firstSeen) return 1;
+        if (!b.firstSeen) return -1;
+        return b.firstSeen < a.firstSeen ? -1 : b.firstSeen > a.firstSeen ? 1 : 0;
+      });
+
+      var html = '<table class="admin-table"><thead><tr>' +
+        '<th>Email</th>' +
+        '<th>Display Name</th>' +
+        '<th>Role</th>' +
+        '<th>Sectors</th>' +
+        '<th>Theme</th>' +
+        '<th>Joined</th>' +
+        '<th style="width:110px"></th>' +
+      '</tr></thead><tbody>';
+
+      if (!users.length) {
+        html += '<tr><td colspan="7" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No users visible. Check that one of profiles / user_prefs / user_watchlist / user_folders has a permissive SELECT RLS policy.</td></tr>';
       } else {
-        profiles.forEach(function(p) {
-          /* display_name comes from admxBumpLastActive (user_metadata.full_name
-             or email prefix). Falls back to first/last name from manual
-             profile edits, then email prefix as last resort. */
-          var fullName    = ((p.first_name || '') + ' ' + (p.last_name || '')).trim();
+        users.forEach(function(u) {
+          var p   = u.profile || {};
+          var pr  = u.pref    || {};
+          var prJson = pr.prefs || {};
           var emailPrefix = (p.email || '').split('@')[0];
-          var displayName = p.display_name || fullName || emailPrefix || '—';
-          var role        = p.role || 'user';
-          var joined      = p.created_at  ? new Date(p.created_at).toISOString().slice(0, 10) : '—';
-          var activeSrc   = p.last_active || p.updated_at || null;
-          var active      = activeSrc ? new Date(activeSrc).toISOString().slice(0, 10) : '—';
-          var saveCount   = savesByUid[p.id] || 0;
-          var uidAttr     = esc(p.id);
+          var fullName    = ((p.first_name || '') + ' ' + (p.last_name || '')).trim();
+          var displayName = p.display_name || prJson.displayName || prJson.name || fullName || emailPrefix || '—';
+          var email       = p.email || '—';
+          var role        = p.role || pr.role || 'user';
+          /* sectors: prefs.sectors is a string[] of preferred sector ids/names */
+          var sectorList  = Array.isArray(prJson.sectors) ? prJson.sectors : [];
+          var sectorsCell = sectorList.length
+            ? sectorList.slice(0, 3).join(', ') + (sectorList.length > 3 ? ' +' + (sectorList.length - 3) : '')
+            : '—';
+          var theme  = pr.theme || '—';
+          var joined = u.firstSeen ? new Date(u.firstSeen).toISOString().slice(0, 10) : '—';
+          var uidAttr = esc(u.id);
           html += '<tr data-uid="' + uidAttr + '">' +
+            '<td style="font-size:12px">' + esc(email) + '</td>' +
             '<td>' + esc(displayName) + '</td>' +
-            '<td style="font-size:12px;color:var(--text-muted)">' + esc(p.email || '—') + '</td>' +
             '<td>' + esc(role) + '</td>' +
-            '<td>' + esc(joined) + '</td>' +
-            '<td>' + esc(active) + '</td>' +
-            '<td style="text-align:right;font-weight:600">' + saveCount + '</td>' +
+            '<td style="font-size:12px;color:var(--text-muted)" title="' + esc(sectorList.join(', ')) + '">' + esc(sectorsCell) + '</td>' +
+            '<td style="font-size:12px">' + esc(theme) + '</td>' +
+            '<td style="font-size:12px">' + esc(joined) + '</td>' +
             '<td style="text-align:right"><button class="btn-secondary admx-user-activity-btn" type="button" data-uid="' + uidAttr + '" style="font-size:11px;padding:3px 10px">&#9654; Activity</button></td>' +
           '</tr>' +
           '<tr class="admx-user-activity-row" data-uid="' + uidAttr + '" style="display:none">' +
