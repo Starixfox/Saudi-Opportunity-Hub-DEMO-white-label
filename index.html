@@ -11818,18 +11818,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (!el) return;
     var rows = [];
     data().forEach(function(it) {
-      if (!it.deadline_date) return;                /* no deadline at all — not relevant here */
+      if (!it.deadline_date) return;                /* no deadline at all */
       var overdue = calcDaysOverdue(it.deadline_date);
-      if (overdue !== null && overdue < 0) return;  /* future deadline — not expired */
+      if (overdue === null) return;                 /* rolling / annual / non-date — not expirable */
+      if (overdue < 0) return;                      /* future deadline — not expired */
       rows.push({ it: it, overdue: overdue });
     });
-    /* Sort: real overdue first (descending), then the null "needs review" rows */
-    rows.sort(function(a, b) {
-      if (a.overdue === null && b.overdue === null) return 0;
-      if (a.overdue === null) return 1;
-      if (b.overdue === null) return -1;
-      return b.overdue - a.overdue;
-    });
+    rows.sort(function(a, b) { return b.overdue - a.overdue; });
     var html = '<table class="admin-table"><thead><tr><th style="width:36px"><input type="checkbox" id="admx-exp-all"></th><th>Title</th><th>Sector</th><th>Deadline</th><th style="text-align:right;width:120px">Days Overdue</th></tr></thead><tbody>';
     if (!rows.length) html += '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No expired records.</td></tr>';
     else rows.slice(0, 300).forEach(function(r) {
