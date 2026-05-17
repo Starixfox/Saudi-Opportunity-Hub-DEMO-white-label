@@ -9497,6 +9497,22 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       <div class="settings-section-title" data-en="Display" data-ar="العرض">Display</div>
       <div class="settings-row">
         <div class="settings-label">
+          <span data-en="Language preference" data-ar="تفضيل اللغة">Language preference</span>
+          <div class="settings-sublabel" data-en="Applied automatically every time you sign in" data-ar="يُطبَّق تلقائياً في كل مرة تسجل الدخول">Applied automatically every time you sign in</div>
+        </div>
+        <div role="radiogroup" aria-label="Language preference" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+          <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.85rem;cursor:pointer">
+            <input type="radio" name="settingsLanguage" id="settingsLanguageEn" value="en" style="margin:0">
+            <span data-en="English" data-ar="الإنجليزية">English</span>
+          </label>
+          <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.85rem;cursor:pointer">
+            <input type="radio" name="settingsLanguage" id="settingsLanguageAr" value="ar" style="margin:0">
+            <span lang="ar" dir="rtl">العربية</span>
+          </label>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-label">
           <span data-en="Default view" data-ar="طريقة العرض الافتراضية">Default view</span>
           <div class="settings-sublabel" data-en="Card layout shown when you arrive" data-ar="تخطيط البطاقات عند الوصول">Card layout shown when you arrive</div>
         </div>
@@ -17030,6 +17046,53 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     } catch(e) {}
   });
 
+  /* Exposed so the Settings save handler + the post-login Supabase
+     preference hook can switch the active language without re-implementing
+     translatePage/restorePage. lang === 'ar' translates if needed and
+     no-ops if already Arabic; 'en' restores if needed and no-ops if
+     already English. Mirrors the active value to BOTH localStorage keys
+     so guest persistence + the boot-time autoload at line ~17027 stay
+     in sync with the Supabase preference. */
+  window.__setLanguage = function(lang) {
+    var target = (lang === 'ar') ? 'ar' : 'en';
+    var currentlyAr = (window.__lang === 'ar') || (_translated || _translating);
+    if (target === 'ar' && !currentlyAr) translatePage();
+    else if (target === 'en' && currentlyAr) restorePage();
+    try { localStorage.setItem('oh-lang',            target); } catch(e) {}
+    try { localStorage.setItem('languagePreference', target); } catch(e) {}
+  };
+
+  /* ── POST-LOGIN LANGUAGE SYNC ─────────────────────────────────
+     For every authenticated user, fetch user_prefs.language and apply
+     it. This guarantees an Arabic-preferring user always lands in
+     Arabic without having to click the toggle — even on a fresh device
+     where localStorage 'oh-lang' isn't set yet. The Supabase value
+     overrides localStorage on login (per spec PART 4).
+     Boot-time localStorage autoload at line ~17027 already handles the
+     no-flicker first paint for return visitors; this listener handles
+     first-time-on-new-device + cross-device sync. */
+  function _applyLanguageFromSupabase() {
+    try {
+      var supa = window._supabase;
+      var sess = window.__ohSession;
+      var uid  = sess && sess.user && sess.user.id;
+      if (!supa || !uid) return;
+      supa.from('user_prefs')
+        .select('language')
+        .eq('user_id', uid)
+        .maybeSingle()
+        .then(function(res) {
+          if (!res || res.error || !res.data) return;
+          var lang = res.data.language === 'ar' ? 'ar' : 'en';
+          window.__setLanguage(lang);
+        }, function(){ /* silent — best-effort */ });
+    } catch (e) { /* silent */ }
+  }
+  window.addEventListener('oh:role-ready', _applyLanguageFromSupabase);
+  /* Also try immediately in case role-ready already fired before this
+     listener was registered (script ordering). */
+  if (window.__ohSession && window.__ohSession.user) _applyLanguageFromSupabase();
+
 })();
 </script>
 
@@ -18530,6 +18593,19 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (alertDeadline) alertDeadline.checked = prefs.alertDeadline !== false;
     if (alertDigest)   alertDigest.checked   = prefs.alertDigest   === true;
 
+    /* Language preference radio — populate from saved value (Supabase
+       user_prefs.language, mirrored to localStorage on save). Default 'en'
+       so first-time visitors see the English radio pre-selected. */
+    var langEn = document.getElementById('settingsLanguageEn');
+    var langAr = document.getElementById('settingsLanguageAr');
+    if (langEn && langAr) {
+      var savedLang = prefs.language ||
+                      (function(){ try { return localStorage.getItem('languagePreference') || localStorage.getItem('oh-lang'); } catch(e) { return null; } })() ||
+                      'en';
+      if (savedLang === 'ar') { langAr.checked = true; langEn.checked = false; }
+      else                    { langEn.checked = true; langAr.checked = false; }
+    }
+
     // Sector chips
     document.querySelectorAll('.settings-chip[data-sector]').forEach(function(chip) {
       var sel = (prefs.sectors || []).includes(chip.dataset.sector);
@@ -18556,6 +18632,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
     var displayNameEl = document.getElementById('settingsDisplayName');
     var newDisplayName = displayNameEl ? displayNameEl.value.trim() : '';
+    /* Read the chosen language radio. Default to current value if neither
+       is checked (shouldn't happen — openSettings always pre-selects one). */
+    var langArChecked = document.getElementById('settingsLanguageAr');
+    var chosenLang = (langArChecked && langArChecked.checked) ? 'ar' : 'en';
     prefs = {
       displayName:    newDisplayName,
       role:           role?.value || '',
@@ -18565,12 +18645,35 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       defaultStatus:  status?.value || '',
       alertNew:       alertNew?.checked !== false,
       alertDeadline:  alertDeadline?.checked !== false,
-      alertDigest:    alertDigest?.checked === true
+      alertDigest:    alertDigest?.checked === true,
+      language:       chosenLang
     };
     save(KEY_PREFS, prefs);
     window.__userPrefs = prefs;  /* expose for insights personalisation */
     window.dispatchEvent(new CustomEvent('__userPrefsUpdated'));  /* notify insights to re-render */
     dbSavePrefs(prefs);
+
+    /* Persist language preference to Supabase user_prefs.language (column
+       added via the add_language_to_user_prefs migration) and mirror to
+       both localStorage keys: 'languagePreference' (per spec) + the
+       existing 'oh-lang' the boot-time autoload uses. Then apply the
+       language immediately so the modal closes into the new language. */
+    try { localStorage.setItem('languagePreference', chosenLang); } catch(e) {}
+    try { localStorage.setItem('oh-lang',            chosenLang); } catch(e) {}
+    (function persistLangToSupabase(){
+      try {
+        var supa = window._supabase;
+        var sess = window.__ohSession;
+        var uid  = sess && sess.user && sess.user.id;
+        if (!supa || !uid) return;  /* guest — localStorage carries it */
+        supa.from('user_prefs').upsert(
+          { user_id: uid, language: chosenLang },
+          { onConflict: 'user_id' }
+        ).then(function(){}, function(){});  /* silent — best-effort */
+      } catch(e) {}
+    })();
+    /* Apply right now so the toast renders in the chosen language. */
+    if (typeof window.__setLanguage === 'function') window.__setLanguage(chosenLang);
     document.getElementById('settingsModalOverlay').classList.remove('open');
     showToast('Preferences saved');
     /* Update greeting immediately if display name changed */
