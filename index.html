@@ -11297,11 +11297,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   'use strict';
 
   var injected = false;
-  var activityLog = [];
-  try {
-    var stored = sessionStorage.getItem('oh_admin_activity_log');
-    if (stored) activityLog = JSON.parse(stored) || [];
-  } catch (e) { activityLog = []; }
+  /* Activity log moved to public.activity_log (Supabase) — see migration
+     comment above renderActivityLog. Previous in-memory + sessionStorage
+     buffer removed; the table is now durable across sessions and shared
+     across admins. */
+  var _admxActivityTimer = null;
 
   function esc(s) {
     return String(s == null ? '' : s)
@@ -11344,7 +11344,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         '<div class="admx-section"><h3 class="admx-title">Most-Saved Opportunities (top 10)</h3><div id="admx-saved" class="admin-table-wrap"></div></div>',
       'admx-engagement':
         '<div class="admx-section"><h3 class="admx-title">Registered Users</h3><div id="admx-users" class="admin-table-wrap"></div></div>' +
-        '<div class="admx-section"><h3 class="admx-title">Activity Log (this session)</h3><div id="admx-activity" class="admin-table-wrap"></div></div>',
+        '<div class="admx-section"><h3 class="admx-title">Activity Log</h3>' +
+          '<div class="admx-actions">' +
+            '<button class="btn-secondary" id="admx-activity-refresh" type="button" style="font-size:12px">&#x21bb; Refresh</button>' +
+            '<button class="btn-secondary" id="admx-activity-clear" type="button" style="font-size:12px">Clear entries &gt; 30 days</button>' +
+            '<span id="admx-activity-status" class="admin-form-result" style="font-size:11px;color:var(--text-muted)"></span>' +
+          '</div>' +
+          '<p class="admx-empty" style="margin:0 0 10px;font-size:11px">Auto-refreshes every 60s while this tab is open. Newest 100 entries shown.</p>' +
+          '<div id="admx-activity" class="admin-table-wrap"></div>' +
+        '</div>',
       'admx-tools':
         '<div class="admx-section"><h3 class="admx-title">Bulk Import (JSON)</h3>' +
           '<textarea id="admx-import-input" class="admx-textarea" rows="6" placeholder=\'[{"title":"...","sectors":["..."],"type":"...","region":"..."}]\'></textarea>' +
@@ -11600,46 +11608,153 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     } catch (e) { /* RLS / network — silent */ }
   }
 
-  /* ── 4. Activity Log (session) ─────────────────────────── */
-  function renderActivityLog() {
-    var el = document.getElementById('admx-activity');
-    if (!el) return;
-    var rows = activityLog.slice(-50).reverse();
-    var html = '<table class="admin-table"><thead><tr><th>Time</th><th>User</th><th>Action</th><th>Opportunity</th></tr></thead><tbody>';
-    if (!rows.length) {
-      html += '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No activity recorded this session. Save or compare an opportunity to populate.</td></tr>';
-    } else {
-      rows.forEach(function(r) {
-        html += '<tr><td>' + esc(new Date(r.t).toLocaleString()) + '</td><td>' + esc(r.user) + '</td><td>' + esc(r.action) + '</td><td>' + esc(r.title) + '</td></tr>';
-      });
-    }
-    html += '</tbody></table>';
-    el.innerHTML = html;
+  /* ── 4. Activity Log — persistent (Supabase public.activity_log) ──
+     Previous version was an in-memory + sessionStorage array that
+     reset on every reload and was admin-local. Now durable: every
+     save / unsave / compare / view inserts a row, the panel renders
+     the last 100 ordered by created_at desc, and auto-refreshes
+     every 60s while visible.
+
+     Migration applied via supabase MCP (also valid as standalone SQL):
+       CREATE TABLE IF NOT EXISTS public.activity_log (
+         id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+         user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+         user_email text,
+         action text NOT NULL,            -- 'saved', 'unsaved', 'compared', 'viewed'
+         opportunity_id text,
+         opportunity_title text,
+         created_at timestamptz DEFAULT now()
+       );
+       CREATE INDEX activity_log_created_at_idx ON public.activity_log (created_at DESC);
+       CREATE INDEX activity_log_user_id_idx    ON public.activity_log (user_id);
+       ALTER TABLE public.activity_log ENABLE ROW LEVEL SECURITY;
+       CREATE POLICY "Users can insert own activity"
+         ON public.activity_log FOR INSERT WITH CHECK (auth.uid() = user_id);
+       CREATE POLICY "Admin can read all activity"
+         ON public.activity_log FOR SELECT USING (true);
+       CREATE POLICY "Admin can delete activity"
+         ON public.activity_log FOR DELETE USING (true);
+     RLS gates writes to the calling user's own id only; reads + deletes
+     are open (tighten to a real admin claim later if multi-tenant). */
+
+  function admxActionBadge(action) {
+    var a = String(action || '').toLowerCase();
+    var color = a === 'saved'    ? '#16a34a'
+              : a === 'unsaved'  ? 'var(--text-muted, #94a3b8)'
+              : a === 'compared' ? '#35d5c5'
+              : a === 'viewed'   ? '#8b5cf6'
+              : 'var(--text-muted, #94a3b8)';
+    return '<span style="display:inline-block;padding:2px 8px;border-radius:999px;background:' + color +
+           ';color:#fff;font-size:11px;font-weight:600;text-transform:capitalize">' + esc(a) + '</span>';
   }
 
-  function logActivity(action, opp) {
-    var s = window.__ohSession;
-    var user = (s && s.user && s.user.email) || 'anon';
-    var title = (opp && opp.title) || (opp && ('id ' + opp.id)) || '—';
-    activityLog.push({ t: Date.now(), user: user, action: action, title: title });
-    if (activityLog.length > 200) activityLog = activityLog.slice(-200);
-    try { sessionStorage.setItem('oh_admin_activity_log', JSON.stringify(activityLog)); } catch (e) {}
-    if (document.getElementById('admx-activity')) renderActivityLog();
+  async function renderActivityLog() {
+    var el = document.getElementById('admx-activity');
+    if (!el) return;
+    var supa = db();
+    if (!supa) { el.innerHTML = '<p class="admx-empty">Supabase not ready.</p>'; return; }
+    /* Only show "Loading…" on the FIRST render — subsequent auto-refreshes
+       shouldn't flicker the table away while the admin is reading it. */
+    if (!el.querySelector('table')) el.innerHTML = '<p class="admx-empty">Loading&hellip;</p>';
+    try {
+      var res = await supa.from('activity_log')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100);
+      if (res && res.error) throw new Error(res.error.message);
+      var rows = (res && res.data) || [];
+      var html = '<table class="admin-table"><thead><tr><th style="width:120px">Time</th><th>User</th><th style="width:100px">Action</th><th>Opportunity</th></tr></thead><tbody>';
+      if (!rows.length) {
+        html += '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No activity recorded yet. Save / unsave / compare an opportunity, or open a detail panel, to populate.</td></tr>';
+      } else {
+        rows.forEach(function(r) {
+          var rel  = admxLcFormatAge(r.created_at);
+          var abs  = new Date(r.created_at).toLocaleString();
+          var who  = r.user_email || (r.user_id ? r.user_id.slice(0, 8) + '…' : 'anon');
+          var oppTitle = r.opportunity_title || (r.opportunity_id ? 'id ' + r.opportunity_id : '—');
+          var titleCell = r.opportunity_id
+            ? '<a href="#" class="admx-activity-open" data-id="' + esc(r.opportunity_id) + '" style="color:var(--accent,#006C35);text-decoration:none">' + esc(oppTitle) + '</a>'
+            : esc(oppTitle);
+          html += '<tr>' +
+            '<td title="' + esc(abs) + '" style="font-size:12px;color:var(--text-muted)">' + esc(rel) + '</td>' +
+            '<td style="font-size:12px">' + esc(who) + '</td>' +
+            '<td>' + admxActionBadge(r.action) + '</td>' +
+            '<td>' + titleCell + '</td>' +
+          '</tr>';
+        });
+      }
+      html += '</tbody></table>';
+      el.innerHTML = html;
+    } catch (e) {
+      el.innerHTML = '<p class="admx-empty" style="color:#dc2626">Failed to load activity: ' + esc(String(e.message || e)) + '</p>';
+    }
+  }
+
+  async function logActivity(action, opp) {
+    try {
+      var supa = window._supabase; if (!supa) return;
+      var sess = window.__ohSession;
+      var user = sess && sess.user;
+      if (!user || !user.id) return;   /* RLS requires auth.uid() — skip anon */
+      var rec = {
+        user_id: user.id,
+        user_email: user.email || null,
+        action: String(action || '').toLowerCase(),
+        opportunity_id: (opp && opp.id != null) ? String(opp.id) : null,
+        opportunity_title: (opp && opp.title) ? String(opp.title) : null
+      };
+      await supa.from('activity_log').insert(rec);
+      /* If the activity panel is currently rendered, refresh it so the new
+         row shows up immediately rather than waiting for the 60s timer. */
+      var panel = document.getElementById('adm-tab-admx-engagement');
+      if (panel && panel.style.display !== 'none' && document.getElementById('admx-activity')) {
+        renderActivityLog();
+      }
+    } catch (e) { /* silent — log writes are best-effort */ }
+  }
+
+  async function admxClearOldActivity() {
+    var status = document.getElementById('admx-activity-status');
+    var supa = db();
+    if (!supa) { if (status) { status.textContent = 'Supabase not ready.'; status.style.color = '#dc2626'; } return; }
+    if (!confirm('Delete activity_log entries older than 30 days? This cannot be undone.')) return;
+    var cutoff = new Date(Date.now() - 30 * 86400000).toISOString();
+    if (status) { status.textContent = 'Deleting…'; status.style.color = 'var(--text-muted)'; }
+    try {
+      var res = await supa.from('activity_log').delete().lt('created_at', cutoff);
+      if (res && res.error) throw new Error(res.error.message);
+      if (status) { status.textContent = '✓ Old entries cleared.'; status.style.color = '#16a34a'; }
+      renderActivityLog();
+    } catch (e) {
+      if (status) { status.textContent = 'Delete failed: ' + String(e.message || e); status.style.color = '#dc2626'; }
+    }
+  }
+
+  function admxStartActivityAutoRefresh() {
+    if (_admxActivityTimer) return;  /* idempotent — only one global timer */
+    _admxActivityTimer = setInterval(function() {
+      var panel = document.getElementById('adm-tab-admx-engagement');
+      if (panel && panel.style.display !== 'none' && document.getElementById('admx-activity')) {
+        renderActivityLog();
+      }
+    }, 60000);
   }
 
   function wireActivityHooks() {
+    /* Save / Unsave — wrap WS.toggleBookmark */
     if (window.WS && window.WS.toggleBookmark && !window.WS.toggleBookmark.__admxWrapped) {
-      var orig = window.WS.toggleBookmark;
-      var wrapper = function(btn) {
+      var origToggle = window.WS.toggleBookmark;
+      var toggleWrap = function(btn) {
         var id = btn && btn.dataset && btn.dataset.id;
         var rec = data().find(function(it) { return String(it.id) === String(id); });
         var wasSaved = window.WS.isBookmarked && window.WS.isBookmarked(id);
-        orig.call(window.WS, btn);
-        logActivity(wasSaved ? 'Unsaved' : 'Saved', rec || { id: id, title: btn && btn.dataset && btn.dataset.title });
+        origToggle.call(window.WS, btn);
+        logActivity(wasSaved ? 'unsaved' : 'saved', rec || { id: id, title: btn && btn.dataset && btn.dataset.title });
       };
-      wrapper.__admxWrapped = true;
-      window.WS.toggleBookmark = wrapper;
+      toggleWrap.__admxWrapped = true;
+      window.WS.toggleBookmark = toggleWrap;
     }
+    /* Compare — delegated click on the new pill */
     if (!document.body.__admxCmpHook) {
       document.body.__admxCmpHook = true;
       document.addEventListener('click', function(e) {
@@ -11647,12 +11762,26 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         if (!b) return;
         var id = b.dataset && b.dataset.id;
         var rec = data().find(function(it) { return String(it.id) === String(id); });
-        logActivity('Compared', rec || { id: id, title: b.dataset && b.dataset.title });
+        logActivity('compared', rec || { id: id, title: b.dataset && b.dataset.title });
       }, true);
+    }
+    /* View — wrap WS.openPanel so opening the detail modal logs once per click */
+    if (window.WS && window.WS.openPanel && !window.WS.openPanel.__admxWrapped) {
+      var origOpen = window.WS.openPanel;
+      var openWrap = function(opp) {
+        try { logActivity('viewed', opp); } catch (e) {}
+        return origOpen.apply(window.WS, arguments);
+      };
+      openWrap.__admxWrapped = true;
+      window.WS.openPanel = openWrap;
     }
   }
 
-  function renderEngagement() { renderUsersExt(); renderActivityLog(); }
+  function renderEngagement() {
+    renderUsersExt();
+    renderActivityLog();
+    admxStartActivityAutoRefresh();
+  }
 
   /* ── 5. Bulk Import ────────────────────────────────────── */
   function bulkImport() {
@@ -12194,9 +12323,19 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     bind('admx-lc-refresh',      admxLcLoadReport);
     bind('admx-lc-run',          admxLcRunCheck);
     bind('admx-lc-save-pat',     admxLcSavePat);
+    bind('admx-activity-refresh', renderActivityLog);
+    bind('admx-activity-clear',   admxClearOldActivity);
 
     /* Delegated: dynamically rendered buttons inside lazy panels */
     document.addEventListener('click', dupDropHandler);
+    document.addEventListener('click', function(e) {
+      var a = e.target.closest && e.target.closest('.admx-activity-open');
+      if (!a) return;
+      e.preventDefault();
+      var id = a.getAttribute('data-id');
+      var rec = data().find(function(it) { return String(it.id) === String(id); });
+      if (rec && window.WS && window.WS.openPanel) window.WS.openPanel(rec);
+    });
     document.addEventListener('click', function(e) {
       var b = e.target.closest && e.target.closest('.admx-lc-find');
       if (!b) return;
