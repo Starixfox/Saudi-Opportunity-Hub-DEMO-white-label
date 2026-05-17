@@ -11378,13 +11378,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           '<div id="admx-expired" class="admin-table-wrap"></div>' +
           '<p class="admx-empty">Records with a free-text deadline (e.g. "Rolling") are not counted as expired.</p>' +
         '</div>' +
-        '<div class="admx-section"><h3 class="admx-title">Broken Link Checker</h3>' +
-          '<p class="admx-empty" style="margin-bottom:10px">Tries 3 public proxies in order: <code>corsproxy.io</code> &rarr; <code>allorigins.win</code> &rarr; <code>thingproxy.freeboard.io</code>. Full check takes ~5&ndash;10 minutes for 1,110 URLs. Backup: weekly server-side cron in <code>.github/workflows/link-check.yml</code>.</p>' +
+        '<div class="admx-section"><h3 class="admx-title">🔗 Link Checker</h3>' +
+          '<p class="admx-empty" style="margin:0 0 14px;line-height:1.6">Live link checking is not possible from the browser due to GitHub Pages security restrictions. Links are checked automatically every Monday via GitHub Actions and results are posted as GitHub Issues.</p>' +
           '<div class="admx-actions">' +
-            '<button class="btn-primary" id="admx-link-check" type="button">Check All URLs</button>' +
-            '<span id="admx-link-progress" class="admin-form-result"></span>' +
+            '<a class="btn-primary" href="https://github.com/starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues?q=label%3Alink-check" target="_blank" rel="noopener noreferrer" style="text-decoration:none">View Link Reports &rarr;</a>' +
+            '<a class="btn-secondary" href="https://github.com/starixfox/Saudi-Opportunity-Hub-DEMO-white-label/actions/workflows/link-check.yml" target="_blank" rel="noopener noreferrer" style="text-decoration:none">Run Check Now &rarr;</a>' +
           '</div>' +
-          '<div id="admx-link-results"></div>' +
         '</div>'
     };
     Object.keys(panels).forEach(function(id) {
@@ -11808,129 +11807,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     });
   }
 
-  /* ── 11. Broken Link Checker (multi-proxy fallback) ───────────
-     Direct fetch() from the GitHub Pages origin fails CORS for every
-     third-party host. We chain through three public proxies; the
-     first one that returns a non-zero HTTP status wins, and we record
-     which proxy succeeded so failures vs proxy-rate-limits can be
-     distinguished in the results. 5-concurrent batches with 300ms
-     between batches to be a polite caller. */
-  function _admxTimeoutSignal(ms) {
-    return (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? { signal: AbortSignal.timeout(ms) } : {};
-  }
-  async function checkUrl(url) {
-    var proxies = [
-      { name: 'corsproxy', fn: async function() {
-          var r = await fetch('https://corsproxy.io/?url=' + encodeURIComponent(url), _admxTimeoutSignal(8000));
-          return r.status;
-      }},
-      { name: 'allorigins', fn: async function() {
-          var r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url), _admxTimeoutSignal(8000));
-          if (!r.ok) return 0;
-          var d = await r.json();
-          return (d && d.status && d.status.http_code) || (d && d.contents ? 200 : 0);
-      }},
-      { name: 'thingproxy', fn: async function() {
-          var r = await fetch('https://thingproxy.freeboard.io/fetch/' + url, _admxTimeoutSignal(8000));
-          return r.status;
-      }}
-    ];
-    for (var i = 0; i < proxies.length; i++) {
-      try {
-        var status = await proxies[i].fn();
-        if (status > 0) return { code: status, proxy: proxies[i].name };
-      } catch (e) { /* try next proxy */ }
-    }
-    return { code: 0, proxy: null };
-  }
-  async function checkLinks() {
-    var out   = document.getElementById('admx-link-progress');
-    var resEl = document.getElementById('admx-link-results');
-    if (!out || !resEl) return;
-
-    var records = [];
-    data().forEach(function(it) {
-      if (it.application_link && /^https?:/.test(it.application_link)) {
-        records.push({ id: it.id, title: it.title, url: it.application_link });
-      }
-    });
-    if (!records.length) {
-      out.className = 'admin-form-result';
-      out.textContent = 'No URLs to check.';
-      resEl.innerHTML = '';
-      return;
-    }
-
-    /* Progress bar — replaces previous results until done */
-    resEl.innerHTML =
-      '<div style="margin:10px 0">' +
-        '<div style="height:8px;background:var(--bg-elevated,#f1f5f9);border-radius:999px;overflow:hidden">' +
-          '<div id="admx-link-fill" style="height:100%;background:var(--accent,#006C35);width:0%;transition:width 0.2s ease"></div>' +
-        '</div>' +
-      '</div>';
-
-    var reachable = [], serverErr = [], broken = [];
-    var done = 0;
-    var BATCH = 5;
-    var DELAY_MS = 300;
-
-    function updateProgress() {
-      out.className = 'admin-form-result';
-      out.textContent = 'Checking ' + done + ' / ' + records.length + '…';
-      var fill = document.getElementById('admx-link-fill');
-      if (fill) fill.style.width = ((done / records.length) * 100).toFixed(1) + '%';
-    }
-    updateProgress();
-
-    for (var i = 0; i < records.length; i += BATCH) {
-      var batch = records.slice(i, i + BATCH);
-      var settled = await Promise.allSettled(batch.map(function(r) {
-        return checkUrl(r.url).then(function(out) { return { rec: r, code: out.code, proxy: out.proxy }; });
-      }));
-      settled.forEach(function(s, k) {
-        var v = (s.status === 'fulfilled') ? s.value : { rec: batch[k], code: 0, proxy: null };
-        var c = v.code;
-        var bucketItem = { rec: v.rec, code: c, proxy: v.proxy };
-        if (c >= 200 && c < 400)       reachable.push(bucketItem);
-        else if (c >= 500 && c < 600)  serverErr.push(bucketItem);
-        else                           broken.push(bucketItem);
-        done++;
-      });
-      updateProgress();
-      if (i + BATCH < records.length) {
-        await new Promise(function(r) { setTimeout(r, DELAY_MS); });
-      }
-    }
-
-    out.className = 'admin-form-result success';
-    out.textContent = 'Checked ' + records.length + ': ' + reachable.length + ' reachable, ' + serverErr.length + ' server error, ' + broken.length + ' broken / unreachable.';
-
-    function renderGroup(label, color, rows, open, formatRow) {
-      var html = '<details ' + (open ? 'open' : '') + ' style="margin-top:10px"><summary style="cursor:pointer;font-weight:600;color:' + color + ';padding:4px 0">' + label + ' (' + rows.length + ')</summary>';
-      if (!rows.length) { html += '<p class="admx-empty">None.</p></details>'; return html; }
-      html += '<ul class="admx-link-list">' + rows.slice(0, 300).map(formatRow).join('') + '</ul>';
-      if (rows.length > 300) html += '<p class="admx-empty">Showing first 300 of ' + rows.length + '.</p>';
-      html += '</details>';
-      return html;
-    }
-    function proxyTag(name) {
-      if (!name) return '<span style="color:var(--text-muted,#94a3b8);font-size:10px;margin-left:6px">all proxies failed</span>';
-      return '<span style="color:var(--text-muted,#94a3b8);font-size:10px;margin-left:6px">via ' + esc(name) + '</span>';
-    }
-    function brokenRow(r) {
-      return '<li><strong>' + esc(r.rec.title || '(untitled)') + '</strong>' +
-        ' <button class="btn-secondary admx-edit-link" type="button" data-id="' + esc(r.rec.id) + '" style="font-size:11px;padding:2px 8px;margin-left:8px">Edit</button>' +
-        '<br><small>' + esc(r.rec.url) + ' &mdash; status: ' + (r.code || 'no response / timeout') + '</small>' + proxyTag(r.proxy) + '</li>';
-    }
-    function reachableRow(r) {
-      return '<li><strong>' + esc(r.rec.title || '(untitled)') + '</strong>' + proxyTag(r.proxy) + '<br><small>' + esc(r.rec.url) + '</small></li>';
-    }
-
-    resEl.innerHTML =
-      renderGroup('❌ Broken / Unreachable', '#dc2626', broken,    true,  brokenRow) +
-      renderGroup('⚠️ Server error',         '#b45309', serverErr, true,  brokenRow) +
-      renderGroup('✅ Reachable',             '#16a34a', reachable, false, reachableRow);
-  }
+  /* Feature 11 (live link checker) removed — GitHub Pages CSP / cross-origin
+     restrictions blocked every browser-side approach (direct fetch, no-cors
+     fetch, public CORS proxies). Replaced by .github/workflows/link-check.yml
+     which runs curl from a GitHub-hosted runner every Monday at 06:00 UTC and
+     posts the report as a GitHub Issue labeled link-check. The admin panel
+     for this feature is now an info box with deep-links to the issues query
+     and the workflow's manual-run page (no JS handlers needed). */
 
   function renderReports() { renderMissing(); renderExpired(); }
 
@@ -11943,7 +11826,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     bind('admx-export-filtered', exportFilteredCsv);
     bind('admx-dup-scan',        dupScan);
     bind('admx-expired-archive', archiveExpired);
-    bind('admx-link-check',      checkLinks);
 
     /* Delegated: dynamically rendered buttons inside lazy panels */
     document.addEventListener('click', dupDropHandler);
