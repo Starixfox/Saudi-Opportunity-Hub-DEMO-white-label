@@ -8017,6 +8017,30 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   border-left: 2px solid var(--green, var(--accent, #006C35));
   color: var(--green, var(--accent, #006C35)) !important;
 }
+/* ═══════════════════════════
+   ADMIN EXTENDED FEATURES — Analytics / Engagement / Data Tools / Reports
+   Added via JS in the admin-extended IIFE; classes prefixed with .admx-.
+   Reuses .admin-tab / .admin-table / .btn-primary / .btn-secondary / .admin-form-result.
+   ═══════════════════════════ */
+.admx-section { background: var(--bg-surface, #fff); border: 1px solid var(--border-default, #e2e8f0); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem; }
+.admx-title { font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--text-primary, #0f172a); margin: 0 0 0.875rem; letter-spacing: -0.01em; }
+.admx-empty { color: var(--text-muted, #94a3b8); font-size: 0.8125rem; padding: 0.5rem 0; margin: 0.5rem 0 0; }
+.admx-actions { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.875rem; flex-wrap: wrap; }
+.admx-actions select { padding: 0.5rem 0.75rem; border: 1px solid var(--border-default, #e2e8f0); border-radius: 8px; background: var(--bg-surface, #fff); color: var(--text-primary, #0f172a); font-size: 0.875rem; }
+.admx-textarea { width: 100%; padding: 0.625rem; border: 1px solid var(--border-default, #e2e8f0); border-radius: 8px; background: var(--bg-surface, #fff); color: var(--text-primary, #0f172a); font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace; font-size: 0.8125rem; line-height: 1.5; resize: vertical; margin-bottom: 0.625rem; box-sizing: border-box; }
+.admx-textarea:focus { outline: none; border-color: var(--accent, #006C35); box-shadow: 0 0 0 3px rgba(0,108,53,0.12); }
+.admx-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.admx-bar { display: grid; grid-template-columns: 180px 1fr 56px; gap: 0.75rem; align-items: center; }
+.admx-bar-label { font-size: 0.8125rem; color: var(--text-primary, #0f172a); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admx-bar-track { height: 10px; background: var(--bg-elevated, #f1f5f9); border-radius: 999px; overflow: hidden; }
+.admx-bar-fill { height: 100%; background: var(--accent, #006C35); border-radius: 999px; }
+.admx-bar-val { font-size: 0.8125rem; font-weight: 600; color: var(--text-primary, #0f172a); text-align: right; }
+.admx-pill-warn { display: inline-block; padding: 2px 8px; background: rgba(245,158,11,.14); color: #b45309; border: 1px solid rgba(245,158,11,.32); border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+.admx-link-list { list-style: none; padding: 0; margin: 0.5rem 0 1rem; }
+.admx-link-list li { padding: 0.375rem 0; border-bottom: 1px solid var(--border-default, #e2e8f0); font-size: 0.8125rem; }
+.admx-link-list li:last-child { border-bottom: none; }
+.admx-link-list small { color: var(--text-muted, #94a3b8); }
+@media (max-width: 640px) { .admx-bar { grid-template-columns: 110px 1fr 40px; gap: 0.5rem; } }
 .oh-tm-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -11254,6 +11278,642 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     });
   })();
 
+})();
+</script>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   ADMIN: EXTENDED FEATURES — 11 features across 4 lazy-rendered tabs
+     Analytics  : Sector Popularity, Most-Saved Opportunities
+     Engagement : User List (with saves count), Activity Log (session)
+     Data Tools : Bulk Import, Bulk Status Update, Export (All/Filtered),
+                  Duplicate Detector (Dice's coefficient on title bigrams)
+     Reports    : Missing Fields, Expired Opportunities, Broken Link Checker
+   Self-contained: wraps window.loadAdminView so it injects tabs after the
+   base admin view boots. No edits to existing admin HTML — panels rendered
+   from JS into .admin-wrap. CSS lives near .admin-tab--owner.
+   ════════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  var injected = false;
+  var activityLog = [];
+  try {
+    var stored = sessionStorage.getItem('oh_admin_activity_log');
+    if (stored) activityLog = JSON.parse(stored) || [];
+  } catch (e) { activityLog = []; }
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function db() { return window._supabase || null; }
+  function data() { return window.opportunitiesData || window.allOpportunities || []; }
+  function normSec(s) {
+    return (window.__normalizeSectorKey || function(r){ return String(r||'').toLowerCase(); })(s);
+  }
+
+  /* ── Tab injection ────────────────────────────────────────── */
+  function inject() {
+    if (injected) return;
+    var tabsBar = document.querySelector('#view-admin .admin-tabs');
+    var wrap    = document.querySelector('#view-admin .admin-wrap');
+    if (!tabsBar || !wrap) return;
+    injected = true;
+
+    [
+      { id: 'admx-analytics',  label: 'Analytics' },
+      { id: 'admx-engagement', label: 'Engagement' },
+      { id: 'admx-tools',      label: 'Data Tools' },
+      { id: 'admx-reports',    label: 'Reports' }
+    ].forEach(function(t) {
+      if (tabsBar.querySelector('[data-admtab="' + t.id + '"]')) return;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'admin-tab';
+      b.setAttribute('data-admtab', t.id);
+      b.textContent = t.label;
+      b.addEventListener('click', function() { switchTo(t.id); });
+      tabsBar.appendChild(b);
+    });
+
+    var panels = {
+      'admx-analytics':
+        '<div class="admx-section"><h3 class="admx-title">Sector Popularity</h3><div id="admx-sec-pop" class="admx-list"></div></div>' +
+        '<div class="admx-section"><h3 class="admx-title">Most-Saved Opportunities (top 10)</h3><div id="admx-saved" class="admin-table-wrap"></div></div>',
+      'admx-engagement':
+        '<div class="admx-section"><h3 class="admx-title">Registered Users</h3><div id="admx-users" class="admin-table-wrap"></div></div>' +
+        '<div class="admx-section"><h3 class="admx-title">Activity Log (this session)</h3><div id="admx-activity" class="admin-table-wrap"></div></div>',
+      'admx-tools':
+        '<div class="admx-section"><h3 class="admx-title">Bulk Import (JSON)</h3>' +
+          '<textarea id="admx-import-input" class="admx-textarea" rows="6" placeholder=\'[{"title":"...","sectors":["..."],"type":"...","region":"..."}]\'></textarea>' +
+          '<div class="admx-actions"><button class="btn-primary" id="admx-import-btn" type="button">Import</button><span id="admx-import-result" class="admin-form-result"></span></div>' +
+          '<p class="admx-empty">Required per record: <code>title</code>, <code>sector</code> or <code>sectors[]</code>, <code>type</code>, <code>region</code> or <code>eligibility_region</code>.</p>' +
+        '</div>' +
+        '<div class="admx-section"><h3 class="admx-title">Bulk Status Update</h3>' +
+          '<div class="admx-actions">' +
+            '<select id="admx-bulk-action"><option value="">Bulk action&hellip;</option><option value="Open">Mark as Active (Open)</option><option value="Expired">Mark as Expired</option><option value="Coming Soon">Mark as Coming Soon</option><option value="__delete">Delete Selected</option></select>' +
+            '<button class="btn-primary" id="admx-bulk-apply" type="button">Apply</button>' +
+            '<span id="admx-bulk-result" class="admin-form-result"></span>' +
+          '</div>' +
+          '<div id="admx-bulk-list" class="admin-table-wrap"></div>' +
+        '</div>' +
+        '<div class="admx-section"><h3 class="admx-title">Export to CSV</h3>' +
+          '<div class="admx-actions"><button class="btn-secondary" id="admx-export-all" type="button">Export All to CSV</button><button class="btn-secondary" id="admx-export-filtered" type="button">Export Filtered to CSV</button></div>' +
+          '<p class="admx-empty">"Filtered" exports whatever the main Opportunities view currently renders (after search / sector / status filters).</p>' +
+        '</div>' +
+        '<div class="admx-section"><h3 class="admx-title">Duplicate Detector</h3>' +
+          '<div class="admx-actions"><button class="btn-primary" id="admx-dup-scan" type="button">Scan for Duplicates</button><span id="admx-dup-result" class="admin-form-result"></span></div>' +
+          '<div id="admx-dup-list" class="admin-table-wrap"></div>' +
+          '<p class="admx-empty">Title similarity via Dice\'s coefficient on character bigrams, threshold 85%. Capped at first 1,500 records for performance.</p>' +
+        '</div>',
+      'admx-reports':
+        '<div class="admx-section"><h3 class="admx-title">Missing Fields Report</h3>' +
+          '<div id="admx-missing" class="admin-table-wrap"></div>' +
+          '<p class="admx-empty">Required fields checked: deadline, sectors, url, description, region. Click <strong>Open</strong> to jump to the record in the Opportunities tab.</p>' +
+        '</div>' +
+        '<div class="admx-section"><h3 class="admx-title">Expired Opportunities</h3>' +
+          '<div class="admx-actions"><button class="btn-primary" id="admx-expired-archive" type="button">Archive Selected as Expired</button><span id="admx-expired-result" class="admin-form-result"></span></div>' +
+          '<div id="admx-expired" class="admin-table-wrap"></div>' +
+          '<p class="admx-empty">Records with a free-text deadline (e.g. "Rolling") are not counted as expired.</p>' +
+        '</div>' +
+        '<div class="admx-section"><h3 class="admx-title">Broken Link Checker</h3>' +
+          '<div class="admx-actions"><button class="btn-primary" id="admx-link-check" type="button">Check All URLs</button><span id="admx-link-progress" class="admin-form-result"></span></div>' +
+          '<div id="admx-link-results"></div>' +
+          '<p class="admx-empty">Uses <code>fetch(url, { mode: \'no-cors\' })</code> — most responses are opaque due to CORS and are treated as likely reachable. Only actual network errors / timeouts (8s) are flagged as broken.</p>' +
+        '</div>'
+    };
+    Object.keys(panels).forEach(function(id) {
+      if (document.getElementById('adm-tab-' + id)) return;
+      var div = document.createElement('div');
+      div.className = 'admin-tab-panel';
+      div.id = 'adm-tab-' + id;
+      div.style.display = 'none';
+      div.innerHTML = panels[id];
+      wrap.appendChild(div);
+    });
+
+    wireFeatures();
+  }
+
+  function switchTo(name) {
+    document.querySelectorAll('#view-admin .admin-tab').forEach(function(t) {
+      t.classList.toggle('active', t.getAttribute('data-admtab') === name);
+    });
+    document.querySelectorAll('#view-admin .admin-tab-panel').forEach(function(p) {
+      p.style.display = (p.id === 'adm-tab-' + name) ? '' : 'none';
+    });
+    if (name === 'admx-analytics')       renderAnalytics();
+    else if (name === 'admx-engagement') renderEngagement();
+    else if (name === 'admx-tools')      renderTools();
+    else if (name === 'admx-reports')    renderReports();
+  }
+
+  /* ── 1. Sector Popularity ──────────────────────────────── */
+  function renderSectorPopularity() {
+    var el = document.getElementById('admx-sec-pop');
+    if (!el) return;
+    var map = {};
+    data().forEach(function(it) {
+      (it.sectors || []).forEach(function(raw) {
+        /* Per user: trim + split on comma + dedup (some legacy rows have CSV strings) */
+        String(raw).split(',').map(function(s) { return s.trim(); }).filter(Boolean).forEach(function(s) {
+          var k = normSec(s);
+          if (k) map[k] = (map[k] || 0) + 1;
+        });
+      });
+    });
+    var entries = Object.keys(map).map(function(k) { return [k, map[k]]; })
+      .sort(function(a, b) { return b[1] - a[1]; });
+    if (!entries.length) { el.innerHTML = '<p class="admx-empty">No sector data.</p>'; return; }
+    var max = entries[0][1];
+    var html = entries.map(function(e) {
+      var pct = Math.round((e[1] / max) * 100);
+      var label = (window.SECTOR_NAMES_EN && window.SECTOR_NAMES_EN[e[0]]) ||
+                  e[0].replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+      return '<div class="admx-bar"><div class="admx-bar-label" title="' + esc(label) + '">' + esc(label) + '</div>' +
+             '<div class="admx-bar-track"><div class="admx-bar-fill" style="width:' + pct + '%"></div></div>' +
+             '<div class="admx-bar-val">' + e[1] + '</div></div>';
+    }).join('');
+    el.innerHTML = html;
+  }
+
+  /* ── 2. Most-Saved Opportunities ───────────────────────── */
+  function renderMostSaved() {
+    var el = document.getElementById('admx-saved');
+    if (!el) return;
+    var supa = db();
+    if (!supa) { el.innerHTML = '<p class="admx-empty">Supabase not ready.</p>'; return; }
+    el.innerHTML = '<p class="admx-empty">Loading&hellip;</p>';
+    supa.from('user_watchlist').select('opportunity_id').limit(10000).then(function(res) {
+      var rows = (res && res.data) || [];
+      var counts = {};
+      rows.forEach(function(r) { if (r.opportunity_id) counts[r.opportunity_id] = (counts[r.opportunity_id] || 0) + 1; });
+      var topIds = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; }).slice(0, 10);
+      var byId = {};
+      data().forEach(function(it) { byId[String(it.id)] = it; });
+      var html = '<table class="admin-table"><thead><tr><th style="width:40px">#</th><th>Title</th><th>Sector</th><th style="text-align:right;width:120px">Save Count</th></tr></thead><tbody>';
+      if (!topIds.length) {
+        html += '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No saves recorded yet.</td></tr>';
+      } else {
+        topIds.forEach(function(id, i) {
+          var it = byId[String(id)] || { title: '(record id ' + id + ')', sectors: [] };
+          html += '<tr><td>' + (i + 1) + '</td><td>' + esc(it.title || '—') + '</td><td>' + esc((it.sectors || [])[0] || '—') + '</td><td style="text-align:right;font-weight:600">' + counts[id] + '</td></tr>';
+        });
+      }
+      html += '</tbody></table>';
+      el.innerHTML = html;
+    });
+  }
+
+  function renderAnalytics() { renderSectorPopularity(); renderMostSaved(); }
+
+  /* ── 3. User List ──────────────────────────────────────── */
+  function renderUsersExt() {
+    var el = document.getElementById('admx-users');
+    if (!el) return;
+    var supa = db();
+    if (!supa) { el.innerHTML = '<p class="admx-empty">Supabase not ready.</p>'; return; }
+    el.innerHTML = '<p class="admx-empty">Loading&hellip;</p>';
+    Promise.all([
+      supa.from('user_prefs').select('user_id, role, prefs, updated_at, created_at').limit(500),
+      supa.from('user_watchlist').select('user_id').limit(10000)
+    ]).then(function(results) {
+      var users = (results[0] && results[0].data) || [];
+      var wl    = (results[1] && results[1].data) || [];
+      var savesByUser = {};
+      wl.forEach(function(r) { if (r.user_id) savesByUser[r.user_id] = (savesByUser[r.user_id] || 0) + 1; });
+      var html = '<table class="admin-table"><thead><tr><th>User ID</th><th>Display Name</th><th>Role</th><th>Joined</th><th>Last Active</th><th style="text-align:right">Saves</th></tr></thead><tbody>';
+      if (!users.length) {
+        html += '<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No users.</td></tr>';
+      } else {
+        users.forEach(function(u) {
+          var prefs = u.prefs || {};
+          var displayName = prefs.displayName || prefs.name || '—';
+          var joined = u.created_at ? new Date(u.created_at).toISOString().slice(0, 10) : '—';
+          var active = u.updated_at ? new Date(u.updated_at).toISOString().slice(0, 10) : '—';
+          html += '<tr><td class="adm-cell-id">' + esc(u.user_id) + '</td><td>' + esc(displayName) + '</td><td>' + esc(u.role || 'user') + '</td><td>' + esc(joined) + '</td><td>' + esc(active) + '</td><td style="text-align:right;font-weight:600">' + (savesByUser[u.user_id] || 0) + '</td></tr>';
+        });
+      }
+      html += '</tbody></table>';
+      el.innerHTML = html;
+    });
+  }
+
+  /* ── 4. Activity Log (session) ─────────────────────────── */
+  function renderActivityLog() {
+    var el = document.getElementById('admx-activity');
+    if (!el) return;
+    var rows = activityLog.slice(-50).reverse();
+    var html = '<table class="admin-table"><thead><tr><th>Time</th><th>User</th><th>Action</th><th>Opportunity</th></tr></thead><tbody>';
+    if (!rows.length) {
+      html += '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No activity recorded this session. Save or compare an opportunity to populate.</td></tr>';
+    } else {
+      rows.forEach(function(r) {
+        html += '<tr><td>' + esc(new Date(r.t).toLocaleString()) + '</td><td>' + esc(r.user) + '</td><td>' + esc(r.action) + '</td><td>' + esc(r.title) + '</td></tr>';
+      });
+    }
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  }
+
+  function logActivity(action, opp) {
+    var s = window.__ohSession;
+    var user = (s && s.user && s.user.email) || 'anon';
+    var title = (opp && opp.title) || (opp && ('id ' + opp.id)) || '—';
+    activityLog.push({ t: Date.now(), user: user, action: action, title: title });
+    if (activityLog.length > 200) activityLog = activityLog.slice(-200);
+    try { sessionStorage.setItem('oh_admin_activity_log', JSON.stringify(activityLog)); } catch (e) {}
+    if (document.getElementById('admx-activity')) renderActivityLog();
+  }
+
+  function wireActivityHooks() {
+    if (window.WS && window.WS.toggleBookmark && !window.WS.toggleBookmark.__admxWrapped) {
+      var orig = window.WS.toggleBookmark;
+      var wrapper = function(btn) {
+        var id = btn && btn.dataset && btn.dataset.id;
+        var rec = data().find(function(it) { return String(it.id) === String(id); });
+        var wasSaved = window.WS.isBookmarked && window.WS.isBookmarked(id);
+        orig.call(window.WS, btn);
+        logActivity(wasSaved ? 'Unsaved' : 'Saved', rec || { id: id, title: btn && btn.dataset && btn.dataset.title });
+      };
+      wrapper.__admxWrapped = true;
+      window.WS.toggleBookmark = wrapper;
+    }
+    if (!document.body.__admxCmpHook) {
+      document.body.__admxCmpHook = true;
+      document.addEventListener('click', function(e) {
+        var b = e.target.closest && e.target.closest('.opp-card-compare-btn');
+        if (!b) return;
+        var id = b.dataset && b.dataset.id;
+        var rec = data().find(function(it) { return String(it.id) === String(id); });
+        logActivity('Compared', rec || { id: id, title: b.dataset && b.dataset.title });
+      }, true);
+    }
+  }
+
+  function renderEngagement() { renderUsersExt(); renderActivityLog(); }
+
+  /* ── 5. Bulk Import ────────────────────────────────────── */
+  function bulkImport() {
+    var ta  = document.getElementById('admx-import-input');
+    var out = document.getElementById('admx-import-result');
+    if (!ta || !out) return;
+    var supa = db();
+    if (!supa) { out.className = 'admin-form-result error'; out.textContent = 'Supabase not ready.'; return; }
+    var raw = ta.value.trim();
+    if (!raw) { out.className = 'admin-form-result error'; out.textContent = 'Paste JSON first.'; return; }
+    var arr;
+    try { arr = JSON.parse(raw); } catch (e) { out.className = 'admin-form-result error'; out.textContent = 'Invalid JSON: ' + e.message; return; }
+    if (!Array.isArray(arr)) { out.className = 'admin-form-result error'; out.textContent = 'JSON must be an array of objects.'; return; }
+    var valid = [], skipped = 0;
+    arr.forEach(function(o) {
+      if (!o || typeof o !== 'object') { skipped++; return; }
+      var hasSector = !!(o.sectors || o.sector);
+      var hasRegion = !!(o.region || o.eligibility_region);
+      if (!o.title || !hasSector || !o.type || !hasRegion) { skipped++; return; }
+      valid.push({
+        title: String(o.title),
+        type: String(o.type),
+        status: o.status || 'Open',
+        eligibility_region: String(o.region || o.eligibility_region),
+        sectors: Array.isArray(o.sectors) ? o.sectors : String(o.sector || '').split(',').map(function(s) { return s.trim(); }).filter(Boolean),
+        deadline_date: o.deadline_date || o.deadline || null,
+        description_short: o.description || o.description_short || '',
+        application_link: o.url || o.application_link || '',
+        funding_amount: o.funding_amount || '',
+        sponsor_institution: o.sponsor_institution || o.sponsor || '',
+        last_verified: new Date().toISOString().slice(0, 10),
+        isNew: true
+      });
+    });
+    if (!valid.length) { out.className = 'admin-form-result error'; out.textContent = '0 imported, ' + skipped + ' skipped (missing required fields).'; return; }
+    out.className = 'admin-form-result'; out.textContent = 'Importing ' + valid.length + '…';
+    supa.from('opportunities').insert(valid).then(function(res) {
+      if (res && res.error) { out.className = 'admin-form-result error'; out.textContent = 'Insert failed: ' + res.error.message; return; }
+      out.className = 'admin-form-result success'; out.textContent = valid.length + ' imported, ' + skipped + ' skipped.';
+      ta.value = '';
+      if (window.opportunitiesData) Array.prototype.push.apply(window.opportunitiesData, valid);
+    });
+  }
+
+  /* ── 6. Bulk Status Update ─────────────────────────────── */
+  function renderBulkList() {
+    var el = document.getElementById('admx-bulk-list');
+    if (!el) return;
+    var d = data().slice(0, 100);
+    var html = '<table class="admin-table"><thead><tr><th style="width:36px"><input type="checkbox" id="admx-bulk-all"></th><th>Title</th><th>Status</th><th>Sector</th></tr></thead><tbody>';
+    if (!d.length) {
+      html += '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No data loaded.</td></tr>';
+    } else {
+      d.forEach(function(it) {
+        html += '<tr><td><input type="checkbox" class="admx-bulk-chk" data-id="' + esc(it.id) + '"></td><td>' + esc(it.title || '—') + '</td><td>' + esc(it.status || '—') + '</td><td>' + esc((it.sectors || [])[0] || '—') + '</td></tr>';
+      });
+    }
+    html += '</tbody></table>';
+    el.innerHTML = html;
+    var all = document.getElementById('admx-bulk-all');
+    if (all) all.addEventListener('change', function() {
+      el.querySelectorAll('.admx-bulk-chk').forEach(function(c) { c.checked = all.checked; });
+    });
+  }
+  function bulkApply() {
+    var sel = document.getElementById('admx-bulk-action');
+    var out = document.getElementById('admx-bulk-result');
+    if (!sel || !out) return;
+    var supa = db();
+    if (!supa) { out.className = 'admin-form-result error'; out.textContent = 'Supabase not ready.'; return; }
+    var action = sel.value;
+    if (!action) { out.className = 'admin-form-result error'; out.textContent = 'Choose an action.'; return; }
+    var chks = document.querySelectorAll('#admx-bulk-list .admx-bulk-chk:checked');
+    if (!chks.length) { out.className = 'admin-form-result error'; out.textContent = 'Select rows first.'; return; }
+    var ids = Array.prototype.map.call(chks, function(c) { return c.dataset.id; });
+    var msg = action === '__delete' ? ('Delete ' + ids.length + ' record(s)? This cannot be undone.') : ('Set status to "' + action + '" on ' + ids.length + ' record(s)?');
+    if (!confirm(msg)) return;
+    out.className = 'admin-form-result'; out.textContent = 'Working…';
+    var q = action === '__delete'
+      ? supa.from('opportunities').delete().in('id', ids)
+      : supa.from('opportunities').update({ status: action, last_verified: new Date().toISOString().slice(0, 10) }).in('id', ids);
+    q.then(function(res) {
+      if (res && res.error) { out.className = 'admin-form-result error'; out.textContent = 'Failed: ' + res.error.message; return; }
+      out.className = 'admin-form-result success'; out.textContent = (action === '__delete' ? 'Deleted ' : 'Updated ') + ids.length + ' record(s).';
+      renderBulkList();
+    });
+  }
+
+  /* ── 7. CSV Export ─────────────────────────────────────── */
+  function csvCell(v) {
+    if (v == null) return '';
+    if (Array.isArray(v)) v = v.join('; ');
+    else if (typeof v === 'object') v = JSON.stringify(v);
+    v = String(v).replace(/"/g, '""');
+    return /[",\n]/.test(v) ? '"' + v + '"' : v;
+  }
+  function exportCsv(records, filename) {
+    if (!records || !records.length) { alert('Nothing to export.'); return; }
+    var fields = Object.keys(records.reduce(function(acc, r) { Object.keys(r || {}).forEach(function(k) { acc[k] = 1; }); return acc; }, {}));
+    var csv = fields.join(',') + '\n' + records.map(function(r) {
+      return fields.map(function(f) { return csvCell(r[f]); }).join(',');
+    }).join('\n');
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 200);
+  }
+  function exportAllCsv() { exportCsv(data(), 'opportunities-export.csv'); }
+  function exportFilteredCsv() {
+    var rendered = document.querySelectorAll('#oppsTableBody [data-id]');
+    if (rendered.length) {
+      var idSet = {};
+      rendered.forEach(function(el) { idSet[el.getAttribute('data-id')] = 1; });
+      var subset = data().filter(function(it) { return idSet[String(it.id)]; });
+      exportCsv(subset, 'opportunities-filtered.csv');
+    } else {
+      exportCsv(data(), 'opportunities-filtered.csv');
+    }
+  }
+
+  /* ── 8. Duplicate Detector — Dice on title bigrams ───── */
+  function bigrams(s) {
+    s = String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    if (s.length < 2) return [];
+    var out = [];
+    for (var i = 0; i < s.length - 1; i++) out.push(s.substr(i, 2));
+    return out;
+  }
+  function dice(a, b) {
+    var ba = bigrams(a), bb = bigrams(b);
+    if (!ba.length || !bb.length) return 0;
+    var counts = {};
+    ba.forEach(function(g) { counts[g] = (counts[g] || 0) + 1; });
+    var inter = 0;
+    bb.forEach(function(g) { if (counts[g] > 0) { inter++; counts[g]--; } });
+    return (2 * inter) / (ba.length + bb.length);
+  }
+  function dupScan() {
+    var out    = document.getElementById('admx-dup-result');
+    var listEl = document.getElementById('admx-dup-list');
+    if (!out || !listEl) return;
+    var sample = data().slice(0, 1500);
+    out.className = 'admin-form-result'; out.textContent = 'Scanning ' + sample.length + ' records…';
+    listEl.innerHTML = '';
+    setTimeout(function() {
+      var pairs = [];
+      for (var i = 0; i < sample.length; i++) {
+        for (var j = i + 1; j < sample.length; j++) {
+          var s = dice(sample[i].title, sample[j].title);
+          if (s >= 0.85) pairs.push({ a: sample[i], b: sample[j], score: s });
+        }
+      }
+      pairs.sort(function(p, q) { return q.score - p.score; });
+      out.className = 'admin-form-result success'; out.textContent = 'Found ' + pairs.length + ' likely duplicate pair(s).';
+      if (!pairs.length) return;
+      var html = '<table class="admin-table"><thead><tr><th style="width:80px">Similarity</th><th>Title A</th><th>Title B</th><th style="width:160px">Action</th></tr></thead><tbody>';
+      pairs.slice(0, 100).forEach(function(p) {
+        html += '<tr><td style="text-align:right;font-weight:600">' + Math.round(p.score * 100) + '%</td><td>' + esc(p.a.title) + '</td><td>' + esc(p.b.title) + '</td>' +
+                '<td><button class="btn-secondary admx-dup-keep" type="button" data-keep="' + esc(p.a.id) + '" data-drop="' + esc(p.b.id) + '">Keep A, drop B</button></td></tr>';
+      });
+      html += '</tbody></table>';
+      if (pairs.length > 100) html += '<p class="admx-empty">Showing top 100 of ' + pairs.length + '.</p>';
+      listEl.innerHTML = html;
+    }, 20);
+  }
+  function dupDropHandler(e) {
+    var b = e.target.closest && e.target.closest('.admx-dup-keep');
+    if (!b) return;
+    var dropId = b.getAttribute('data-drop');
+    if (!dropId || !confirm('Delete record id ' + dropId + '? This cannot be undone.')) return;
+    var supa = db(); if (!supa) return;
+    supa.from('opportunities').delete().eq('id', dropId).then(function(res) {
+      if (res && res.error) { alert('Delete failed: ' + res.error.message); return; }
+      var tr = b.closest('tr'); if (tr) { tr.style.opacity = 0.4; }
+      b.textContent = 'Dropped ✓'; b.disabled = true;
+    });
+  }
+
+  function renderTools() { renderBulkList(); }
+
+  /* ── 9. Missing Fields Report ─────────────────────────── */
+  function renderMissing() {
+    var el = document.getElementById('admx-missing');
+    if (!el) return;
+    var rows = [];
+    data().forEach(function(it) {
+      var missing = [];
+      if (!it.deadline_date) missing.push('deadline');
+      if (!it.sectors || !it.sectors.length) missing.push('sector');
+      if (!it.application_link) missing.push('url');
+      if (!it.description_short) missing.push('description');
+      if (!it.eligibility_region && !it.country) missing.push('region');
+      if (missing.length) rows.push({ it: it, missing: missing });
+    });
+    rows.sort(function(a, b) { return b.missing.length - a.missing.length; });
+    var html = '<table class="admin-table"><thead><tr><th>Title</th><th>Missing</th><th style="width:90px">Action</th></tr></thead><tbody>';
+    if (!rows.length) html += '<tr><td colspan="3" style="text-align:center;padding:1.5rem;color:var(--text-muted)">All records have the required fields.</td></tr>';
+    else rows.slice(0, 200).forEach(function(r) {
+      html += '<tr><td>' + esc(r.it.title || '—') + '</td><td><span class="admx-pill-warn">' + esc(r.missing.join(', ')) + '</span></td>' +
+              '<td><button class="btn-secondary admx-edit-link" type="button" data-id="' + esc(r.it.id) + '">Open</button></td></tr>';
+    });
+    html += '</tbody></table>';
+    if (rows.length > 200) html += '<p class="admx-empty">Showing first 200 of ' + rows.length + '.</p>';
+    el.innerHTML = html;
+  }
+
+  /* ── 10. Expired Opportunities ────────────────────────── */
+  function renderExpired() {
+    var el = document.getElementById('admx-expired');
+    if (!el) return;
+    var todayMs = Date.now();
+    var rows = [];
+    data().forEach(function(it) {
+      if (!it.deadline_date) return;
+      var dl = new Date(it.deadline_date);
+      if (isNaN(dl.getTime())) return; /* free-text deadline (Rolling, etc.) — skip */
+      if (dl.getTime() >= todayMs) return;
+      rows.push({ it: it, days: Math.floor((todayMs - dl.getTime()) / 86400000) });
+    });
+    rows.sort(function(a, b) { return b.days - a.days; });
+    var html = '<table class="admin-table"><thead><tr><th style="width:36px"><input type="checkbox" id="admx-exp-all"></th><th>Title</th><th>Sector</th><th>Deadline</th><th style="text-align:right;width:110px">Days Overdue</th></tr></thead><tbody>';
+    if (!rows.length) html += '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No expired records.</td></tr>';
+    else rows.slice(0, 300).forEach(function(r) {
+      html += '<tr><td><input type="checkbox" class="admx-exp-chk" data-id="' + esc(r.it.id) + '"></td><td>' + esc(r.it.title || '—') + '</td><td>' + esc((r.it.sectors || [])[0] || '—') + '</td><td>' + esc(r.it.deadline_date) + '</td><td style="text-align:right;color:#dc2626;font-weight:600">' + r.days + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    if (rows.length > 300) html += '<p class="admx-empty">Showing first 300 of ' + rows.length + '.</p>';
+    el.innerHTML = html;
+    var all = document.getElementById('admx-exp-all');
+    if (all) all.addEventListener('change', function() {
+      el.querySelectorAll('.admx-exp-chk').forEach(function(c) { c.checked = all.checked; });
+    });
+  }
+  function archiveExpired() {
+    var out  = document.getElementById('admx-expired-result');
+    var chks = document.querySelectorAll('#admx-expired .admx-exp-chk:checked');
+    if (!chks.length) { if (out) { out.className = 'admin-form-result error'; out.textContent = 'Select rows first.'; } return; }
+    var ids = Array.prototype.map.call(chks, function(c) { return c.dataset.id; });
+    if (!confirm('Archive ' + ids.length + ' record(s) as Expired?')) return;
+    var supa = db(); if (!supa) return;
+    out.className = 'admin-form-result'; out.textContent = 'Updating…';
+    supa.from('opportunities').update({ status: 'Expired' }).in('id', ids).then(function(res) {
+      if (res && res.error) { out.className = 'admin-form-result error'; out.textContent = 'Failed: ' + res.error.message; return; }
+      out.className = 'admin-form-result success'; out.textContent = 'Archived ' + ids.length + '.';
+      renderExpired();
+    });
+  }
+
+  /* ── 11. Broken Link Checker ──────────────────────────── */
+  function checkLinks() {
+    var out   = document.getElementById('admx-link-progress');
+    var resEl = document.getElementById('admx-link-results');
+    if (!out || !resEl) return;
+    var urls = [];
+    data().forEach(function(it) {
+      if (it.application_link && /^https?:/.test(it.application_link)) urls.push({ url: it.application_link, title: it.title });
+    });
+    if (!urls.length) { out.className = 'admin-form-result'; out.textContent = 'No URLs to check.'; return; }
+    out.className = 'admin-form-result'; out.textContent = 'Checking ' + urls.length + ' URL(s)…';
+    resEl.innerHTML = '';
+    var reachable = [], broken = [];
+    var done = 0, idx = 0;
+    var BATCH = 8;
+    function finish() {
+      out.className = 'admin-form-result success';
+      out.textContent = 'Checked ' + urls.length + ': ' + reachable.length + ' likely reachable, ' + broken.length + ' broken / errored.';
+      var html = '';
+      if (broken.length) {
+        html += '<h4 class="admx-title" style="color:#dc2626">❌ Broken / errored (' + broken.length + ')</h4>' +
+                '<ul class="admx-link-list">' + broken.map(function(r) { return '<li><a href="' + esc(r.url) + '" target="_blank" rel="noopener noreferrer">' + esc(r.title || r.url) + '</a> &mdash; <small>' + esc(r.err) + '</small></li>'; }).join('') + '</ul>';
+      }
+      if (reachable.length) {
+        html += '<h4 class="admx-title" style="color:#16a34a">✅ Likely reachable (' + reachable.length + ')</h4>' +
+                '<p class="admx-empty">CORS returns opaque responses for most cross-origin sites; treated as reachable unless the fetch itself rejected.</p>';
+      }
+      resEl.innerHTML = html;
+    }
+    function pump() {
+      if (idx >= urls.length) return finish();
+      var batch = urls.slice(idx, idx + BATCH);
+      idx += BATCH;
+      Promise.all(batch.map(function(u) {
+        return Promise.race([
+          fetch(u.url, { method: 'HEAD', mode: 'no-cors' }).then(function() { return { ok: true }; }, function(e) { return { ok: false, err: String(e && e.message || e) }; }),
+          new Promise(function(r) { setTimeout(function() { r({ ok: false, err: 'timeout (8s)' }); }, 8000); })
+        ]).then(function(res) {
+          if (res.ok) reachable.push(u);
+          else broken.push({ url: u.url, title: u.title, err: res.err || 'failed' });
+          done++;
+          out.textContent = 'Checked ' + done + '/' + urls.length + '…';
+        });
+      })).then(function() {
+        if (idx < urls.length) setTimeout(pump, 50);
+        else finish();
+      });
+    }
+    pump();
+  }
+
+  function renderReports() { renderMissing(); renderExpired(); }
+
+  /* ── Wire one-time handlers ───────────────────────────── */
+  function wireFeatures() {
+    function bind(id, fn) { var el = document.getElementById(id); if (el) el.addEventListener('click', fn); }
+    bind('admx-import-btn',      bulkImport);
+    bind('admx-bulk-apply',      bulkApply);
+    bind('admx-export-all',      exportAllCsv);
+    bind('admx-export-filtered', exportFilteredCsv);
+    bind('admx-dup-scan',        dupScan);
+    bind('admx-expired-archive', archiveExpired);
+    bind('admx-link-check',      checkLinks);
+
+    /* Delegated: dynamically rendered buttons inside lazy panels */
+    document.addEventListener('click', dupDropHandler);
+    document.addEventListener('click', function(e) {
+      var b = e.target.closest && e.target.closest('.admx-edit-link');
+      if (!b) return;
+      var id  = b.getAttribute('data-id');
+      var rec = data().find(function(r) { return String(r.id) === String(id); });
+      /* Jump to the existing Opportunities admin tab and prime its search */
+      document.querySelectorAll('#view-admin .admin-tab').forEach(function(t) {
+        t.classList.toggle('active', t.getAttribute('data-admtab') === 'opportunities');
+      });
+      document.querySelectorAll('#view-admin .admin-tab-panel').forEach(function(p) {
+        p.style.display = (p.id === 'adm-tab-opportunities') ? '' : 'none';
+      });
+      var search = document.getElementById('adm-search');
+      if (search && rec && rec.title) {
+        search.value = rec.title.split(/[—:|-]/)[0].trim().slice(0, 50);
+        search.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    });
+
+    wireActivityHooks();
+  }
+
+  /* ── Bootstrap: wrap loadAdminView to inject after base boot ─ */
+  function bootstrap() {
+    if (!window.__ohIsAdmin) return;
+    var existing = window.loadAdminView;
+    if (!existing) { setTimeout(bootstrap, 200); return; }
+    if (!existing.__admxWrapped) {
+      var wrapped = function() {
+        existing.apply(this, arguments);
+        setTimeout(inject, 50);
+      };
+      wrapped.__admxWrapped = true;
+      window.loadAdminView = wrapped;
+    }
+    var v = document.getElementById('view-admin');
+    if (v && v.classList.contains('active')) inject();
+  }
+
+  if (window.__ohIsAdmin) bootstrap();
+  else window.addEventListener('oh:role-ready', function(e) {
+    if (e && e.detail && e.detail.isAdmin) bootstrap();
+  });
 })();
 </script>
 
