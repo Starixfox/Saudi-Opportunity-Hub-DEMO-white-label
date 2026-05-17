@@ -11765,24 +11765,80 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     el.innerHTML = html;
   }
 
-  /* ── 10. Expired Opportunities ────────────────────────── */
+  /* ── 10. Expired Opportunities ──────────────────────────
+     Why the dedicated parser: passing free-text deadlines like
+       "Rolling calls for founders; MENA expansion active since 2024"
+       "Annual cycle; first edition launched in 2025"
+       "12-15 April 2026"
+     directly to `new Date()` is dangerous. V8 happily extracts the
+     trailing year — "active since 2024" parses as 2024-01-01, giving
+     an "867 days overdue" reading from a string that explicitly says
+     "Rolling". The range "12-15 April 2026" mis-parses as year 0012
+     or April 2015 depending on engine, producing wildly wrong counts.
+     The isNaN guard never catches these because the result is a valid
+     (wrong) Date, not NaN. The parser below rejects keyword-text
+     up-front, handles dash ranges by taking the end date, and rejects
+     any parse outside year 2000-2100 as a sanity floor. */
+  var DEADLINE_NON_DATE_KEYWORDS = [
+    'rolling', 'annual', 'cycle', 'active since', 'launched',
+    'ongoing', 'open call', 'tbd', 'n/a', 'varies', 'continuous'
+  ];
+  function parseDeadlineDate(str) {
+    if (!str || typeof str !== 'string') return null;
+    var s = str.trim();
+    if (!s) return null;
+    var lower = s.toLowerCase();
+    for (var i = 0; i < DEADLINE_NON_DATE_KEYWORDS.length; i++) {
+      if (lower.indexOf(DEADLINE_NON_DATE_KEYWORDS[i]) !== -1) return null;
+    }
+    /* Date range like "12-15 April 2026" or "12–15 April 2026" — take end date */
+    var rangeMatch = s.match(/(\d{1,2})\s*[-–—]\s*(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/);
+    if (rangeMatch) s = rangeMatch[2] + ' ' + rangeMatch[3] + ' ' + rangeMatch[4];
+    /* Try standard parse, but reject obvious mis-parses (year 12 from "12-15") */
+    var d = new Date(s);
+    if (!isNaN(d.getTime()) && d.getFullYear() >= 2000 && d.getFullYear() <= 2100) return d;
+    /* Fallback: "DD Month YYYY" — reorder to "Month DD, YYYY" for cross-browser parsing */
+    var dmy = s.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/);
+    if (dmy) {
+      d = new Date(dmy[2] + ' ' + dmy[1] + ', ' + dmy[3]);
+      if (!isNaN(d.getTime()) && d.getFullYear() >= 2000 && d.getFullYear() <= 2100) return d;
+    }
+    return null;
+  }
+  function calcDaysOverdue(deadlineStr) {
+    var d = parseDeadlineDate(deadlineStr);
+    if (!d) return null;
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    /* Signed delta — negative = future, 0 = today, positive = past */
+    return Math.floor((today.getTime() - d.getTime()) / 86400000);
+  }
   function renderExpired() {
     var el = document.getElementById('admx-expired');
     if (!el) return;
-    var todayMs = Date.now();
     var rows = [];
     data().forEach(function(it) {
-      if (!it.deadline_date) return;
-      var dl = new Date(it.deadline_date);
-      if (isNaN(dl.getTime())) return; /* free-text deadline (Rolling, etc.) — skip */
-      if (dl.getTime() >= todayMs) return;
-      rows.push({ it: it, days: Math.floor((todayMs - dl.getTime()) / 86400000) });
+      if (!it.deadline_date) return;                /* no deadline at all — not relevant here */
+      var overdue = calcDaysOverdue(it.deadline_date);
+      if (overdue !== null && overdue < 0) return;  /* future deadline — not expired */
+      rows.push({ it: it, overdue: overdue });
     });
-    rows.sort(function(a, b) { return b.days - a.days; });
-    var html = '<table class="admin-table"><thead><tr><th style="width:36px"><input type="checkbox" id="admx-exp-all"></th><th>Title</th><th>Sector</th><th>Deadline</th><th style="text-align:right;width:110px">Days Overdue</th></tr></thead><tbody>';
+    /* Sort: real overdue first (descending), then the null "needs review" rows */
+    rows.sort(function(a, b) {
+      if (a.overdue === null && b.overdue === null) return 0;
+      if (a.overdue === null) return 1;
+      if (b.overdue === null) return -1;
+      return b.overdue - a.overdue;
+    });
+    var html = '<table class="admin-table"><thead><tr><th style="width:36px"><input type="checkbox" id="admx-exp-all"></th><th>Title</th><th>Sector</th><th>Deadline</th><th style="text-align:right;width:120px">Days Overdue</th></tr></thead><tbody>';
     if (!rows.length) html += '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No expired records.</td></tr>';
     else rows.slice(0, 300).forEach(function(r) {
-      html += '<tr><td><input type="checkbox" class="admx-exp-chk" data-id="' + esc(r.it.id) + '"></td><td>' + esc(r.it.title || '—') + '</td><td>' + esc((r.it.sectors || [])[0] || '—') + '</td><td>' + esc(r.it.deadline_date) + '</td><td style="text-align:right;color:#dc2626;font-weight:600">' + r.days + '</td></tr>';
+      var ov = r.overdue;
+      var cellColor  = (ov !== null && ov > 0) ? '#dc2626' : 'var(--text-muted, #94a3b8)';
+      var cellWeight = (ov !== null && ov > 0) ? '700' : '400';
+      var cellText   = (ov === null) ? '&mdash;' : (ov === 0 ? 'Today' : ov + ' days');
+      html += '<tr><td><input type="checkbox" class="admx-exp-chk" data-id="' + esc(r.it.id) + '"></td><td>' + esc(r.it.title || '—') + '</td><td>' + esc((r.it.sectors || [])[0] || '—') + '</td><td>' + esc(r.it.deadline_date) + '</td>' +
+        '<td style="text-align:right;color:' + cellColor + ';font-weight:' + cellWeight + '">' + cellText + '</td></tr>';
     });
     html += '</tbody></table>';
     if (rows.length > 300) html += '<p class="admx-empty">Showing first 300 of ' + rows.length + '.</p>';
