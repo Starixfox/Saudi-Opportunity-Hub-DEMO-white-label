@@ -9882,6 +9882,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     return d.getTime() >= (Date.now() - 7 * 24 * 60 * 60 * 1000);
   };
 
+  /* Canonical sector key for dedup / bucketing. Without this, the sector
+     bucket map saw "Energy" / "energy" / "Energy " / "energy_" as different
+     keys and the sector grid showed duplicates with split counts. Mirrors the
+     normalization sectorMeta() already does for SECTOR_META lookup so display
+     labels still resolve. */
+  window.__normalizeSectorKey = function(raw) {
+    return String(raw == null ? '' : raw).trim().toLowerCase().replace(/[\s\-\/]+/g, '_');
+  };
+
   /* ---------------- Dashboard / KPIs / Charts ---------------- */
   var chartRefs = {};
   /* GREEN — Saudi green brand accent. */
@@ -10004,8 +10013,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       });
       var newThis = data.filter(window.__isNewThisWeek);
       var sectorMap = {};
+      var _normSec = window.__normalizeSectorKey || function(r){ return String(r||''); };
       data.forEach(function(d) {
-        (d.sectors || []).forEach(function(s) { sectorMap[s] = (sectorMap[s] || 0) + 1; });
+        (d.sectors || []).forEach(function(s) {
+          var k = _normSec(s);
+          if (k) sectorMap[k] = (sectorMap[k] || 0) + 1;
+        });
       });
 
       set('homeTotalVal', data.length.toLocaleString());
@@ -10070,7 +10083,8 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           var newThis2 = d.filter(window.__isNewThisWeek);
           renderHomeOppList('homeNewList', newThis2.slice(0, 8), true);
           var sm2 = {};
-          d.forEach(function(x){ (x.sectors||[]).forEach(function(s){ sm2[s]=(sm2[s]||0)+1; }); });
+          var _nsHome = window.__normalizeSectorKey || function(r){ return String(r||''); };
+          d.forEach(function(x){ (x.sectors||[]).forEach(function(s){ var k=_nsHome(s); if (k) sm2[k]=(sm2[k]||0)+1; }); });
           renderHomeSectorChips(sm2);
         } else {
           /* Genuine slow load or error — show graceful empty state */
@@ -10239,8 +10253,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (!data || !data.length) return;
     if (!window.Chart) return;
     chartsInitialized = true;
-      // KPIs
-      var sectorMap = tally(data, 'sectors');
+      // KPIs — sectors normalized via shared helper (else "Energy" / "energy" / "Energy " count as distinct buckets and the unique-sector KPI inflates).
+      var sectorMap = {};
+      var _ns = window.__normalizeSectorKey || function(r){ return String(r||''); };
+      data.forEach(function(d){ (d.sectors || []).forEach(function(s){ var k=_ns(s); if (k) sectorMap[k] = (sectorMap[k]||0)+1; }); });
       var countryMap = tally(data, 'country');
       var openCount = data.filter(function (d) {
         var s = String(d.status || '').toLowerCase().replace(/_/g, '');
@@ -10309,8 +10325,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       }
     };
 
-    // Sectors (bar, top 10) — labels go through t() for Arabic
-    var sectorTop = topN(tally(data, 'sectors'), 10);
+    // Sectors (bar, top 10) — labels go through t() for Arabic.
+    // Use normalized sector map so "Energy" / "energy" don't show as two bars.
+    var _sectorTallyMap = {};
+    var _nsChart = window.__normalizeSectorKey || function(r){ return String(r||''); };
+    data.forEach(function(d){ (d.sectors || []).forEach(function(s){ var k=_nsChart(s); if (k) _sectorTallyMap[k] = (_sectorTallyMap[k]||0)+1; }); });
+    var sectorTop = topN(_sectorTallyMap, 10);
     makeChart('chartSectors', 'bar', {
       labels: sectorTop.map(function (x) { return t(x[0]); }),
       datasets: [{ label: t('Opportunities'), data: sectorTop.map(function (x) { return x[1]; }), backgroundColor: GREEN, borderRadius: 6 }]
@@ -10348,7 +10368,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var hint = document.getElementById('sectorsHint');
     if (!grid) return;
     waitForData(function (data) {
-      var sectorMap = tally(data, 'sectors');
+      /* Normalized via shared helper — see comment in _renderDashboard. */
+      var sectorMap = {};
+      var _ns2 = window.__normalizeSectorKey || function(r){ return String(r||''); };
+      data.forEach(function(d){ (d.sectors || []).forEach(function(s){ var k=_ns2(s); if (k) sectorMap[k] = (sectorMap[k]||0)+1; }); });
       var entries = Object.keys(sectorMap).map(function (k) { return [k, sectorMap[k]]; });
       entries.sort(function (a, b) { return b[1] - a[1]; });
       grid.innerHTML = '';
@@ -14963,7 +14986,8 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
        counters across the app show the same number. */
     var newCount = data.filter(window.__isNewThisWeek).length;
     var sectorSet= {};
-    data.forEach(function(r){ (r.sectors||[]).forEach(function(s){ if(s) sectorSet[s]=true; }); });
+    var _nsKpi = window.__normalizeSectorKey || function(r){ return String(r||''); };
+    data.forEach(function(r){ (r.sectors||[]).forEach(function(s){ var k=_nsKpi(s); if (k) sectorSet[k]=true; }); });
 
     var elTotal   = document.getElementById('liv2KpiTotal');
     var elOpen    = document.getElementById('liv2KpiOpen');
@@ -18466,7 +18490,8 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     }
     if (statSectors && _ds && _ds.length > 0) {
       var sset = {};
-      _ds.forEach(function (it) { (it.sectors || []).forEach(function (s) { sset[String(s)] = 1; }); });
+      var _nsStat = window.__normalizeSectorKey || function(r){ return String(r||''); };
+      _ds.forEach(function (it) { (it.sectors || []).forEach(function (s) { var k=_nsStat(s); if (k) sset[k] = 1; }); });
       var sc = Object.keys(sset).length;
       if (sc > 0) statSectors.innerHTML = sc + '<span>+</span>';
     }
@@ -19805,9 +19830,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var canvas = document.getElementById('ohEnh2Radar');
     if (!canvas || !window.Chart) return;
     var counts = {}, openCounts = {};
+    var _nsRad = window.__normalizeSectorKey || function(r){ return String(r||''); };
     data.forEach(function (it) {
       (it.sectors || []).forEach(function (s) {
-        var k = String(s);
+        var k = _nsRad(s);
+        if (!k) return;
         counts[k] = (counts[k] || 0) + 1;
         if ((it.status||'').toLowerCase() === 'open') openCounts[k] = (openCounts[k] || 0) + 1;
       });
@@ -21043,9 +21070,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
   function buildSectorStats(data) {
     var stats = {};
+    var norm = window.__normalizeSectorKey || function(r){ return String(r||''); };
     data.forEach(function (it) {
       (it.sectors || []).forEach(function (raw) {
-        var key = String(raw);
+        var key = norm(raw);
+        if (!key) return;
         if (!stats[key]) stats[key] = { total: 0, open: 0, sponsors: {}, withFunding: 0 };
         stats[key].total++;
         if ((it.status||'').toLowerCase() === 'open') stats[key].open++;
@@ -21217,8 +21246,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var sectorSet = {};
     var regionSet = {};
     var latest = null;
+    var _nsAbout = window.__normalizeSectorKey || function(r){ return String(r||''); };
     data.forEach(function (it) {
-      (it.sectors || []).forEach(function (s) { sectorSet[String(s)] = 1; });
+      (it.sectors || []).forEach(function (s) { var k=_nsAbout(s); if (k) sectorSet[k] = 1; });
       var r = String(it.eligibility_region || it.country || '').trim();
       if (r) regionSet[r] = 1;
       var lv = it.last_verified || it.updated_at || it.created_at;
