@@ -9305,7 +9305,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
               </div>
               <div class="admin-field">
                 <label for="adm-f-deadline">Deadline</label>
-                <input type="date" id="adm-f-deadline">
+                <input type="text" id="adm-f-deadline" placeholder="e.g. 2026-12-31 or Rolling / Open">
               </div>
               <div class="admin-field">
                 <label for="adm-f-funding">Funding Amount</label>
@@ -10763,7 +10763,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
             return '<option' + (s === rec.status ? ' selected' : '') + '>' + s + '</option>';
           }).join('') +
         '</select></td>' +
-        '<td><input type="date" class="admin-search-input adm-edit-deadline" value="' + escAdm(fmtDate(rec.deadline_date)) + '"></td>' +
+        '<td><input type="text" class="admin-search-input adm-edit-deadline" value="' + escAdm(fmtDate(rec.deadline_date)) + '" placeholder="e.g. 2026-12-31 or Rolling / Open"></td>' +
         '<td>' + escAdm(fmtDate(rec.last_verified)) + '</td>' +
         '<td>' +
           '<button class="adm-action-btn adm-save"   data-id="' + escAdm(rec.id) + '" type="button" aria-label="Save"><i data-lucide="check"></i></button>' +
