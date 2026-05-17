@@ -11297,10 +11297,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   'use strict';
 
   var injected = false;
-  /* Activity log moved to public.activity_log (Supabase) — see migration
-     comment above renderActivityLog. Previous in-memory + sessionStorage
-     buffer removed; the table is now durable across sessions and shared
-     across admins. */
+  /* Activity log lives in public.activity_log (Supabase). The standalone
+     Activity Log table that used to be in the Engagement tab was merged
+     into the Registered Users table — each user row now has a
+     ▶ Activity toggle that lazy-loads their last 20 entries inline. */
   var _admxActivityTimer = null;
 
   function esc(s) {
@@ -11343,15 +11343,14 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         '<div class="admx-section"><h3 class="admx-title">Sector Popularity</h3><div id="admx-sec-pop" class="admx-list"></div></div>' +
         '<div class="admx-section"><h3 class="admx-title">Most-Saved Opportunities (top 10)</h3><div id="admx-saved" class="admin-table-wrap"></div></div>',
       'admx-engagement':
-        '<div class="admx-section"><h3 class="admx-title">Registered Users</h3><div id="admx-users" class="admin-table-wrap"></div></div>' +
-        '<div class="admx-section"><h3 class="admx-title">Activity Log</h3>' +
+        '<div class="admx-section"><h3 class="admx-title">Registered Users</h3>' +
           '<div class="admx-actions">' +
-            '<button class="btn-secondary" id="admx-activity-refresh" type="button" style="font-size:12px">&#x21bb; Refresh</button>' +
-            '<button class="btn-secondary" id="admx-activity-clear" type="button" style="font-size:12px">Clear entries &gt; 30 days</button>' +
+            '<button class="btn-secondary" id="admx-users-refresh" type="button" style="font-size:12px">&#x21bb; Refresh</button>' +
+            '<button class="btn-secondary" id="admx-activity-clear" type="button" style="font-size:12px">Clear activity entries &gt; 30 days</button>' +
             '<span id="admx-activity-status" class="admin-form-result" style="font-size:11px;color:var(--text-muted)"></span>' +
           '</div>' +
-          '<p class="admx-empty" style="margin:0 0 10px;font-size:11px">Auto-refreshes every 60s while this tab is open. Newest 100 entries shown.</p>' +
-          '<div id="admx-activity" class="admin-table-wrap"></div>' +
+          '<p class="admx-empty" style="margin:0 0 10px;font-size:11px">Auto-refreshes every 60s while this tab is open. Click <strong>▶ Activity</strong> on any user row to view their last 20 actions.</p>' +
+          '<div id="admx-users" class="admin-table-wrap"></div>' +
         '</div>',
       'admx-tools':
         '<div class="admx-section"><h3 class="admx-title">Bulk Import (JSON)</h3>' +
@@ -11493,22 +11492,16 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
   function renderAnalytics() { renderSectorPopularity(); renderMostSaved(); }
 
-  /* ── 3. User List ──────────────────────────────────────────
-     Source: public.profiles (extended by migration to include email,
-     display_name, last_active, role on top of the original first_name /
-     last_name / organisation). The admxBumpLastActive() upsert below
-     keeps email / display_name / last_active fresh on every page load
-     for any authed user, so this table reflects real activity even for
-     users who never edit their profile manually.
-
-     SELECT * pulls every column so newly-added profile fields (e.g. a
-     future `organisation` enrichment) flow through without code edits.
-     The user_watchlist join is in-memory for the per-user Saves count.
-
-     RLS — applied via migration:
-       INSERT WITH CHECK (auth.uid() = id)  — upsert own row only
-       UPDATE USING/WITH CHECK same          — touch own row only
-       SELECT USING (true)                   — admin lists everyone */
+  /* ── 3 + 4. Registered Users (with inline per-user activity sub-rows) ─
+     Previously two tables: Registered Users + Activity Log (standalone).
+     Now one unified table — each user row has a ▶ Activity toggle that
+     expands a sub-row beneath it showing the user's last 20 actions
+     from public.activity_log (WHERE user_id = profile.id, ORDER BY
+     created_at DESC, LIMIT 20). Lazy: fetched only on first expand.
+     Single-expand: opening another user collapses the previous one.
+     _admxExpandedUid persists the open uid across re-renders so the
+     60-second auto-refresh doesn't blow away expansion state. */
+  var _admxExpandedUid = null;
   async function renderUsersExt() {
     var el = document.getElementById('admx-users');
     if (!el) return;
@@ -11540,9 +11533,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       }
       var savesByUid = {};
       saves.forEach(function(r) { if (r.user_id) savesByUid[r.user_id] = (savesByUid[r.user_id] || 0) + 1; });
-      var html = '<table class="admin-table"><thead><tr><th>Display Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Last Active</th><th style="text-align:right">Saves</th></tr></thead><tbody>';
+      var html = '<table class="admin-table"><thead><tr><th>Display Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Last Active</th><th style="text-align:right">Saves</th><th style="width:110px"></th></tr></thead><tbody>';
       if (!profiles.length) {
-        html += '<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No profile rows visible (check RLS policy). The migration sets <code>SELECT USING (true)</code>; if this row appears, the policy did not apply.</td></tr>';
+        html += '<tr><td colspan="7" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No profile rows visible (check RLS policy). The migration sets <code>SELECT USING (true)</code>; if this row appears, the policy did not apply.</td></tr>';
       } else {
         profiles.forEach(function(p) {
           /* display_name comes from admxBumpLastActive (user_metadata.full_name
@@ -11553,26 +11546,109 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           var displayName = p.display_name || fullName || emailPrefix || '—';
           var role        = p.role || 'user';
           var joined      = p.created_at  ? new Date(p.created_at).toISOString().slice(0, 10) : '—';
-          /* Prefer last_active (set on every login), fall back to updated_at
-             for pre-migration rows that haven't been touched yet. */
           var activeSrc   = p.last_active || p.updated_at || null;
           var active      = activeSrc ? new Date(activeSrc).toISOString().slice(0, 10) : '—';
           var saveCount   = savesByUid[p.id] || 0;
-          html += '<tr>' +
+          var uidAttr     = esc(p.id);
+          html += '<tr data-uid="' + uidAttr + '">' +
             '<td>' + esc(displayName) + '</td>' +
             '<td style="font-size:12px;color:var(--text-muted)">' + esc(p.email || '—') + '</td>' +
             '<td>' + esc(role) + '</td>' +
             '<td>' + esc(joined) + '</td>' +
             '<td>' + esc(active) + '</td>' +
             '<td style="text-align:right;font-weight:600">' + saveCount + '</td>' +
+            '<td style="text-align:right"><button class="btn-secondary admx-user-activity-btn" type="button" data-uid="' + uidAttr + '" style="font-size:11px;padding:3px 10px">&#9654; Activity</button></td>' +
+          '</tr>' +
+          '<tr class="admx-user-activity-row" data-uid="' + uidAttr + '" style="display:none">' +
+            '<td colspan="7" style="background:var(--bg-elevated, #f1f5f9);padding:10px 14px">' +
+              '<div class="admx-user-activity-content" data-uid="' + uidAttr + '"></div>' +
+            '</td>' +
           '</tr>';
         });
       }
       html += '</tbody></table>';
       el.innerHTML = html;
+      /* Restore expansion if one was open before this re-render (e.g. via
+         the 60s auto-refresh) so the admin doesn't lose their place. */
+      admxRestoreExpansion();
     } catch (e) {
       el.innerHTML = '<p class="admx-empty" style="color:#dc2626">Failed to load users: ' + esc(String(e.message || e)) + '</p>';
     }
+  }
+
+  function _admxSelEsc(s) {
+    /* CSS.escape for attribute selectors — safe for UUIDs (alphanumeric +
+       dashes) but defensive against odd ids. */
+    return (window.CSS && CSS.escape) ? CSS.escape(String(s)) : String(s).replace(/"/g, '\\"');
+  }
+
+  async function admxLoadUserActivity(uid, container) {
+    if (!container) return;
+    var supa = db();
+    if (!supa) { container.innerHTML = '<p class="admx-empty">Supabase not ready.</p>'; return; }
+    container.innerHTML = '<p class="admx-empty" style="margin:0">Loading activity&hellip;</p>';
+    try {
+      var res = await supa.from('activity_log')
+        .select('*')
+        .eq('user_id', uid)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (res && res.error) throw new Error(res.error.message);
+      var rows = (res && res.data) || [];
+      if (!rows.length) {
+        container.innerHTML = '<p class="admx-empty" style="margin:0">No activity recorded for this user yet.</p>';
+        return;
+      }
+      var html = '<table class="admin-table" style="margin:0;background:transparent">' +
+        '<thead><tr><th style="width:140px">Time</th><th style="width:110px">Action</th><th>Opportunity</th></tr></thead><tbody>';
+      rows.forEach(function(r) {
+        var rel = admxLcFormatAge(r.created_at);
+        var abs = new Date(r.created_at).toLocaleString();
+        var oppTitle = r.opportunity_title || (r.opportunity_id ? 'id ' + r.opportunity_id : '—');
+        var titleCell = r.opportunity_id
+          ? '<a href="#" class="admx-activity-open" data-id="' + esc(r.opportunity_id) + '" style="color:var(--accent,#006C35);text-decoration:none">' + esc(oppTitle) + '</a>'
+          : esc(oppTitle);
+        html += '<tr>' +
+          '<td title="' + esc(abs) + '" style="font-size:12px;color:var(--text-muted)">' + esc(rel) + '</td>' +
+          '<td>' + admxActionBadge(r.action) + '</td>' +
+          '<td style="font-size:13px">' + titleCell + '</td>' +
+        '</tr>';
+      });
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    } catch (e) {
+      container.innerHTML = '<p class="admx-empty" style="margin:0;color:#dc2626">Failed: ' + esc(String(e.message || e)) + '</p>';
+    }
+  }
+
+  function admxToggleUserActivity(btn) {
+    var uid = btn && btn.getAttribute('data-uid');
+    if (!uid) return;
+    var wasExpanded = (_admxExpandedUid === uid);
+    /* Collapse every sub-row + reset every button (single-expand UX). */
+    document.querySelectorAll('.admx-user-activity-row').forEach(function(r) { r.style.display = 'none'; });
+    document.querySelectorAll('.admx-user-activity-btn').forEach(function(b) { b.innerHTML = '&#9654; Activity'; });
+    if (wasExpanded) { _admxExpandedUid = null; return; }
+    /* Expand this row */
+    var subRow = document.querySelector('.admx-user-activity-row[data-uid="' + _admxSelEsc(uid) + '"]');
+    if (!subRow) return;
+    subRow.style.display = '';
+    btn.innerHTML = '&#9660; Activity';
+    _admxExpandedUid = uid;
+    var content = subRow.querySelector('.admx-user-activity-content');
+    if (content) admxLoadUserActivity(uid, content);
+  }
+
+  function admxRestoreExpansion() {
+    if (!_admxExpandedUid) return;
+    var sel = _admxSelEsc(_admxExpandedUid);
+    var btn    = document.querySelector('.admx-user-activity-btn[data-uid="' + sel + '"]');
+    var subRow = document.querySelector('.admx-user-activity-row[data-uid="' + sel + '"]');
+    if (!btn || !subRow) { _admxExpandedUid = null; return; }
+    subRow.style.display = '';
+    btn.innerHTML = '&#9660; Activity';
+    var content = subRow.querySelector('.admx-user-activity-content');
+    if (content) admxLoadUserActivity(_admxExpandedUid, content);
   }
 
   /* Upsert the current user's profile row on every page load so the
@@ -11639,48 +11715,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
            ';color:#fff;font-size:11px;font-weight:600;text-transform:capitalize">' + esc(a) + '</span>';
   }
 
-  async function renderActivityLog() {
-    var el = document.getElementById('admx-activity');
-    if (!el) return;
-    var supa = db();
-    if (!supa) { el.innerHTML = '<p class="admx-empty">Supabase not ready.</p>'; return; }
-    /* Only show "Loading…" on the FIRST render — subsequent auto-refreshes
-       shouldn't flicker the table away while the admin is reading it. */
-    if (!el.querySelector('table')) el.innerHTML = '<p class="admx-empty">Loading&hellip;</p>';
-    try {
-      var res = await supa.from('activity_log')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100);
-      if (res && res.error) throw new Error(res.error.message);
-      var rows = (res && res.data) || [];
-      var html = '<table class="admin-table"><thead><tr><th style="width:120px">Time</th><th>User</th><th style="width:100px">Action</th><th>Opportunity</th></tr></thead><tbody>';
-      if (!rows.length) {
-        html += '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No activity recorded yet. Save / unsave / compare an opportunity, or open a detail panel, to populate.</td></tr>';
-      } else {
-        rows.forEach(function(r) {
-          var rel  = admxLcFormatAge(r.created_at);
-          var abs  = new Date(r.created_at).toLocaleString();
-          var who  = r.user_email || (r.user_id ? r.user_id.slice(0, 8) + '…' : 'anon');
-          var oppTitle = r.opportunity_title || (r.opportunity_id ? 'id ' + r.opportunity_id : '—');
-          var titleCell = r.opportunity_id
-            ? '<a href="#" class="admx-activity-open" data-id="' + esc(r.opportunity_id) + '" style="color:var(--accent,#006C35);text-decoration:none">' + esc(oppTitle) + '</a>'
-            : esc(oppTitle);
-          html += '<tr>' +
-            '<td title="' + esc(abs) + '" style="font-size:12px;color:var(--text-muted)">' + esc(rel) + '</td>' +
-            '<td style="font-size:12px">' + esc(who) + '</td>' +
-            '<td>' + admxActionBadge(r.action) + '</td>' +
-            '<td>' + titleCell + '</td>' +
-          '</tr>';
-        });
-      }
-      html += '</tbody></table>';
-      el.innerHTML = html;
-    } catch (e) {
-      el.innerHTML = '<p class="admx-empty" style="color:#dc2626">Failed to load activity: ' + esc(String(e.message || e)) + '</p>';
-    }
-  }
-
   async function logActivity(action, opp) {
     try {
       var supa = window._supabase; if (!supa) return;
@@ -11695,11 +11729,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         opportunity_title: (opp && opp.title) ? String(opp.title) : null
       };
       await supa.from('activity_log').insert(rec);
-      /* If the activity panel is currently rendered, refresh it so the new
-         row shows up immediately rather than waiting for the 60s timer. */
+      /* If the engagement panel is currently visible AND this user's
+         sub-row is the expanded one, refresh it so the new event shows
+         up immediately. */
       var panel = document.getElementById('adm-tab-admx-engagement');
-      if (panel && panel.style.display !== 'none' && document.getElementById('admx-activity')) {
-        renderActivityLog();
+      if (panel && panel.style.display !== 'none' && _admxExpandedUid === user.id) {
+        var content = document.querySelector('.admx-user-activity-content[data-uid="' + _admxSelEsc(user.id) + '"]');
+        if (content) admxLoadUserActivity(user.id, content);
       }
     } catch (e) { /* silent — log writes are best-effort */ }
   }
@@ -11715,7 +11751,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var res = await supa.from('activity_log').delete().lt('created_at', cutoff);
       if (res && res.error) throw new Error(res.error.message);
       if (status) { status.textContent = '✓ Old entries cleared.'; status.style.color = '#16a34a'; }
-      renderActivityLog();
+      /* If a user's sub-row is currently expanded, reload it so any of
+         their just-deleted old entries disappear from view. */
+      if (_admxExpandedUid) {
+        var c = document.querySelector('.admx-user-activity-content[data-uid="' + _admxSelEsc(_admxExpandedUid) + '"]');
+        if (c) admxLoadUserActivity(_admxExpandedUid, c);
+      }
     } catch (e) {
       if (status) { status.textContent = 'Delete failed: ' + String(e.message || e); status.style.color = '#dc2626'; }
     }
@@ -11725,8 +11766,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (_admxActivityTimer) return;  /* idempotent — only one global timer */
     _admxActivityTimer = setInterval(function() {
       var panel = document.getElementById('adm-tab-admx-engagement');
-      if (panel && panel.style.display !== 'none' && document.getElementById('admx-activity')) {
-        renderActivityLog();
+      /* Refresh the Users table (keeps Last Active timestamps current).
+         renderUsersExt() restores any open Activity sub-row via
+         admxRestoreExpansion(), so the admin doesn't lose their place. */
+      if (panel && panel.style.display !== 'none' && document.getElementById('admx-users')) {
+        renderUsersExt();
       }
     }, 60000);
   }
@@ -11770,7 +11814,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
   function renderEngagement() {
     renderUsersExt();
-    renderActivityLog();
     admxStartActivityAutoRefresh();
   }
 
@@ -12314,7 +12357,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     bind('admx-lc-refresh',      admxLcLoadReport);
     bind('admx-lc-run',          admxLcRunCheck);
     bind('admx-lc-save-pat',     admxLcSavePat);
-    bind('admx-activity-refresh', renderActivityLog);
+    bind('admx-users-refresh',   renderUsersExt);
     bind('admx-activity-clear',   admxClearOldActivity);
 
     /* Delegated: dynamically rendered buttons inside lazy panels */
@@ -12326,6 +12369,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var id = a.getAttribute('data-id');
       var rec = data().find(function(it) { return String(it.id) === String(id); });
       if (rec && window.WS && window.WS.openPanel) window.WS.openPanel(rec);
+    });
+    /* Per-user Activity toggle */
+    document.addEventListener('click', function(e) {
+      var b = e.target.closest && e.target.closest('.admx-user-activity-btn');
+      if (!b) return;
+      admxToggleUserActivity(b);
     });
     document.addEventListener('click', function(e) {
       var b = e.target.closest && e.target.closest('.admx-lc-find');
