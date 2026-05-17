@@ -8868,21 +8868,23 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           </label>
           <select id="sectorFilter" class="filter-select" aria-label="Filter by sector">
             <option value="all" data-ar="جميع القطاعات">All sectors</option>
-            <option value="agriculture" data-ar="الزراعة والغذاء">Agriculture & Food Processing</option>
-            <option value="energy" data-ar="الطاقة">Energy</option>
-            <option value="healthcare" data-ar="الرعاية الصحية">Healthcare & Life Sciences</option>
-            <option value="environment" data-ar="البيئة">Environment Services</option>
-            <option value="industrial" data-ar="الصناعة والتصنيع">Industrial & Manufacturing</option>
-            <option value="pharma" data-ar="الصيدلة والتقنية الحيوية">Pharma & Biotech</option>
-            <option value="chemicals" data-ar="الكيميائيات">Chemicals</option>
-            <option value="realestate" data-ar="العقارات">Real Estate</option>
-            <option value="financial" data-ar="الخدمات المالية">Financial Services</option>
-            <option value="transport" data-ar="النقل واللوجستيك">Transport & Logistics</option>
-            <option value="mining" data-ar="التعدين والمعادن">Mining & Metals</option>
-            <option value="tourism" data-ar="السياحة وجودة الحياة">Tourism & Quality of Life</option>
-            <option value="education" data-ar="التعليم">Education</option>
             <option value="ict" data-ar="تقنية المعلومات">ICT</option>
-            <option value="innovation" data-ar="الابتكار والريادة">Innovation & Entrepreneurship</option>
+            <option value="innovation" data-ar="الابتكار وريادة الأعمال">Innovation & Entrepreneurship</option>
+            <option value="financial" data-ar="الخدمات المالية">Financial Services</option>
+            <option value="industrial" data-ar="التصنيع والصناعة">Manufacturing & Industrial</option>
+            <option value="healthcare" data-ar="الرعاية الصحية وعلوم الحياة">Healthcare & Life Sciences</option>
+            <option value="environment" data-ar="البيئة">Environment</option>
+            <option value="energy" data-ar="الطاقة">Energy</option>
+            <option value="realestate" data-ar="العقارات">Real Estate</option>
+            <option value="education" data-ar="التعليم">Education</option>
+            <option value="pharma" data-ar="الصيدلة">Pharmaceuticals</option>
+            <option value="chemicals" data-ar="الكيماويات">Chemicals</option>
+            <option value="agriculture" data-ar="الزراعة">Agriculture</option>
+            <option value="tourism" data-ar="السياحة">Tourism</option>
+            <option value="transport" data-ar="النقل واللوجستيات">Transport & Logistics</option>
+            <option value="mining" data-ar="التعدين">Mining</option>
+            <option value="private_sector" data-ar="القطاع الخاص">Private Sector</option>
+            <option value="humanitarian" data-ar="الإنساني">Humanitarian</option>
           </select>
         </div>
 
@@ -9304,7 +9306,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
               </div>
               <div class="admin-field">
                 <label for="adm-f-sector">Sector *</label>
-                <input type="text" id="adm-f-sector" placeholder="e.g. Technology, Energy">
+                <input type="text" id="adm-f-sector" placeholder="One of: ICT, Innovation &amp; Entrepreneurship, Financial Services, Manufacturing &amp; Industrial, Healthcare &amp; Life Sciences, Environment, Energy, Real Estate, Education, Pharmaceuticals, Chemicals, Agriculture, Tourism, Transport &amp; Logistics, Mining (canonicalized at read time)">
               </div>
               <div class="admin-field">
                 <label for="adm-f-region">Region</label>
@@ -9912,71 +9914,126 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
      belong to the canonical set. This map collapses them at read time
      (Supabase data is left untouched per spec). Lookups are
      case/whitespace-insensitive and tolerate snake_case keys too. */
+  /* The 17 canonical sector display names. Order is the spec order.
+     Exposed on window for any external admin tool that needs the list. */
+  var CANONICAL_SECTORS = [
+    'ICT', 'Innovation & Entrepreneurship', 'Financial Services',
+    'Manufacturing & Industrial', 'Healthcare & Life Sciences', 'Environment',
+    'Energy', 'Real Estate', 'Education', 'Pharmaceuticals', 'Chemicals',
+    'Agriculture', 'Tourism', 'Transport & Logistics', 'Mining',
+    'Private Sector', 'Humanitarian'
+  ];
+  window.CANONICAL_SECTORS = CANONICAL_SECTORS;
+
+  /* Raw-string → canonical DISPLAY name. Lookup is case + whitespace +
+     underscore + ampersand insensitive. Anything unknown passes through. */
   var SECTOR_CANONICAL_MAP = {
     /* → ICT */
     'technology': 'ICT', 'tech': 'ICT', 'information technology': 'ICT',
     'telecommunications': 'ICT', 'digital': 'ICT', 'ai': 'ICT', 'space': 'ICT',
-    'media': 'ICT', 'gaming': 'ICT', 'saas': 'ICT',
-    /* → Industrial */
-    'defense': 'Industrial', 'defence': 'Industrial', 'manufacturing': 'Industrial',
-    'infrastructure': 'Industrial',
+    'gaming': 'ICT', 'saas': 'ICT',
+    /* → Manufacturing & Industrial */
+    'defense': 'Manufacturing & Industrial', 'defence': 'Manufacturing & Industrial',
+    'manufacturing': 'Manufacturing & Industrial',
+    'infrastructure': 'Manufacturing & Industrial',
+    'industrial': 'Manufacturing & Industrial',
     /* → Real Estate */
     'construction': 'Real Estate', 'construction technology': 'Real Estate',
     'real estate technology': 'Real Estate',
-    /* → Transport */
-    'logistics': 'Transport', 'aviation': 'Transport', 'maritime': 'Transport',
+    /* → Transport & Logistics */
+    'logistics': 'Transport & Logistics', 'aviation': 'Transport & Logistics',
+    'maritime': 'Transport & Logistics', 'transport': 'Transport & Logistics',
     /* → Financial Services */
     'finance': 'Financial Services', 'fintech': 'Financial Services',
     'banking': 'Financial Services', 'investment': 'Financial Services',
     'insurance': 'Financial Services', 'insurance technology': 'Financial Services',
     'financial technology': 'Financial Services', 'trade': 'Financial Services',
-    /* → Healthcare */
-    'life sciences': 'Healthcare', 'biotech': 'Healthcare',
-    'biotechnology': 'Healthcare', 'medical': 'Healthcare',
+    'financial': 'Financial Services',
+    /* → Healthcare & Life Sciences */
+    'life sciences': 'Healthcare & Life Sciences', 'biotech': 'Healthcare & Life Sciences',
+    'biotechnology': 'Healthcare & Life Sciences', 'medical': 'Healthcare & Life Sciences',
+    'healthcare': 'Healthcare & Life Sciences',
+    /* → Pharmaceuticals */
+    'pharma': 'Pharmaceuticals', 'pharmaceutical': 'Pharmaceuticals',
     /* → Environment */
     'water': 'Environment', 'water technology': 'Environment', 'sustainability': 'Environment',
     /* → Energy */
-    'clean energy': 'Energy', 'renewables': 'Energy', 'solar': 'Energy',
-    'hydrogen': 'Energy',
+    'clean energy': 'Energy', 'renewables': 'Energy', 'solar': 'Energy', 'hydrogen': 'Energy',
     /* → Agriculture */
     'food': 'Agriculture', 'agritech': 'Agriculture', 'food technology': 'Agriculture',
-    /* → Tourism */
-    'hospitality': 'Tourism', 'entertainment': 'Tourism', 'sports': 'Tourism',
-    /* → Innovation */
-    'research': 'Innovation', 'science': 'Innovation', 'entrepreneurship': 'Innovation',
-    'women entrepreneurship': 'Innovation', 'accelerator': 'Innovation',
-    'research & technology': 'Innovation', 'smes': 'Innovation',
-    'social development': 'Innovation',
+    /* → Tourism (now includes media per updated spec) */
+    'hospitality': 'Tourism', 'entertainment': 'Tourism', 'sports': 'Tourism', 'media': 'Tourism',
+    /* → Innovation & Entrepreneurship */
+    'research': 'Innovation & Entrepreneurship', 'science': 'Innovation & Entrepreneurship',
+    'entrepreneurship': 'Innovation & Entrepreneurship',
+    'women entrepreneurship': 'Innovation & Entrepreneurship',
+    'accelerator': 'Innovation & Entrepreneurship',
+    'research & technology': 'Innovation & Entrepreneurship',
+    'smes': 'Innovation & Entrepreneurship',
+    'social development': 'Innovation & Entrepreneurship',
+    'innovation': 'Innovation & Entrepreneurship',
     /* → Education */
     'human capital': 'Education', 'employment': 'Education', 'training': 'Education',
     'education technology': 'Education',
-    /* Identity / case-variant mappings — also catches the sectorFilter
-       dropdown values ('realestate', 'financial' etc.) so filter matching
-       collapses to the same canonical form on both sides. */
-    'energy': 'Energy', 'ict': 'ICT', 'healthcare': 'Healthcare',
+    /* Identity for canonical names + short DB codes that map 1:1 */
+    'ict': 'ICT', 'environment': 'Environment', 'energy': 'Energy',
     'real estate': 'Real Estate', 'real_estate': 'Real Estate', 'realestate': 'Real Estate',
-    'financial services': 'Financial Services', 'financial_services': 'Financial Services', 'financial': 'Financial Services',
-    'agriculture': 'Agriculture', 'tourism': 'Tourism', 'industrial': 'Industrial',
-    'education': 'Education', 'transport': 'Transport', 'innovation': 'Innovation',
-    'environment': 'Environment', 'pharma': 'Pharma', 'pharmaceutical': 'Pharma',
-    'pharmaceuticals': 'Pharma', 'chemicals': 'Chemicals', 'chemical': 'Chemicals',
-    'mining': 'Mining'
+    'agriculture': 'Agriculture', 'tourism': 'Tourism', 'education': 'Education',
+    'chemicals': 'Chemicals', 'chemical': 'Chemicals', 'mining': 'Mining',
+    'pharmaceuticals': 'Pharmaceuticals',
+    'private sector': 'Private Sector', 'private_sector': 'Private Sector',
+    'humanitarian': 'Humanitarian',
+    /* Long-form identity (so a value already-canonicalized passes through) */
+    'innovation & entrepreneurship': 'Innovation & Entrepreneurship',
+    'manufacturing & industrial': 'Manufacturing & Industrial',
+    'healthcare & life sciences': 'Healthcare & Life Sciences',
+    'transport & logistics': 'Transport & Logistics',
+    'financial services': 'Financial Services', 'financial_services': 'Financial Services'
   };
+
+  /* Display-name → SHORT bucket key. Lets __normalizeSectorKey produce the
+     short keys ('industrial', 'healthcare', 'pharma', 'transport',
+     'innovation') that SECTOR_META + the static <select> values + the DB
+     all already use, even though canonicalize() returns the LONG display
+     name per spec. Without this, the key for 'Manufacturing & Industrial'
+     would become 'manufacturing_industrial' and SECTOR_META + dropdown
+     lookups would all break. */
+  var SECTOR_DISPLAY_TO_KEY = {
+    'ICT': 'ict',
+    'Innovation & Entrepreneurship': 'innovation',
+    'Financial Services': 'financial',
+    'Manufacturing & Industrial': 'industrial',
+    'Healthcare & Life Sciences': 'healthcare',
+    'Environment': 'environment',
+    'Energy': 'energy',
+    'Real Estate': 'realestate',
+    'Education': 'education',
+    'Pharmaceuticals': 'pharma',
+    'Chemicals': 'chemicals',
+    'Agriculture': 'agriculture',
+    'Tourism': 'tourism',
+    'Transport & Logistics': 'transport',
+    'Mining': 'mining',
+    'Private Sector': 'private_sector',
+    'Humanitarian': 'humanitarian'
+  };
+
   window.__canonicalizeSector = function(raw) {
     var trimmed = String(raw == null ? '' : raw).trim();
     if (!trimmed) return '';
-    /* Lower + collapse underscores/whitespace for the lookup key */
     var lc = trimmed.toLowerCase().replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
     return SECTOR_CANONICAL_MAP[lc] || trimmed;
   };
-  /* Bucketing key — canonicalize first, then lowercase + underscore.
-     Mirrors what sectorMeta() does for SECTOR_META lookup so display
-     labels still resolve through the existing pipeline. Without the
-     canonicalize step, "Technology" and "ICT" sat in separate buckets
-     and the Sectors page showed 35 entries instead of ≤15. */
+
+  /* Bucketing key — canonicalize, then collapse to the short key used by
+     SECTOR_META + dropdown values. */
   window.__normalizeSectorKey = function(raw) {
     var canonical = window.__canonicalizeSector(raw);
-    return canonical.trim().toLowerCase().replace(/[\s\-\/]+/g, '_');
+    if (SECTOR_DISPLAY_TO_KEY[canonical]) return SECTOR_DISPLAY_TO_KEY[canonical];
+    /* Unknown — fall through to a sanitized key (also strips & / + so
+       odd values like "Foo & Bar" don't produce ugly underscored keys). */
+    return canonical.trim().toLowerCase()
+      .replace(/[\s\-\/&+]+/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
   };
 
   /* ---------------- Dashboard / KPIs / Charts ---------------- */
@@ -16148,14 +16205,21 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   'use strict';
 
   /* —— sector display names ————————————————————————————— */
+  /* Display labels keyed by SHORT canonical key. Long forms here so
+     the admin Sector Popularity table + any other consumer that reads
+     this map directly shows the same name as SECTOR_META + the
+     <select> dropdown. */
   var SECTOR_NAMES_EN = {
-    agriculture:'Agriculture', chemicals:'Chemicals', defense:'Defense',
+    agriculture:'Agriculture', chemicals:'Chemicals',
     education:'Education', energy:'Energy', environment:'Environment',
-    financial:'Financial', gaming:'Gaming', healthcare:'Healthcare',
-    ict:'ICT', industrial:'Industrial', innovation:'Innovation',
-    media:'Media', mining:'Mining', pharma:'Pharma',
-    realestate:'Real Estate', space:'Space', sports:'Sports',
-    technology:'Technology', tourism:'Tourism', transport:'Transport', other:'Other'
+    financial:'Financial Services', healthcare:'Healthcare & Life Sciences',
+    ict:'ICT', industrial:'Manufacturing & Industrial',
+    innovation:'Innovation & Entrepreneurship',
+    mining:'Mining', pharma:'Pharmaceuticals',
+    realestate:'Real Estate', tourism:'Tourism',
+    transport:'Transport & Logistics',
+    private_sector:'Private Sector', humanitarian:'Humanitarian',
+    other:'Other'
   };
   var SECTOR_NAMES_AR = {
     agriculture:'\u0627\u0644\u0632\u0631\u0627\u0639\u0629', chemicals:'\u0627\u0644\u0643\u064a\u0645\u064a\u0627\u0621', defense:'\u0627\u0644\u062f\u0641\u0627\u0639',
@@ -19237,11 +19301,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     { value: 'student',      label: 'Student',             labelAr: 'طالب' },
     { value: 'ngo',          label: 'NGO / Non-profit',    labelAr: 'منظمة غير ربحية' }
   ];
+  /* User-prefs onboarding picker — matches the 15 canonical sectors
+     (excluding the two outliers, which are too generic for users to
+     opt-in to). Keep order roughly by Saudi Vision 2030 priority. */
   var SECTOR_OPTIONS = [
-    'Energy', 'ICT', 'Healthcare', 'Financial Services',
-    'Real Estate', 'Agriculture', 'Tourism', 'Education',
-    'Transport', 'Industrial', 'Innovation', 'Mining',
-    'Environment', 'Space', 'Defence'
+    'ICT', 'Innovation & Entrepreneurship', 'Financial Services',
+    'Manufacturing & Industrial', 'Healthcare & Life Sciences',
+    'Energy', 'Environment', 'Real Estate', 'Education',
+    'Pharmaceuticals', 'Chemicals', 'Agriculture',
+    'Tourism', 'Transport & Logistics', 'Mining'
   ];
 
   function escWiz(s) {
@@ -22380,7 +22448,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     mining:      { icon: 'hammer',          en: 'Mining',                         ar: 'التعدين' },
     media:       { icon: 'film',            en: 'Media & Entertainment',          ar: 'الإعلام والترفيه' },
     sports:      { icon: 'trophy',          en: 'Sports',                         ar: 'الرياضة' },
-    entertainment:{ icon: 'film',           en: 'Entertainment',                  ar: 'الترفيه' }
+    entertainment:{ icon: 'film',           en: 'Entertainment',                  ar: 'الترفيه' },
+    /* Outlier canonical sectors per the 17-sector spec — preserved as their
+       own buckets when raw data doesn't fit any of the other 15. */
+    private_sector: { icon: 'briefcase',    en: 'Private Sector',                 ar: 'القطاع الخاص' },
+    humanitarian:   { icon: 'shield-check', en: 'Humanitarian',                   ar: 'الإنساني' }
   };
   function iconSvg(name) {
     /* Tiny Lucide-style inline SVGs for the icons we use, keyed by name. */
@@ -22569,22 +22641,36 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       '</a>';
     }).join('');
 
-    /* Click → route to opportunities + apply sector filter */
+    /* Click → route to opportunities + apply sector filter + scroll to top */
     grid.querySelectorAll('[data-sector]').forEach(function (a) {
       function go() {
-        var key = a.dataset.sector;
+        /* Canonicalize both sides via __normalizeSectorKey so the lookup
+           survives any data shape (long display name, short DB code,
+           weird casing). */
+        var keyFn = window.__normalizeSectorKey || function(s){ return String(s||'').toLowerCase(); };
+        var targetKey = keyFn(a.dataset.sector);
         if (typeof window.setRoute === 'function') window.setRoute('opportunities');
         setTimeout(function () {
           var sel = document.getElementById('sectorFilter');
           if (!sel) return;
+          var matched = false;
           Array.from(sel.options).forEach(function (opt) {
-            if (opt.value.toLowerCase() === String(key).toLowerCase() ||
-                opt.textContent.trim().toLowerCase() === String(key).toLowerCase()) {
+            if (matched) return;
+            if (keyFn(opt.value) === targetKey || keyFn(opt.textContent) === targetKey) {
               sel.value = opt.value;
+              matched = true;
             }
           });
           sel.dispatchEvent(new Event('change', { bubbles: true }));
           sel.dispatchEvent(new Event('input', { bubbles: true }));
+          /* Scroll to top of the opportunities grid (per spec) — try the
+             explicit results wrapper first, fall back to the view, fall
+             back to window. */
+          var target = document.getElementById('oppsTableWrapper')
+                    || document.getElementById('resultsBar')
+                    || document.getElementById('view-opportunities');
+          if (target && target.scrollIntoView) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          else window.scrollTo({ top: 0, behavior: 'smooth' });
         }, 150);
       }
       a.addEventListener('click', function (e) { e.preventDefault(); go(); });
