@@ -12153,12 +12153,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                     ${deadline ? `<span class="occ-chip occ-chip--deadline">${deadline}</span>` : ''}
                   </div>
                   <div class="occ-actions">
-                    <button class="opp-insights-btn occ-insights-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" type="button" aria-label="View insights for ${(item.title||'').replace(/"/g,'&quot;')}">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                      ${t('Insights')}
+                    <button class="opp-card-action-btn opp-card-save-btn card-bookmark-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" data-sector="${(item.sectors&&item.sectors[0])||''}" data-type="${item.type||''}" onclick="WS&&WS.toggleBookmark(this)" type="button" aria-label="${t('Save')}">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+                      ${t('Save')}
                     </button>
-                    <button class="card-bookmark-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" data-sector="${(item.sectors&&item.sectors[0])||''}" data-type="${item.type||''}" onclick="WS&&WS.toggleBookmark(this)" title="Add to watchlist" aria-label="Bookmark" style="position:static;width:28px;height:28px;flex-shrink:0;">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+                    <button class="opp-card-action-btn opp-card-compare-btn${(window.__oppCompareIds && window.__oppCompareIds.indexOf(item.id) >= 0) ? ' is-active' : ''}" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" type="button" aria-label="${t('Compare')}">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a2 2 0 0 1 2-2h16"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a2 2 0 0 1-2 2H3"/></svg>
+                      ${t('Compare')}
                     </button>
                     ${applyHref ? `<a class="occ-apply-btn" href="${applyHref}" ${applyAttrs}>${t('Apply →')}</a>` : `<span class="occ-apply-btn occ-apply-btn--disabled" style="opacity:0.35;cursor:default;pointer-events:none;">${t('Apply →')}</span>`}
                   </div>
@@ -12227,9 +12228,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                     ${item.isNew ? `<span class="badge-new">${newLabel}</span>` : (item.last_verified && (Date.now() - new Date(item.last_verified).getTime()) <= 30*86400000 && !item.isNew ? `<span class="badge-new" style="background:rgba(245,166,35,0.15);color:#c68a00;border-color:rgba(245,166,35,0.3);">${t('Updated')}</span>` : '')}
                   </div>
                   <div class="opp-card-btns">
-                    <button class="opp-insights-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" type="button">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                      ${t('View Insights')}
+                    <button class="opp-card-action-btn opp-card-save-btn card-bookmark-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" data-sector="${(item.sectors&&item.sectors[0])||''}" data-type="${item.type||''}" onclick="WS&&WS.toggleBookmark(this)" type="button" aria-label="${t('Save')}">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+                      ${t('Save')}
+                    </button>
+                    <button class="opp-card-action-btn opp-card-compare-btn${(window.__oppCompareIds && window.__oppCompareIds.indexOf(item.id) >= 0) ? ' is-active' : ''}" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" type="button" aria-label="${t('Compare')}">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a2 2 0 0 1 2-2h16"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a2 2 0 0 1-2 2H3"/></svg>
+                      ${t('Compare')}
                     </button>
                     ${item.application_link && item.application_link.startsWith('http') ? `<a class="panel-link-btn opp-card-link" href="${esc(item.application_link)}" target="_blank" rel="noopener noreferrer">${t('Go to Website')}</a>` : ''}
                   </div>
@@ -12621,6 +12626,20 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       .opp-card-btns { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
       .opp-insights-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: 12px; font-weight: 600; border-radius: 999px; border: 1.5px solid rgba(255,255,255,.22); background: rgba(255,255,255,.08); color: rgba(255,255,255,.90); cursor: pointer; white-space: nowrap; transition: background 0.15s, border-color 0.15s; }
       .opp-insights-btn:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.40); color: #fff; }
+      /* Action-row Save + Compare buttons (pill style, matches .opp-insights-btn).
+         Distinct class so the document-level .opp-insights-btn click handler at
+         ~line 14642 (opens the detail panel) does NOT fire for these. */
+      .opp-card-action-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: 12px; font-weight: 600; border-radius: 999px; border: 1.5px solid rgba(255,255,255,.22); background: rgba(255,255,255,.08); color: rgba(255,255,255,.90); cursor: pointer; white-space: nowrap; transition: background 0.15s, border-color 0.15s, color 0.15s; }
+      .opp-card-action-btn:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.40); color: #fff; }
+      .opp-card-action-btn svg { flex-shrink: 0; }
+      /* Saved state — driven by .bookmarked class that WS.syncBookmarkButtons()
+         toggles on every .card-bookmark-btn[data-id] on each render. */
+      .opp-card-action-btn.opp-card-save-btn.bookmarked { background: rgba(201,166,107,.18); border-color: rgba(201,166,107,.55); color: #C9A66B; }
+      .opp-card-action-btn.opp-card-save-btn.bookmarked svg { fill: currentColor; }
+      /* Compare-active state — teal accent matching the compare tray button. */
+      .opp-card-action-btn.opp-card-compare-btn.is-active { background: rgba(53,213,197,.18); border-color: rgba(53,213,197,.55); color: #35d5c5; }
+      /* Compact (.occ-actions row) variant — slightly tighter. */
+      .occ-actions .opp-card-action-btn { padding: 6px 10px; font-size: 11px; gap: 5px; }
       .opp-card-link { width: auto; white-space: nowrap; background: #35d5c5; border-radius: 999px; box-shadow: 0 6px 16px rgba(47,213,199,.16); padding: 8px 14px; font-size: 12px; }
       .opp-card-sponsor { margin-top: 8px; color: rgba(255,255,255,.66); font-size: 11px; }
       .pagination { gap: 4px; margin-top: 14px; }
@@ -13916,8 +13935,22 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     updateProvenanceCount();
     var tbody2 = document.getElementById('oppsTableBody');
     if (tbody2) {
+      /* Keep a flat id list mirror of compareItems so card render templates can
+         pre-paint the .is-active class on .opp-card-compare-btn after re-render
+         (renderCards replaces innerHTML, so transient classes are lost). */
+      function refreshCompareIdMirror() {
+        window.__oppCompareIds = compareItems.map(function(x) { return x.id || ''; });
+      }
+      function syncCompareButtonState(id) {
+        document.querySelectorAll('[data-id="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"].opp-card-compare-btn').forEach(function(b) {
+          b.classList.toggle('is-active', compareItems.some(function(x){ return (x.id||'') === id; }));
+        });
+        document.querySelectorAll('.opp-select-btn[data-id="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]').forEach(function(b) {
+          b.classList.toggle('selected', compareItems.some(function(x){ return (x.id||'') === id; }));
+        });
+      }
       tbody2.addEventListener('click', function(e) {
-        var btn = e.target.closest('.opp-select-btn');
+        var btn = e.target.closest('.opp-select-btn, .opp-card-compare-btn');
         if (!btn) return;
         e.stopPropagation();
         var id = btn.dataset.id;
@@ -13927,7 +13960,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         var idx = compareItems.findIndex(function(x) { return (x.id||'') === id; });
         if (idx >= 0) {
           compareItems.splice(idx, 1);
-          btn.classList.remove('selected');
         } else {
           if (compareItems.length >= MAX_COMPARE) {
             if (typeof showToastOb === 'function') showToastOb(t('You can compare up to') + ' ' + MAX_COMPARE + ' ' + t('opportunities at a time.'));
@@ -13935,10 +13967,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
             return;
           }
           compareItems.push(item);
-          btn.classList.add('selected');
         }
+        refreshCompareIdMirror();
+        syncCompareButtonState(id);
         updateCompareTray();
       });
+      /* Seed the mirror at boot so the first render reflects any pre-existing state. */
+      refreshCompareIdMirror();
     }
 
     // Sticky sentinel: adds .is-docked to the results bar when it is actively stuck
@@ -18795,22 +18830,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       }
     }
 
-    /* Share button */
-    var actions = content.querySelector('.opp-card-btns');
-    if (actions && !actions.querySelector('.oh-enh-share')) {
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'oh-enh-share';
-      btn.title = T('Copy share link','نسخ الرابط');
-      btn.setAttribute('aria-label', T('Share','مشاركة'));
-      btn.dataset.id = id;
-      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="11.49"/></svg>';
-      btn.addEventListener('click', function (e) {
-        e.preventDefault(); e.stopPropagation();
-        copyShareLink(id);
-      });
-      actions.insertBefore(btn, actions.firstChild);
-    }
+    /* Share button removed — replaced by Save + Compare buttons in the
+       card render templates. copyShareLink() below is still used by deep-link
+       routing in other modules so it stays. */
 
     row.dataset.ohEnhanced = '1';
   }
