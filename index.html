@@ -10726,7 +10726,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     function loadKPIs() {
       var _db = db();
       if (!_db) return;
-      _db.from('opportunities').select('id', { count: 'exact', head: true }).then(function (r) {
+      _db.from('opportunities').select('id', { count: 'exact', head: true }).neq('status', 'archived').then(function (r) {
         var v = $$('adm-total'); if (v) v.textContent = (r && r.count != null) ? r.count.toLocaleString() : '—';
       });
       _db.from('user_prefs').select('user_id', { count: 'exact', head: true }).then(function (r) {
@@ -11833,6 +11833,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var rows = [];
     data().forEach(function(it) {
       if (!it.deadline_date) return;                /* no deadline at all */
+      if (it.status === 'archived') return;         /* already archived — never re-list */
       var overdue = calcDaysOverdue(it.deadline_date);
       if (overdue === null) return;                 /* rolling / annual / non-date — not expirable */
       if (overdue < 0) return;                      /* future deadline — not expired */
@@ -11862,14 +11863,54 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var chks = document.querySelectorAll('#admx-expired .admx-exp-chk:checked');
     if (!chks.length) { if (out) { out.className = 'admin-form-result error'; out.textContent = 'Select rows first.'; } return; }
     var ids = Array.prototype.map.call(chks, function(c) { return c.dataset.id; });
-    if (!confirm('Archive ' + ids.length + ' record(s) as Expired?')) return;
-    var supa = db(); if (!supa) return;
-    out.className = 'admin-form-result'; out.textContent = 'Updating…';
-    supa.from('opportunities').update({ status: 'Expired' }).in('id', ids).then(function(res) {
-      if (res && res.error) { out.className = 'admin-form-result error'; out.textContent = 'Failed: ' + res.error.message; return; }
-      out.className = 'admin-form-result success'; out.textContent = 'Archived ' + ids.length + '.';
-      renderExpired();
-    });
+    if (!confirm('Archive ' + ids.length + ' record(s)? They will be removed from the user-facing grid and KPIs.')) return;
+    var supa = db();
+    if (!supa) { out.className = 'admin-form-result error'; out.textContent = 'Supabase not ready.'; return; }
+    out.className = 'admin-form-result'; out.textContent = 'Archiving…';
+    /* Persist to Supabase BEFORE touching local state — if the network call
+       fails we want the rows to remain visible so the admin can retry. The
+       loader fetchPage() at line ~12183 filters out status='archived' so once
+       this update commits, a page reload would also remove them. */
+    supa.from('opportunities')
+      .update({ status: 'archived' })
+      .in('id', ids)
+      .then(function(res) {
+        if (res && res.error) {
+          out.className = 'admin-form-result error';
+          out.textContent = 'Archive failed (no rows changed): ' + res.error.message;
+          return;
+        }
+        /* Success — prune from in-memory dataset so the main grid / KPIs /
+           search / sectors all stop counting these IMMEDIATELY without a
+           reload. Mirrors the .neq('status','archived') filter in the
+           loader. */
+        var idSet = {};
+        ids.forEach(function(id) { idSet[String(id)] = 1; });
+        if (Array.isArray(window.opportunitiesData)) {
+          window.opportunitiesData = window.opportunitiesData.filter(function(it) {
+            return !idSet[String(it.id)];
+          });
+        }
+        if (Array.isArray(window.allOpportunities)) {
+          window.allOpportunities = window.allOpportunities.filter(function(it) {
+            return !idSet[String(it.id)];
+          });
+        }
+        /* Decrement the admin TOTAL RECORDS KPI locally (the underlying
+           Supabase query at line ~10729 already filters archived, so this
+           just keeps the displayed value correct between page loads). */
+        var totalEl = document.getElementById('adm-total');
+        if (totalEl) {
+          var current = parseInt(String(totalEl.textContent).replace(/[^\d]/g, ''), 10);
+          if (!isNaN(current)) totalEl.textContent = Math.max(0, current - ids.length).toLocaleString();
+        }
+        out.className = 'admin-form-result success';
+        out.textContent = 'Archived ' + ids.length + ' record(s). They are gone from the user grid and KPIs.';
+        /* Re-render the expired list — rows just removed from
+           opportunitiesData won't appear, and the renderExpired() guard at
+           it.status === 'archived' is a second safety net. */
+        renderExpired();
+      });
   }
 
   /* ── 11. Link Checker — GitHub Actions report viewer ──────────
@@ -12181,9 +12222,20 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                'profiles,sectors,isNew,created_at';
 
   async function fetchPage(from) {
+    /* Exclude archived records at the loader so window.opportunitiesData
+       only ever contains active rows. Cascades automatically to the main
+       grid, sector counts, "Total Records" KPI, "Open Now" filter, search
+       results, and every other consumer that reads from in-memory data.
+       NOTE: column already exists on the table (text, nullable); if it
+       didn't, the migration would be:
+         ALTER TABLE opportunities ADD COLUMN status text DEFAULT 'active';
+       The admin Opportunities tab uses its own .from('opportunities')
+       query without this filter on purpose, so archived rows remain
+       visible / un-archivable from there. */
     const { data, error, count } = await window._supabase
       .from('opportunities')
       .select(COLS, { count: 'exact' })
+      .neq('status', 'archived')
       .order('id', { ascending: true })
       .range(from, from + PAGE - 1);
     if (error) throw error;
