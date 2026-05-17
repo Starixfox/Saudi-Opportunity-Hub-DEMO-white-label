@@ -11379,11 +11379,25 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           '<p class="admx-empty">Records with a free-text deadline (e.g. "Rolling") are not counted as expired.</p>' +
         '</div>' +
         '<div class="admx-section"><h3 class="admx-title">🔗 Link Checker</h3>' +
-          '<p class="admx-empty" style="margin:0 0 14px;line-height:1.6">Live link checking is not possible from the browser due to GitHub Pages security restrictions. Links are checked automatically every Monday via GitHub Actions and results are posted as GitHub Issues.</p>' +
-          '<div class="admx-actions">' +
-            '<a class="btn-primary" href="https://github.com/starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues?q=label%3Alink-check" target="_blank" rel="noopener noreferrer" style="text-decoration:none">View Link Reports &rarr;</a>' +
-            '<a class="btn-secondary" href="https://github.com/starixfox/Saudi-Opportunity-Hub-DEMO-white-label/actions/workflows/link-check.yml" target="_blank" rel="noopener noreferrer" style="text-decoration:none">Run Check Now &rarr;</a>' +
+          '<p class="admx-empty" style="margin:0 0 14px;line-height:1.6">Links are checked weekly via GitHub Actions; reports are posted as GitHub Issues. The latest report loads automatically below.</p>' +
+          '<div id="admx-lc-summary" style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap">' +
+            '<div id="admx-lc-meta" style="font-size:13px;color:var(--text-muted);flex:1;min-width:200px">Loading latest report…</div>' +
+            '<button class="btn-secondary" id="admx-lc-refresh" type="button" title="Refresh from GitHub" style="padding:6px 12px;font-size:12px">&#x21bb; Refresh</button>' +
           '</div>' +
+          '<details style="margin-bottom:14px;border:1px solid var(--border-default,#e2e8f0);border-radius:8px;padding:8px 12px">' +
+            '<summary style="cursor:pointer;font-size:12px;color:var(--text-muted);font-weight:600">GitHub Personal Access Token (optional &mdash; enables one-click "Run Check Now")</summary>' +
+            '<div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
+              '<input type="password" id="admx-lc-pat" placeholder="ghp_..." class="admin-search-input" style="max-width:380px;flex:1;min-width:200px">' +
+              '<button class="btn-secondary" id="admx-lc-save-pat" type="button">Save (session only)</button>' +
+              '<span id="admx-lc-pat-status" class="admin-form-result"></span>' +
+            '</div>' +
+            '<p class="admx-empty" style="margin:6px 0 0;font-size:11px">Required scope: <code>workflow</code>. Held in memory only &mdash; cleared on page reload, never persisted.</p>' +
+          '</details>' +
+          '<div class="admx-actions">' +
+            '<button class="btn-primary" id="admx-lc-run" type="button">Run Check Now</button>' +
+            '<span id="admx-lc-run-status" class="admin-form-result"></span>' +
+          '</div>' +
+          '<div id="admx-lc-results"></div>' +
         '</div>'
     };
     Object.keys(panels).forEach(function(id) {
@@ -11858,15 +11872,191 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     });
   }
 
-  /* Feature 11 (live link checker) removed — GitHub Pages CSP / cross-origin
-     restrictions blocked every browser-side approach (direct fetch, no-cors
-     fetch, public CORS proxies). Replaced by .github/workflows/link-check.yml
-     which runs curl from a GitHub-hosted runner every Monday at 06:00 UTC and
-     posts the report as a GitHub Issue labeled link-check. The admin panel
-     for this feature is now an info box with deep-links to the issues query
-     and the workflow's manual-run page (no JS handlers needed). */
+  /* ── 11. Link Checker — GitHub Actions report viewer ──────────
+     The CHECK itself runs server-side in .github/workflows/link-check.yml
+     (browser-side fetch is blocked by GitHub Pages CSP for every
+     destination + every public CORS proxy). The viewer below is a
+     read of the GitHub Issues API — that endpoint IS CORS-allowed —
+     plus an optional authenticated POST to workflow_dispatch so the
+     admin can trigger a fresh run without leaving the app. PAT is
+     held in a closure variable; never written to localStorage. */
+  var _admxLcPat   = '';
+  var _admxLcOwner = 'Starixfox';
+  var _admxLcRepo  = 'Saudi-Opportunity-Hub-DEMO-white-label';
 
-  function renderReports() { renderMissing(); renderExpired(); }
+  function admxLcFormatAge(dateStr) {
+    var ms = Date.now() - new Date(dateStr).getTime();
+    if (ms < 0) ms = 0;
+    var mins = Math.floor(ms / 60000);
+    if (mins < 1)  return 'just now';
+    if (mins < 60) return mins + ' min ago';
+    var hrs = Math.floor(mins / 60);
+    if (hrs < 24)  return hrs + ' hour'  + (hrs === 1 ? '' : 's') + ' ago';
+    var days = Math.floor(hrs / 24);
+    if (days < 30) return days + ' day'  + (days === 1 ? '' : 's') + ' ago';
+    var months = Math.floor(days / 30);
+    return months + ' month' + (months === 1 ? '' : 's') + ' ago';
+  }
+
+  function admxLcParseReport(body) {
+    var lines = String(body || '').split(/\r?\n/);
+    var rows = [];
+    var totalChecked = null, totalBroken = null;
+    lines.forEach(function(ln) {
+      /* Match "- ❌ `STATUS` — URL" with various status forms (3-digit, ERR, TIMEOUT, 000) */
+      var m = ln.match(/^[-*]\s*[❌✗xX]?\s*`?(\d{3}|ERR|TIMEOUT)`?\s*[—–-]\s*(\S+)/);
+      if (m) { rows.push({ status: m[1], url: m[2] }); return; }
+      var tc = ln.match(/Total checked:\s*\**\s*(\d+)/i);
+      if (tc) totalChecked = parseInt(tc[1], 10);
+      var tb = ln.match(/Total broken:\s*\**\s*(\d+)/i);
+      if (tb) totalBroken = parseInt(tb[1], 10);
+    });
+    return { rows: rows, totalChecked: totalChecked, totalBroken: totalBroken };
+  }
+
+  function admxLcRenderResults(parsed) {
+    var el = document.getElementById('admx-lc-results');
+    if (!el) return;
+    if (!parsed || !parsed.rows.length) {
+      el.innerHTML = '<p class="admx-empty">No broken URLs in the latest report. 🎉</p>';
+      return;
+    }
+    var html = '<table class="admin-table"><thead><tr><th style="width:80px">Status</th><th>URL</th><th style="width:120px">Action</th></tr></thead><tbody>';
+    parsed.rows.forEach(function(r) {
+      var first = String(r.status).charAt(0);
+      var color = (r.status === 'ERR' || r.status === 'TIMEOUT' || first === '5') ? '#b45309'
+                : (first === '4' || r.status === '000') ? '#dc2626'
+                : 'var(--text-muted, #94a3b8)';
+      var truncated = r.url.length > 90 ? r.url.slice(0, 87) + '…' : r.url;
+      html += '<tr>' +
+        '<td><span style="display:inline-block;padding:2px 8px;border-radius:999px;background:' + color + ';color:#fff;font-size:11px;font-weight:600">' + esc(r.status) + '</span></td>' +
+        '<td><a href="' + esc(r.url) + '" target="_blank" rel="noopener noreferrer" title="' + esc(r.url) + '" style="font-size:12px;word-break:break-all">' + esc(truncated) + '</a></td>' +
+        '<td><button class="btn-secondary admx-lc-find" type="button" data-url="' + esc(r.url) + '" style="font-size:11px;padding:3px 10px">Find in DB</button></td>' +
+      '</tr>';
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  }
+
+  async function admxLcLoadReport() {
+    var meta  = document.getElementById('admx-lc-meta');
+    var resEl = document.getElementById('admx-lc-results');
+    if (!meta || !resEl) return;
+    meta.textContent = 'Loading latest report from GitHub…';
+    resEl.innerHTML = '';
+    try {
+      var apiUrl = 'https://api.github.com/repos/' + _admxLcOwner + '/' + _admxLcRepo +
+                   '/issues?labels=link-check&state=open&per_page=1&sort=created&direction=desc';
+      var res = await fetch(apiUrl, { headers: { 'Accept': 'application/vnd.github+json' } });
+      if (!res.ok) throw new Error('GitHub API ' + res.status + ' ' + res.statusText);
+      var issues = await res.json();
+      if (!Array.isArray(issues) || !issues.length) {
+        meta.innerHTML = '<em>No reports yet &mdash; run a check below.</em>';
+        resEl.innerHTML = '';
+        return;
+      }
+      var issue   = issues[0];
+      var parsed  = admxLcParseReport(issue.body);
+      var age     = admxLcFormatAge(issue.created_at);
+      var broken  = (parsed.totalBroken != null) ? parsed.totalBroken : parsed.rows.length;
+      var bits    = [];
+      bits.push('<strong>' + esc(issue.title || 'Latest report') + '</strong>');
+      bits.push('Generated ' + esc(age));
+      if (parsed.totalChecked != null) bits.push(parsed.totalChecked + ' URLs checked');
+      bits.push('<strong style="color:' + (broken > 0 ? '#dc2626' : '#16a34a') + '">' + broken + ' broken</strong>');
+      bits.push('<a href="' + esc(issue.html_url) + '" target="_blank" rel="noopener noreferrer" style="font-size:12px">Open on GitHub &#8599;</a>');
+      meta.innerHTML = bits.join(' &middot; ');
+      admxLcRenderResults(parsed);
+    } catch (e) {
+      meta.innerHTML = '<span style="color:#dc2626">Could not load: ' + esc(String(e.message || e)) + '</span>';
+    }
+  }
+
+  async function admxLcRunCheck() {
+    var status = document.getElementById('admx-lc-run-status');
+    if (!status) return;
+    if (!_admxLcPat) {
+      /* Fallback: open the workflow page so the admin can hit "Run workflow" manually */
+      window.open('https://github.com/' + _admxLcOwner + '/' + _admxLcRepo + '/actions/workflows/link-check.yml',
+                  '_blank', 'noopener,noreferrer');
+      status.className = 'admin-form-result';
+      status.textContent = 'No PAT saved — opened the workflow page in a new tab. Click "Run workflow" there.';
+      return;
+    }
+    status.className = 'admin-form-result';
+    status.textContent = 'Dispatching workflow…';
+    try {
+      var apiUrl = 'https://api.github.com/repos/' + _admxLcOwner + '/' + _admxLcRepo +
+                   '/actions/workflows/link-check.yml/dispatches';
+      var res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/vnd.github+json',
+          'Authorization': 'Bearer ' + _admxLcPat,
+          'X-GitHub-Api-Version': '2022-11-28',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ref: 'main' })
+      });
+      if (!res.ok) {
+        var errText = '';
+        try { errText = (await res.text()).slice(0, 240); } catch (_e) {}
+        throw new Error(res.status + ' ' + res.statusText + (errText ? ' — ' + errText : ''));
+      }
+      status.className = 'admin-form-result success';
+      status.textContent = 'Workflow triggered — check back in ~5 minutes, then hit ↻ Refresh.';
+    } catch (e) {
+      status.className = 'admin-form-result error';
+      status.textContent = 'Dispatch failed: ' + String(e.message || e);
+    }
+  }
+
+  function admxLcSavePat() {
+    var input  = document.getElementById('admx-lc-pat');
+    var status = document.getElementById('admx-lc-pat-status');
+    if (!input || !status) return;
+    _admxLcPat = (input.value || '').trim();
+    if (_admxLcPat) {
+      status.className = 'admin-form-result success';
+      status.textContent = '✓ PAT held in memory for this session.';
+      input.value = '';
+    } else {
+      status.className = 'admin-form-result';
+      status.textContent = 'PAT cleared.';
+    }
+  }
+
+  function admxLcFindInDB(url) {
+    if (!url) return;
+    var rec = (data() || []).find(function(it) {
+      return it.application_link && (it.application_link === url || it.application_link.indexOf(url) !== -1);
+    });
+    /* Switch to the existing Opportunities admin tab regardless of match */
+    document.querySelectorAll('#view-admin .admin-tab').forEach(function(t) {
+      t.classList.toggle('active', t.getAttribute('data-admtab') === 'opportunities');
+    });
+    document.querySelectorAll('#view-admin .admin-tab-panel').forEach(function(p) {
+      p.style.display = (p.id === 'adm-tab-opportunities') ? '' : 'none';
+    });
+    var search = document.getElementById('adm-search');
+    if (!search) return;
+    if (rec && rec.title) {
+      /* Match found in opportunitiesData — prime search with the record title
+         so the existing admin search surfaces that row. */
+      search.value = rec.title.split(/[—:|-]/)[0].trim().slice(0, 50);
+    } else {
+      /* No DB match — surface the domain so admin sees an empty result instead
+         of a stale search, signalling "this URL isn't an opportunity link
+         (probably a hardcoded asset in index.html)". */
+      var domain = (url.match(/^https?:\/\/([^\/?#]+)/) || [])[1] || url.slice(0, 40);
+      search.value = domain;
+    }
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+    search.focus();
+    try { search.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_e) {}
+  }
+
+  function renderReports() { renderMissing(); renderExpired(); admxLcLoadReport(); }
 
   /* ── Wire one-time handlers ───────────────────────────── */
   function wireFeatures() {
@@ -11877,9 +12067,17 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     bind('admx-export-filtered', exportFilteredCsv);
     bind('admx-dup-scan',        dupScan);
     bind('admx-expired-archive', archiveExpired);
+    bind('admx-lc-refresh',      admxLcLoadReport);
+    bind('admx-lc-run',          admxLcRunCheck);
+    bind('admx-lc-save-pat',     admxLcSavePat);
 
     /* Delegated: dynamically rendered buttons inside lazy panels */
     document.addEventListener('click', dupDropHandler);
+    document.addEventListener('click', function(e) {
+      var b = e.target.closest && e.target.closest('.admx-lc-find');
+      if (!b) return;
+      admxLcFindInDB(b.getAttribute('data-url'));
+    });
     document.addEventListener('click', function(e) {
       var b = e.target.closest && e.target.closest('.admx-edit-link');
       if (!b) return;

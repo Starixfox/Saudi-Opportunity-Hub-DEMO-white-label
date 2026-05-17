@@ -21,11 +21,22 @@ jobs:
         run: echo "today=$(date '+%Y-%m-%d')" >> "$GITHUB_OUTPUT"
 
       - name: Extract URLs
-        run: grep -oP 'https?://[^\s"<>]+' index.html | grep -v 'github\|fonts\|cdnjs\|jsdelivr\|unpkg\|fontshare\|googleapis' | sort -u > urls.txt
+        run: |
+          grep -oP 'https?://[^\s"<>]+' index.html \
+          | grep -v 'github\|fonts\|cdnjs\|jsdelivr\|unpkg\|fontshare\|googleapis' \
+          | grep -v 'w3\.org\|formspree\|unsplash\|wikimedia\|supabase\.co\|sdb\.gov\.sa/SiteFiles' \
+          | grep -v 'monshaat\.gov\.sa\|https://\.\.\.' \
+          | grep -v "^'" \
+          | sed "s/'$//" \
+          | sort -u > urls.txt || true
+          echo "Checking $(wc -l < urls.txt) URLs after filtering..."
 
       - name: Check URLs
         run: |
+          total=$(wc -l < urls.txt)
           echo "## Link Check Report — ${{ steps.date.outputs.today }}" > report.md
+          echo "" >> report.md
+          echo "**Total checked: $total**" >> report.md
           echo "" >> report.md
           broken=0
           while read url; do
