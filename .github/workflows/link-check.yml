@@ -1,0 +1,26 @@
+name: Link Checker
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  link-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract URLs from index.html
+        run: grep -oP 'https?://[^\s"<>]+' index.html | sort -u > urls.txt
+      - name: Check each URL
+        run: |
+          echo "STATUS URL" > results.txt
+          while read url; do
+            status=$(curl -o /dev/null -s -w "%{http_code}" --max-time 10 "$url" 2>/dev/null || echo "ERR")
+            echo "$status $url" >> results.txt
+          done < urls.txt
+      - name: Upload results artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: link-check-results
+          path: results.txt
+          retention-days: 14

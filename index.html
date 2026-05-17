@@ -11378,10 +11378,14 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           '<div id="admx-expired" class="admin-table-wrap"></div>' +
           '<p class="admx-empty">Records with a free-text deadline (e.g. "Rolling") are not counted as expired.</p>' +
         '</div>' +
-        '<div class="admx-section"><h3 class="admx-title">Broken Link Checker</h3>' +
-          '<div class="admx-actions"><button class="btn-primary" id="admx-link-check" type="button">Check All URLs</button><span id="admx-link-progress" class="admin-form-result"></span></div>' +
+        '<div class="admx-section"><h3 class="admx-title">URL Format Validator</h3>' +
+          '<p class="admx-empty" style="margin-bottom:10px">URL format validation only &mdash; live reachability is checked weekly via GitHub Actions (see Actions tab).</p>' +
+          '<div class="admx-actions">' +
+            '<button class="btn-primary" id="admx-link-check" type="button">Check All URLs</button>' +
+            '<a class="btn-secondary" href="https://github.com/starixfox/Saudi-Opportunity-Hub-DEMO-white-label/actions" target="_blank" rel="noopener noreferrer" style="text-decoration:none">View GitHub Actions &rarr;</a>' +
+            '<span id="admx-link-progress" class="admin-form-result"></span>' +
+          '</div>' +
           '<div id="admx-link-results"></div>' +
-          '<p class="admx-empty">Uses <code>fetch(url, { mode: \'no-cors\' })</code> — most responses are opaque due to CORS and are treated as likely reachable. Only actual network errors / timeouts (8s) are flagged as broken.</p>' +
         '</div>'
     };
     Object.keys(panels).forEach(function(id) {
@@ -11805,55 +11809,68 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     });
   }
 
-  /* ── 11. Broken Link Checker ──────────────────────────── */
+  /* ── 11. URL Format Validator ─────────────────────────────
+     The earlier fetch-based reachability checker was removed: GitHub
+     Pages serves this app from a cross-origin sandbox, so every
+     fetch() to a third-party host failed CORS and the checker reported
+     every URL as broken even when it was perfectly fine. Live
+     reachability is now a weekly job in .github/workflows/link-check.yml.
+     This client-side validator only inspects URL FORMAT — no network
+     calls, runs instantly even on 1,000+ records. */
+  var LINK_VALID_TLDS = ['com','org','ae','gov','sa','qa','om','bh','kw','eu','int','io','co','net','edu','vc','aero','ai'];
+  var LINK_PLACEHOLDER_RE = /(?:^|\b)(?:example\.com|tbd|placeholder)(?:\b|$)|^#$|^https?:\/\/#$/i;
+  function classifyUrl(url) {
+    if (url == null || String(url).trim() === '') return 'missing';
+    var u = String(url).trim();
+    if (u.length < 10) return 'review';
+    if (LINK_PLACEHOLDER_RE.test(u)) return 'review';
+    if (!/^https?:\/\//i.test(u)) return 'review';
+    var m = u.match(/^https?:\/\/([^\/?#]+)(.*)$/i);
+    if (!m) return 'review';
+    var host = m[1], rest = m[2] || '';
+    /* Bare domain with no path / query — flag for review */
+    if (!rest || rest === '/') return 'review';
+    /* TLD check (strip optional :port from host) */
+    var tld = host.replace(/:\d+$/, '').split('.').pop().toLowerCase();
+    if (LINK_VALID_TLDS.indexOf(tld) === -1) return 'review';
+    return 'valid';
+  }
   function checkLinks() {
     var out   = document.getElementById('admx-link-progress');
     var resEl = document.getElementById('admx-link-results');
     if (!out || !resEl) return;
-    var urls = [];
+    var groups = { valid: [], review: [], missing: [] };
     data().forEach(function(it) {
-      if (it.application_link && /^https?:/.test(it.application_link)) urls.push({ url: it.application_link, title: it.title });
+      groups[classifyUrl(it.application_link)].push({ id: it.id, title: it.title, url: it.application_link });
     });
-    if (!urls.length) { out.className = 'admin-form-result'; out.textContent = 'No URLs to check.'; return; }
-    out.className = 'admin-form-result'; out.textContent = 'Checking ' + urls.length + ' URL(s)…';
-    resEl.innerHTML = '';
-    var reachable = [], broken = [];
-    var done = 0, idx = 0;
-    var BATCH = 8;
-    function finish() {
-      out.className = 'admin-form-result success';
-      out.textContent = 'Checked ' + urls.length + ': ' + reachable.length + ' likely reachable, ' + broken.length + ' broken / errored.';
-      var html = '';
-      if (broken.length) {
-        html += '<h4 class="admx-title" style="color:#dc2626">❌ Broken / errored (' + broken.length + ')</h4>' +
-                '<ul class="admx-link-list">' + broken.map(function(r) { return '<li><a href="' + esc(r.url) + '" target="_blank" rel="noopener noreferrer">' + esc(r.title || r.url) + '</a> &mdash; <small>' + esc(r.err) + '</small></li>'; }).join('') + '</ul>';
+    var total = groups.valid.length + groups.review.length + groups.missing.length;
+    out.className = 'admin-form-result success';
+    out.textContent = 'Validated ' + total + ' records: ' + groups.valid.length + ' valid, ' + groups.review.length + ' need review, ' + groups.missing.length + ' missing.';
+    function renderGroup(label, color, rows, opts) {
+      opts = opts || {};
+      var open = opts.open ? 'open' : '';
+      var showEdit = opts.showEdit !== false;
+      var html = '<details ' + open + ' style="margin-top:10px"><summary style="cursor:pointer;font-weight:600;color:' + color + ';padding:4px 0">' + label + ' (' + rows.length + ')</summary>';
+      if (!rows.length) {
+        html += '<p class="admx-empty">None.</p></details>';
+        return html;
       }
-      if (reachable.length) {
-        html += '<h4 class="admx-title" style="color:#16a34a">✅ Likely reachable (' + reachable.length + ')</h4>' +
-                '<p class="admx-empty">CORS returns opaque responses for most cross-origin sites; treated as reachable unless the fetch itself rejected.</p>';
-      }
-      resEl.innerHTML = html;
-    }
-    function pump() {
-      if (idx >= urls.length) return finish();
-      var batch = urls.slice(idx, idx + BATCH);
-      idx += BATCH;
-      Promise.all(batch.map(function(u) {
-        return Promise.race([
-          fetch(u.url, { method: 'HEAD', mode: 'no-cors' }).then(function() { return { ok: true }; }, function(e) { return { ok: false, err: String(e && e.message || e) }; }),
-          new Promise(function(r) { setTimeout(function() { r({ ok: false, err: 'timeout (8s)' }); }, 8000); })
-        ]).then(function(res) {
-          if (res.ok) reachable.push(u);
-          else broken.push({ url: u.url, title: u.title, err: res.err || 'failed' });
-          done++;
-          out.textContent = 'Checked ' + done + '/' + urls.length + '…';
-        });
-      })).then(function() {
-        if (idx < urls.length) setTimeout(pump, 50);
-        else finish();
+      html += '<ul class="admx-link-list">';
+      rows.slice(0, 300).forEach(function(r) {
+        html += '<li><strong>' + esc(r.title || '(untitled)') + '</strong>';
+        if (showEdit) html += ' <button class="btn-secondary admx-edit-link" type="button" data-id="' + esc(r.id) + '" style="font-size:11px;padding:2px 8px;margin-left:8px">Edit</button>';
+        if (r.url) html += '<br><small>' + esc(r.url) + '</small>';
+        html += '</li>';
       });
+      html += '</ul>';
+      if (rows.length > 300) html += '<p class="admx-empty">Showing first 300 of ' + rows.length + '.</p>';
+      html += '</details>';
+      return html;
     }
-    pump();
+    resEl.innerHTML =
+      renderGroup('✅ Valid format',  '#16a34a', groups.valid,   { open: false, showEdit: false }) +
+      renderGroup('⚠️ Needs review',  '#b45309', groups.review,  { open: true,  showEdit: true }) +
+      renderGroup('❌ Missing URL',    '#dc2626', groups.missing, { open: true,  showEdit: true });
   }
 
   function renderReports() { renderMissing(); renderExpired(); }
