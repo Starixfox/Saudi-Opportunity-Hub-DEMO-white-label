@@ -17741,6 +17741,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         body:     ar ? 'اكتب اسم الجهة أو القطاع أو الكلمة المفتاحية للبحث. استخدم الفلاتر الأسفل لتضييق النتائج بالقطاع أو المنطقة أو الحالة.' : 'Type a sponsor name, sector, or keyword to search. Use the filters below to narrow by sector, region, programme type, or status.',
         placement: 'bottom',
         spotlightPad: 8,
+        /* Filter bar can wrap to multiple rows on narrow viewports — centering
+           it pushes the tooltip off the bottom or clamps it to the top. 'nearest'
+           is a no-op when the bar is already in view (which it is, because
+           beforeShow's setRoute -> showView -> scrollTo({top:0}) already put
+           the page at top with the filter bar in its natural position). */
+        scrollBlock: 'nearest',
         beforeShow: function() {
           /* Pass replace:true so setRoute takes the branch that calls showView()
              synchronously (line ~9811) instead of routing through the async
@@ -18058,8 +18064,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       }
     }
 
-    /* Scroll target into view instantly so getBoundingClientRect is accurate */
-    target.scrollIntoView({ behavior: 'instant', block: 'center', inline: 'nearest' });
+    /* Scroll target into view instantly so getBoundingClientRect is accurate.
+       Per-step override: pass scrollBlock: 'nearest' when the target is tall
+       (a wide filter bar, a card grid) — centering a tall target leaves so
+       little spaceBelow that placement: 'bottom' falls back to "above" and
+       the tooltip ends up clamped near the top of the viewport. */
+    target.scrollIntoView({ behavior: 'instant', block: current.scrollBlock || 'center', inline: 'nearest' });
 
     setTimeout(function() {
       var rect = target.getBoundingClientRect();
