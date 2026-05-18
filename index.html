@@ -9916,16 +9916,16 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
      home KPI showed one number (set by the truthy oh:data-complete listener)
      while the widget below showed another (rendered earlier by the strict
      _renderHomeStats). Routed everything through this helper. */
-  /* "New this week" now keys on the actual add-date (opportunities.created_at,
-     timestamptz, populated by Supabase's DEFAULT now() on insert). The old
-     contract depended on a manually-set isNew boolean + last_verified
-     proximity, which produced false positives whenever a row was re-verified
-     and false negatives whenever isNew wasn't set on insert. The "NEW" badge
-     on cards still keys off item.isNew — only the COUNTER + Latest Additions
-     strip switched to created_at. */
+  /* "New this week" keys on opportunities.last_verified (date) — the
+     human-curation timestamp, populated when an editor reviews / adds
+     a row. NOT created_at — that column is the Supabase insert timestamp
+     and the active table was bulk-loaded inside one rolling-7-day window,
+     so created_at would mark every row "new" until those import dates
+     age out. The "NEW" badge on cards still keys off item.isNew per the
+     prior spec; only the COUNTER + Latest Additions strip use this. */
   window.__isNewThisWeek = function(item) {
-    if (!item || !item.created_at) return false;
-    var d = new Date(item.created_at);
+    if (!item || !item.last_verified) return false;
+    var d = new Date(item.last_verified);
     if (isNaN(d.getTime())) return false;
     return d.getTime() >= (Date.now() - 7 * 24 * 60 * 60 * 1000);
   };
@@ -12964,15 +12964,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (!el) return;
     // Local esc — not available in this IIFE scope
     function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-    /* Latest 10 by actual add-date (opportunities.created_at). Independent
-       of the isNew flag — the strip now reflects ACTUAL recency rather
-       than whatever was manually tagged on import. Mirrors the date-based
-       window.__isNewThisWeek logic so the KPI counter + this strip never
-       disagree about what "recent" means. */
+    /* Latest 10 by curation date (opportunities.last_verified). Same field
+       __isNewThisWeek uses so the KPI counter and this strip stay in
+       lockstep. NOT created_at — that's the Supabase insert timestamp
+       and treats every bulk-imported row as "added today" until the
+       import dates age out. */
     var recent = dataSource()
-      .filter(function(item){ return item && item.created_at; })
+      .filter(function(item){ return item && item.last_verified; })
       .slice()
-      .sort(function(a, b){ return new Date(b.created_at) - new Date(a.created_at); })
+      .sort(function(a, b){ return new Date(b.last_verified) - new Date(a.last_verified); })
       .slice(0, 10);
     if (!recent.length) {
       el.innerHTML = '<div class="no-recent">' + (t('No newly flagged opportunities.') || 'No newly flagged opportunities.') + '</div>';
