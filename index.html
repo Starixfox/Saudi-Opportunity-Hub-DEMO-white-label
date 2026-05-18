@@ -10492,14 +10492,20 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       }
     };
 
-    // Sectors (bar, top 10) — labels go through t() for Arabic.
-    // Use normalized sector map so "Energy" / "energy" don't show as two bars.
+    // Sectors (bar, top 10) — AXIS labels stay English in both modes per
+    // i18n policy ("sector names on charts and filters" don't translate).
+    // The dataset LABEL ("Opportunities") is a tooltip-only UI string and
+    // still goes through t().
     var _sectorTallyMap = {};
     var _nsChart = window.__normalizeSectorKey || function(r){ return String(r||''); };
     data.forEach(function(d){ (d.sectors || []).forEach(function(s){ var k=_nsChart(s); if (k) _sectorTallyMap[k] = (_sectorTallyMap[k]||0)+1; }); });
     var sectorTop = topN(_sectorTallyMap, 10);
+    var _sectorEnLabel = function(key) {
+      return (window.SECTOR_NAMES_EN && window.SECTOR_NAMES_EN[key]) ||
+             String(key||'').replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+    };
     makeChart('chartSectors', 'bar', {
-      labels: sectorTop.map(function (x) { return t(x[0]); }),
+      labels: sectorTop.map(function (x) { return _sectorEnLabel(x[0]); }),
       datasets: [{ label: t('Opportunities'), data: sectorTop.map(function (x) { return x[1]; }), backgroundColor: GREEN, borderRadius: 6 }]
     }, Object.assign({}, baseOpts, { plugins: { legend: { display: false } }, indexAxis: 'y' }));
 
@@ -17493,19 +17499,17 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var diff = Date.now() - new Date(isoStr).getTime();
     var mins = Math.floor(diff / 60000);
     if (mins < 1) return ar ? 'للتو' : 'just now';
-    /* Use full Arabic unit words instead of single-letter abbreviations
-       (د / س / ي) — the page-translation pipeline picks up the English
-       'd' / 'h' on counterpart strings and matches them to those single
-       letters in Arabic mode, leaving the user staring at a stray 'د'
-       wondering if it's "day" or "minute". Western digits preserved
-       (123 not ١٢٣) per the readability requirement. */
-    if (mins < 60) return ar ? ('منذ ' + mins + ' ' + (mins === 1 ? 'دقيقة' : 'دقائق')) : (mins + 'm ago');
+    /* Numeric values + time units always render in English regardless of
+       UI language, per the i18n policy: data labels / numbers / units
+       stay Latin so they're legible to all users. Only the pure UI text
+       ("just now") translates. */
+    if (mins < 60) return mins + 'm ago';
     var hrs = Math.floor(mins / 60);
-    if (hrs < 24)  return ar ? ('منذ ' + hrs + ' ' + (hrs === 1 ? 'ساعة' : 'ساعات')) : (hrs + 'h ago');
+    if (hrs < 24)  return hrs + 'h ago';
     var days = Math.floor(hrs / 24);
-    if (days < 30) return ar ? ('منذ ' + days + ' ' + (days === 1 ? 'يوم' : 'أيام')) : (days + 'd ago');
+    if (days < 30) return days + 'd ago';
     var months = Math.floor(days / 30);
-    return ar ? ('منذ ' + months + ' ' + (months === 1 ? 'شهر' : 'أشهر')) : (months + 'mo ago');
+    return months + 'mo ago';
   }
   function uid() {
     return Math.random().toString(36).slice(2, 10);
@@ -18082,14 +18086,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                 var daysLeft = Math.ceil((dl - today) / 86400000);
                 if (daysLeft > 0 && daysLeft <= 30) {
                   var urgent = daysLeft <= 7;
-                  /* Plural-aware day word + space-separated 'left' so the
-                     Arabic plural ('أيام') gets used for everything but
-                     daysLeft===1, mirroring the urgencyLevel() label format. */
-                  var _dayWord = ar
-                    ? (daysLeft === 1 ? 'يوم' : 'أيام')
-                    : ('day' + (daysLeft === 1 ? '' : 's') + ' left');
+                  /* Numeric value + day unit stays English in both modes —
+                     it's a data label, not UI text. Only the 'Closed' status
+                     word a few lines below translates per the i18n policy. */
                   deadlineBadge = '<span class="pipeline-deadline-badge' + (urgent ? ' urgent' : '') + '">' +
-                    daysLeft + ' ' + _dayWord + (ar ? ' متبقي' : '') + '</span>';
+                    daysLeft + 'd left</span>';
                 } else if (daysLeft <= 0) {
                   deadlineBadge = '<span class="pipeline-deadline-badge urgent">' + (ar ? 'مُغلق' : 'Closed') + '</span>';
                 }
@@ -20435,14 +20436,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   }
   function urgencyLevel(days) {
     if (days == null) return null;
+    /* "Closed" is a status word — translatable per i18n policy. */
     if (days < 0)   return { level:'past',     color:'#94a3b8', pct:100, label:T('Closed','مغلق') };
-    /* Full-word day unit instead of bare 'd' — the page-translation MT
-       was mapping the English 'd' to a stray 'د' in Arabic mode, which
-       users read as "minute" (the actual د abbreviation). Western digits
-       preserved per the spec. */
-    var ar = (window.__lang === 'ar');
-    var unit = ar ? (days === 1 ? 'يوم' : 'أيام') : (days === 1 ? 'day' : 'days');
-    var label = days + ' ' + unit + ' ' + T('left','متبقي');
+    /* Numeric value + day unit + qualifier stay English in both modes.
+       Data labels and time units don't translate (they're not UI strings —
+       all users need them to be legible regardless of UI language). */
+    var label = days + 'd left';
     if (days <= 7)  return { level:'critical', color:'#dc2626', pct:95,  label:label };
     if (days <= 14) return { level:'urgent',   color:'#ea580c', pct:80,  label:label };
     if (days <= 30) return { level:'soon',     color:'#d97706', pct:60,  label:label };
@@ -20784,18 +20783,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       ol.innerHTML = '<li class="oh-enh-lb-empty">' + T('No open opportunities with parseable deadlines.','لا توجد فرص مفتوحة بمواعيد محددة.') + '</li>';
       return;
     }
-    /* Day-unit suffix in the leaderboard count cell. Was a literal 'd'
-       (English-only); switched to a plural-aware unit string so the
-       Arabic label is a full word and the page translator doesn't have
-       a single 'd' to mistranslate as 'د' (the Arabic minute abbreviation). */
-    var _lbAr = (window.__lang === 'ar');
+    /* Day-count cell stays English ('5d') in both modes — numeric value
+       + unit is data, not UI text. Only the title (a translatable
+       fallback) and the placeholder 'Untitled' translate. */
     ol.innerHTML = items.map(function (o) {
       var u = urgencyLevel(o.days);
-      var dayUnit = _lbAr ? (o.days === 1 ? 'يوم' : 'أيام') : 'd';
       return '<li class="oh-enh-lb-item" data-id="' + esc(o.item.id||'') + '">' +
         '<span class="oh-enh-lb-pulse" style="background:' + u.color + '"></span>' +
         '<span class="oh-enh-lb-title">' + esc(o.item.title || T('Untitled','بلا عنوان')) + '</span>' +
-        '<span class="oh-enh-lb-days" style="color:' + u.color + '">' + o.days + (_lbAr ? ' ' : '') + dayUnit + '</span>' +
+        '<span class="oh-enh-lb-days" style="color:' + u.color + '">' + o.days + 'd</span>' +
       '</li>';
     }).join('');
     ol.querySelectorAll('.oh-enh-lb-item').forEach(function (li) {
