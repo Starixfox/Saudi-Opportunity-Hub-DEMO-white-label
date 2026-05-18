@@ -17434,13 +17434,19 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var diff = Date.now() - new Date(isoStr).getTime();
     var mins = Math.floor(diff / 60000);
     if (mins < 1) return ar ? 'للتو' : 'just now';
-    if (mins < 60) return ar ? ('منذ ' + mins + ' د') : (mins + 'm ago');
+    /* Use full Arabic unit words instead of single-letter abbreviations
+       (د / س / ي) — the page-translation pipeline picks up the English
+       'd' / 'h' on counterpart strings and matches them to those single
+       letters in Arabic mode, leaving the user staring at a stray 'د'
+       wondering if it's "day" or "minute". Western digits preserved
+       (123 not ١٢٣) per the readability requirement. */
+    if (mins < 60) return ar ? ('منذ ' + mins + ' ' + (mins === 1 ? 'دقيقة' : 'دقائق')) : (mins + 'm ago');
     var hrs = Math.floor(mins / 60);
-    if (hrs < 24) return ar ? ('منذ ' + hrs + ' س') : (hrs + 'h ago');
+    if (hrs < 24)  return ar ? ('منذ ' + hrs + ' ' + (hrs === 1 ? 'ساعة' : 'ساعات')) : (hrs + 'h ago');
     var days = Math.floor(hrs / 24);
-    if (days < 30) return ar ? ('منذ ' + days + ' ي') : (days + 'd ago');
+    if (days < 30) return ar ? ('منذ ' + days + ' ' + (days === 1 ? 'يوم' : 'أيام')) : (days + 'd ago');
     var months = Math.floor(days / 30);
-    return ar ? ('منذ ' + months + ' شهر') : (months + 'mo ago');
+    return ar ? ('منذ ' + months + ' ' + (months === 1 ? 'شهر' : 'أشهر')) : (months + 'mo ago');
   }
   function uid() {
     return Math.random().toString(36).slice(2, 10);
@@ -18017,8 +18023,14 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                 var daysLeft = Math.ceil((dl - today) / 86400000);
                 if (daysLeft > 0 && daysLeft <= 30) {
                   var urgent = daysLeft <= 7;
+                  /* Plural-aware day word + space-separated 'left' so the
+                     Arabic plural ('أيام') gets used for everything but
+                     daysLeft===1, mirroring the urgencyLevel() label format. */
+                  var _dayWord = ar
+                    ? (daysLeft === 1 ? 'يوم' : 'أيام')
+                    : ('day' + (daysLeft === 1 ? '' : 's') + ' left');
                   deadlineBadge = '<span class="pipeline-deadline-badge' + (urgent ? ' urgent' : '') + '">' +
-                    daysLeft + (ar ? ' يوم' : 'd left') + '</span>';
+                    daysLeft + ' ' + _dayWord + (ar ? ' متبقي' : '') + '</span>';
                 } else if (daysLeft <= 0) {
                   deadlineBadge = '<span class="pipeline-deadline-badge urgent">' + (ar ? 'مُغلق' : 'Closed') + '</span>';
                 }
@@ -20365,11 +20377,18 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   function urgencyLevel(days) {
     if (days == null) return null;
     if (days < 0)   return { level:'past',     color:'#94a3b8', pct:100, label:T('Closed','مغلق') };
-    if (days <= 7)  return { level:'critical', color:'#dc2626', pct:95,  label:days + 'd ' + T('left','متبقي') };
-    if (days <= 14) return { level:'urgent',   color:'#ea580c', pct:80,  label:days + 'd ' + T('left','متبقي') };
-    if (days <= 30) return { level:'soon',     color:'#d97706', pct:60,  label:days + 'd ' + T('left','متبقي') };
-    if (days <= 90) return { level:'open',     color:'#16a34a', pct:35,  label:days + 'd ' + T('left','متبقي') };
-    return { level:'far', color:'#64748b', pct:15, label:days + 'd ' + T('left','متبقي') };
+    /* Full-word day unit instead of bare 'd' — the page-translation MT
+       was mapping the English 'd' to a stray 'د' in Arabic mode, which
+       users read as "minute" (the actual د abbreviation). Western digits
+       preserved per the spec. */
+    var ar = (window.__lang === 'ar');
+    var unit = ar ? (days === 1 ? 'يوم' : 'أيام') : (days === 1 ? 'day' : 'days');
+    var label = days + ' ' + unit + ' ' + T('left','متبقي');
+    if (days <= 7)  return { level:'critical', color:'#dc2626', pct:95,  label:label };
+    if (days <= 14) return { level:'urgent',   color:'#ea580c', pct:80,  label:label };
+    if (days <= 30) return { level:'soon',     color:'#d97706', pct:60,  label:label };
+    if (days <= 90) return { level:'open',     color:'#16a34a', pct:35,  label:label };
+    return { level:'far', color:'#64748b', pct:15, label:label };
   }
   function computeMatch(item) {
     var p = getPrefs();
@@ -20706,12 +20725,18 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       ol.innerHTML = '<li class="oh-enh-lb-empty">' + T('No open opportunities with parseable deadlines.','لا توجد فرص مفتوحة بمواعيد محددة.') + '</li>';
       return;
     }
+    /* Day-unit suffix in the leaderboard count cell. Was a literal 'd'
+       (English-only); switched to a plural-aware unit string so the
+       Arabic label is a full word and the page translator doesn't have
+       a single 'd' to mistranslate as 'د' (the Arabic minute abbreviation). */
+    var _lbAr = (window.__lang === 'ar');
     ol.innerHTML = items.map(function (o) {
       var u = urgencyLevel(o.days);
+      var dayUnit = _lbAr ? (o.days === 1 ? 'يوم' : 'أيام') : 'd';
       return '<li class="oh-enh-lb-item" data-id="' + esc(o.item.id||'') + '">' +
         '<span class="oh-enh-lb-pulse" style="background:' + u.color + '"></span>' +
         '<span class="oh-enh-lb-title">' + esc(o.item.title || T('Untitled','بلا عنوان')) + '</span>' +
-        '<span class="oh-enh-lb-days" style="color:' + u.color + '">' + o.days + 'd</span>' +
+        '<span class="oh-enh-lb-days" style="color:' + u.color + '">' + o.days + (_lbAr ? ' ' : '') + dayUnit + '</span>' +
       '</li>';
     }).join('');
     ol.querySelectorAll('.oh-enh-lb-item').forEach(function (li) {
