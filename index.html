@@ -12023,15 +12023,24 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         logActivity('compared', rec || { id: id, title: b.dataset && b.dataset.title });
       }, true);
     }
-    /* View — wrap WS.openPanel so opening the detail modal logs once per click */
-    if (window.WS && window.WS.openPanel && !window.WS.openPanel.__admxWrapped) {
-      var origOpen = window.WS.openPanel;
-      var openWrap = function(opp) {
+    /* View — wrap window.__openDetailPanel (the OPPORTUNITY detail modal
+       opener) so opening any card's detail logs once per click with the
+       full opp object (carries .title + .id).
+       Bug fix: the prior version wrapped window.WS.openPanel by mistake.
+       WS.openPanel(tab) opens the WORKSPACE side panel and takes a
+       string ('watchlist' / 'searches' / 'recents' / 'home'), NOT an
+       opportunity — so logActivity received a string, opp.title was
+       undefined, and every viewed-row landed in the DB with
+       opportunity_title NULL ("—" in the admin table). It also fired
+       on every workspace icon click, which wasn't a view at all. */
+    if (window.__openDetailPanel && !window.__openDetailPanel.__admxWrapped) {
+      var origDetailOpen = window.__openDetailPanel;
+      var detailOpenWrap = function(opp) {
         try { logActivity('viewed', opp); } catch (e) {}
-        return origOpen.apply(window.WS, arguments);
+        return origDetailOpen.apply(this, arguments);
       };
-      openWrap.__admxWrapped = true;
-      window.WS.openPanel = openWrap;
+      detailOpenWrap.__admxWrapped = true;
+      window.__openDetailPanel = detailOpenWrap;
     }
   }
 
@@ -12664,9 +12673,17 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   }
   window.addEventListener('oh:role-ready', _admxWireHooksWhenReady);
   _admxWireHooksWhenReady();
+  /* Two independent IIFEs expose the things we wrap: the WS module
+     (toggleBookmark) and the detail-panel module (__openDetailPanel).
+     They can initialize in either order. Keep polling until BOTH are
+     wrapped, or the 15s timeout hits — wireActivityHooks is idempotent
+     via __admxWrapped flags so repeat calls are cheap. */
   (function pollWS(attempts) {
-    if (attempts > 30) return;                /* give up after ~15 seconds */
-    if (window.WS && window.WS.toggleBookmark) { wireActivityHooks(); return; }
+    if (attempts > 30) return;
+    wireActivityHooks();
+    var toggleDone = !!(window.WS && window.WS.toggleBookmark && window.WS.toggleBookmark.__admxWrapped);
+    var detailDone = !!(window.__openDetailPanel && window.__openDetailPanel.__admxWrapped);
+    if (toggleDone && detailDone) return;
     setTimeout(function() { pollWS(attempts + 1); }, 500);
   })(0);
 })();
