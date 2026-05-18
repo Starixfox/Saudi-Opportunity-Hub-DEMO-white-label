@@ -13286,6 +13286,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     // Detailed card
     'View Insights':       'عرض التحليلات',
     'Go to Website':       'الانتقال للموقع',
+    'Visit sponsor website': 'زيارة موقع الجهة الراعية',
     'Sponsor:':            'الجهة الراعية:',
     'Recently added':      'أُضيف مؤخراً',
     'Untitled':            'بلا عنوان',
@@ -13720,7 +13721,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a2 2 0 0 1 2-2h16"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a2 2 0 0 1-2 2H3"/></svg>
                       ${t('Compare')}
                     </button>
-                    ${applyHref ? `<a class="occ-apply-btn" href="${applyHref}" ${applyAttrs}>${t('Apply →')}</a>` : `<span class="occ-apply-btn occ-apply-btn--disabled" style="opacity:0.35;cursor:default;pointer-events:none;">${t('Apply →')}</span>`}
+                    ${applyHref ? `<a class="occ-apply-btn" href="${applyHref}" ${applyAttrs} title="${t('Visit sponsor website')}">${t('Apply →')}</a>` : `<span class="occ-apply-btn occ-apply-btn--disabled" style="opacity:0.35;cursor:default;pointer-events:none;">${t('Apply →')}</span>`}
                   </div>
                 </div>
 
@@ -13798,7 +13799,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a2 2 0 0 1 2-2h16"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a2 2 0 0 1-2 2H3"/></svg>
                       ${t('Compare')}
                     </button>
-                    ${item.application_link && item.application_link.startsWith('http') ? `<a class="panel-link-btn opp-card-link" href="${esc(item.application_link)}" target="_blank" rel="noopener noreferrer">${t('Go to Website')}</a>` : ''}
+                    ${item.application_link && item.application_link.startsWith('http') ? `<a class="panel-link-btn opp-card-link" href="${esc(item.application_link)}" target="_blank" rel="noopener noreferrer" title="${t('Visit sponsor website')}">${t('Go to Website')}</a>` : ''}
                   </div>
                 </div>
                 <div class="opp-card-sponsor">${item.sponsor_institution ? `<strong>${t('Sponsor:')}</strong> ${esc(item.sponsor_institution)}` : ''}</div>
