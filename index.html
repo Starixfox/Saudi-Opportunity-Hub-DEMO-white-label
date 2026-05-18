@@ -9916,10 +9916,16 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
      home KPI showed one number (set by the truthy oh:data-complete listener)
      while the widget below showed another (rendered earlier by the strict
      _renderHomeStats). Routed everything through this helper. */
+  /* "New this week" now keys on the actual add-date (opportunities.created_at,
+     timestamptz, populated by Supabase's DEFAULT now() on insert). The old
+     contract depended on a manually-set isNew boolean + last_verified
+     proximity, which produced false positives whenever a row was re-verified
+     and false negatives whenever isNew wasn't set on insert. The "NEW" badge
+     on cards still keys off item.isNew — only the COUNTER + Latest Additions
+     strip switched to created_at. */
   window.__isNewThisWeek = function(item) {
-    if (!item || !item.isNew) return false;            /* truthy — matches 1/"true"/true */
-    if (!item.last_verified) return false;
-    var d = new Date(item.last_verified);
+    if (!item || !item.created_at) return false;
+    var d = new Date(item.created_at);
     if (isNaN(d.getTime())) return false;
     return d.getTime() >= (Date.now() - 7 * 24 * 60 * 60 * 1000);
   };
@@ -12958,7 +12964,16 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (!el) return;
     // Local esc — not available in this IIFE scope
     function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-    var recent = dataSource().filter(function(item){ return item.isNew; }).slice(0, 8);
+    /* Latest 10 by actual add-date (opportunities.created_at). Independent
+       of the isNew flag — the strip now reflects ACTUAL recency rather
+       than whatever was manually tagged on import. Mirrors the date-based
+       window.__isNewThisWeek logic so the KPI counter + this strip never
+       disagree about what "recent" means. */
+    var recent = dataSource()
+      .filter(function(item){ return item && item.created_at; })
+      .slice()
+      .sort(function(a, b){ return new Date(b.created_at) - new Date(a.created_at); })
+      .slice(0, 10);
     if (!recent.length) {
       el.innerHTML = '<div class="no-recent">' + (t('No newly flagged opportunities.') || 'No newly flagged opportunities.') + '</div>';
       return;
