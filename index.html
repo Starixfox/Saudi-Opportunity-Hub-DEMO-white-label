@@ -8911,12 +8911,20 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           </label>
           <select id="typeFilter" class="filter-select" aria-label="Filter by opportunity type">
             <option value="all" data-ar="جميع الأنواع">All types</option>
-            <option value="grant" data-ar="منحة">Grant</option>
-            <option value="tender" data-ar="عطاء / مسابقة">Tender / Competition</option>
             <option value="accelerator" data-ar="مسرّعة">Accelerator</option>
-            <option value="investment_program" data-ar="برنامج استثماري">Investment program</option>
-            <option value="fellowship" data-ar="زمالة">Fellowship</option>
-            <option value="other" data-ar="أخرى">Other</option>
+            <option value="competition" data-ar="مسابقة">Competition</option>
+            <option value="financing" data-ar="تمويل">Financing</option>
+            <option value="grant" data-ar="منحة">Grant</option>
+            <option value="grant_program" data-ar="منحة / برنامج">Grant/Program</option>
+            <option value="incentive" data-ar="حافز">Incentive</option>
+            <option value="incubator" data-ar="حاضنة">Incubator</option>
+            <option value="investment" data-ar="استثمار">Investment</option>
+            <option value="investment_program" data-ar="برنامج استثماري">Investment Program</option>
+            <option value="licensing" data-ar="ترخيص">Licensing</option>
+            <option value="loan" data-ar="قرض">Loan</option>
+            <option value="program" data-ar="برنامج">Program</option>
+            <option value="training" data-ar="تدريب">Training</option>
+            <option value="training_program" data-ar="برنامج تدريبي">Training Program</option>
           </select>
         </div>
 
@@ -12966,9 +12974,22 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var sectorRaw = document.getElementById('sectorFilter')?.value || 'all';
     _filterCache.sector = sectorRaw === 'all' ? 'all' : _canonSecKey(sectorRaw);
     _filterCache.country = norm(document.getElementById('countryFilter')?.value || 'all');
-    _filterCache.type = norm(document.getElementById('typeFilter')?.value || 'all');
+    _filterCache.type = canonType(document.getElementById('typeFilter')?.value || 'all');
     _filterCache.status = norm(document.getElementById('statusFilter')?.value || 'all');
   }
+
+  /* Type-filter canonicalizer: lowercase, then collapse spaces / hyphens /
+     underscores / slashes into a single underscore. So "Grant", "grant",
+     "Investment Program", "investment_program", and "Grant/Program" reach
+     "grant", "investment_program", and "grant_program" respectively — every
+     case + separator variant in the messy DB maps to one filter key. */
+  function canonType(v) {
+    return String(v || '').toLowerCase().trim().replace(/[\s_\-\/]+/g, '_');
+  }
+  /* Exposed so the analytics chart (separate IIFE below) can group by the
+     same canonical key the filter uses, instead of by raw r.type which
+     duplicates "Grant" / "grant" into two slices. */
+  window.canonType = canonType;
 
   function matchesFilters(item) {
     var q = _filterCache.q, sector = _filterCache.sector, country = _filterCache.country;
@@ -12985,7 +13006,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (q && !haystack.includes(q)) return false;
     if (sector !== 'all' && !(Array.isArray(item.sectors) && item.sectors.map(_canonSecKey).includes(sector))) return false;
     if (country !== 'all' && regionGroup(item) !== country) return false;
-    if (type !== 'all' && norm(item.type) !== type) return false;
+    if (type !== 'all' && canonType(item.type) !== type) return false;
     if (status !== 'all') {
       var s = norm(item.status);
       if (status === 'open' && !s.includes('open')) return false;
@@ -16576,10 +16597,24 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     updateChip(prefs, hasPrefs);
 
     /* —— CHART 1: Programme types in filtered data (horizontal bar) —— */
+    /* Canonicalize the raw type before counting so "Grant" / "grant" and
+       "Investment Program" / "investment_program" collapse into the same
+       slice. Without this the legend showed both variants separately —
+       see the screenshot the user shared when they asked for the filter
+       to be normalized. Uses the same canonType helper as the filter so
+       the chart slices line up exactly with the filter options. */
+    var _canonT = (typeof window.canonType === 'function')
+      ? window.canonType
+      : function(v){ return String(v||'').toLowerCase().trim().replace(/[\s_\-\/]+/g, '_'); };
     var typeCounts = {};
-    filtered.forEach(function(r){ var t=r.type||'other'; typeCounts[t]=(typeCounts[t]||0)+1; });
+    filtered.forEach(function(r){ var t = _canonT(r.type) || 'other'; typeCounts[t] = (typeCounts[t]||0) + 1; });
+    function _typeLabel(k) {
+      if (TNAMES[k]) return TNAMES[k];
+      /* prettify: snake_case → Title Case */
+      return k.replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+    }
     var typeEntries = Object.keys(typeCounts).map(function(k){
-      return { label: TNAMES[k]||k, value: typeCounts[k] };
+      return { label: _typeLabel(k), value: typeCounts[k] };
     }).sort(function(a,b){ return b.value-a.value; });
 
     var c1title = document.getElementById('liv2FundingChart') &&
