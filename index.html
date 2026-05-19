@@ -23430,25 +23430,55 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   var ohNumFmt = new Intl.NumberFormat('en-US');
   function ohFormatInt(n) { return ohNumFmt.format(Math.round(n)); }
 
+  /* The animation target is stored on dataset.ohTarget so that mid-flight
+     external writes (e.g. when the streaming opportunities loader updates a
+     KPI from 1,000 to the full 1,190 *while* the 0→1,000 animation is still
+     running) cause the in-progress animation to re-target instead of being
+     silently dropped. Previously the observer skipped any text change while
+     ohAnimating was set, and the running tween then overwrote the external
+     write on its next frame — locking the KPI at the partial-load value. */
   function ohAnimateCount(el, to, opts) {
+    el.dataset.ohTarget = String(to);
     if (REDUCED) { el.textContent = ohFormatInt(to); el.dataset.ohFrom = String(to); return; }
+    if (el.dataset.ohAnimating === '1') return; /* running tick will pick up new ohTarget */
     opts = opts || {};
     var duration = opts.duration || 900;
     var from = ohParseNum(el.dataset.ohFrom);
     if (from == null) from = 0;
-    if (from === to) return;
+    if (from === to) { el.dataset.ohFrom = String(to); return; }
     var startTime = performance.now();
+    var curFrom = from;
+    var curTo = to;
     el.dataset.ohAnimating = '1';
     function tick(now) {
+      /* Re-read the latest target every frame so observer-detected external
+         writes redirect the animation smoothly. */
+      var latest = ohParseNum(el.dataset.ohTarget);
+      if (latest != null && latest !== curTo) {
+        curFrom = ohParseNum(el.textContent);
+        if (curFrom == null) curFrom = curTo;
+        curTo = latest;
+        startTime = now;
+      }
       var t = Math.min(1, (now - startTime) / duration);
       var eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
-      var cur = from + (to - from) * eased;
+      var cur = curFrom + (curTo - curFrom) * eased;
       el.textContent = ohFormatInt(cur);
       if (t < 1) requestAnimationFrame(tick);
       else {
-        el.textContent = ohFormatInt(to);
+        /* If a new target arrived in the last frame, keep going. */
+        var stillLatest = ohParseNum(el.dataset.ohTarget);
+        if (stillLatest != null && stillLatest !== curTo) {
+          curFrom = ohParseNum(el.textContent);
+          if (curFrom == null) curFrom = curTo;
+          curTo = stillLatest;
+          startTime = performance.now();
+          requestAnimationFrame(tick);
+          return;
+        }
+        el.textContent = ohFormatInt(curTo);
         delete el.dataset.ohAnimating;
-        el.dataset.ohFrom = String(to);
+        el.dataset.ohFrom = String(curTo);
       }
     }
     requestAnimationFrame(tick);
@@ -23459,10 +23489,19 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     for (var i = 0; i < muts.length; i++) {
       var m = muts[i];
       var el = m.target.nodeType === Node.TEXT_NODE ? m.target.parentElement : m.target;
-      if (!el || el.dataset.ohAnimating === '1') continue;
+      if (!el) continue;
       if (!el.matches || !el.matches(KPI_SELECTOR)) continue;
       var n = ohParseNum(el.textContent);
       if (n == null) continue;
+      /* During animation, suppress self-writes (text content matches the
+         animation's current frame), but accept external writes by updating
+         the live target. The running tick reads ohTarget every frame. */
+      if (el.dataset.ohAnimating === '1') {
+        var curTarget = ohParseNum(el.dataset.ohTarget);
+        if (curTarget === n) continue;       /* matches current target — likely self-write */
+        el.dataset.ohTarget = String(n);     /* redirect the in-flight animation */
+        continue;
+      }
       var last = ohParseNum(el.dataset.ohFrom);
       if (last === n) continue;
       ohAnimateCount(el, n);
