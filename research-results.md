@@ -157,6 +157,88 @@ These rows were searched but no public, verifiable evidence on the sponsor's own
 4. **Rolling-by-default for sponsor portals.** Many missing-deadline rows are sponsor service portals (NDF, SFD, DGA umbrella, etc.). If the platform's UX is comfortable showing "Ongoing" for these, the agents already flagged them; if not, a small number of rows could be converted with a single SQL pass once you confirm the UX rule.
 5. **Auto-tag policy.** Six of the 27 remaining rows are RDIA / Saudi Minds family. Saudi Minds is login-gated, which hides the actual call deadlines from any non-authenticated researcher (human or AI). If you want these covered, the cleanest path is to add the Saudi Minds login and walk the open calls manually once per quarter.
 
+## Post-research cleanup (2026-05-19)
+
+After the bulk research pass, the five recommendations above were all executed in a single SQL transaction.
+
+### Summary
+
+| Action | Rows | Result |
+|---|---:|---|
+| Archived (moved to `opportunities_archive`) | 3 | 2 UUID duplicates + 1 mis-categorised row |
+| Tech Champions row repointed | 1 | `code.mcit.gov.sa/en/incubators/tech-champions-5`, title generalised |
+| Sponsor-portal rows tagged `Ongoing` | 7 | SFD, NDF, DGA, SNIH, SIDF Logistics, MoIndustry, DIFC |
+| Flagged `needs_manual_review_login_gated` | 5 | RDIA/Saudi Minds family + QRDI |
+| **Net unresolved after cleanup** | — | **17** (down from 27; 5 are now explicitly flagged for human review behind login) |
+
+### 1. Archived rows
+
+| Archived ID | Reason | Kept canonical |
+|---|---|---|
+| `17f9d035-91c9-4632-956e-f8e380dde51c` | Duplicate of `SA-1632` (same Riyadah institution, same URL, created one day later) | `SA-1632` |
+| `7cc88af7-52b7-4a4c-b2db-10f07c3f8eb8` | Duplicate of `SA-1635` (same Monshaat University Startup Accelerator, same URL) | `SA-1635` |
+| `SA-N14` | Mis-categorised: ITCC is a real-estate complex in Riyadh, not a procurer of space digital twin or smart city services. Title and sponsor do not match. | — |
+
+Archive rows carry `archive_reason` and `archive_kept_id` columns so the merge intent is recoverable.
+
+### 2. Tech Champions row updated
+
+| Before | After |
+|---|---|
+| Title: `Tech Champions 3 — MCIT CODE Program` | Title: `Tech Champions Program — MCIT CODE` |
+| URL: `https://code.mcit.gov.sa/en/tech-champions-3rd` (closed 2022 cohort) | URL: `https://code.mcit.gov.sa/en/incubators/tech-champions-5` (current FinTech AI cohort, Riyadh+Jeddah) |
+| Deadline: NULL | Deadline: `Cohort-based` |
+
+Title was generalised so future cohorts (TC6, TC7…) don't require another rename — only the URL.
+
+### 3. Sponsor-portal rows tagged `Ongoing` (7)
+
+These are sponsor service portals / umbrella entry points without a single application cycle — the agent left them null because no specific date exists, but the user-facing "Ongoing" status accurately describes them.
+
+| ID | Title |
+|---|---|
+| `18b7afe2-…` | SFD Development Loans |
+| `24dc2683-…` | NDF Development Financing Coordination |
+| `3151368e-…` | DGA Digital Transformation Programs |
+| `32349ed2-…` | SNIH Research Grants Submission |
+| `1bc1593a-…` | SIDF Logistics Sector Financing |
+| `760cbb5e-…` | Ministry of Industry — Standard Incentives |
+| `98ab62fc-…` | DIFC Innovation Hub Grants & Incentives |
+
+### 4. Flagged `needs_manual_review_login_gated` (5)
+
+These rows' deadlines live behind login on `saudiminds.rdia.gov.sa` or equivalent. AI research cannot see them. The new `review_status` makes this a queryable bucket so the platform owner can do one quarterly manual sweep with credentials.
+
+| ID | Title |
+|---|---|
+| `275ba6ce-…` | RDIA Saudi Minds Healthcare & Life Sciences Research Grant |
+| `SA-1629` | Saudi Minds National Research Priorities Grants |
+| `SA-1641` | Qatar Research, Development and Innovation Council — Funding Opportunities |
+| `SA-N252` | Saudi Innovation Grants Program (SIGP) |
+| `SA-N253` | RDIA National Priorities Research Grants |
+
+### 5. Final unresolved list (17 rows — 12 genuinely unfillable + 5 login-gated)
+
+| ID | Title | Status |
+|---|---|---|
+| `0ccb33ae-…` | Fintech Saudi & Flat6Labs Fintech Accelerator | no public deadline |
+| `21b67113-…` | Misk Graduate Traineeship (Tamheer) | no public deadline (rolling per HRDF) |
+| `275ba6ce-…` | RDIA Saudi Minds Healthcare & Life Sci | **login-gated** |
+| `68c824d4-…` | ADIO AGWA Cluster | no public deadline |
+| `98d71cc4-…` | IsDB King Abdullah Program (KAAP) | trust-fund, no application window |
+| `eefcfcf9-…` | Misk Art Grant | 2026 call not yet posted |
+| `SA-1629` | Saudi Minds National Research Priorities | **login-gated** |
+| `SA-1630` | Riyadh Techstars | not in Spring 2026 lineup |
+| `SA-1631` | Techstars Founder Catalyst | no current Saudi cohort confirmed |
+| `SA-1633` | RTPP 2026 | program open, no closing date published |
+| `SA-1641` | QRDI Funding Opportunities | **login-gated umbrella** |
+| `SA-1645` | QBIC Accelerator | 2026 cohort already selected |
+| `SA-1653` | MENA InsurTech 2026 | 2026 page has no deadline |
+| `SA-1656` | KACST R&D Grants | portal not loadable, no 2026 deadline |
+| `SA-N252` | Saudi Innovation Grants (SIGP) | **login-gated** |
+| `SA-N253` | RDIA National Priorities Research Grants | **login-gated** |
+| `SA-N258` | Founder Institute GCC Spring 2026 | no public deadline on fi.co/apply/gcc |
+
 ## Verification commands
 
 ```sql
