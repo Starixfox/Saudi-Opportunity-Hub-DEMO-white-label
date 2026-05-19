@@ -23155,5 +23155,379 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 })();
 </script>
 
+<!-- ════════════════════════════════════════════════════════════════
+     MICRO-INTERACTIONS LAYER (2026-05-19)
+     One self-contained additive layer for hover elevation, fade-in,
+     animated KPI counters, skeleton primitives, smooth chart
+     transitions, and hover glow on buttons. Loaded last so it wins
+     the cascade without touching the 20k lines above.
+     Respects prefers-reduced-motion across the board.
+══════════════════════════════════════════════════════════════════ -->
+<style>
+:root {
+  --oh-anim-fast:   140ms;
+  --oh-anim-base:   220ms;
+  --oh-anim-slow:   420ms;
+  --oh-anim-ease:   cubic-bezier(.22,.61,.36,1);
+  --oh-anim-spring: cubic-bezier(.34,1.32,.64,1);
+  --oh-lift-1: 0 1px 2px rgba(0,0,0,.04), 0 6px 16px -8px rgba(0,0,0,.10);
+  --oh-lift-2: 0 2px 4px rgba(0,0,0,.06), 0 14px 32px -12px rgba(0,0,0,.14);
+  --oh-glow-green: 0 0 0 1px rgba(0,108,53,.30), 0 8px 24px -8px rgba(0,108,53,.45);
+  --oh-glow-gold:  0 0 0 1px rgba(201,166,107,.35), 0 8px 24px -8px rgba(201,166,107,.45);
+}
+[data-theme="dark"] {
+  --oh-lift-1: 0 1px 2px rgba(0,0,0,.30), 0 6px 16px -8px rgba(0,0,0,.55);
+  --oh-lift-2: 0 2px 4px rgba(0,0,0,.40), 0 14px 32px -12px rgba(0,0,0,.65);
+}
+
+/* ── 1. Hover elevation on cards ───────────────────────────────── */
+.la-card, .home-card, .opp-card, .panel-card, .dash-card, .admin-kpi-card,
+.dfp-card, .insight-card, .home-opp-item, .home-folder-item,
+.oh4-sector-card, .sector-chip, .home-sector-chip,
+.oh-enh-momentum-card, .oh-enh-spotlight-card,
+.compare-card, .ws-item-card {
+  transition:
+    transform   var(--oh-anim-base) var(--oh-anim-ease),
+    box-shadow  var(--oh-anim-base) var(--oh-anim-ease),
+    border-color var(--oh-anim-base) var(--oh-anim-ease);
+  will-change: transform;
+}
+@media (hover: hover) {
+  .la-card:hover, .home-card:hover, .opp-card:hover, .panel-card:hover,
+  .dash-card:hover, .admin-kpi-card:hover, .dfp-card:hover,
+  .insight-card:hover, .home-opp-item:hover, .home-folder-item:hover,
+  .oh4-sector-card:hover, .compare-card:hover, .ws-item-card:hover,
+  .oh-enh-momentum-card:hover, .oh-enh-spotlight-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--oh-lift-2);
+  }
+  .sector-chip:hover, .home-sector-chip:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--oh-lift-1);
+  }
+}
+
+/* ── 2. Fade-in transitions ────────────────────────────────────── */
+@keyframes ohFadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.oh-anim-in {
+  animation: ohFadeUp var(--oh-anim-slow) var(--oh-anim-ease) both;
+  animation-delay: var(--oh-anim-delay, 0ms);
+}
+/* Stagger helpers — apply to a container, children fade in 60ms apart */
+.oh-stagger > * { animation: ohFadeUp var(--oh-anim-slow) var(--oh-anim-ease) both; }
+.oh-stagger > *:nth-child(1)  { animation-delay:  0ms; }
+.oh-stagger > *:nth-child(2)  { animation-delay:  60ms; }
+.oh-stagger > *:nth-child(3)  { animation-delay: 120ms; }
+.oh-stagger > *:nth-child(4)  { animation-delay: 180ms; }
+.oh-stagger > *:nth-child(5)  { animation-delay: 240ms; }
+.oh-stagger > *:nth-child(6)  { animation-delay: 300ms; }
+.oh-stagger > *:nth-child(7)  { animation-delay: 360ms; }
+.oh-stagger > *:nth-child(8)  { animation-delay: 420ms; }
+.oh-stagger > *:nth-child(n+9) { animation-delay: 480ms; }
+
+/* When a view becomes active, fade its content in. Existing app sets
+   .view.is-active on the visible view container; piggyback on that. */
+.view.is-active > .view-content,
+.view.is-active > section,
+.view.is-active > .panel,
+.view.is-active > .dash-grid,
+.view.is-active > .home-grid,
+.view.is-active > .opp-grid {
+  animation: ohFadeUp var(--oh-anim-slow) var(--oh-anim-ease) both;
+}
+
+/* ── 4. Skeleton loaders ───────────────────────────────────────── */
+@keyframes ohShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.oh-skel,
+.oh-skel-line,
+.oh-skel-card {
+  position: relative;
+  background: linear-gradient(
+    100deg,
+    var(--surface-2, #f1efe9) 30%,
+    rgba(255,255,255,.55) 50%,
+    var(--surface-2, #f1efe9) 70%
+  );
+  background-size: 200% 100%;
+  animation: ohShimmer 1.4s ease-in-out infinite;
+  border-radius: var(--radius-sm, 8px);
+  color: transparent !important;
+  user-select: none;
+  pointer-events: none;
+}
+[data-theme="dark"] .oh-skel,
+[data-theme="dark"] .oh-skel-line,
+[data-theme="dark"] .oh-skel-card {
+  background: linear-gradient(
+    100deg,
+    var(--surface-2, #1f2024) 30%,
+    rgba(255,255,255,.08) 50%,
+    var(--surface-2, #1f2024) 70%
+  );
+  background-size: 200% 100%;
+}
+.oh-skel-line  { display: inline-block; height: 1em; min-width: 4em; vertical-align: middle; }
+.oh-skel-line--lg { height: 1.6em; min-width: 8em; }
+.oh-skel-card  { display: block; min-height: 140px; }
+
+/* ── 6. Hover glow on buttons ──────────────────────────────────── */
+.btn-primary, .btn-secondary, .btn-cta, .btn-submit, .btn-apply,
+.la-btn, .panel-link-btn, .home-cta {
+  transition:
+    transform   var(--oh-anim-fast) var(--oh-anim-ease),
+    box-shadow  var(--oh-anim-base) var(--oh-anim-ease),
+    background  var(--oh-anim-fast) var(--oh-anim-ease),
+    border-color var(--oh-anim-fast) var(--oh-anim-ease);
+}
+@media (hover: hover) {
+  .btn-primary:hover:not([disabled]):not([aria-disabled="true"]),
+  .btn-cta:hover:not([disabled]),
+  .btn-submit:hover:not([disabled]),
+  .btn-apply:hover:not([disabled]),
+  .la-btn:hover:not([disabled]),
+  .home-cta:hover:not([disabled]) {
+    box-shadow: var(--oh-glow-green);
+    transform: translateY(-1px);
+  }
+  .btn-secondary:hover:not([disabled]):not([aria-disabled="true"]),
+  .panel-link-btn:hover:not([disabled]) {
+    box-shadow: var(--oh-glow-gold);
+    transform: translateY(-1px);
+  }
+  /* SSO disabled variant from the auth-pages cleanup already styles
+     itself; do not glow these. */
+  .btn-sso[aria-disabled="true"]:hover { box-shadow: none; transform: none; }
+}
+.btn-primary:active, .btn-secondary:active, .btn-cta:active,
+.btn-submit:active, .btn-apply:active, .la-btn:active {
+  transform: translateY(0);
+}
+
+/* ── 3. Counter target — small visual cue while counting ───────── */
+.kpi-value[data-oh-animating="1"],
+.admin-kpi-value[data-oh-animating="1"],
+.home-stat-val[data-oh-animating="1"],
+.dfp-stat-value[data-oh-animating="1"] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 7. Accessibility: honour reduced-motion ───────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .la-card, .home-card, .opp-card, .panel-card, .dash-card,
+  .admin-kpi-card, .dfp-card, .insight-card, .home-opp-item,
+  .home-folder-item, .oh4-sector-card, .sector-chip, .home-sector-chip,
+  .btn-primary, .btn-secondary, .btn-cta, .btn-submit, .btn-apply,
+  .la-btn, .panel-link-btn, .home-cta,
+  .oh-anim-in, .oh-stagger > *,
+  .view.is-active > .view-content,
+  .view.is-active > section,
+  .view.is-active > .panel,
+  .view.is-active > .dash-grid,
+  .view.is-active > .home-grid,
+  .view.is-active > .opp-grid {
+    animation: none !important;
+    transition-duration: 1ms !important;
+    transform: none !important;
+  }
+  .oh-skel, .oh-skel-line, .oh-skel-card { animation: none !important; }
+}
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  /* Respect reduced-motion at the JS layer too — skip the animated
+     counter entirely when the user has the OS-level preference set. */
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ── 5. Chart.js global animation defaults ──────────────────────
+     Set once at parse time so every later `new Chart()` picks them up.
+     ChartJS is loaded synchronously above so window.Chart exists by
+     the time this block runs. */
+  if (window.Chart && Chart.defaults) {
+    var dur = REDUCED ? 0 : 850;
+    Chart.defaults.animation = Object.assign({}, Chart.defaults.animation, {
+      duration: dur,
+      easing: 'easeOutQuart'
+    });
+    Chart.defaults.animations = Object.assign({}, Chart.defaults.animations, {
+      tension: { duration: Math.round(dur * 0.7), easing: 'easeOutQuart' },
+      colors:  { type: 'color',  duration: Math.round(dur * 0.7), easing: 'easeOutQuart' },
+      'numbers': { type: 'number', properties: ['x','y','borderWidth','radius','tension'], duration: dur, easing: 'easeOutQuart' }
+    });
+    Chart.defaults.transitions = Object.assign({}, Chart.defaults.transitions, {
+      active: { animation: { duration: Math.round(dur * 0.45) } },
+      resize: { animation: { duration: 0 } }
+    });
+  }
+
+  /* ── 3. Animated KPI counters ──────────────────────────────────
+     A MutationObserver listens for textContent changes on the known
+     KPI element classes. Any time the new content parses as a number
+     AND differs from the last animated value, it tweens up. This way
+     none of the 20+ KPI-setting call sites need editing. */
+  var KPI_SELECTOR = '.kpi-value, .admin-kpi-value, .home-stat-val, .dfp-stat-value';
+
+  function ohParseNum(s) {
+    if (s == null) return null;
+    var cleaned = String(s).replace(/[,\s]/g, '');
+    if (!/^-?\d+(\.\d+)?$/.test(cleaned)) return null;
+    return parseFloat(cleaned);
+  }
+
+  function ohAnimateCount(el, to, opts) {
+    if (REDUCED) { el.textContent = to.toLocaleString(); el.dataset.ohFrom = String(to); return; }
+    opts = opts || {};
+    var duration = opts.duration || 900;
+    var from = ohParseNum(el.dataset.ohFrom);
+    if (from == null) from = 0;
+    if (from === to) return;
+    var startTime = performance.now();
+    var isInt = Number.isInteger(to) && Number.isInteger(from);
+    el.dataset.ohAnimating = '1';
+    function tick(now) {
+      var t = Math.min(1, (now - startTime) / duration);
+      var eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+      var cur = from + (to - from) * eased;
+      el.textContent = isInt ? Math.round(cur).toLocaleString() : cur.toFixed(1);
+      if (t < 1) requestAnimationFrame(tick);
+      else {
+        el.textContent = isInt ? to.toLocaleString() : String(to);
+        delete el.dataset.ohAnimating;
+        el.dataset.ohFrom = String(to);
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+  window.ohAnimateCount = ohAnimateCount;
+
+  var ohKpiObserver = new MutationObserver(function (muts) {
+    for (var i = 0; i < muts.length; i++) {
+      var m = muts[i];
+      var el = m.target.nodeType === Node.TEXT_NODE ? m.target.parentElement : m.target;
+      if (!el || el.dataset.ohAnimating === '1') continue;
+      if (!el.matches || !el.matches(KPI_SELECTOR)) continue;
+      var n = ohParseNum(el.textContent);
+      if (n == null) continue;
+      var last = ohParseNum(el.dataset.ohFrom);
+      if (last === n) continue;
+      ohAnimateCount(el, n);
+    }
+  });
+
+  function attachKpiObservers(root) {
+    var nodes = (root || document).querySelectorAll(KPI_SELECTOR);
+    for (var i = 0; i < nodes.length; i++) {
+      ohKpiObserver.observe(nodes[i], { childList: true, characterData: true, subtree: true });
+    }
+  }
+  attachKpiObservers();
+
+  /* Watch for KPI elements added later (admin views, dashboard cards). */
+  var ohRootObserver = new MutationObserver(function (muts) {
+    for (var i = 0; i < muts.length; i++) {
+      var added = muts[i].addedNodes;
+      for (var j = 0; j < added.length; j++) {
+        var node = added[j];
+        if (node.nodeType !== Node.ELEMENT_NODE) continue;
+        if (node.matches && node.matches(KPI_SELECTOR)) {
+          ohKpiObserver.observe(node, { childList: true, characterData: true, subtree: true });
+        }
+        if (node.querySelectorAll) attachKpiObservers(node);
+      }
+    }
+  });
+  ohRootObserver.observe(document.body, { childList: true, subtree: true });
+
+  /* ── 2. Fade-in on scroll for off-screen cards ─────────────────
+     Lightweight IntersectionObserver pass. Cards already in the
+     viewport at load get the fade via the .view.is-active CSS rule;
+     this handles the long-scroll cases (analytics, opportunities). */
+  if (!REDUCED && 'IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('oh-anim-in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+    var IO_TARGETS = '.la-card, .panel-card, .dash-card, .admin-kpi-card, .dfp-card, .insight-card, .compare-card';
+    function attachIo(root) {
+      var nodes = (root || document).querySelectorAll(IO_TARGETS);
+      for (var i = 0; i < nodes.length; i++) {
+        if (!nodes[i].classList.contains('oh-anim-in')) io.observe(nodes[i]);
+      }
+    }
+    attachIo();
+
+    /* Catch newly-rendered cards (e.g. opportunity list re-renders). */
+    var ohCardObserver = new MutationObserver(function (muts) {
+      for (var i = 0; i < muts.length; i++) {
+        var added = muts[i].addedNodes;
+        for (var j = 0; j < added.length; j++) {
+          var node = added[j];
+          if (node.nodeType !== Node.ELEMENT_NODE) continue;
+          if (node.matches && node.matches(IO_TARGETS)) io.observe(node);
+          if (node.querySelectorAll) attachIo(node);
+        }
+      }
+    });
+    ohCardObserver.observe(document.body, { childList: true, subtree: true });
+  }
+
+  /* ── 4. Skeleton helper API (opt-in) ───────────────────────────
+     DOM-node based — no innerHTML. Stash existing children in a
+     DocumentFragment, swap in a skeleton built via createElement,
+     restore on hide. */
+  function buildSkel(type) {
+    var wrap = document.createElement('div');
+    if (type === 'card') {
+      var card = document.createElement('div');
+      card.className = 'oh-skel-card';
+      wrap.appendChild(card);
+    } else if (type === 'lines') {
+      var l1 = document.createElement('span'); l1.className = 'oh-skel-line oh-skel-line--lg';
+      var l2 = document.createElement('span'); l2.className = 'oh-skel-line';
+      var l3 = document.createElement('span'); l3.className = 'oh-skel-line';
+      wrap.appendChild(l1); wrap.appendChild(document.createElement('br'));
+      wrap.appendChild(l2); wrap.appendChild(document.createElement('br'));
+      wrap.appendChild(l3);
+    } else {
+      var s = document.createElement('span'); s.className = 'oh-skel-line oh-skel-line--lg';
+      wrap.appendChild(s);
+    }
+    return wrap;
+  }
+
+  var skelStash = new WeakMap();
+  window.ohSkeleton = {
+    show: function (el, type) {
+      if (!el || skelStash.has(el)) return;
+      var frag = document.createDocumentFragment();
+      while (el.firstChild) frag.appendChild(el.firstChild);
+      skelStash.set(el, frag);
+      el.appendChild(buildSkel(type));
+    },
+    hide: function (el) {
+      if (!el) return;
+      var frag = skelStash.get(el);
+      if (!frag) return;
+      while (el.firstChild) el.removeChild(el.firstChild);
+      el.appendChild(frag);
+      skelStash.delete(el);
+    }
+  };
+})();
+</script>
+
 </body>
 </html>
