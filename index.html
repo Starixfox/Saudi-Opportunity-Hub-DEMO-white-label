@@ -16788,6 +16788,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (rendered && Array.isArray(window.opportunitiesData)) renderInsightsV2(window.opportunitiesData);
   });
 
+  /* The Supabase loader streams the first 1000 rows, fires oh:data-ready, then
+     fetches the remainder and fires oh:data-complete with the full dataset. If
+     this section was already on screen (IntersectionObserver tripped), the KPI
+     would freeze at 1,000 — the first-page count. Refresh here so the KPI
+     reflects the real total once all pages have arrived. */
+  document.addEventListener('oh:data-complete', function() {
+    if (rendered && Array.isArray(window.opportunitiesData)) renderInsightsV2(window.opportunitiesData);
+  });
+
   /* re-render on theme / lang change */
   new MutationObserver(function(){
     if (rendered && Array.isArray(window.opportunitiesData)) renderInsightsV2(window.opportunitiesData);
