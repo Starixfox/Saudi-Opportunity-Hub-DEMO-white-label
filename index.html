@@ -12806,7 +12806,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       for (let i = 0; i < remainingPages.length; i += CONCURRENCY) {
         const batch = remainingPages.slice(i, i + CONCURRENCY);
         const results = await Promise.allSettled(batch.map(from => fetchPageWithRetry(from)));
-        results.forEach(r => { if (r.status === 'fulfilled' && r.value.data) all = all.concat(r.value.data); });
+        results.forEach((r, idx) => {
+          if (r.status === 'fulfilled' && r.value.data) {
+            all = all.concat(r.value.data);
+          } else if (r.status === 'rejected') {
+            /* Surface page failures loudly — previously these were silently
+               swallowed by Promise.allSettled, leaving the dataset short. */
+            console.error('[OH] Page fetch FAILED (from=' + batch[idx] + '):', r.reason && r.reason.message);
+          }
+        });
         /* Update global data as pages arrive */
         window.opportunitiesData = all.slice();
       }
@@ -12825,8 +12833,42 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       }
     }
 
+    /* ── Step 3.5: gap-fill any pages that failed in the parallel pass.
+       Without this, a single transient 5xx on page 2 would silently
+       lose ~190 rows and the KPI ends up reading 1000 instead of 1190.
+       We do up to 4 sequential gap-fill attempts at the current tail. */
+    if (totalCount && all.length < totalCount) {
+      console.warn('[OH] Parallel pass landed at ' + all.length + ' of ' + totalCount + ' rows — gap-filling…');
+      let gapAttempts = 0;
+      const MAX_GAP_ATTEMPTS = 4;
+      while (all.length < totalCount && gapAttempts < MAX_GAP_ATTEMPTS) {
+        const fromIdx = all.length;
+        try {
+          const { data } = await fetchPage(fromIdx);
+          if (data && data.length) {
+            all = all.concat(data);
+            window.opportunitiesData = all.slice();
+            console.log('[OH] Gap-fill: pulled ' + data.length + ' more rows; total now ' + all.length);
+          } else {
+            /* PostgREST returned an empty page but we still have a deficit —
+               likely a stale count. Stop to avoid an infinite loop. */
+            console.warn('[OH] Gap-fill stopped: empty page at offset ' + fromIdx + ', deficit=' + (totalCount - all.length));
+            break;
+          }
+        } catch (err) {
+          gapAttempts++;
+          console.warn('[OH] Gap-fill attempt ' + gapAttempts + ' failed:', err && err.message);
+          await new Promise(r => setTimeout(r, 800 * gapAttempts));
+        }
+      }
+    }
+
     window.opportunitiesData = all;
-    console.log('[OH] All ' + all.length + ' opportunities loaded');
+    if (totalCount && all.length < totalCount) {
+      console.error('[OH] Loader stopped short: ' + all.length + ' of ' + totalCount + ' rows. KPIs and counts will be incomplete.');
+    } else {
+      console.log('[OH] All ' + all.length + ' opportunities loaded');
+    }
 
     /* ── Final signal with complete dataset ─────────── */
     document.dispatchEvent(new CustomEvent('oh:data-complete', { detail: { count: all.length } }));
