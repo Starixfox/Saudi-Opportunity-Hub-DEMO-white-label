@@ -23439,7 +23439,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
      write on its next frame — locking the KPI at the partial-load value. */
   function ohAnimateCount(el, to, opts) {
     el.dataset.ohTarget = String(to);
-    if (REDUCED) { el.textContent = ohFormatInt(to); el.dataset.ohFrom = String(to); return; }
+    if (REDUCED) {
+      var rTxt = ohFormatInt(to);
+      el.dataset.ohSelfWrite = rTxt;
+      el.textContent = rTxt;
+      el.dataset.ohFrom = String(to);
+      return;
+    }
     if (el.dataset.ohAnimating === '1') return; /* running tick will pick up new ohTarget */
     opts = opts || {};
     var duration = opts.duration || 900;
@@ -23463,7 +23469,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var t = Math.min(1, (now - startTime) / duration);
       var eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
       var cur = curFrom + (curTo - curFrom) * eased;
-      el.textContent = ohFormatInt(cur);
+      var txt = ohFormatInt(cur);
+      el.dataset.ohSelfWrite = txt;  /* stamp the tick's write so the observer can ignore it */
+      el.textContent = txt;
       if (t < 1) requestAnimationFrame(tick);
       else {
         /* If a new target arrived in the last frame, keep going. */
@@ -23476,7 +23484,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           requestAnimationFrame(tick);
           return;
         }
-        el.textContent = ohFormatInt(curTo);
+        var finalTxt = ohFormatInt(curTo);
+        el.dataset.ohSelfWrite = finalTxt;
+        el.textContent = finalTxt;
         delete el.dataset.ohAnimating;
         el.dataset.ohFrom = String(curTo);
       }
@@ -23491,15 +23501,18 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var el = m.target.nodeType === Node.TEXT_NODE ? m.target.parentElement : m.target;
       if (!el) continue;
       if (!el.matches || !el.matches(KPI_SELECTOR)) continue;
-      var n = ohParseNum(el.textContent);
+      var txt = el.textContent;
+      var n = ohParseNum(txt);
       if (n == null) continue;
-      /* During animation, suppress self-writes (text content matches the
-         animation's current frame), but accept external writes by updating
-         the live target. The running tick reads ohTarget every frame. */
+      /* During animation, ignore mutations whose text matches the tick's last
+         self-stamped value — those are our own frames. Any *other* text is an
+         external update and redirects the in-flight tween via ohTarget.
+         (Without this distinction the observer would mistake interim tween
+         output like "63" for a new target and hijack the animation down to
+         a single-digit number — the Admin KPI symptom we saw.) */
       if (el.dataset.ohAnimating === '1') {
-        var curTarget = ohParseNum(el.dataset.ohTarget);
-        if (curTarget === n) continue;       /* matches current target — likely self-write */
-        el.dataset.ohTarget = String(n);     /* redirect the in-flight animation */
+        if (el.dataset.ohSelfWrite === txt) continue;  /* our own frame */
+        el.dataset.ohTarget = String(n);               /* external — redirect */
         continue;
       }
       var last = ohParseNum(el.dataset.ohFrom);
