@@ -9911,20 +9911,18 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   }
 
   /* SINGLE source of truth for "added this week" / "new this week".
-     Previously inlined in 7 places with subtly different checks — some used
-     `item.isNew === true` (strict), others `item.isNew` (truthy). When the
-     Supabase column returned anything other than a JS boolean (e.g. 1, "true"),
-     the strict sites under-counted and the truthy sites over-counted, so the
-     home KPI showed one number (set by the truthy oh:data-complete listener)
-     while the widget below showed another (rendered earlier by the strict
-     _renderHomeStats). Routed everything through this helper. */
-  /* "New this week" keys on opportunities.last_verified (date) — the
-     human-curation timestamp, populated when an editor reviews / adds
-     a row. NOT created_at — that column is the Supabase insert timestamp
-     and the active table was bulk-loaded inside one rolling-7-day window,
-     so created_at would mark every row "new" until those import dates
-     age out. The "NEW" badge on cards still keys off item.isNew per the
-     prior spec; only the COUNTER + Latest Additions strip use this. */
+     Every counter, badge, filter, and detail-panel state in the app now
+     routes through this helper, so the topbar pill, the home "Added this
+     week" stat, the analytics newCount, the "Newly added" profile filter,
+     and the card badge all agree on the same answer for the same row.
+
+     Source of truth = opportunities.last_verified (date). That's the
+     curator timestamp — set when an editor adds or re-verifies a row.
+     We don't use the legacy boolean isNew column (it drifted out of
+     sync with reality and the user asked for purely date-based logic).
+     We don't use created_at either — that's the raw Supabase insert
+     timestamp, which gets bulk-load-contaminated whenever a batch is
+     imported and would falsely mark every row as new. */
   window.__isNewThisWeek = function(item) {
     if (!item || !item.last_verified) return false;
     var d = new Date(item.last_verified);
@@ -12080,8 +12078,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         application_link: o.url || o.application_link || '',
         funding_amount: o.funding_amount || '',
         sponsor_institution: o.sponsor_institution || o.sponsor || '',
-        last_verified: new Date().toISOString().slice(0, 10),
-        isNew: true
+        /* last_verified is the source of "new this week" — setting it to
+           today makes the imported row appear in the weekly counter / strip
+           without needing a separate isNew flag. */
+        last_verified: new Date().toISOString().slice(0, 10)
       });
     });
     if (!valid.length) { out.className = 'admin-form-result error'; out.textContent = '0 imported, ' + skipped + ' skipped (missing required fields).'; return; }
@@ -12742,10 +12742,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   // ── Fetch with retry ──────────────────────────────────────
   const MAX_RETRIES = 3;
   const PAGE = 1000;
+  /* "isNew" intentionally NOT fetched — the column is legacy. "New this
+     week" is derived purely from last_verified via window.__isNewThisWeek. */
   const COLS = 'id,title,description_short,type,sponsor_institution,country,' +
                'eligibility_region,eligibility_entities,funding_amount,funding_type,' +
                'application_link,deadline_date,status,language,notes,last_verified,' +
-               'profiles,sectors,isNew,created_at';
+               'profiles,sectors,created_at';
 
   /* Exclude archived records at the loader so window.opportunitiesData
      only ever contains active rows. Cascades automatically to the main
@@ -12938,7 +12940,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
   function profileMatch(item) {
     if (selectedProfile === 'all') return true;
-    if (selectedProfile === 'new') return !!item.isNew;
+    if (selectedProfile === 'new') return !!(window.__isNewThisWeek && window.__isNewThisWeek(item));
     const profiles = Array.isArray(item.profiles) ? item.profiles.map(norm) : [];
     if (selectedProfile === 'startup') return profiles.some(p => p.includes('startup') || p.includes('sme'));
     if (selectedProfile === 'researcher') return profiles.some(p => p.includes('research') || p.includes('university') || p.includes('academic'));
@@ -13812,7 +13814,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                     <span class="pill ${typeClass(item.type)}">${withTooltip(typeStr)}</span>
                     <span class="region-tag region-${region}">${regionLabel}</span>
                     <span class="status-badge ${statusClass(item.status)}">${statusStr}</span>
-                    ${item.isNew ? `<span class="badge-new">${newLabel}</span>` : (item.last_verified && (Date.now() - new Date(item.last_verified).getTime()) <= 30*86400000 && !item.isNew ? `<span class="badge-new" style="background:rgba(245,166,35,0.15);color:#c68a00;border-color:rgba(245,166,35,0.3);">${t('Updated')}</span>` : '')}
+                    ${(window.__isNewThisWeek && window.__isNewThisWeek(item)) ? `<span class="badge-new">${newLabel}</span>` : (item.last_verified && (Date.now() - new Date(item.last_verified).getTime()) <= 30*86400000 ? `<span class="badge-new" style="background:rgba(245,166,35,0.15);color:#c68a00;border-color:rgba(245,166,35,0.3);">${t('Updated')}</span>` : '')}
                   </div>
                   <div class="opp-card-btns">
                     <button class="opp-card-action-btn opp-card-save-btn card-bookmark-btn" data-id="${item.id || ''}" data-title="${(item.title||'').replace(/"/g,'&quot;')}" data-sector="${(item.sectors&&item.sectors[0])||''}" data-type="${item.type||''}" onclick="WS&&WS.toggleBookmark(this)" type="button" aria-label="${t('Save')}">
@@ -15623,7 +15625,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
        because created_at reflects Supabase insert time (all rows
        inserted in one batch share the same date), not publish date.
        We use last_verified as the data-currency signal instead:
-       - addedWeek  = window.__isNewThisWeek(item)  (isNew + last_verified within 7d)
+       - addedWeek  = window.__isNewThisWeek(item)  (last_verified within 7d)
        - updatedWeek = last_verified within 7 days (any row)
        addedWeek MUST go through the shared helper or it drifts from the
        home KPI / widget — see helper definition near getData(). */
@@ -15764,7 +15766,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   document.addEventListener('oh:data-complete', function() {
     if (typeof renderCards === 'function') renderCards();
     if (typeof populateDfp === 'function') populateDfp();
-    /* Refresh new-this-week count in topbar (now has full isNew data) */
+    /* Refresh new-this-week count in topbar with full dataset */
     if (window.WS && typeof window.WS.loadFromSupabase === 'function') {
       /* updateWsBar is called inside loadFromSupabase after data merges */
     }
@@ -16017,7 +16019,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var recurring = data.filter(function(r){ return r.status === 'closed_but_recurring' || r.status === 'recurring'; }).length;
     var saudiElig = data.filter(function(r){ return r.eligibility_region === 'Saudi_only' || r.eligibility_region === 'Saudi'; }).length;
     var globalElig = data.filter(function(r){ return r.eligibility_region === 'Global' || r.eligibility_region === 'Global_including_Saudi'; }).length;
-    var newCount = data.filter(function(r){ return r.isNew; }).length;
+    var newCount = data.filter(window.__isNewThisWeek).length;
     el.innerHTML =
       '<div class="snapshot-axis-note">Programme status &amp; applicant eligibility &mdash; across all origin tiers</div>' +
       '<div class="panel-sector-stats" style="grid-template-columns:repeat(2,1fr);gap:var(--space-2);margin-bottom:var(--space-3)">' +
@@ -16081,7 +16083,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       badge(pretty(item.type || 'Other')) +
       badge(item.country || pretty(item.eligibility_region) || 'Global') +
       badge(pretty(item.status || 'Unknown'), statusCls) +
-      (item.isNew ? badge(t('New'), 'badge-new') : '');
+      ((window.__isNewThisWeek && window.__isNewThisWeek(item)) ? badge(t('New'), 'badge-new') : '');
 
     // Trust bar
     if (panelTrustBar) {
@@ -16118,7 +16120,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
       // Record state: New / Updated / On file
       var recState, recDot;
-      if (item.isNew) {
+      if (window.__isNewThisWeek && window.__isNewThisWeek(item)) {
         recState = ar ? 'سجل جديد' : 'Newly added';
         recDot = 'panel-trust-dot--green';
       } else if (vDate && (Date.now() - new Date(vDate).getTime()) <= 30 * 86400000) {
@@ -17780,7 +17782,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (wc) wc.textContent = watchlist.length;
     if (sc) sc.textContent = searches.length;
 
-    // "New this week" = isNew flag AND last_verified within the last 7 days
+    // "New this week" = last_verified within the last 7 days (via shared helper)
     var newCount = 0;
     var _dataset = window.opportunitiesData || window.allOpportunities || window._wsDataset || null;
     if (_dataset && window.__isNewThisWeek) {
@@ -19087,7 +19089,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       window._wsDataset = dataset;
       clearInterval(recInterval);
       renderRecommendations();
-      updateWsBar(); // refresh "New this week" with real isNew count
+      updateWsBar(); // refresh "New this week" against the latest dataset
     }, 600);
 
     // Update last visit time
