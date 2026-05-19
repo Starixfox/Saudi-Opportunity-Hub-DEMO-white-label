@@ -10427,15 +10427,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var _ns = window.__normalizeSectorKey || function(r){ return String(r||''); };
       data.forEach(function(d){ (d.sectors || []).forEach(function(s){ var k=_ns(s); if (k) sectorMap[k] = (sectorMap[k]||0)+1; }); });
       var countryMap = tally(data, 'country');
+      /* Strict 'open' only — matches the Home "Open now" stat, the analytics
+         KPI, and the loader's open count. Recurring and rolling programmes
+         show under their own status badges; counting them as "open" here
+         made this card disagree with the rest of the app (e.g. 1,005 here
+         vs 975 on the home stat for the same dataset). */
       var openCount = data.filter(function (d) {
-        var s = String(d.status || '').toLowerCase().replace(/_/g, '');
-        /* BUG-006 FIX: Match only truly-active statuses.
-           'closed_but_recurring' contains 'open'=false & 'recurring'=true but IS closed.
-           Treat: 'open' and pure 'recurring'/'rolling' as active; 'closed_but_recurring' as NOT open. */
-        if (s === 'open') return true;
-        if (s === 'recurring' || s === 'rolling') return true;
-        if (s.indexOf('closedbutrecurring') !== -1 || s.indexOf('closed') !== -1) return false;
-        return s.indexOf('open') !== -1;
+        return String(d.status || '').toLowerCase() === 'open';
       }).length;
       set('kpiTotal', data.length.toLocaleString());
       set('kpiOpen', openCount.toLocaleString());
