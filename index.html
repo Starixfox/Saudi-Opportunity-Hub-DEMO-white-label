@@ -23417,31 +23417,47 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
      none of the 20+ KPI-setting call sites need editing. */
   var KPI_SELECTOR = '.kpi-value, .admin-kpi-value, .home-stat-val, .dfp-stat-value';
 
+  /* Locale-safe integer parser. KPI values are always integers, but the
+     visible text may be formatted by .toLocaleString() in any locale —
+     en-US uses ',' as thousands separator, nl-NL/de-DE/etc. use '.'.
+     Stripping only commas (the original implementation) caused "1.190"
+     in a European locale to parse as the decimal 1.19, triggering a
+     feedback loop where the observer animated the KPI *down* to 1.19.
+     We treat every non-digit-non-minus character as a separator. */
   function ohParseNum(s) {
     if (s == null) return null;
-    var cleaned = String(s).replace(/[,\s]/g, '');
-    if (!/^-?\d+(\.\d+)?$/.test(cleaned)) return null;
-    return parseFloat(cleaned);
+    var str = String(s).trim();
+    if (!str) return null;
+    var cleaned = str.replace(/[^\d-]/g, '');
+    if (!cleaned || cleaned === '-') return null;
+    var n = parseInt(cleaned, 10);
+    return isNaN(n) ? null : n;
   }
 
+  /* Always format with en-US so the display we write and the value the
+     observer reads are guaranteed round-trip compatible regardless of
+     the browser's locale. Without this we re-trigger ourselves in any
+     locale that doesn't use ',' as the thousands separator. */
+  var ohNumFmt = new Intl.NumberFormat('en-US');
+  function ohFormatInt(n) { return ohNumFmt.format(Math.round(n)); }
+
   function ohAnimateCount(el, to, opts) {
-    if (REDUCED) { el.textContent = to.toLocaleString(); el.dataset.ohFrom = String(to); return; }
+    if (REDUCED) { el.textContent = ohFormatInt(to); el.dataset.ohFrom = String(to); return; }
     opts = opts || {};
     var duration = opts.duration || 900;
     var from = ohParseNum(el.dataset.ohFrom);
     if (from == null) from = 0;
     if (from === to) return;
     var startTime = performance.now();
-    var isInt = Number.isInteger(to) && Number.isInteger(from);
     el.dataset.ohAnimating = '1';
     function tick(now) {
       var t = Math.min(1, (now - startTime) / duration);
       var eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
       var cur = from + (to - from) * eased;
-      el.textContent = isInt ? Math.round(cur).toLocaleString() : cur.toFixed(1);
+      el.textContent = ohFormatInt(cur);
       if (t < 1) requestAnimationFrame(tick);
       else {
-        el.textContent = isInt ? to.toLocaleString() : String(to);
+        el.textContent = ohFormatInt(to);
         delete el.dataset.ohAnimating;
         el.dataset.ohFrom = String(to);
       }
