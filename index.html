@@ -12833,33 +12833,49 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       }
     }
 
-    /* ── Step 3.5: gap-fill any pages that failed in the parallel pass.
-       Without this, a single transient 5xx on page 2 would silently
-       lose ~190 rows and the KPI ends up reading 1000 instead of 1190.
-       We do up to 4 sequential gap-fill attempts at the current tail. */
-    if (totalCount && all.length < totalCount) {
-      console.warn('[OH] Parallel pass landed at ' + all.length + ' of ' + totalCount + ' rows — gap-filling…');
-      let gapAttempts = 0;
-      const MAX_GAP_ATTEMPTS = 4;
-      while (all.length < totalCount && gapAttempts < MAX_GAP_ATTEMPTS) {
+    /* ── Step 3.5: UNCONDITIONAL tail-walk. Trust nothing.
+       The previous gap-fill only ran when totalCount said there were
+       more rows, but if PostgREST's count header was wrong or cached
+       (some Supabase projects cap the count at db.max-rows), the
+       loader would exit at exactly 1000 rows convinced it was done.
+       This pass keeps fetching from all.length until a fetch comes
+       back with fewer than PAGE rows — the only honest signal that
+       we've actually reached the end of the table. */
+    {
+      let tailGuard = 0;
+      const TAIL_GUARD_MAX = 50;            // hard cap: 50 × PAGE = 50,000 rows
+      let lastSize = all.length;
+      while (tailGuard < TAIL_GUARD_MAX) {
+        tailGuard++;
         const fromIdx = all.length;
+        let pageData;
         try {
-          const { data } = await fetchPage(fromIdx);
-          if (data && data.length) {
-            all = all.concat(data);
-            window.opportunitiesData = all.slice();
-            console.log('[OH] Gap-fill: pulled ' + data.length + ' more rows; total now ' + all.length);
-          } else {
-            /* PostgREST returned an empty page but we still have a deficit —
-               likely a stale count. Stop to avoid an infinite loop. */
-            console.warn('[OH] Gap-fill stopped: empty page at offset ' + fromIdx + ', deficit=' + (totalCount - all.length));
-            break;
-          }
+          const res = await fetchPage(fromIdx);
+          pageData = res.data;
         } catch (err) {
-          gapAttempts++;
-          console.warn('[OH] Gap-fill attempt ' + gapAttempts + ' failed:', err && err.message);
-          await new Promise(r => setTimeout(r, 800 * gapAttempts));
+          console.warn('[OH] Tail-walk fetch failed at offset ' + fromIdx + ':', err && err.message);
+          /* One retry with short backoff, then give up the tail walk. */
+          await new Promise(r => setTimeout(r, 800));
+          try { const res2 = await fetchPage(fromIdx); pageData = res2.data; }
+          catch (err2) { console.error('[OH] Tail-walk retry also failed:', err2 && err2.message); break; }
         }
+        if (!pageData || !pageData.length) break;
+        all = all.concat(pageData);
+        window.opportunitiesData = all.slice();
+        if (pageData.length < PAGE) {
+          /* Partial page = end of table reached cleanly. */
+          break;
+        }
+        if (all.length === lastSize) {
+          /* Page returned data but all.length didn't grow — defensive
+             stop to avoid infinite loop on any future bug. */
+          console.warn('[OH] Tail-walk made no progress; bailing.');
+          break;
+        }
+        lastSize = all.length;
+      }
+      if (tailGuard >= TAIL_GUARD_MAX) {
+        console.error('[OH] Tail-walk hit hard guard at ' + (TAIL_GUARD_MAX * PAGE) + ' rows.');
       }
     }
 
