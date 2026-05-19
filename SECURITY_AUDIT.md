@@ -218,3 +218,83 @@ All Critical/High exploit paths are closed in the live database.
 | `404.html` | Same |
 
 No code was pushed. The DB migration is **live** (applied via MCP); the file changes are local and ready for your review.
+
+---
+
+## 7. Post-audit follow-ups (2026-05-19, second pass)
+
+Three items from §4 (manual checks) and §5 (recommendations) handled in a follow-up pass.
+
+### 7.1 OAuth buttons in `login.html` — no longer clickable when not configured
+
+The Google and Microsoft SSO buttons used to call `signInWithOAuth(...)` regardless of whether the provider was actually wired in Supabase Auth. Verifying via `auth.identities` showed zero non-email identities, so both providers were unwired — clicking either button would have surfaced a Supabase error.
+
+**Change.**
+- Added an `OH_OAUTH = { google: true, microsoft: false }` config block at the top of the login script. The owner left Google enabled (provider will be wired in the Supabase dashboard before launch); Microsoft stays disabled until wired. Operator flips a flag to `true` after wiring the provider in Supabase Auth → Providers.
+- New `markProviderUnavailable(btn, label)` decorates each unwired button with `aria-disabled="true"`, `disabled`, `tabindex="-1"`, a translated `title`/`aria-label`, and a small inline "Not available / غير متاح" caption. Visual styling (gray, no hover lift, not-allowed cursor) added in CSS.
+- Click handlers now early-return when the flag is `false`, so even programmatic clicks no-op.
+- `switchLang()` re-applies `title`/`aria-label` for elements decorated with `data-title-en` / `data-title-ar` so the disabled-button tooltip language tracks the rest of the page.
+
+**Verify.** Open `login.html`. Both SSO buttons render grayed out with "Not available" / "غير متاح" caption. Hover shows the explanatory tooltip in the current language. Clicking does nothing (no network request, no console error). Toggle language — caption + tooltip update.
+
+To re-enable: configure the provider in Supabase Auth, then flip the matching `OH_OAUTH.<provider>` flag to `true`.
+
+### 7.2 `profiles.role` removed — `user_prefs.role` is now the only role source
+
+The audit (§5 M1) flagged the two parallel `role` columns. Code-side audit found exactly one reader of `profiles.role` (`index.html:11769`, in the admin Registered-Users table) — every other admin code path already consulted `user_prefs.role`, including `is_admin()`.
+
+**Change.**
+- `index.html:11769`: `var role = p.role || pr.role || 'user'` → `var role = pr.role || 'user'`. Comment points at the deprecation migration.
+- New migration `supabase/migrations/2026_05_19_drop_profiles_role.sql`:
+  1. Idempotent re-bootstrap of the owner's admin status in `user_prefs` (belt-and-braces).
+  2. Drop the now-orphan `protect_profiles_role` trigger (it would error after the column is gone).
+  3. `ALTER TABLE public.profiles DROP COLUMN IF EXISTS role;`
+  4. `COMMENT ON TABLE public.profiles` records that adding a role column back is forbidden.
+- Migration applied live via MCP. Confirmed via `information_schema.columns` that `profiles.role` no longer exists; the owner's `user_prefs.role = 'admin'` survived.
+
+The `protect_user_prefs_role` trigger stays in place — it's the load-bearing escalation guard now.
+
+**Verify.**
+```sql
+-- Should return false / 'admin'
+SELECT
+  EXISTS(SELECT 1 FROM information_schema.columns
+         WHERE table_schema='public' AND table_name='profiles' AND column_name='role'),
+  (SELECT role FROM public.user_prefs WHERE user_id = '<owner uid>');
+```
+
+### 7.3 `contact.html` bot protection — honeypot + min-fill-time
+
+The contact form is the only unauthenticated POST in the app. Formspree has its own spam filtering, but the form was reachable by automated tools with no front-end friction at all.
+
+**Change.** Two layers added in `contact.html`, both fail-soft (the bot sees the same "success" UI as a real user, so it can't iterate against an error signal):
+
+1. **Honeypot field** — a visually-hidden, off-screen `<input name="website">` with `tabindex="-1"`, `aria-hidden="true"`, `autocomplete="off"`. Humans never see it. Most form-spam bots auto-fill every input. If non-empty at submit, the submission is dropped (no Formspree POST) and the user sees the success state.
+2. **Min-fill-time gate** — records `Date.now()` when the script first runs. Submits arriving in under 2 seconds are dropped (humans physically can't fill three fields plus a dropdown that fast; bots paste-and-submit instantly). Same fail-soft success UI.
+
+Both events log a console warning so legitimate users misclassified by the time gate are debuggable.
+
+**Verify.**
+- Open `contact.html`, view source, confirm the off-screen honeypot div is present at the top of the form.
+- Submit the form with everything else filled but a value in `#contact-website` (use DevTools to set `document.getElementById('contact-website').value = 'http://x'` then submit) — the form will show the success state but the Network tab will show no Formspree POST and the console will log `[contact] honeypot tripped`.
+- Fill the form normally in under 2 seconds (use DevTools' Fill Form, or paste each field rapidly) — same fail-soft success, console logs `submission faster than humanly possible`.
+- A real user submission (>2 s, honeypot empty) still hits Formspree as before.
+
+### 7.4 Residual risk + when to escalate to a real CAPTCHA
+
+Honeypot + time-gate stops casual form-spam bots (Selenium/Puppeteer scripted submissions, basic credential stuffing harvesters). What they will NOT stop:
+
+- A targeted attacker who reads the source, skips the honeypot, and waits 2 s before submitting.
+- A human spammer typing real input.
+
+If you ever see real abuse landing in your inbox, the next step is hCaptcha or Cloudflare Turnstile — both have a CSP-friendly script and a server-side verify hop. Formspree also supports its own CAPTCHA toggle in the form dashboard; that's the lowest-effort upgrade and worth enabling if abuse appears.
+
+### 7.5 Files changed in this follow-up pass
+
+| File | Change |
+|---|---|
+| `index.html` | `:11769` switched from `p.role \|\| pr.role` to `pr.role` only |
+| `login.html` | OAuth `OH_OAUTH` flags + `markProviderUnavailable()` + CSS for `aria-disabled` SSO buttons + language sync for tooltips |
+| `contact.html` | Honeypot field + min-fill-time gate, both fail-soft into the existing success UI |
+| `supabase/migrations/2026_05_19_drop_profiles_role.sql` | NEW — applied live; drops `profiles.role` after `index.html` stopped reading it |
+| `SECURITY_AUDIT.md` | This §7 section |

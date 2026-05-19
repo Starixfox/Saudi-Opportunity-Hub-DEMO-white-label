@@ -11766,7 +11766,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           var fullName    = ((p.first_name || '') + ' ' + (p.last_name || '')).trim();
           var displayName = p.display_name || prJson.displayName || prJson.name || fullName || emailPrefix || '—';
           var email       = p.email || '—';
-          var role        = p.role || pr.role || 'user';
+          /* Role source-of-truth is user_prefs.role; profiles.role is
+             deprecated (see 2026_05_19_drop_profiles_role.sql). */
+          var role        = pr.role || 'user';
           /* sectors: prefs.sectors is a string[] of preferred sector ids/names */
           var sectorList  = Array.isArray(prJson.sectors) ? prJson.sectors : [];
           var sectorsCell = sectorList.length

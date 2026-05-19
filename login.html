@@ -764,6 +764,36 @@
       font-family: var(--font-arabic);
     }
 
+    /* SSO buttons in their "provider not configured" state. The OAuth
+       providers in Supabase Auth are not wired up; until they are, the
+       buttons render as obviously-unavailable so users don't click into
+       a broken redirect. Flip OH_OAUTH.{google,microsoft} = true in the
+       script below once the provider is enabled in the dashboard. */
+    .btn-sso[aria-disabled="true"] {
+      cursor: not-allowed;
+      opacity: 0.55;
+      background: var(--surface-2);
+    }
+    .btn-sso[aria-disabled="true"]:hover {
+      background: var(--surface-2);
+      border-color: var(--border);
+      box-shadow: none;
+    }
+    .btn-sso-unavailable {
+      font-size: 10.5px;
+      font-weight: 500;
+      color: var(--text-faint);
+      margin-left: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    [dir="rtl"] .btn-sso-unavailable {
+      margin-left: 0;
+      margin-right: 4px;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
     .btn-sso:hover {
       background: var(--surface-2);
       border-color: #c5bfb7;
@@ -1205,6 +1235,18 @@
   }
 
   /* ──────────────────────────────────────────────────────────────
+     OAUTH PROVIDER AVAILABILITY
+     Flip these to true only after configuring the matching provider in
+     Supabase Auth → Providers. Until then the corresponding button is
+     rendered in a clearly-disabled state and the click handler no-ops,
+     so users never get a broken redirect.
+  ────────────────────────────────────────────────────────────── */
+  const OH_OAUTH = {
+    google:    true,
+    microsoft: false
+  };
+
+  /* ──────────────────────────────────────────────────────────────
      SUPABASE CONFIG
   ────────────────────────────────────────────────────────────── */
   const SUPABASE_URL = 'https://dshrbbnjahjcwxzvzygh.supabase.co';
@@ -1342,6 +1384,14 @@
     // Swap all placeholder attributes [data-ph-en] / [data-ph-ar]
     document.querySelectorAll('[data-ph-en][data-ph-ar]').forEach(function(el) {
       el.placeholder = isAr ? el.dataset.phAr : el.dataset.phEn;
+    });
+
+    // Re-apply title + aria-label on elements decorated by
+    // markProviderUnavailable() so the disabled-SSO tooltips track lang.
+    document.querySelectorAll('[data-title-en][data-title-ar]').forEach(function(el) {
+      var s = isAr ? el.dataset.titleAr : el.dataset.titleEn;
+      el.setAttribute('title', s);
+      el.setAttribute('aria-label', s);
     });
 
     // Update password toggle aria-label
@@ -1660,8 +1710,46 @@
     }
   }
 
-  btnGoogle.addEventListener('click',    function() { handleOAuth('google'); });
-  btnMicrosoft.addEventListener('click', function() { handleOAuth('azure'); });
+  /* Mark an unwired provider as unavailable so users don't get a
+     broken redirect. We DON'T hide the button — keeping it visible
+     signals "this is on the roadmap" and reminds the operator to wire
+     the provider before launch. Toggle OH_OAUTH.<provider> = true to
+     re-enable. */
+  function markProviderUnavailable(btn, providerLabel) {
+    if (!btn) return;
+    btn.setAttribute('aria-disabled', 'true');
+    btn.setAttribute('disabled', 'disabled');
+    btn.setAttribute('tabindex', '-1');
+    // Tooltip + screen-reader label so the disabled state is communicated.
+    var titleEn = providerLabel + ' sign-in is not yet enabled on this site.';
+    var titleAr = 'تسجيل الدخول عبر ' + providerLabel + ' غير مفعّل بعد على هذا الموقع.';
+    btn.setAttribute('title',      currentLang === 'ar' ? titleAr : titleEn);
+    btn.setAttribute('aria-label', currentLang === 'ar' ? titleAr : titleEn);
+    btn.dataset.titleEn = titleEn;
+    btn.dataset.titleAr = titleAr;
+    // Add a small "Not available" caption so the disabled state is
+    // visually obvious without depending on hover-only tooltip.
+    if (!btn.querySelector('.btn-sso-unavailable')) {
+      var cap = document.createElement('span');
+      cap.className = 'btn-sso-unavailable';
+      cap.dataset.en = 'Not available';
+      cap.dataset.ar = 'غير متاح';
+      cap.textContent = currentLang === 'ar' ? cap.dataset.ar : cap.dataset.en;
+      btn.appendChild(cap);
+    }
+  }
+
+  if (!OH_OAUTH.google)    markProviderUnavailable(btnGoogle,    'Google');
+  if (!OH_OAUTH.microsoft) markProviderUnavailable(btnMicrosoft, 'Microsoft');
+
+  btnGoogle.addEventListener('click', function() {
+    if (!OH_OAUTH.google) return;
+    handleOAuth('google');
+  });
+  btnMicrosoft.addEventListener('click', function() {
+    if (!OH_OAUTH.microsoft) return;
+    handleOAuth('azure');
+  });
 
   /* ──────────────────────────────────────────────────────────────
      INLINE VALIDATION (real-time, on blur)

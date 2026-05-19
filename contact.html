@@ -385,6 +385,23 @@
   <!-- Form -->
   <form id="contact-form" novalidate>
 
+    <!-- Honeypot: visually hidden, off-screen, skipped by keyboard +
+         screen readers. Real users never see or fill this field; bots
+         that auto-fill every input will trip it and have their submit
+         silently dropped. Combined with the min-fill-time check in JS
+         and Formspree's own filtering, this gives three layers of bot
+         friction without a CAPTCHA. -->
+    <div aria-hidden="true" style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;">
+      <label for="contact-website">Leave this field empty</label>
+      <input
+        type="text"
+        id="contact-website"
+        name="website"
+        tabindex="-1"
+        autocomplete="off"
+      />
+    </div>
+
     <div class="form-group">
       <label class="form-label" for="contact-name" data-en="Your name" data-ar="اسمك">Your name</label>
       <input class="form-input" type="text" id="contact-name" name="name"
@@ -493,6 +510,21 @@
   const msgText    = document.getElementById('msg-text');
   const successDiv = document.getElementById('success-state');
 
+  /* ── Bot protection ──
+     Two layers on top of Formspree's own filtering:
+       1. Honeypot field (#contact-website) — invisible to humans,
+          auto-filled by most form-spam bots. If non-empty, we show
+          the success state but do NOT POST.
+       2. Min-fill-time gate — record when the page finished parsing
+          this script and reject submissions that arrive in < 2 s.
+          Real users physically can't fill the form that fast; bots
+          paste-and-submit instantly.
+     Both checks fail-soft: the user (or bot) sees a success state, so
+     bots can't iterate against an error signal. */
+  const FORM_LOAD_TS = Date.now();
+  const MIN_FILL_MS  = 2000;
+  const honeypot     = document.getElementById('contact-website');
+
   function showMsg(text, type) {
     msgBox.className = type === 'error' ? 'is-error' : 'is-success';
     msgText.textContent = text;
@@ -516,9 +548,31 @@
 
   function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.trim()); }
 
+  function showFakeSuccess() {
+    /* Used when the bot-protection checks trip. We mirror the real
+       success state exactly so a bot can't tell its submission was
+       silently dropped. */
+    form.style.display = 'none';
+    document.getElementById('back-link').style.display = 'none';
+    successDiv.style.display = 'block';
+  }
+
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
     clearMsg();
+
+    // ── Bot check 1: honeypot ─────────────────────────────────────
+    if (honeypot && honeypot.value.trim() !== '') {
+      console.warn('[contact] honeypot tripped, dropping submission');
+      showFakeSuccess();
+      return;
+    }
+    // ── Bot check 2: min-fill-time ────────────────────────────────
+    if (Date.now() - FORM_LOAD_TS < MIN_FILL_MS) {
+      console.warn('[contact] submission faster than humanly possible, dropping');
+      showFakeSuccess();
+      return;
+    }
 
     const nameEl    = document.getElementById('contact-name');
     const emailEl   = document.getElementById('contact-email');
