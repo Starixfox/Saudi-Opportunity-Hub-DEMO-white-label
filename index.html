@@ -12749,141 +12749,105 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                'application_link,deadline_date,status,language,notes,last_verified,' +
                'profiles,sectors,isNew,created_at';
 
-  async function fetchPage(from) {
-    /* Exclude archived records at the loader so window.opportunitiesData
-       only ever contains active rows. Cascades automatically to the main
-       grid, sector counts, "Total Records" KPI, "Open Now" filter, search
-       results, and every other consumer that reads from in-memory data.
-       NOTE: column already exists on the table (text, nullable); if it
-       didn't, the migration would be:
-         ALTER TABLE opportunities ADD COLUMN status text DEFAULT 'active';
-       The admin Opportunities tab uses its own .from('opportunities')
-       query without this filter on purpose, so archived rows remain
-       visible / un-archivable from there. */
-    const { data, error, count } = await window._supabase
+  /* Exclude archived records at the loader so window.opportunitiesData
+     only ever contains active rows. Cascades automatically to the main
+     grid, sector counts, "Total Records" KPI, "Open Now" filter, search
+     results, and every other consumer that reads from in-memory data. */
+
+  /* Keyset (cursor) pagination on the primary key. Offset-based pagination
+     using .range(from, to) had been failing for some users at exactly the
+     first-page boundary (KPIs frozen at 1,000) even though the same query
+     works against the REST API. Cursor pagination side-steps the entire
+     class of offset / Range-header / count-cap edge cases: each request is
+     "give me the next PAGE rows where id > lastId", which is stable, cheap,
+     and works regardless of PostgREST or proxy configuration. */
+  async function fetchPageAfter(lastId) {
+    let q = window._supabase
       .from('opportunities')
-      .select(COLS, { count: 'exact' })
+      .select(COLS)
       .neq('status', 'archived')
       .order('id', { ascending: true })
-      .range(from, from + PAGE - 1);
+      .limit(PAGE);
+    if (lastId != null) q = q.gt('id', lastId);
+    const { data, error } = await q;
     if (error) throw error;
-    return { data: data || [], count };
+    return data || [];
   }
 
-  async function fetchPageWithRetry(from) {
+  async function fetchPageAfterWithRetry(lastId) {
     let attempt = 0, lastErr;
     while (attempt < MAX_RETRIES) {
-      try { return await fetchPage(from); }
+      try { return await fetchPageAfter(lastId); }
       catch (err) {
         lastErr = err; attempt++;
-        console.warn('[OH] Page fetch attempt ' + attempt + ' failed (from=' + from + '):', err.message);
+        console.warn('[OH] Page fetch attempt ' + attempt + ' failed (after=' + lastId + '):', err.message);
         await new Promise(r => setTimeout(r, 600 * attempt));
       }
     }
     throw lastErr;
   }
 
-  try {
-    /* ── Step 1: fetch page 0 to get the total count ─── */
-    const first = await fetchPageWithRetry(0);
-    const totalCount = typeof first.count === 'number' ? first.count : null;
-    let all = first.data;
+  /* Best-effort total count (purely informational — drives the
+     "[OH] Loader stopped short" warning). The pagination itself is
+     cursor-based and does NOT depend on this count being correct. */
+  async function fetchTotalCount() {
+    try {
+      const { count, error } = await window._supabase
+        .from('opportunities')
+        .select('id', { count: 'exact', head: true })
+        .neq('status', 'archived');
+      if (error) throw error;
+      return typeof count === 'number' ? count : null;
+    } catch (e) {
+      console.warn('[OH] Count probe failed (non-fatal):', e && e.message);
+      return null;
+    }
+  }
 
-    /* ── Step 2: stream first page immediately so cards render now ── */
-    window.opportunitiesData = all.slice(); /* partial — triggers boot() */
+  try {
+    /* ── Step 1: fetch first page to stream cards immediately ── */
+    let all = await fetchPageAfterWithRetry(null);
+    window.opportunitiesData = all.slice();
     window._ohDataFired = true; /* flag so late initHome() callers don't wait for an already-fired event */
     document.dispatchEvent(new CustomEvent('oh:data-ready', { detail: { count: all.length, partial: true } }));
-    console.log('[OH] First page loaded (' + all.length + ' rows), streaming remainder…');
+    console.log('[OH] First page loaded (' + all.length + ' rows), streaming remainder via cursor…');
 
-    /* ── Step 3: fetch remaining pages in parallel ─── */
-    if (totalCount && all.length < totalCount) {
-      const remainingPages = [];
-      for (let from = PAGE; from < totalCount; from += PAGE) {
-        remainingPages.push(from);
+    /* Count probe runs in parallel with the rest — purely diagnostic. */
+    const totalCountPromise = fetchTotalCount();
+
+    /* ── Step 2: cursor-walk until we get a short page ── */
+    const PAGE_GUARD_MAX = 50;                          // hard cap: 50 × PAGE = 50,000 rows
+    let pageGuard = 0;
+    while (all.length && pageGuard < PAGE_GUARD_MAX) {
+      const lastId = all[all.length - 1] && all[all.length - 1].id;
+      if (lastId == null) {
+        console.warn('[OH] Cursor walk: last row has no id, stopping.');
+        break;
       }
-      /* Fetch up to 4 pages at once */
-      const CONCURRENCY = 4;
-      for (let i = 0; i < remainingPages.length; i += CONCURRENCY) {
-        const batch = remainingPages.slice(i, i + CONCURRENCY);
-        const results = await Promise.allSettled(batch.map(from => fetchPageWithRetry(from)));
-        results.forEach((r, idx) => {
-          if (r.status === 'fulfilled' && r.value.data) {
-            all = all.concat(r.value.data);
-          } else if (r.status === 'rejected') {
-            /* Surface page failures loudly — previously these were silently
-               swallowed by Promise.allSettled, leaving the dataset short. */
-            console.error('[OH] Page fetch FAILED (from=' + batch[idx] + '):', r.reason && r.reason.message);
-          }
-        });
-        /* Update global data as pages arrive */
-        window.opportunitiesData = all.slice();
+      let next;
+      try {
+        next = await fetchPageAfterWithRetry(lastId);
+      } catch (e) {
+        console.error('[OH] Cursor walk failed at after=' + lastId + ':', e && e.message);
+        break;
       }
-    } else if (!totalCount) {
-      /* No count returned — fall back to sequential until empty page */
-      let from = PAGE;
-      const MAX_PAGES = 200;
-      let pageCount = 0;
-      while (pageCount < MAX_PAGES) {
-        const { data } = await fetchPageWithRetry(from);
-        if (!data || !data.length) break;
-        all = all.concat(data);
-        window.opportunitiesData = all.slice();
-        from += PAGE;
-        pageCount++;
-      }
+      if (!next.length) break;                          // reached end of table
+      all = all.concat(next);
+      window.opportunitiesData = all.slice();
+      pageGuard++;
+      console.log('[OH] Cursor walk: +' + next.length + ' rows (total ' + all.length + ')');
+      if (next.length < PAGE) break;                    // partial page = end of table
     }
-
-    /* ── Step 3.5: UNCONDITIONAL tail-walk. Trust nothing.
-       The previous gap-fill only ran when totalCount said there were
-       more rows, but if PostgREST's count header was wrong or cached
-       (some Supabase projects cap the count at db.max-rows), the
-       loader would exit at exactly 1000 rows convinced it was done.
-       This pass keeps fetching from all.length until a fetch comes
-       back with fewer than PAGE rows — the only honest signal that
-       we've actually reached the end of the table. */
-    {
-      let tailGuard = 0;
-      const TAIL_GUARD_MAX = 50;            // hard cap: 50 × PAGE = 50,000 rows
-      let lastSize = all.length;
-      while (tailGuard < TAIL_GUARD_MAX) {
-        tailGuard++;
-        const fromIdx = all.length;
-        let pageData;
-        try {
-          const res = await fetchPage(fromIdx);
-          pageData = res.data;
-        } catch (err) {
-          console.warn('[OH] Tail-walk fetch failed at offset ' + fromIdx + ':', err && err.message);
-          /* One retry with short backoff, then give up the tail walk. */
-          await new Promise(r => setTimeout(r, 800));
-          try { const res2 = await fetchPage(fromIdx); pageData = res2.data; }
-          catch (err2) { console.error('[OH] Tail-walk retry also failed:', err2 && err2.message); break; }
-        }
-        if (!pageData || !pageData.length) break;
-        all = all.concat(pageData);
-        window.opportunitiesData = all.slice();
-        if (pageData.length < PAGE) {
-          /* Partial page = end of table reached cleanly. */
-          break;
-        }
-        if (all.length === lastSize) {
-          /* Page returned data but all.length didn't grow — defensive
-             stop to avoid infinite loop on any future bug. */
-          console.warn('[OH] Tail-walk made no progress; bailing.');
-          break;
-        }
-        lastSize = all.length;
-      }
-      if (tailGuard >= TAIL_GUARD_MAX) {
-        console.error('[OH] Tail-walk hit hard guard at ' + (TAIL_GUARD_MAX * PAGE) + ' rows.');
-      }
+    if (pageGuard >= PAGE_GUARD_MAX) {
+      console.error('[OH] Cursor walk hit hard guard at ' + (PAGE_GUARD_MAX * PAGE) + ' rows.');
     }
 
     window.opportunitiesData = all;
-    if (totalCount && all.length < totalCount) {
+    const totalCount = await totalCountPromise;
+    if (totalCount != null && all.length < totalCount) {
       console.error('[OH] Loader stopped short: ' + all.length + ' of ' + totalCount + ' rows. KPIs and counts will be incomplete.');
     } else {
-      console.log('[OH] All ' + all.length + ' opportunities loaded');
+      console.log('[OH] All ' + all.length + ' opportunities loaded' + (totalCount != null ? ' (db count: ' + totalCount + ')' : ''));
     }
 
     /* ── Final signal with complete dataset ─────────── */
