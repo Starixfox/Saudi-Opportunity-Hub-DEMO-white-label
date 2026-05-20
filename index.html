@@ -12789,7 +12789,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   const PAGE = 1000;
   /* "isNew" intentionally NOT fetched — the column is legacy. "New this
      week" is derived purely from last_verified via window.__isNewThisWeek. */
-  const COLS = 'id,title,description_short,type,sponsor_institution,country,' +
+  const COLS = 'id,title,title_ar,description_short,description_short_ar,type,sponsor_institution,country,' +
                'eligibility_region,eligibility_entities,funding_amount,funding_type,' +
                'application_link,deadline_date,status,language,notes,last_verified,' +
                'profiles,sectors,created_at';
@@ -16222,6 +16222,44 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     private_sector: 'القطاع الخاص'
   };
 
+  /* SHORT Arabic display names — used in inline lists (Sectors field
+     in the detail modal, sector chips). The header uses the longer
+     SECTOR_NAME_AR above; lists need the bare two-word form. */
+  var SECTOR_DISPLAY_AR = {
+    ict:            'تقنية المعلومات',
+    innovation:     'الابتكار وريادة الأعمال',
+    financial:      'الخدمات المالية',
+    industrial:     'الصناعة',
+    healthcare:     'الرعاية الصحية',
+    environment:    'البيئة',
+    energy:         'الطاقة',
+    realestate:     'العقارات',
+    education:      'التعليم',
+    pharma:         'الصيدلة',
+    chemicals:      'الكيميائيات',
+    agriculture:    'الزراعة',
+    tourism:        'السياحة',
+    transport:      'النقل',
+    mining:         'التعدين',
+    space:          'الفضاء',
+    private_sector: 'القطاع الخاص',
+    humanitarian:   'الإنسانية'
+  };
+  /* Translate a single sector value (raw DB token OR canonical
+     English display name) to its short AR display when in AR mode.
+     Uses the app-wide __normalizeSectorKey helper so any input form
+     (raw 'ict' / 'ICT' / 'Education' / 'Innovation & Entrepreneurship')
+     collapses to the same short key. */
+  function sectorAR(raw) {
+    var s = String(raw == null ? '' : raw).trim();
+    if (!s) return '';
+    if (window.__lang !== 'ar') return s;
+    var key = (typeof window.__normalizeSectorKey === 'function')
+                ? window.__normalizeSectorKey(s)
+                : s.toLowerCase().replace(/[\s&-]+/g, '_');
+    return SECTOR_DISPLAY_AR[key] || s;
+  }
+
   /* AR map for the small set of free-text VALUES that the detail
      panel renders unchanged from the database. Used by valueAR() so
      "Startup, Investor" comes out as "شركة ناشئة، مستثمر" in AR
@@ -16289,8 +16327,32 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
   function openPanel(item) {
     if (!panel || !item) return;
-    panelTitle.textContent = item.title || t('Opportunity Details');
-    panelDesc.textContent  = item.description_short || '';
+    var isAr = (window.__lang === 'ar');
+
+    /* Title — prefer authored Arabic when present, fall back to the
+       English title. Never auto-translate; the title_ar column stays
+       NULL until a human authors it. */
+    var titleStr = isAr ? (item.title_ar || item.title) : item.title;
+    panelTitle.textContent = titleStr || t('Opportunity Details');
+
+    /* Description — same fallback rule, with one extra: when the
+       English description is shown to an AR user (because no _ar
+       version exists), append a small explanatory note so it's not
+       read as a translation bug. Note is added as a sibling element
+       so we never construct innerHTML from DB content. */
+    var descStr = isAr ? (item.description_short_ar || item.description_short) : item.description_short;
+    panelDesc.textContent = descStr || '';
+    /* Remove any previous fallback note before re-rendering. */
+    var prevNote = panel.querySelector('.panel-desc-fallback-note');
+    if (prevNote && prevNote.parentNode) prevNote.parentNode.removeChild(prevNote);
+    if (isAr && !item.description_short_ar && item.description_short) {
+      var note = document.createElement('div');
+      note.className = 'panel-desc-fallback-note';
+      note.setAttribute('dir', 'rtl');
+      note.style.cssText = 'margin-top:6px;font-size:12px;color:var(--text-faint,#888);font-style:italic;';
+      note.textContent = '⚠️ الوصف غير متوفر باللغة العربية بعد';
+      if (panelDesc && panelDesc.parentNode) panelDesc.parentNode.insertBefore(note, panelDesc.nextSibling);
+    }
 
     // Badges — status routes through __statusFormat so the panel
     // header shows "Closed – Recurring" / "مغلق – يتكرر" instead of the
@@ -16397,20 +16459,17 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     // (eligibility tokens, funding type, language, audience profiles)
     // route through valueAR() / listAR() so AR mode shows the proper
     // Arabic label instead of leaking the raw English DB value.
-    var sectorListVal = (item.sectors && item.sectors.length)
-      ? Array.from(new Set(item.sectors.map(window.__canonicalizeSector || pretty).filter(Boolean))).join(', ')
-      : '';
-    /* In AR mode, also localise the sector list values using SECTOR_NAME_AR
-       when the value matches a known sector canonical name. */
-    var sectorListDisplay = sectorListVal;
-    if (window.__lang === 'ar' && sectorListVal) {
-      sectorListDisplay = sectorListVal.split(/\s*,\s*/).map(function (n) {
-        for (var k in SECTOR_DATA) {
-          if (SECTOR_DATA[k] && SECTOR_DATA[k].name === n && SECTOR_NAME_AR[k]) return SECTOR_NAME_AR[k];
-        }
-        return n;
-      }).join('، ');
-    }
+    var sectorCanonList = (item.sectors && item.sectors.length)
+      ? Array.from(new Set(item.sectors.map(window.__canonicalizeSector || pretty).filter(Boolean)))
+      : [];
+    /* Translate every sector token individually via sectorAR() so a
+       mixed list like ["Education","Financial Services","Innovation &
+       Entrepreneurship"] becomes "التعليم، الخدمات المالية،
+       الابتكار وريادة الأعمال" in AR mode. Sep is the Arabic comma
+       in AR, ASCII comma otherwise. */
+    var _sectorSep = (window.__lang === 'ar') ? '، ' : ', ';
+    var sectorListDisplay = sectorCanonList.map(sectorAR).join(_sectorSep);
+    var sectorListVal = sectorCanonList.join(', '); /* kept for back-compat with later code paths */
     panelFields.innerHTML =
       sectorHtml +
       field(t('Sponsor / Institution'), item.sponsor_institution) +
