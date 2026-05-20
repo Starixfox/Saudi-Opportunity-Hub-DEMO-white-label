@@ -9799,6 +9799,38 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     admin: 'Admin',
     workspace: 'My Workspace'
   };
+  /* Arabic mirror — keep keys in sync with TITLES above. The topbar
+     title (#appTopbarTitle) is updated by showView() and previously
+     read only from TITLES, so Arabic mode left the header in English
+     even though the body translated. resolveTitle() picks the right
+     map based on window.__lang and is also called by the language
+     toggle so the header re-renders without a navigation. */
+  var TITLES_AR = {
+    home:          'الرئيسية',
+    dashboard:     'لوحة التحكم',
+    opportunities: 'الفرص',
+    sectors:       'القطاعات',
+    saved:         'المحفوظات',
+    about:         'حول المنصة',
+    admin:         'الإدارة',
+    workspace:     'مساحتي'
+  };
+  function resolveTitle(view) {
+    var isAr = (typeof window.__lang === 'string' && window.__lang === 'ar')
+            || (document.documentElement.getAttribute('dir') === 'rtl');
+    if (isAr && TITLES_AR[view]) return TITLES_AR[view];
+    return TITLES[view] || 'Opportunity Hub';
+  }
+  /* Exposed so the language toggle (translatePage / restorePage) can
+     refresh the topbar title in-place when the user flips language
+     without navigating. */
+  window.__refreshTopbarTitle = function() {
+    var titleEl = document.getElementById('appTopbarTitle');
+    if (!titleEl) return;
+    var hash = (window.location.hash || '').replace(/^#/, '').toLowerCase();
+    var view = (typeof TITLES_AR[hash] !== 'undefined' || typeof TITLES[hash] !== 'undefined') ? hash : 'home';
+    titleEl.textContent = resolveTitle(view);
+  };
   var DEFAULT_VIEW = 'home';
   var chartsInitialized = false;
   var _viewBtns = null;
@@ -9825,7 +9857,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       btn.classList.toggle('active', btn.getAttribute('data-view') === view);
     });
     var titleEl = document.getElementById('appTopbarTitle');
-    if (titleEl) titleEl.textContent = TITLES[view] || 'Opportunity Hub';
+    if (titleEl) titleEl.textContent = resolveTitle(view);
     if (view === 'dashboard') {
       if (!chartsInitialized) {
         initDashboard();
@@ -17080,6 +17112,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     document.documentElement.setAttribute('lang', 'ar');
     document.body.setAttribute('dir', 'rtl');
     window.__lang = 'ar';   /* tells t() and all chart builders to use Arabic */
+    /* Topbar page title uses a per-view AR map — refresh now so the
+       header flips immediately without needing a navigation. */
+    if (typeof window.__refreshTopbarTitle === 'function') window.__refreshTopbarTitle();
     injectRTL();
 
     /* Apply known data-ar translations immediately (no API needed) */
@@ -17148,6 +17183,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     document.documentElement.setAttribute('lang', 'en');
     document.body.setAttribute('dir', 'ltr');
     window.__lang = 'en';   /* tells t() and all chart builders to use English */
+    if (typeof window.__refreshTopbarTitle === 'function') window.__refreshTopbarTitle();
     removeRTL();
     /* Reset greeting badge to English */ var _gb2 = document.getElementById('homeTimeBadge'); if (_gb2) { var _eg2 = _gb2.getAttribute('data-en-greeting'); if (_eg2) _gb2.textContent = _eg2; }
 
