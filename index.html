@@ -10896,9 +10896,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       return dt.toISOString().slice(0, 10);
     }
     function statusPill(s) {
-      var v = String(s || '').toLowerCase();
-      var cls = (v === 'open') ? 'open' : (v === 'closed') ? 'closed' : (v === 'recurring') ? 'recurring' : '';
-      return '<span class="adm-status-pill ' + cls + '">' + escAdm(s || '—') + '</span>';
+      /* Routes through the unified __statusFormat so admin rows never
+         show "closed_but_recurring" with underscores again. The admin
+         pill CSS uses bare names (open/closed/recurring); we strip the
+         "status-" prefix returned by __statusFormat to match. */
+      var stat = window.__statusFormat ? window.__statusFormat(s) : { label: s || '—', cls: 'status-closed' };
+      var cls = stat.cls.replace(/^status-/, '');
+      return '<span class="adm-status-pill ' + cls + '">' + escAdm(stat.label) + '</span>';
     }
 
     function revealAdminNav() {
@@ -12144,7 +12148,8 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       html += '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--text-muted)">No data loaded.</td></tr>';
     } else {
       d.forEach(function(it) {
-        html += '<tr><td><input type="checkbox" class="admx-bulk-chk" data-id="' + esc(it.id) + '"></td><td>' + esc(it.title || '—') + '</td><td>' + esc(it.status || '—') + '</td><td>' + esc((it.sectors || [])[0] || '—') + '</td></tr>';
+        var _bulkStat = window.__statusFormat ? window.__statusFormat(it.status).label : (it.status || '—');
+        html += '<tr><td><input type="checkbox" class="admx-bulk-chk" data-id="' + esc(it.id) + '"></td><td>' + esc(it.title || '—') + '</td><td>' + esc(_bulkStat) + '</td><td>' + esc((it.sectors || [])[0] || '—') + '</td></tr>';
       });
     }
     html += '</tbody></table>';
@@ -12972,11 +12977,80 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   }
 
   function statusClass(status) {
-    const s = norm(status);
-    if (s.includes('open')) return 'status-open';
-    if (s.includes('recurring')) return 'status-recurring';
-    return 'status-closed';
+    /* Backed by __statusFormat below so every call site agrees on which
+       CSS class a raw status string deserves. closed_but_recurring is
+       explicitly mapped to status-closed (same visual style as Closed,
+       per spec) — not status-recurring as the old substring match did. */
+    return (window.__statusFormat ? window.__statusFormat(status).cls : 'status-closed');
   }
+
+  /* Single source of truth for opportunity status display + CSS class.
+     Returns { label, cls, dotColor } honouring window.__lang for the
+     localised label. Every status-badge / status-pill / status-dot in
+     the app routes through this so we never ship raw "closed_but_recurring"
+     strings to the UI again. */
+  window.__statusFormat = function(raw) {
+    var s   = String(raw == null ? '' : raw).trim();
+    var key = s.toLowerCase().replace(/[\s-]+/g, '_');
+    var isAr = window.__lang === 'ar';
+
+    /* CSS class per raw status. Defaults to status-closed for unknowns
+       so we never produce an undefined class name. */
+    var CLS = {
+      'open':                 'status-open',
+      'ongoing':              'status-open',
+      'rolling':              'status-recurring',
+      'recurring':            'status-recurring',
+      'closed':               'status-closed',
+      'closed_but_recurring': 'status-closed',
+      'coming_soon':          'status-closed'
+    };
+
+    /* Display labels — en-dash U+2013, not hyphen-minus, per spec. */
+    var EN = {
+      'open':                 'Open',
+      'ongoing':              'Ongoing',
+      'rolling':              'Rolling',
+      'recurring':            'Recurring',
+      'closed':               'Closed',
+      'closed_but_recurring': 'Closed – Recurring',
+      'coming_soon':          'Coming Soon'
+    };
+    var AR = {
+      'open':                 'مفتوح',
+      'ongoing':              'مستمر',
+      'rolling':              'متجدد',
+      'recurring':            'يتكرر',
+      'closed':               'مغلق',
+      'closed_but_recurring': 'مغلق – يتكرر',
+      'coming_soon':          'قريبًا'
+    };
+
+    /* Status-dot tints used by the table-row render. Aligned with the
+       chosen CSS class so the dot never disagrees with the badge. */
+    var DOT = {
+      'open':                 '#16a34a',
+      'ongoing':              '#16a34a',
+      'rolling':              '#d97706',
+      'recurring':            '#d97706',
+      'closed':               '#94a3b8',
+      'closed_but_recurring': '#94a3b8',
+      'coming_soon':          '#94a3b8'
+    };
+
+    var dict = isAr ? AR : EN;
+    var label = dict[key];
+    if (!label) {
+      /* Unknown value — pretty-print without breaking layout. */
+      label = s ? s.replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); })
+                : (isAr ? 'غير معروف' : 'Unknown');
+    }
+    return {
+      label:    label,
+      cls:      CLS[key] || 'status-closed',
+      dotColor: DOT[key] || '#94a3b8'
+    };
+  };
 
   function profileMatch(item) {
     if (selectedProfile === 'all') return true;
@@ -13750,10 +13824,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       tbody.innerHTML = pageItems.map(function(item) {
         // Compact: derive the 6 highest-value data points only
         var typeLabel  = t(pretty(item.type || 'Other'));
-        var statusCls  = statusClass(item.status);
-        var statusDot  = item.status === 'open' ? '#16a34a'
-                       : item.status === 'closed_but_recurring' ? '#d97706'
-                       : item.status === 'recurring' ? '#2563eb' : '#94a3b8';
+        var _status    = window.__statusFormat ? window.__statusFormat(item.status) : { label: item.status || '', cls: statusClass(item.status), dotColor: '#94a3b8' };
+        var statusCls  = _status.cls;
+        var statusDot  = _status.dotColor;
         var funding    = item.funding_amount || '';
         var region     = t(item.country || pretty(item.eligibility_region) || 'Global');
         var deadline   = item.deadline_date ? (t(item.deadline_date) || item.deadline_date) : '';
@@ -13762,10 +13835,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         var applyHref  = (item.application_link && item.application_link.startsWith('http')) ? item.application_link : null;
         var applyAttrs = applyHref ? 'target="_blank" rel="noopener noreferrer"' : '';
 
-        // Status label: shorten verbose statuses
-        var statusLabel = item.status === 'open' ? t('Open')
-                        : item.status === 'closed_but_recurring' ? t('Recurring')
-                        : item.status === 'recurring' ? t('Recurring') : t('Closed');
+        // Status label sourced from __statusFormat — already AR-aware,
+        // and renders "Closed – Recurring" / "مغلق – يتكرر" for the
+        // closed_but_recurring value instead of the raw underscore form.
+        var statusLabel = _status.label;
 
         /* IMPORTANT: parent #oppsTableBody is a <div> (display:grid). Using <tr>
            here makes the HTML parser strip it on insertion, which removes the
@@ -13824,7 +13897,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       const chips = [pretty(item.funding_type), ...(item.profiles || []).slice(0,2).map(pretty), ..._canonSecList].filter(Boolean).slice(0,5);
       const typeStr   = t(pretty(item.type || 'Other'));
       const countryStr = t(item.country || pretty(item.eligibility_region) || 'Global');
-      const statusStr  = t(pretty(item.status || 'Unknown'));
+      const _stat       = window.__statusFormat ? window.__statusFormat(item.status) : { label: item.status || 'Unknown', cls: 'status-closed' };
+      const statusStr   = _stat.label;
+      const statusBadgeCls = _stat.cls;
       const deadlineStr = t(item.deadline_date || 'TBA');
       const fundingLabel  = t('Funding / Size');
       const statusLabel   = t('Status');
@@ -13866,7 +13941,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
                   <div class="opp-card-badges">
                     <span class="pill ${typeClass(item.type)}">${withTooltip(typeStr)}</span>
                     <span class="region-tag region-${region}">${regionLabel}</span>
-                    <span class="status-badge ${statusClass(item.status)}">${statusStr}</span>
+                    <span class="status-badge ${statusBadgeCls}">${statusStr}</span>
                     ${(window.__isNewThisWeek && window.__isNewThisWeek(item)) ? `<span class="badge-new">${newLabel}</span>` : (item.last_verified && (Date.now() - new Date(item.last_verified).getTime()) <= 30*86400000 ? `<span class="badge-new" style="background:rgba(245,166,35,0.15);color:#c68a00;border-color:rgba(245,166,35,0.3);">${t('Updated')}</span>` : '')}
                   </div>
                   <div class="opp-card-btns">
@@ -16128,14 +16203,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     panelTitle.textContent = item.title || t('Opportunity Details');
     panelDesc.textContent  = item.description_short || '';
 
-    // Badges
-    var statusCls = (item.status === 'open') ? 'status-open'
-                  : (item.status === 'recurring' || item.status === 'closed_but_recurring') ? 'status-recurring'
-                  : 'status-closed';
+    // Badges — status routes through __statusFormat so the panel
+    // header shows "Closed – Recurring" / "مغلق – يتكرر" instead of the
+    // raw underscore form, and the badge class never lands on an
+    // undefined value.
+    var _panelStat = window.__statusFormat ? window.__statusFormat(item.status) : { label: pretty(item.status || 'Unknown'), cls: 'status-closed' };
     panelBadges.innerHTML =
       badge(pretty(item.type || 'Other')) +
       badge(item.country || pretty(item.eligibility_region) || 'Global') +
-      badge(pretty(item.status || 'Unknown'), statusCls) +
+      badge(_panelStat.label, _panelStat.cls) +
       ((window.__isNewThisWeek && window.__isNewThisWeek(item)) ? badge(t('New'), 'badge-new') : '');
 
     // Trust bar
@@ -20794,7 +20870,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   function renderCompareTable(container, items) {
     var rows = [
       [T('Type','النوع'),               function (i) { return i.type ? esc(prettify(i.type)) : '—'; }],
-      [T('Status','الحالة'),            function (i) { return i.status ? esc(prettify(i.status)) : '—'; }],
+      [T('Status','الحالة'),            function (i) { return i.status ? esc(window.__statusFormat ? window.__statusFormat(i.status).label : prettify(i.status)) : '—'; }],
       [T('Country / Region','الدولة'),  function (i) { return esc(i.country || prettify(i.eligibility_region) || '—'); }],
       [T('Sector','القطاع'),            function (i) { return esc((i.sectors||[]).slice(0,3).map(prettify).join(', ') || '—'); }],
       [T('Deadline','الموعد'),          function (i) {
@@ -22400,7 +22476,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var pretty = function (s) { return String(s||'').replace(/_/g,' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); }); };
       var rows = [
         ['Type',         function (i) { return i.type ? pretty(i.type) : '—'; }],
-        ['Status',       function (i) { return i.status ? pretty(i.status) : '—'; }],
+        ['Status',       function (i) { return i.status ? (window.__statusFormat ? window.__statusFormat(i.status).label : pretty(i.status)) : '—'; }],
         ['Country',      function (i) { return i.country || pretty(i.eligibility_region) || '—'; }],
         ['Sector',       function (i) { return (i.sectors||[]).slice(0,3).map(pretty).join(', ') || '—'; }],
         ['Deadline',     function (i) { return i.deadline_date || '—'; }],
@@ -22546,7 +22622,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         var pretty = function (s) { return String(s||'').replace(/_/g,' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); }); };
         var meta = [
           it.type && pretty(it.type),
-          it.status && pretty(it.status),
+          it.status && (window.__statusFormat ? window.__statusFormat(it.status).label : pretty(it.status)),
           it.country || pretty(it.eligibility_region) || '',
           it.deadline_date && ('Deadline: ' + it.deadline_date),
           it.funding_amount && (it.funding_amount.length > 36 ? it.funding_amount.slice(0, 36) + '…' : it.funding_amount)
