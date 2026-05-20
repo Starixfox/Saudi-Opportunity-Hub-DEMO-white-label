@@ -10842,7 +10842,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           '<div class="wl-saved-card__right">' +
             (status ? '<span class="wl-saved-status wl-status--' + esc(status.toLowerCase().replace(/\s/g,'-')) + '">' + esc(status) + '</span>' : '') +
             (savedAt ? '<span class="wl-saved-date">' + esc(savedAt) + '</span>' : '') +
-            '<button class="wl-saved-open" data-id="' + esc(id) + '" title="View details" type="button"><i data-lucide="arrow-right"></i></button>' +
+            '<button class="wl-saved-open" data-id="' + esc(id) + '" title="' + esc(window.__lang === 'ar' ? 'عرض التفاصيل' : 'View details') + '" aria-label="' + esc(window.__lang === 'ar' ? 'عرض التفاصيل' : 'View details') + '" type="button"><i data-lucide="arrow-right"></i></button>' +
           '</div>';
         var openBtn = card.querySelector('.wl-saved-open');
         if (openBtn) openBtn.addEventListener('click', function(e) {
@@ -13254,7 +13254,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var bmSavedCls = isSaved ? ' la-saved' : '';
 
       // View details handler — opens detail panel if WS.openPanel exists
-      var viewLabel = isAr ? 'عرض' : 'View';
+      var viewLabel = isAr ? 'عرض التفاصيل' : 'View details';
       var compareLabel = isAr ? 'قارن' : 'Compare';
       var sourceLabel = isAr ? 'المصدر' : 'Source';
 
@@ -16198,6 +16198,95 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     return null;
   }
 
+  /* Arabic mirror for the sector-context header. Same keys as
+     SECTOR_DATA above. The body text (size/growth/note) stays in
+     English on purpose — it's data citations, not UI chrome. */
+  var SECTOR_NAME_AR = {
+    ict:         'تقنية المعلومات والاقتصاد الرقمي',
+    innovation:  'الابتكار والبحث والتطوير',
+    energy:      'الطاقة والطاقة المتجددة',
+    healthcare:  'الرعاية الصحية وعلوم الحياة',
+    financial:   'الخدمات المالية والتقنية المالية',
+    industrial:  'الصناعة والتصنيع',
+    environment: 'البيئة والاستدامة',
+    pharma:      'الصيدلة والتقنية الحيوية',
+    realestate:  'العقارات والبناء',
+    education:   'التعليم وتنمية القدرات البشرية',
+    space:       'اقتصاد الفضاء',
+    agriculture: 'الزراعة والأمن الغذائي',
+    tourism:     'السياحة',
+    transport:   'النقل واللوجستيات',
+    mining:      'التعدين',
+    chemicals:   'الكيميائيات',
+    humanitarian:'الإنسانية',
+    private_sector: 'القطاع الخاص'
+  };
+
+  /* AR map for the small set of free-text VALUES that the detail
+     panel renders unchanged from the database. Used by valueAR() so
+     "Startup, Investor" comes out as "شركة ناشئة، مستثمر" in AR
+     mode and stays English otherwise. The key is the value tokenised
+     to lowercase + underscores (matching the same normaliser used
+     elsewhere in the codebase). */
+  var VALUE_AR = {
+    /* Audience / eligibility profiles */
+    'startup':       'شركة ناشئة',
+    'startups':      'الشركات الناشئة',
+    'sme':           'المنشآت الصغيرة والمتوسطة',
+    'smes':          'المنشآت الصغيرة والمتوسطة',
+    'investor':      'مستثمر',
+    'investors':     'المستثمرون',
+    'researcher':    'باحث',
+    'researchers':   'الباحثون',
+    'university':    'جامعة',
+    'universities':  'الجامعات',
+    'student':       'طالب',
+    'students':      'الطلاب',
+    'corporate':     'شركة',
+    'corporates':    'الشركات',
+    'government':    'حكومة',
+    'public_sector': 'القطاع العام',
+    'ngo':           'منظمة غير حكومية',
+    'ngos':          'منظمات غير حكومية',
+    'individual':    'فرد',
+    'individuals':   'أفراد',
+    'entrepreneur':  'رائد أعمال',
+    'entrepreneurs': 'رواد الأعمال',
+    /* Funding-type & cadence values */
+    'annual':        'سنوي',
+    'cohort_based':  'قائم على الدفعات',
+    'cohort-based':  'قائم على الدفعات',
+    'rolling':       'متجدد',
+    'ongoing':       'مستمر',
+    'one_time':      'لمرة واحدة',
+    'recurring':     'يتكرر',
+    /* Language column on opportunities table */
+    'english':       'إنجليزي',
+    'en':            'إنجليزي',
+    'arabic':        'عربي',
+    'ar':            'عربي',
+    'bilingual':     'ثنائي اللغة',
+    'en_ar':         'ثنائي اللغة'
+  };
+  function valueAR(raw) {
+    var s = String(raw == null ? '' : raw).trim();
+    if (!s) return '';
+    if (window.__lang !== 'ar') return s;
+    var key = s.toLowerCase().replace(/[\s-]+/g, '_');
+    return VALUE_AR[key] || s;
+  }
+  /* Split a comma / "،" / semicolon separated list of values, translate
+     each token via valueAR(), rejoin with the locale-appropriate
+     separator. Use the Arabic comma (U+060C) when the page is in AR. */
+  function listAR(raw) {
+    var s = String(raw == null ? '' : raw).trim();
+    if (!s) return '';
+    var parts = s.split(/[,،;]+/).map(function (p) { return p.trim(); }).filter(Boolean);
+    if (!parts.length) return '';
+    var sep = (window.__lang === 'ar') ? '، ' : ', ';
+    return parts.map(valueAR).join(sep);
+  }
+
   function openPanel(item) {
     if (!panel || !item) return;
     panelTitle.textContent = item.title || t('Opportunity Details');
@@ -16278,11 +16367,21 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
     // Sector context block
     var ctx = sectorContext(item.sectors || []);
+    var ctxKey = null;
+    if (ctx) {
+      /* Reverse-lookup the SECTOR_DATA key for ctx so we can find its
+         Arabic name. Cheap (≤ 18 keys) and avoids a refactor of
+         SECTOR_DATA to add nameAr to every entry. */
+      for (var _sk in SECTOR_DATA) {
+        if (SECTOR_DATA[_sk] === ctx) { ctxKey = _sk; break; }
+      }
+    }
+    var sectorDisplayName = (window.__lang === 'ar' && ctxKey && SECTOR_NAME_AR[ctxKey]) ? SECTOR_NAME_AR[ctxKey] : (ctx ? ctx.name : '');
     var sectorHtml = '';
     if (ctx) {
       sectorHtml =
         '<div class="panel-sector-context">' +
-          '<div class="panel-sector-context__title">&#9656; ' + t('Sector Context — ') + esc(ctx.name) + '</div>' +
+          '<div class="panel-sector-context__title">&#9656; ' + t('Sector Context — ') + esc(sectorDisplayName) + '</div>' +
           '<div class="panel-sector-stats">' +
             '<div><div class="panel-sector-stat__value">' + esc(ctx.size) + '</div><div class="panel-sector-stat__label">' + t('Market size') + '</div></div>' +
             '<div><div class="panel-sector-stat__value">' + esc(ctx.growth) + '</div><div class="panel-sector-stat__label">' + t('Growth outlook') + '</div></div>' +
@@ -16294,18 +16393,35 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         '</div>';
     }
 
-    // Program fields
+    // Program fields — values that come from a fixed vocabulary
+    // (eligibility tokens, funding type, language, audience profiles)
+    // route through valueAR() / listAR() so AR mode shows the proper
+    // Arabic label instead of leaking the raw English DB value.
+    var sectorListVal = (item.sectors && item.sectors.length)
+      ? Array.from(new Set(item.sectors.map(window.__canonicalizeSector || pretty).filter(Boolean))).join(', ')
+      : '';
+    /* In AR mode, also localise the sector list values using SECTOR_NAME_AR
+       when the value matches a known sector canonical name. */
+    var sectorListDisplay = sectorListVal;
+    if (window.__lang === 'ar' && sectorListVal) {
+      sectorListDisplay = sectorListVal.split(/\s*,\s*/).map(function (n) {
+        for (var k in SECTOR_DATA) {
+          if (SECTOR_DATA[k] && SECTOR_DATA[k].name === n && SECTOR_NAME_AR[k]) return SECTOR_NAME_AR[k];
+        }
+        return n;
+      }).join('، ');
+    }
     panelFields.innerHTML =
       sectorHtml +
       field(t('Sponsor / Institution'), item.sponsor_institution) +
       field(t('Funding'), item.funding_amount) +
-      field(t('Funding type'), pretty(item.funding_type)) +
-      field(t('Eligibility'), item.eligibility_entities) +
+      field(t('Funding type'), valueAR(pretty(item.funding_type))) +
+      field(t('Eligibility'), listAR(item.eligibility_entities)) +
       field(t('Deadline'), item.deadline_date) +
       field(t('Last verified'), item.last_verified) +
-      field(t('Language'), item.language) +
-      (item.sectors && item.sectors.length ? field(t('Sectors'), Array.from(new Set(item.sectors.map(window.__canonicalizeSector || pretty).filter(Boolean))).join(', ')) : '') +
-      (item.profiles && item.profiles.length ? field(t('Audience'), item.profiles.map(pretty).join(', ')) : '');
+      field(t('Language'), valueAR(item.language)) +
+      (sectorListVal ? field(t('Sectors'), sectorListDisplay) : '') +
+      (item.profiles && item.profiles.length ? field(t('Audience'), item.profiles.map(function (p) { return valueAR(pretty(p)); }).join((window.__lang === 'ar' ? '، ' : ', '))) : '');
 
     var validLink = item.application_link && item.application_link !== '#' && item.application_link.startsWith('http');
     panelLink.href = validLink ? item.application_link : '#';
