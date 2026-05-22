@@ -15924,11 +15924,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         statOpps.appendChild(plus);
       }
 
-      /* Insights-strip badges: live record + sector counts */
+      /* Insights-strip badges: live record + sector counts.
+         Use the app-wide __normalizeSectorKey so the count matches the
+         Sectors view's chip grid (otherwise raw-string dedup over-counts
+         variants like "ICT" vs "ict & digital economy"). */
+      var _nsBadge = window.__normalizeSectorKey || function(r){ return String(r||'').trim().toLowerCase(); };
       var sectorSet = {};
       all.forEach(function(o){
         (o.sectors || []).forEach(function(s){
-          var k = String(s || '').trim().toLowerCase();
+          var k = _nsBadge(s);
           if (k) sectorSet[k] = true;
         });
       });
