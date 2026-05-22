@@ -8832,9 +8832,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
     <!-- IS STATS STRIP -->
     <div class="is-stats-strip" role="list" aria-label="Platform highlights">
-      <div class="is-stat-item" role="listitem">1,074 verified records</div>
+      <div class="is-stat-item" role="listitem" id="statVerifiedRecords">1,074 verified records</div>
       <div class="is-stat-divider" aria-hidden="true"></div>
-      <div class="is-stat-item" role="listitem">20+ sectors covered</div>
+      <div class="is-stat-item" role="listitem" id="statSectorsCovered">20+ sectors covered</div>
       <div class="is-stat-divider" aria-hidden="true"></div>
       <div class="is-stat-item" role="listitem" id="statSnapshotDate">Data snapshot: Loading…</div>
       <div class="is-stat-divider" aria-hidden="true"></div>
@@ -15920,7 +15920,33 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         window.__renderHomeNewList(newList.slice(0, 8));
       }
       var statOpps = document.getElementById('obStatOpps');
-      if (statOpps) statOpps.innerHTML = all.length.toLocaleString() + '<span>+</span>';
+      if (statOpps) {
+        statOpps.textContent = all.length.toLocaleString();
+        var plus = document.createElement('span');
+        plus.textContent = '+';
+        statOpps.appendChild(plus);
+      }
+
+      /* Insights-strip badges: live record + sector counts */
+      var sectorSet = {};
+      all.forEach(function(o){
+        (o.sectors || []).forEach(function(s){
+          var k = String(s || '').trim().toLowerCase();
+          if (k) sectorSet[k] = true;
+        });
+      });
+      var sectorCount = Object.keys(sectorSet).length;
+      var verifiedEl = document.getElementById('statVerifiedRecords');
+      if (verifiedEl) verifiedEl.textContent = all.length.toLocaleString() + ' verified records';
+      var sectorsEl = document.getElementById('statSectorsCovered');
+      if (sectorsEl && sectorCount > 0) sectorsEl.textContent = sectorCount + ' sectors covered';
+      var obSectors = document.getElementById('obStatSectors');
+      if (obSectors && sectorCount > 0) {
+        obSectors.textContent = String(sectorCount);
+        var plus2 = document.createElement('span');
+        plus2.textContent = '+';
+        obSectors.appendChild(plus2);
+      }
     }
   });
 })();
