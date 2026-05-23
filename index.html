@@ -2308,9 +2308,10 @@ footer {
   line-height: 1.6;
 }
 
-/* ── APP FOOTER (rich 4-column, lives inside .app-content) ──────── */
+/* ── APP FOOTER (rich 4-column, sibling of .app-shell so it spans
+        full viewport width — including under the sidebar column) ──── */
 .sh-footer {
-  margin: 80px -28px -60px;            /* bleed past .app-content's padding */
+  width: 100%;
   padding: 56px clamp(24px, 4vw, 56px) 0;
   background: var(--bg-deep, #0b1424);
   color: rgba(255,255,255,0.72);
@@ -2318,7 +2319,7 @@ footer {
   font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
 }
 @media (max-width: 768px) {
-  .sh-footer { margin: 60px -14px 0; padding: 40px 18px 0; }
+  .sh-footer { padding: 40px 18px calc(72px + env(safe-area-inset-bottom, 0px)); }
 }
 
 .sh-footer-grid {
@@ -9500,101 +9501,6 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       </div>
     </section>
 
-    <!-- ═══════════════════════════════════════════
-         FOOTER — appears at the bottom of every view
-    ═══════════════════════════════════════════ -->
-    <footer class="sh-footer" role="contentinfo" aria-label="Site footer">
-      <div class="sh-footer-grid">
-
-        <!-- Brand column -->
-        <div class="sh-footer-brand">
-          <a href="#home" class="sh-footer-brand-mark" aria-label="Saudi Opportunity Hub home">
-            <svg width="26" height="26" viewBox="0 0 36 36" fill="none" aria-hidden="true">
-              <circle cx="18" cy="18" r="17" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
-              <ellipse cx="18" cy="18" rx="17" ry="6.5" stroke="currentColor" stroke-width="1.5" opacity="0.8" transform="rotate(-25 18 18)"/>
-              <circle cx="18" cy="18" r="3.5" fill="#006C35"/>
-            </svg>
-            <span>Saudi Opportunity Hub</span>
-          </a>
-          <div class="sh-footer-brand-ar">مركز الفرص السعودي</div>
-          <p class="sh-footer-brand-tag">
-            The single platform tracking every Vision 2030 grant, tender, accelerator, and investment programme — verified, categorised, and searchable.
-          </p>
-          <div class="sh-footer-brand-credit">
-            Built by <a href="https://midnight.space" target="_blank" rel="noopener">Midnight Space</a>
-          </div>
-        </div>
-
-        <!-- Platform column -->
-        <div class="sh-footer-col">
-          <h4 data-ar="المنصة">Platform</h4>
-          <ul role="list">
-            <li><a href="#home" data-ar="الرئيسية">Home</a></li>
-            <li><a href="#opportunities" data-ar="الفرص">Browse opportunities</a></li>
-            <li><a href="#dashboard" data-ar="التحليلات">Analytics dashboard</a></li>
-            <li><a href="#sectors" data-ar="القطاعات">Sectors</a></li>
-            <li><a href="#saved" data-ar="المحفوظات">Saved &amp; watchlist</a></li>
-            <li><a href="#about" data-ar="حول المنصة">About the data</a></li>
-          </ul>
-        </div>
-
-        <!-- Resources column -->
-        <div class="sh-footer-col">
-          <h4 data-ar="الموارد">Resources</h4>
-          <ul role="list">
-            <li><a href="api.html" data-ar="واجهة برمجة التطبيقات">API access</a></li>
-            <li><a href="contact.html" data-ar="اتصل بنا">Contact</a></li>
-            <li><a href="#about" data-ar="المنهجية">Methodology</a></li>
-            <li><a href="#about" data-ar="التغطية">Coverage &amp; sources</a></li>
-            <li><a href="https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label" target="_blank" rel="noopener">Release notes</a></li>
-          </ul>
-        </div>
-
-        <!-- Contact column -->
-        <div class="sh-footer-col">
-          <h4 data-ar="تواصل معنا">Get in touch</h4>
-          <div class="sh-footer-contact-row">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
-            <a href="mailto:jblancoapodaca@gmail.com">jblancoapodaca@gmail.com</a>
-          </div>
-          <div class="sh-footer-contact-row">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <span>Riyadh · GCC · Global</span>
-          </div>
-          <a href="contact.html" class="sh-footer-cta">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            <span data-ar="اطلب عرضًا توضيحيًا">Request a demo</span>
-          </a>
-          <div class="sh-footer-social" aria-label="Social links">
-            <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5.001 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zm7 0h3.8v1.8h.05c.53-1 1.83-2.05 3.76-2.05 4.02 0 4.76 2.65 4.76 6.1V21H18v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.08 1.4-2.08 2.85V21H10z"/></svg>
-            </a>
-            <a href="https://x.com/" target="_blank" rel="noopener" aria-label="X (Twitter)">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.91l-5.41-7.07L4.5 22H1.24l8.04-9.18L1 2h7.08l4.9 6.48L18.24 2zm-1.2 18h1.82L7.05 4H5.12l11.92 16z"/></svg>
-            </a>
-            <a href="https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label" target="_blank" rel="noopener" aria-label="GitHub">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56v-2.18c-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.23-1.27-5.23-5.66 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.58.24 2.75.12 3.04.74.8 1.18 1.82 1.18 3.07 0 4.4-2.69 5.36-5.25 5.64.41.36.78 1.06.78 2.13v3.16c0 .31.21.67.8.56C20.21 21.38 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Bottom strip -->
-      <div class="sh-footer-bottom">
-        <div class="sh-footer-bottom-links">
-          <a href="#about">Privacy</a>
-          <a href="#about">Terms</a>
-          <a href="#about">Methodology</a>
-          <a href="contact.html">Report data issue</a>
-        </div>
-        <span class="sh-footer-demo-pill">Private demo build</span>
-        <div>&copy; <span id="shFooterYear">2026</span> Saudi Opportunity Hub · v1.2</div>
-      </div>
-      <script>
-        (function(){ var y = document.getElementById('shFooterYear'); if (y) y.textContent = new Date().getFullYear(); })();
-      </script>
-    </footer>
-
   </div><!-- /.app-content -->
 
   <!-- Mobile bottom tab bar (under 768px) -->
@@ -9619,6 +9525,100 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     </button>
   </nav>
 </div><!-- /.app-shell -->
+
+<!-- ═══════════════════════════════════════════
+     FOOTER — full-width, sits below .app-shell so it
+     spans under the sidebar column too. The sticky
+     sidebar (height:100vh, top:0) naturally scrolls
+     off-screen once the shell ends, so the footer
+     reads as edge-to-edge.
+═══════════════════════════════════════════ -->
+<footer class="sh-footer" role="contentinfo" aria-label="Site footer">
+  <div class="sh-footer-grid">
+
+    <div class="sh-footer-brand">
+      <a href="#home" class="sh-footer-brand-mark" aria-label="Saudi Opportunity Hub home">
+        <svg width="26" height="26" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+          <circle cx="18" cy="18" r="17" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+          <ellipse cx="18" cy="18" rx="17" ry="6.5" stroke="currentColor" stroke-width="1.5" opacity="0.8" transform="rotate(-25 18 18)"/>
+          <circle cx="18" cy="18" r="3.5" fill="#006C35"/>
+        </svg>
+        <span>Saudi Opportunity Hub</span>
+      </a>
+      <div class="sh-footer-brand-ar">مركز الفرص السعودي</div>
+      <p class="sh-footer-brand-tag">
+        The single platform tracking every Vision 2030 grant, tender, accelerator, and investment programme — verified, categorised, and searchable.
+      </p>
+      <div class="sh-footer-brand-credit">
+        Built by <a href="https://midnight.space" target="_blank" rel="noopener">Midnight Space</a>
+      </div>
+    </div>
+
+    <div class="sh-footer-col">
+      <h4 data-ar="المنصة">Platform</h4>
+      <ul role="list">
+        <li><a href="#home" data-ar="الرئيسية">Home</a></li>
+        <li><a href="#opportunities" data-ar="الفرص">Browse opportunities</a></li>
+        <li><a href="#dashboard" data-ar="التحليلات">Analytics dashboard</a></li>
+        <li><a href="#sectors" data-ar="القطاعات">Sectors</a></li>
+        <li><a href="#saved" data-ar="المحفوظات">Saved &amp; watchlist</a></li>
+        <li><a href="#about" data-ar="حول المنصة">About the data</a></li>
+      </ul>
+    </div>
+
+    <div class="sh-footer-col">
+      <h4 data-ar="الموارد">Resources</h4>
+      <ul role="list">
+        <li><a href="api.html" data-ar="واجهة برمجة التطبيقات">API access</a></li>
+        <li><a href="contact.html" data-ar="اتصل بنا">Contact</a></li>
+        <li><a href="#about" data-ar="المنهجية">Methodology</a></li>
+        <li><a href="#about" data-ar="التغطية">Coverage &amp; sources</a></li>
+        <li><a href="https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label" target="_blank" rel="noopener">Release notes</a></li>
+      </ul>
+    </div>
+
+    <div class="sh-footer-col">
+      <h4 data-ar="تواصل معنا">Get in touch</h4>
+      <div class="sh-footer-contact-row">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
+        <a href="mailto:jblancoapodaca@gmail.com">jblancoapodaca@gmail.com</a>
+      </div>
+      <div class="sh-footer-contact-row">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>Riyadh · GCC · Global</span>
+      </div>
+      <a href="contact.html" class="sh-footer-cta">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        <span data-ar="اطلب عرضًا توضيحيًا">Request a demo</span>
+      </a>
+      <div class="sh-footer-social" aria-label="Social links">
+        <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5.001 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zm7 0h3.8v1.8h.05c.53-1 1.83-2.05 3.76-2.05 4.02 0 4.76 2.65 4.76 6.1V21H18v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.08 1.4-2.08 2.85V21H10z"/></svg>
+        </a>
+        <a href="https://x.com/" target="_blank" rel="noopener" aria-label="X (Twitter)">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.91l-5.41-7.07L4.5 22H1.24l8.04-9.18L1 2h7.08l4.9 6.48L18.24 2zm-1.2 18h1.82L7.05 4H5.12l11.92 16z"/></svg>
+        </a>
+        <a href="https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label" target="_blank" rel="noopener" aria-label="GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56v-2.18c-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.23-1.27-5.23-5.66 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.58.24 2.75.12 3.04.74.8 1.18 1.82 1.18 3.07 0 4.4-2.69 5.36-5.25 5.64.41.36.78 1.06.78 2.13v3.16c0 .31.21.67.8.56C20.21 21.38 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="sh-footer-bottom">
+    <div class="sh-footer-bottom-links">
+      <a href="#about">Privacy</a>
+      <a href="#about">Terms</a>
+      <a href="#about">Methodology</a>
+      <a href="contact.html">Report data issue</a>
+    </div>
+    <span class="sh-footer-demo-pill">Private demo build</span>
+    <div>&copy; <span id="shFooterYear">2026</span> Saudi Opportunity Hub · v1.2</div>
+  </div>
+  <script>
+    (function(){ var y = document.getElementById('shFooterYear'); if (y) y.textContent = new Date().getFullYear(); })();
+  </script>
+</footer>
 
 <!-- ══ WORKSPACE PANEL (Watchlist + Saved Searches) ══════════════════ -->
 <div class="ws-panel-overlay" id="wsPanelOverlay"></div>
