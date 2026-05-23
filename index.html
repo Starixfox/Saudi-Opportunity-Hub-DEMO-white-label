@@ -2444,6 +2444,12 @@ footer {
   /* keep dark — footer is intentionally a dark anchor at page bottom */
 }
 
+/* Hide the footer on full-page fixed-overlay views (workspace + admin).
+   They cover .app-content with position:fixed, and the footer would
+   otherwise bleed through behind them. */
+body[data-active-view="workspace"] .sh-footer,
+body[data-active-view="admin"] .sh-footer { display: none; }
+
 /* ── FADE-UP ANIMATION ───────────────────────── */
 .fade-up {
   opacity: 0;
@@ -10068,6 +10074,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   function showView(view) {
     if (VIEWS.indexOf(view) === -1) view = DEFAULT_VIEW;
     if (view === 'admin' && !window.__ohIsAdmin) view = DEFAULT_VIEW;
+    /* Expose the active view to CSS so chrome (footer, etc.) can react.
+       Workspace + admin are full-page fixed overlays that would otherwise
+       collide with the bottom-of-page footer. */
+    document.body.setAttribute('data-active-view', view);
     VIEWS.forEach(function (v) {
       /* Workspace lives in <aside id="wsPanel"> outside .app-content; everything
          else uses the standard "view-<name>" id pattern. */
