@@ -5049,6 +5049,184 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 .home-opp-tag { font-size: 10px; color: var(--text-muted); background: var(--surface-3); padding: 2px 7px; border-radius: var(--radius-full); font-weight: 500; }
 .home-opp-new { font-size: 10px; font-weight: 600; color: var(--green); background: var(--green-highlight); padding: 2px 7px; border-radius: var(--radius-full); border: 1px solid rgba(0,166,81,0.2); }
 .home-list-loading { padding: 24px 18px; color: var(--text-faint); font-size: 13px; }
+
+/* ── RECENTLY ADDED IN YOUR SECTOR ──────────────────────────
+   Personalised section between the stats row and home-cols.
+   Hidden by default; JS unhides + sets data-state to drive
+   which sub-block is visible (loading / grid / empty / cta). */
+.home-ris { margin: 24px 0 0; }
+.home-ris[hidden] { display: none; }
+.home-ris-hdr {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px; margin-bottom: 14px;
+}
+.home-ris-hdr-left {
+  display: flex; align-items: center; gap: 12px; min-width: 0;
+}
+.home-ris-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--green-highlight, rgba(0,108,53,0.1));
+  color: var(--green, #006C35); flex-shrink: 0;
+}
+.home-ris-icon [data-lucide] { width: 18px; height: 18px; }
+.home-ris-title {
+  font-size: 17px; font-weight: 700; color: var(--text);
+  margin: 0; letter-spacing: -0.01em;
+}
+.home-ris-sub {
+  font-size: 12px; color: var(--text-muted);
+  margin: 2px 0 0;
+}
+.home-ris-viewall {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 500; color: var(--green);
+  text-decoration: none; padding: 6px 10px; border-radius: var(--radius-full);
+  transition: background var(--transition);
+  white-space: nowrap;
+}
+.home-ris-viewall:hover { background: var(--green-highlight, rgba(0,108,53,0.1)); }
+.home-ris-viewall [data-lucide] { width: 14px; height: 14px; }
+
+.home-ris-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.home-ris-grid[hidden] { display: none; }
+@media (max-width: 1100px) { .home-ris-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px)  { .home-ris-grid { grid-template-columns: 1fr; } }
+
+.home-ris-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 12px);
+  padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 8px;
+  cursor: pointer;
+  transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+  min-width: 0;
+}
+.home-ris-card:hover {
+  border-color: var(--green, #006C35);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 12px rgba(0,108,53,0.08);
+}
+.home-ris-card-title {
+  font-size: 13.5px; font-weight: 600; color: var(--text);
+  line-height: 1.35;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+}
+.home-ris-card-meta {
+  display: flex; flex-wrap: wrap; gap: 5px; align-items: center;
+}
+.home-ris-tag {
+  font-size: 10px; font-weight: 500;
+  color: var(--text-muted); background: var(--surface-3, var(--surface-2));
+  padding: 2px 8px; border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+.home-ris-tag--type { text-transform: capitalize; }
+.home-ris-tag--status-open   { color: #047857; background: rgba(5,150,105,0.1); }
+.home-ris-tag--status-closed { color: #991b1b; background: rgba(239,68,68,0.08); }
+.home-ris-tag--status-rolling,
+.home-ris-tag--status-recurring { color: #92400e; background: rgba(245,158,11,0.1); }
+/* Matching sector chip — highlighted to show "this is why we surfaced it" */
+.home-ris-tag--sector-match {
+  color: var(--green, #006C35);
+  background: var(--green-highlight, rgba(0,108,53,0.12));
+  border: 1px solid rgba(0,108,53,0.22);
+  font-weight: 600;
+}
+.home-ris-card-foot {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 8px; margin-top: 2px;
+  font-size: 11px; color: var(--text-faint);
+}
+.home-ris-added {
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.home-ris-added [data-lucide] { width: 11px; height: 11px; }
+
+/* Skeleton shimmer */
+.home-ris-skeleton {
+  background: linear-gradient(90deg,
+    var(--surface-2, rgba(0,0,0,0.04)) 0%,
+    var(--surface-3, rgba(0,0,0,0.07)) 50%,
+    var(--surface-2, rgba(0,0,0,0.04)) 100%);
+  background-size: 200% 100%;
+  animation: homeRisShimmer 1.4s infinite linear;
+  border-color: transparent;
+  height: 96px;
+  cursor: default;
+}
+.home-ris-skeleton:hover { transform: none; border-color: transparent; box-shadow: none; }
+@keyframes homeRisShimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .home-ris-skeleton { animation: none; } }
+
+/* Empty state */
+.home-ris-empty {
+  background: var(--surface); border: 1px dashed var(--border);
+  border-radius: var(--radius-lg, 12px);
+  padding: 28px 18px; text-align: center;
+  color: var(--text-muted); font-size: 13.5px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.home-ris-empty[hidden] { display: none; }
+.home-ris-empty [data-lucide] { width: 26px; height: 26px; color: var(--text-faint); }
+.home-ris-empty p { margin: 0; max-width: 44ch; line-height: 1.5; }
+
+/* CTA card (no prefs set yet) */
+.home-ris-cta {
+  background: linear-gradient(135deg,
+    var(--green-highlight, rgba(0,108,53,0.08)) 0%,
+    var(--surface) 100%);
+  border: 1px solid rgba(0,108,53,0.18);
+  border-radius: var(--radius-lg, 12px);
+  padding: 22px 24px;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 20px; flex-wrap: wrap;
+}
+.home-ris-cta[hidden] { display: none; }
+.home-ris-cta-body { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.home-ris-cta-icon {
+  width: 22px; height: 22px; color: var(--green, #006C35);
+  flex-shrink: 0;
+}
+.home-ris-cta-title {
+  font-size: 15px; font-weight: 700; color: var(--text);
+  margin: 0 0 2px;
+}
+.home-ris-cta-desc {
+  font-size: 13px; color: var(--text-muted);
+  margin: 0; max-width: 60ch; line-height: 1.5;
+}
+.home-ris-cta-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px; border-radius: var(--radius-full);
+  background: var(--green, #006C35); color: #fff;
+  border: 1px solid var(--green, #006C35);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+  white-space: nowrap;
+}
+.home-ris-cta-btn:hover { background: #005228; transform: translateY(-1px); }
+.home-ris-cta-btn [data-lucide] { width: 14px; height: 14px; }
+
+/* RTL flips */
+[dir="rtl"] .home-ris-hdr-left { flex-direction: row-reverse; }
+[dir="rtl"] .home-ris-viewall { flex-direction: row-reverse; }
+[dir="rtl"] .home-ris-cta-body { flex-direction: row-reverse; text-align: right; }
+[dir="rtl"] .home-ris-cta-btn { flex-direction: row-reverse; }
+[dir="rtl"] .home-ris-viewall [data-lucide],
+[dir="rtl"] .home-ris-cta-btn [data-lucide] { transform: scaleX(-1); }
+
+@media (max-width: 640px) {
+  .home-ris-hdr { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .home-ris-cta { flex-direction: column; align-items: stretch; }
+  .home-ris-cta-btn { justify-content: center; }
+}
 /* Watchlist empty */
 .home-wl-empty { display: flex; flex-direction: column; align-items: center; padding: 32px 18px; text-align: center; color: var(--text-muted); gap: 8px; }
 .home-wl-empty [data-lucide] { width: 28px; height: 28px; color: var(--text-faint); }
@@ -8716,6 +8894,64 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
             <div class="home-stat-lbl">Sectors tracked</div>
           </div>
         </div>
+
+        <!-- ─────────────────────────────────────────────────────
+             Recently Added in Your Sector
+             Personalised digest of recent opportunities matching
+             the logged-in user's sector preferences. Hidden when
+             logged-out; shows CTA when no prefs set.
+        ───────────────────────────────────────────────────────── -->
+        <section class="home-ris" id="homeRecentInSector" hidden aria-labelledby="homeRisHeading" data-state="loading">
+          <div class="home-ris-hdr">
+            <div class="home-ris-hdr-left">
+              <span class="home-ris-icon" aria-hidden="true">
+                <i data-lucide="sparkles"></i>
+              </span>
+              <div>
+                <h2 class="home-ris-title" id="homeRisHeading" data-ar="أحدث الفرص في قطاعك">Recently Added in Your Sector</h2>
+                <p class="home-ris-sub" id="homeRisSub" data-ar="فرص جديدة من القطاعات التي تتابعها — آخر 30 يوماً.">New opportunities from the sectors you follow — last 30 days.</p>
+              </div>
+            </div>
+            <a href="#opportunities" class="home-ris-viewall" id="homeRisViewAll" data-ar="عرض الكل">
+              <span>View all</span>
+              <i data-lucide="arrow-right"></i>
+            </a>
+          </div>
+
+          <!-- LOADING — 6 skeleton cards -->
+          <div class="home-ris-grid home-ris-grid--loading" id="homeRisLoading">
+            <div class="home-ris-card home-ris-skeleton"></div>
+            <div class="home-ris-card home-ris-skeleton"></div>
+            <div class="home-ris-card home-ris-skeleton"></div>
+            <div class="home-ris-card home-ris-skeleton"></div>
+            <div class="home-ris-card home-ris-skeleton"></div>
+            <div class="home-ris-card home-ris-skeleton"></div>
+          </div>
+
+          <!-- RESULTS — populated by JS -->
+          <div class="home-ris-grid" id="homeRisGrid" hidden role="list"></div>
+
+          <!-- EMPTY — has prefs, but nothing matched in last 30 days -->
+          <div class="home-ris-empty" id="homeRisEmpty" hidden>
+            <i data-lucide="inbox"></i>
+            <p data-ar="لا توجد فرص جديدة في قطاعاتك خلال الـ 30 يومًا الماضية. عاود التحقق قريبًا!">No new opportunities in your sectors in the last 30 days. Check back soon!</p>
+          </div>
+
+          <!-- CTA — logged in but no sector prefs saved yet -->
+          <div class="home-ris-cta" id="homeRisCta" hidden>
+            <div class="home-ris-cta-body">
+              <i data-lucide="target" class="home-ris-cta-icon"></i>
+              <div>
+                <h3 class="home-ris-cta-title" data-ar="خصّص فرصك">Personalise your feed</h3>
+                <p class="home-ris-cta-desc" data-ar="أخبرنا بالقطاعات التي تهتم بها وسنعرض لك أحدث الفرص هنا.">Tell us which sectors you're interested in and we'll show you the latest opportunities here.</p>
+              </div>
+            </div>
+            <button class="home-ris-cta-btn" type="button" onclick="if (window.WS && WS.openSettings) WS.openSettings();" data-ar="حدّد اهتماماتك">
+              <span>Set Interests</span>
+              <i data-lucide="arrow-right"></i>
+            </button>
+          </div>
+        </section>
 
         <!-- Two-column layout: New this week + Your watchlist -->
         <div class="home-cols">
@@ -24208,6 +24444,390 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       skelStash.delete(el);
     }
   };
+})();
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     RECENTLY ADDED IN YOUR SECTOR — fetches a personalised digest of
+     opportunities from the user's preferred sectors (last 30 days) and
+     renders them between the home stats and home cols.
+
+     States:
+       - logged out                  → section hidden
+       - logged in, no sectors saved → CTA card linking to settings
+       - logged in, fetching         → 6 skeleton cards
+       - logged in, no recent hits   → empty-state message
+       - logged in, with hits        → up to 6 sector-matched cards
+
+     Refreshes on: auth changes, __userPrefsUpdated, oh:data-complete.
+════════════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  var WINDOW_DAYS    = 30;
+  var MAX_RESULTS    = 6;
+  var ROOT_ID        = 'homeRecentInSector';
+  var LOADING_ID     = 'homeRisLoading';
+  var GRID_ID        = 'homeRisGrid';
+  var EMPTY_ID       = 'homeRisEmpty';
+  var CTA_ID         = 'homeRisCta';
+  var VIEWALL_ID     = 'homeRisViewAll';
+
+  function el(id) { return document.getElementById(id); }
+  function ar() { return (document.documentElement.lang || '').toLowerCase().indexOf('ar') === 0; }
+
+  /* Normalize sectors via the app-wide helper so user-pref keys
+     (e.g. "energy") compare correctly against db variants
+     ("Energy", "energy", etc.) — see __normalizeSectorKey upstream. */
+  function normSector(s) {
+    var fn = window.__normalizeSectorKey;
+    return fn ? fn(s) : String(s || '').trim().toLowerCase();
+  }
+
+  function setState(state) {
+    var root = el(ROOT_ID); if (!root) return;
+    root.dataset.state = state;
+    var blocks = {
+      loading: el(LOADING_ID),
+      grid:    el(GRID_ID),
+      empty:   el(EMPTY_ID),
+      cta:     el(CTA_ID)
+    };
+    Object.keys(blocks).forEach(function(k) {
+      if (!blocks[k]) return;
+      if (k === state) blocks[k].removeAttribute('hidden');
+      else             blocks[k].setAttribute('hidden', '');
+    });
+  }
+
+  function showRoot()  { var r = el(ROOT_ID); if (r) r.removeAttribute('hidden'); }
+  function hideRoot()  { var r = el(ROOT_ID); if (r) r.setAttribute('hidden', ''); }
+
+  /* "Added 3 days ago" / "أضيف منذ 3 أيام" */
+  function relativeDaysSince(iso) {
+    if (!iso) return '';
+    var then = new Date(iso); if (isNaN(then.getTime())) return '';
+    var ms = Date.now() - then.getTime();
+    var days = Math.max(0, Math.floor(ms / 86400000));
+    if (ar()) {
+      if (days === 0) return 'أضيف اليوم';
+      if (days === 1) return 'أضيف منذ يوم';
+      if (days === 2) return 'أضيف منذ يومين';
+      if (days < 11)  return 'أضيف منذ ' + days + ' أيام';
+      return 'أضيف منذ ' + days + ' يومًا';
+    }
+    if (days === 0) return 'Added today';
+    if (days === 1) return 'Added 1 day ago';
+    return 'Added ' + days + ' days ago';
+  }
+
+  function statusKey(s) {
+    var k = String(s || '').toLowerCase().trim();
+    if (k === 'open' || k === 'closed' || k === 'rolling' || k === 'recurring') return k;
+    return '';
+  }
+  function statusLabel(s) {
+    var k = statusKey(s); if (!k) return s || '';
+    if (ar()) return ({open:'مفتوحة', closed:'مغلقة', rolling:'دورية', recurring:'متكررة'})[k] || s;
+    return k.charAt(0).toUpperCase() + k.slice(1);
+  }
+  function typeLabel(t) {
+    var s = String(t || '').replace(/_/g, ' ').trim();
+    if (!s) return '';
+    return s.replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+  }
+
+  function sectorLabel(key) {
+    var k = String(key || '').toLowerCase();
+    if (ar() && window.SECTOR_NAMES_AR && window.SECTOR_NAMES_AR[k]) return window.SECTOR_NAMES_AR[k];
+    if (window.SECTOR_NAMES_EN && window.SECTOR_NAMES_EN[k]) return window.SECTOR_NAMES_EN[k];
+    return k.replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+  }
+
+  function pickSectorChip(opp, prefKeySet) {
+    var sectors = Array.isArray(opp.sectors) ? opp.sectors : [];
+    var match = null, first = null;
+    for (var i = 0; i < sectors.length; i++) {
+      var k = normSector(sectors[i]);
+      if (!k) continue;
+      if (!first) first = { raw: sectors[i], key: k };
+      if (prefKeySet[k]) { match = { raw: sectors[i], key: k, match: true }; break; }
+    }
+    return match || (first ? Object.assign(first, { match: false }) : null);
+  }
+
+  /* Build a card via DOM nodes (no innerHTML on user-supplied data) */
+  function buildCard(opp, prefKeySet) {
+    var btn = document.createElement('button');
+    btn.className = 'home-ris-card';
+    btn.type = 'button';
+    btn.setAttribute('role', 'listitem');
+    btn.dataset.id = String(opp.id || '');
+
+    var title = document.createElement('div');
+    title.className = 'home-ris-card-title';
+    title.textContent = (ar() && opp.title_ar) ? opp.title_ar : (opp.title || (ar() ? 'بدون عنوان' : 'Untitled'));
+    btn.appendChild(title);
+
+    var meta = document.createElement('div');
+    meta.className = 'home-ris-card-meta';
+
+    if (opp.type) {
+      var t = document.createElement('span');
+      t.className = 'home-ris-tag home-ris-tag--type';
+      t.textContent = typeLabel(opp.type);
+      meta.appendChild(t);
+    }
+    if (opp.status) {
+      var s = document.createElement('span');
+      var sk = statusKey(opp.status);
+      s.className = 'home-ris-tag' + (sk ? ' home-ris-tag--status-' + sk : '');
+      s.textContent = statusLabel(opp.status);
+      meta.appendChild(s);
+    }
+    var chip = pickSectorChip(opp, prefKeySet);
+    if (chip) {
+      var sec = document.createElement('span');
+      sec.className = 'home-ris-tag ' + (chip.match ? 'home-ris-tag--sector-match' : 'home-ris-tag--sector');
+      sec.textContent = sectorLabel(chip.key);
+      meta.appendChild(sec);
+    }
+    btn.appendChild(meta);
+
+    var foot = document.createElement('div');
+    foot.className = 'home-ris-card-foot';
+    var added = document.createElement('span');
+    added.className = 'home-ris-added';
+    added.textContent = relativeDaysSince(opp.created_at);
+    foot.appendChild(added);
+    btn.appendChild(foot);
+
+    return btn;
+  }
+
+  function fetchUserSectorPrefs(uid) {
+    var supa = window._supabase;
+    if (!supa || !uid) return Promise.resolve([]);
+    return supa.from('user_prefs').select('prefs').eq('user_id', uid).maybeSingle().then(function(res) {
+      if (res && res.error) { console.warn('[RIS] user_prefs fetch failed:', res.error.message); return []; }
+      var prefs = (res && res.data && res.data.prefs) || {};
+      var arr = Array.isArray(prefs.sectors) ? prefs.sectors : [];
+      var out = [], seen = {};
+      arr.forEach(function(s) {
+        var k = normSector(s);
+        if (k && !seen[k]) { seen[k] = true; out.push(k); }
+      });
+      return out;
+    }).catch(function(e) {
+      console.warn('[RIS] user_prefs fetch threw:', e && e.message);
+      return [];
+    });
+  }
+
+  /* Expand normalized pref keys → raw stored sector strings so we can
+     use Postgres array overlap (.overlaps does exact-string match). */
+  function expandPrefKeysToRawStrings(prefKeys) {
+    var keySet = {}; prefKeys.forEach(function(k){ keySet[k] = true; });
+    var local = window.opportunitiesData;
+    if (Array.isArray(local) && local.length) {
+      var raws = {};
+      local.forEach(function(o){
+        (o.sectors || []).forEach(function(s){
+          if (keySet[normSector(s)]) raws[s] = true;
+        });
+      });
+      return Promise.resolve(Object.keys(raws));
+    }
+    var supa = window._supabase;
+    if (!supa) return Promise.resolve([]);
+    return supa.from('opportunities').select('sectors').neq('status', 'archived')
+      .then(function(res) {
+        if (res && res.error) return [];
+        var raws = {};
+        (res.data || []).forEach(function(o){
+          (o.sectors || []).forEach(function(s){
+            if (keySet[normSector(s)]) raws[s] = true;
+          });
+        });
+        return Object.keys(raws);
+      })
+      .catch(function(){ return []; });
+  }
+
+  function fetchRecentInSectors(rawSectorStrings) {
+    var supa = window._supabase;
+    if (!supa || !rawSectorStrings.length) return Promise.resolve([]);
+    var since = new Date(Date.now() - WINDOW_DAYS * 86400000).toISOString();
+    return supa.from('opportunities')
+      .select('id, title, title_ar, type, status, sectors, country, created_at')
+      .overlaps('sectors', rawSectorStrings)
+      .neq('status', 'archived')
+      .gte('created_at', since)
+      .order('created_at', { ascending: false })
+      .limit(MAX_RESULTS)
+      .then(function(res){
+        if (res && res.error) { console.warn('[RIS] opportunities fetch failed:', res.error.message); return []; }
+        return res.data || [];
+      })
+      .catch(function(e){
+        console.warn('[RIS] opportunities fetch threw:', e && e.message);
+        return [];
+      });
+  }
+
+  function wireViewAll(prefKeys) {
+    var link = el(VIEWALL_ID); if (!link) return;
+    link.onclick = function(e) {
+      e.preventDefault();
+      window.__sectorPrefFilter = prefKeys.slice();
+      if (typeof window.setRoute === 'function') window.setRoute('opportunities');
+      else                                       window.location.hash = '#opportunities';
+    };
+  }
+
+  function applyLangLabels() {
+    var arNow = ar();
+    var subEl = el('homeRisSub');
+    if (subEl) subEl.textContent = arNow
+      ? 'فرص جديدة من القطاعات التي تتابعها — آخر 30 يوماً.'
+      : 'New opportunities from the sectors you follow — last 30 days.';
+    var viewAll = el(VIEWALL_ID);
+    if (viewAll) {
+      var span = viewAll.querySelector('span');
+      if (span) span.textContent = arNow ? 'عرض الكل' : 'View all';
+    }
+    var ctaWrap = el(CTA_ID);
+    var ctaBtnSpan = ctaWrap ? ctaWrap.querySelector('.home-ris-cta-btn span') : null;
+    if (ctaBtnSpan) ctaBtnSpan.textContent = arNow ? 'حدّد اهتماماتك' : 'Set Interests';
+  }
+
+  var _renderLock = 0;
+  function render() {
+    var root = el(ROOT_ID); if (!root) return;
+    var lock = ++_renderLock;
+
+    var supa = window._supabase;
+    if (!supa || !supa.auth) { hideRoot(); return; }
+
+    supa.auth.getSession().then(function(res) {
+      if (lock !== _renderLock) return;
+      var user = res && res.data && res.data.session && res.data.session.user;
+      if (!user) { hideRoot(); return; }
+      var uid = user.id;
+
+      showRoot();
+      setState('loading');
+      applyLangLabels();
+
+      fetchUserSectorPrefs(uid).then(function(prefKeys) {
+        if (lock !== _renderLock) return;
+
+        if (!prefKeys.length) {
+          setState('cta');
+          if (window.lucide && lucide.createIcons) lucide.createIcons();
+          return;
+        }
+
+        wireViewAll(prefKeys);
+
+        expandPrefKeysToRawStrings(prefKeys).then(function(raws) {
+          if (lock !== _renderLock) return;
+          if (!raws.length) {
+            setState('empty');
+            if (window.lucide && lucide.createIcons) lucide.createIcons();
+            return;
+          }
+          fetchRecentInSectors(raws).then(function(opps) {
+            if (lock !== _renderLock) return;
+            if (!opps.length) {
+              setState('empty');
+              if (window.lucide && lucide.createIcons) lucide.createIcons();
+              return;
+            }
+            var grid = el(GRID_ID); if (!grid) return;
+            while (grid.firstChild) grid.removeChild(grid.firstChild);
+            var prefKeySet = {}; prefKeys.forEach(function(k){ prefKeySet[k] = true; });
+            var byId = {};
+            opps.forEach(function(o){
+              byId[String(o.id)] = o;
+              var card = buildCard(o, prefKeySet);
+              card.addEventListener('click', function() {
+                if (typeof window.__openDetailPanel === 'function') window.__openDetailPanel(o);
+              });
+              grid.appendChild(card);
+            });
+            setState('grid');
+            if (window.lucide && lucide.createIcons) lucide.createIcons();
+          });
+        });
+      });
+    }).catch(function() { hideRoot(); });
+  }
+
+  /* Opportunities view: apply pending sector filter on mount */
+  function applyPendingSectorFilterOnOpps(view) {
+    if (view !== 'opportunities') return;
+    var prefs = window.__sectorPrefFilter;
+    if (!Array.isArray(prefs) || !prefs.length) return;
+    window.__sectorPrefFilter = null;
+    setTimeout(function() {
+      var sf = document.getElementById('sectorFilter');
+      if (!sf) return;
+      var match = null;
+      for (var i = 0; i < prefs.length && !match; i++) {
+        for (var j = 0; j < sf.options.length; j++) {
+          if (sf.options[j].value === prefs[i]) { match = prefs[i]; break; }
+        }
+      }
+      if (match) {
+        sf.value = match;
+        sf.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }, 250);
+  }
+
+  function onHashChange() {
+    var hash = (location.hash || '').replace(/^#/, '').split('?')[0];
+    applyPendingSectorFilterOnOpps(hash);
+  }
+
+  function safeRender() { try { render(); } catch (e) { console.warn('[RIS] render failed:', e && e.message); } }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', safeRender, { once: true });
+  } else {
+    safeRender();
+  }
+
+  document.addEventListener('oh:data-complete', safeRender);
+  window.addEventListener('__userPrefsUpdated', safeRender);
+
+  function watchAuth() {
+    if (!window._supabase || !window._supabase.auth) { setTimeout(watchAuth, 200); return; }
+    window._supabase.auth.onAuthStateChange(function(event) {
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') safeRender();
+    });
+  }
+  watchAuth();
+
+  var langObserver = new MutationObserver(function(muts) {
+    for (var i = 0; i < muts.length; i++) {
+      if (muts[i].type === 'attributes' && (muts[i].attributeName === 'lang' || muts[i].attributeName === 'dir')) {
+        applyLangLabels();
+        var root = el(ROOT_ID);
+        if (root && root.dataset.state === 'grid') safeRender();
+        break;
+      }
+    }
+  });
+  langObserver.observe(document.documentElement, { attributes: true });
+
+  window.addEventListener('hashchange', onHashChange);
+  /* Also handle initial route */
+  onHashChange();
+
+  window.__renderRecentInSector = safeRender;
 })();
 </script>
 
