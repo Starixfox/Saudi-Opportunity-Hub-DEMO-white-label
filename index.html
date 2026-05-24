@@ -156,6 +156,32 @@ window.OH_THEMES = {
     logo: 'https://www.sdb.gov.sa/SiteFiles/images/logo.svg',
     logoDark: 'https://www.sdb.gov.sa/SiteFiles/images/logo.svg',
     logoHeight: 30
+  },
+  'swift-solve': {
+    label: 'Swift Solve',
+    labelAr: 'سويفت سولف',
+    /* Light-mode primary: deep navy lifted from the brand mark */
+    accent: '#0E2A56',
+    accentHover: '#091F40',
+    accentLight: 'rgba(14,42,86,0.10)',
+    accentGlow: 'rgba(14,42,86,0.25)',
+    accentDim: 'rgba(14,42,86,0.08)',
+    /* Dark-mode primary: lifted from the chevron highlight — pure navy
+       is unreadable against the dark surface tokens, so swap to the
+       bright royal blue that's visible on dark backgrounds. */
+    darkAccent: '#4A90E2',
+    darkAccentHover: '#3578C5',
+    darkAccentLight: 'rgba(74,144,226,0.14)',
+    darkAccentGlow: 'rgba(74,144,226,0.30)',
+    darkAccentDim: 'rgba(74,144,226,0.10)',
+    tagline: 'Investment Intelligence Platform',
+    taglineAr: 'منصة ذكاء الاستثمار',
+    navName: 'Swift Solve',
+    navNameAr: 'سويفت سولف',
+    logo: 'assets/logo-swift-solve.svg',
+    logoDark: 'assets/logo-swift-solve.svg',
+    logoHeight: 30,
+    pageTitle: 'Swift Solve — Investment Intelligence Platform'
   }
 };
 
@@ -165,21 +191,32 @@ window.applyTheme = function (key) {
   var t = window.OH_THEMES[key] || window.OH_THEMES['default'];
   var r = document.documentElement;
 
+  /* Per-mode accent palette. Themes may opt-in to a brighter dark-mode
+     variant via `darkAccent*` fields — pure-navy primaries like Swift
+     Solve are invisible against dark surface tokens, so we swap. Themes
+     without darkAccent* fields keep the legacy single-palette behaviour. */
+  var isDarkMode  = r.getAttribute('data-theme') === 'dark';
+  var accent      = (isDarkMode && t.darkAccent)       ? t.darkAccent       : t.accent;
+  var accentHover = (isDarkMode && t.darkAccentHover)  ? t.darkAccentHover  : t.accentHover;
+  var accentLight = (isDarkMode && t.darkAccentLight)  ? t.darkAccentLight  : t.accentLight;
+  var accentGlow  = (isDarkMode && t.darkAccentGlow)   ? t.darkAccentGlow   : t.accentGlow;
+  var accentDim   = (isDarkMode && t.darkAccentDim)    ? t.darkAccentDim    : t.accentDim;
+
   /* Legacy --green* tokens (original brand palette) */
-  r.style.setProperty('--green',           t.accent);
-  r.style.setProperty('--green-hover',     t.accentHover);
-  r.style.setProperty('--green-highlight', t.accentLight);
-  r.style.setProperty('--green-glow',      t.accentGlow);
-  r.style.setProperty('--green-dim',       t.accentDim);
+  r.style.setProperty('--green',           accent);
+  r.style.setProperty('--green-hover',     accentHover);
+  r.style.setProperty('--green-highlight', accentLight);
+  r.style.setProperty('--green-glow',      accentGlow);
+  r.style.setProperty('--green-dim',       accentDim);
   /* New design-system --accent* tokens (used by Phase D + admin views) */
-  r.style.setProperty('--accent',          t.accent);
-  r.style.setProperty('--accent-hover',    t.accentHover);
-  r.style.setProperty('--accent-light',    t.accentLight);
-  r.style.setProperty('--accent-glow',     t.accentGlow);
+  r.style.setProperty('--accent',          accent);
+  r.style.setProperty('--accent-hover',    accentHover);
+  r.style.setProperty('--accent-light',    accentLight);
+  r.style.setProperty('--accent-glow',     accentGlow);
   /* Sidebar active-state + focus ring derive from the same accent */
-  r.style.setProperty('--sidebar-active-bg',     t.accentLight);
-  r.style.setProperty('--sidebar-active-border', t.accent);
-  r.style.setProperty('--shadow-focus',          '0 0 0 3px ' + t.accentGlow);
+  r.style.setProperty('--sidebar-active-bg',     accentLight);
+  r.style.setProperty('--sidebar-active-border', accent);
+  r.style.setProperty('--shadow-focus',          '0 0 0 3px ' + accentGlow);
 
   /* Brand text in the sidebar (data-ar holds Arabic) */
   var brandSpan = document.querySelector('.app-sidebar-brand span[data-ar]');
@@ -194,11 +231,12 @@ window.applyTheme = function (key) {
   var navLogo     = document.querySelector('.app-sidebar-brand');
   var navLogoText = brandSpan;
   var brandDot    = navLogo && navLogo.querySelector('.brand-dot');
-  var isDark      = document.documentElement.getAttribute('data-theme') === 'dark';
+  var isDark      = isDarkMode;
   var logoUrl     = isDark ? (t.logoDark || t.logo) : t.logo;
 
-  /* Brand container background should track the theme accent */
-  if (navLogo) navLogo.style.background = t.accent;
+  /* Brand container background should track the resolved accent (so the
+     dark-mode brighter variant shows in dark mode, navy in light mode). */
+  if (navLogo) navLogo.style.background = accent;
 
   if (logoUrl && navLogo) {
     var navLogoImg = document.getElementById('ohThemeLogoImg');
@@ -233,8 +271,9 @@ window.applyTheme = function (key) {
     if (navLogoText) navLogoText.style.display = '';
   }
 
-  /* Page title */
-  document.title = t.label + ' — Intelligence Platform';
+  /* Page title — themes may override the full string via t.pageTitle
+     (used by Swift Solve to read "Investment Intelligence Platform"). */
+  document.title = t.pageTitle || (t.label + ' — Intelligence Platform');
 
   /* Hero/dash tagline if any matching element exists (graceful no-op otherwise) */
   var tagEl = document.querySelector('.hero-tagline, .hero-sub, .hero-subtitle, .dash-sub');
@@ -266,6 +305,23 @@ window.applyTheme = function (key) {
     var saved = localStorage.getItem('oh_theme') || 'default';
     window.applyTheme(urlTheme || saved);
   } catch(e) { window.applyTheme('default'); }
+})();
+
+/* Re-resolve the accent palette when light↔dark toggles, so themes
+   that opt into a brighter dark-mode variant (e.g. Swift Solve)
+   swap their primary tokens at the same time the surface tokens flip. */
+(function watchThemeMode() {
+  var obs = new MutationObserver(function (muts) {
+    for (var i = 0; i < muts.length; i++) {
+      if (muts[i].type === 'attributes' && muts[i].attributeName === 'data-theme') {
+        if (typeof window.applyTheme === 'function') {
+          window.applyTheme(window.__ohActiveTheme || 'default');
+        }
+        break;
+      }
+    }
+  });
+  obs.observe(document.documentElement, { attributes: true });
 })();
 </script>
 
