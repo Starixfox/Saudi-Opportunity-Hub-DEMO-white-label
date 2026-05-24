@@ -185,6 +185,10 @@ window.OH_THEMES = {
     logo: 'assets/logo-swift-solve.png',
     logoDark: 'assets/logo-swift-solve.png',
     logoHeight: 30,
+    /* Swift Solve's mark is icon-only (no wordmark), so render the
+       brand name alongside it in white. NEOM/MISA/etc. don't set this
+       because their logo files already contain their wordmark. */
+    showName: true,
     pageTitle: 'Swift Solve — Investment Intelligence Platform'
   }
 };
@@ -256,14 +260,27 @@ window.applyTheme = function (key) {
     navLogoImg.style.maxWidth = '160px';
     navLogoImg.style.flexShrink = '0';
     navLogoImg.style.display = 'block';
-    if (brandDot)    brandDot.style.display = 'none';
-    if (navLogoText) navLogoText.style.display = 'none';
+    if (brandDot) brandDot.style.display = 'none';
+    /* showName=true keeps the wordmark visible next to icon-only logos
+       (e.g. Swift Solve); themes with wordmark logo files leave it
+       hidden so the name isn't duplicated. */
+    if (navLogoText) {
+      if (t.showName) {
+        navLogoText.style.display = '';
+        navLogoText.style.color = '#fff';
+        navLogoText.textContent = (document.documentElement.lang === 'ar' || document.body.dir === 'rtl') ? t.navNameAr : t.navName;
+      } else {
+        navLogoText.style.display = 'none';
+        navLogoText.style.color = '';
+      }
+    }
     /* Broken image → restore text + dot */
     navLogoImg.onerror = function () {
       this.style.display = 'none';
       if (brandDot)    brandDot.style.display = '';
       if (navLogoText) {
         navLogoText.style.display = '';
+        navLogoText.style.color = t.showName ? '#fff' : '';
         navLogoText.textContent = (document.documentElement.lang === 'ar' || document.body.dir === 'rtl') ? t.navNameAr : t.navName;
       }
     };
@@ -272,7 +289,10 @@ window.applyTheme = function (key) {
     var themeImg = document.getElementById('ohThemeLogoImg');
     if (themeImg) themeImg.style.display = 'none';
     if (brandDot)    brandDot.style.display = '';
-    if (navLogoText) navLogoText.style.display = '';
+    if (navLogoText) {
+      navLogoText.style.display = '';
+      navLogoText.style.color = '';
+    }
   }
 
   /* Page title — themes may override the full string via t.pageTitle
