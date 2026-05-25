@@ -5178,56 +5178,132 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 @media (max-width: 640px)  { .home-ris-grid { grid-template-columns: 1fr; } }
 
 .home-ris-card {
+  position: relative;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius-lg, 12px);
-  padding: 14px 16px;
-  display: flex; flex-direction: column; gap: 8px;
+  padding: 16px;
+  display: flex; flex-direction: column;
+  align-items: stretch; justify-content: flex-start;
+  gap: 10px;
+  min-height: 120px; min-width: 0;
+  text-align: start;
   cursor: pointer;
-  transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
-  min-width: 0;
-}
-.home-ris-card:hover {
-  border-color: var(--green, #006C35);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 12px rgba(0,108,53,0.08);
-}
-.home-ris-card-title {
-  font-size: 13.5px; font-weight: 600; color: var(--text);
-  line-height: 1.35;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden;
+  transition:
+    border-color   180ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform      180ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow     180ms cubic-bezier(0.16, 1, 0.3, 1),
+    background     180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* Left accent bar — invisible by default, slides in on hover */
+.home-ris-card::before {
+  content: '';
+  position: absolute;
+  inset-block: 0; inset-inline-start: 0;
+  width: 3px;
+  background: var(--green, #006C35);
+  transform: scaleY(0); transform-origin: center;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  border-start-start-radius: var(--radius-lg, 12px);
+  border-end-start-radius: var(--radius-lg, 12px);
+}
+.home-ris-card:hover,
+.home-ris-card:focus-visible {
+  border-color: var(--border-light, var(--border));
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.home-ris-card:hover::before,
+.home-ris-card:focus-visible::before { transform: scaleY(1); }
+
+.home-ris-card-title {
+  font-size: clamp(0.85rem, 0.78rem + 0.25vw, 0.95rem);
+  font-weight: 600; color: var(--text);
+  line-height: 1.4;
+  letter-spacing: -0.005em;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; text-overflow: ellipsis;
   margin: 0;
 }
 .home-ris-card-meta {
-  display: flex; flex-wrap: wrap; gap: 5px; align-items: center;
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
 }
 .home-ris-tag {
-  font-size: 10px; font-weight: 500;
-  color: var(--text-muted); background: var(--surface-3, var(--surface-2));
-  padding: 2px 8px; border-radius: var(--radius-full);
+  font-size: 11px; font-weight: 500; line-height: 1;
+  color: var(--text-muted);
+  background: var(--surface-3, var(--surface-2));
+  padding: 4px 9px; border-radius: var(--radius-full);
   white-space: nowrap;
 }
 .home-ris-tag--type { text-transform: capitalize; }
-.home-ris-tag--status-open   { color: #047857; background: rgba(5,150,105,0.1); }
-.home-ris-tag--status-closed { color: #991b1b; background: rgba(239,68,68,0.08); }
+.home-ris-tag--status-open   { color: #047857; background: rgba(5,150,105,0.12); }
+.home-ris-tag--status-closed { color: #991b1b; background: rgba(239,68,68,0.10); }
 .home-ris-tag--status-rolling,
-.home-ris-tag--status-recurring { color: #92400e; background: rgba(245,158,11,0.1); }
-/* Matching sector chip — highlighted to show "this is why we surfaced it" */
+.home-ris-tag--status-recurring { color: #92400e; background: rgba(245,158,11,0.12); }
+/* Sector chip — tinted with the active primary so it picks up the theme */
+.home-ris-tag--sector,
 .home-ris-tag--sector-match {
   color: var(--green, #006C35);
   background: var(--green-highlight, rgba(0,108,53,0.12));
-  border: 1px solid rgba(0,108,53,0.22);
   font-weight: 600;
 }
+@supports (color: oklch(from white l c h / 0.12)) {
+  .home-ris-tag--sector,
+  .home-ris-tag--sector-match {
+    background: oklch(from var(--green, #006C35) l c h / 0.12);
+  }
+}
+/* Matching sector — slightly stronger so it still reads as "this is why
+   we surfaced this card" in the otherwise harmonized palette */
+.home-ris-tag--sector-match {
+  box-shadow: inset 0 0 0 1px rgba(0,108,53,0.22);
+}
+
 .home-ris-card-foot {
   display: flex; justify-content: space-between; align-items: center;
-  gap: 8px; margin-top: 2px;
-  font-size: 11px; color: var(--text-faint);
+  gap: 8px; margin-top: auto;
+  font-size: 11px; color: var(--text-muted);
 }
 .home-ris-added {
-  display: inline-flex; align-items: center; gap: 4px;
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--text-muted); line-height: 1;
 }
-.home-ris-added [data-lucide] { width: 11px; height: 11px; }
+.home-ris-added [data-lucide] {
+  width: 11px; height: 11px;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+/* "Click-through" arrow — appears on hover only */
+.home-ris-arrow {
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--green, #006C35);
+  opacity: 0; transform: translateX(-4px);
+  transition:
+    opacity   180ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.home-ris-arrow [data-lucide] { width: 14px; height: 14px; }
+.home-ris-card:hover .home-ris-arrow,
+.home-ris-card:focus-visible .home-ris-arrow {
+  opacity: 1; transform: translateX(0);
+}
+[dir="rtl"] .home-ris-arrow { transform: translateX(4px); }
+[dir="rtl"] .home-ris-arrow [data-lucide] { transform: scaleX(-1); }
+[dir="rtl"] .home-ris-card:hover .home-ris-arrow,
+[dir="rtl"] .home-ris-card:focus-visible .home-ris-arrow {
+  transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-ris-card,
+  .home-ris-card::before,
+  .home-ris-arrow { transition: none; }
+  .home-ris-card:hover,
+  .home-ris-card:focus-visible { transform: none; }
+}
 
 /* Skeleton shimmer */
 .home-ris-skeleton {
@@ -24705,8 +24781,23 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     foot.className = 'home-ris-card-foot';
     var added = document.createElement('span');
     added.className = 'home-ris-added';
-    added.textContent = relativeDaysSince(opp.created_at);
+    var clockIcon = document.createElement('i');
+    clockIcon.setAttribute('data-lucide', 'clock');
+    clockIcon.setAttribute('aria-hidden', 'true');
+    added.appendChild(clockIcon);
+    var addedText = document.createElement('span');
+    addedText.textContent = relativeDaysSince(opp.created_at);
+    added.appendChild(addedText);
     foot.appendChild(added);
+
+    var arrow = document.createElement('span');
+    arrow.className = 'home-ris-arrow';
+    arrow.setAttribute('aria-hidden', 'true');
+    var arrowIcon = document.createElement('i');
+    arrowIcon.setAttribute('data-lucide', 'arrow-right');
+    arrow.appendChild(arrowIcon);
+    foot.appendChild(arrow);
+
     btn.appendChild(foot);
 
     return btn;
