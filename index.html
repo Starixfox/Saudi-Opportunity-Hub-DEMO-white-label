@@ -11018,8 +11018,22 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     el.querySelectorAll('.home-opp-item').forEach(function(row) {
       function activate() {
         var id = row.getAttribute('data-id');
-        var opp = items.find(function(o) { return String(o.id) === String(id); });
-        if (opp && window.__openDetailPanel) window.__openDetailPanel(opp);
+        if (!id) return;
+        /* Deep-link to the card on the Opportunities page — same as
+           the RIS cards. Never open the side detail panel from the
+           home view; the user wants to see the card in its list
+           context. */
+        if (typeof window.__deepLinkToOpportunity === 'function') {
+          window.__deepLinkToOpportunity(id);
+          return;
+        }
+        window.__pendingDeepLinkOppId = String(id);
+        window.__sectorPrefFilter = null;
+        if (typeof window.setRoute === 'function') {
+          window.setRoute('opportunities');
+        } else {
+          window.location.hash = '#opportunities';
+        }
       }
       row.addEventListener('click', activate);
       row.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } });
@@ -11058,8 +11072,22 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     el.querySelectorAll('[data-wl-id]').forEach(function(row) {
       function activate() {
         var id = row.getAttribute('data-wl-id');
-        var opp = byId[id];
-        if (opp && window.__openDetailPanel) window.__openDetailPanel(opp);
+        if (!id) return;
+        /* Same as the RIS / "New this week" home cards: navigate to
+           the Opportunities list and highlight the matching card
+           rather than opening the side detail panel from the home
+           view. */
+        if (typeof window.__deepLinkToOpportunity === 'function') {
+          window.__deepLinkToOpportunity(id);
+          return;
+        }
+        window.__pendingDeepLinkOppId = String(id);
+        window.__sectorPrefFilter = null;
+        if (typeof window.setRoute === 'function') {
+          window.setRoute('opportunities');
+        } else {
+          window.location.hash = '#opportunities';
+        }
       }
       row.addEventListener('click', activate);
       row.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } });
