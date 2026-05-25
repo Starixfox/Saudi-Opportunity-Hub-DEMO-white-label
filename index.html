@@ -25013,11 +25013,25 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
               var card = buildCard(o, prefKeySet);
               (function(opp) {
                 card.addEventListener('click', function() {
+                  /* ALWAYS deep-link to the card on the Opportunities
+                     page — never open the side detail panel from here.
+                     The user wants to see the card in its list context,
+                     not in a drawer. */
                   if (typeof window.__deepLinkToOpportunity === 'function') {
                     window.__deepLinkToOpportunity(opp.id);
-                  } else if (typeof window.__openDetailPanel === 'function') {
-                    /* Fallback while the deep-link helper isn't loaded yet */
-                    window.__openDetailPanel(opp);
+                    return;
+                  }
+                  /* Helper IIFE hasn't parsed yet — race on cold load.
+                     Stash the pending id + route to opportunities; the
+                     deep-link IIFE checks for a pending id on init and
+                     on hashchange, so the jump still happens once the
+                     script finishes parsing. */
+                  window.__pendingDeepLinkOppId = String(opp.id);
+                  window.__sectorPrefFilter = null;
+                  if (typeof window.setRoute === 'function') {
+                    window.setRoute('opportunities');
+                  } else {
+                    window.location.hash = '#opportunities';
                   }
                 });
               })(o);
@@ -25266,6 +25280,21 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     window.__pendingDeepLinkOppId = null;
     setTimeout(function() { jumpToCard(pending); }, 200);
   });
+
+  /* Same race, but worse: user clicked a RIS card before THIS IIFE
+     parsed, so the click handler took the cold-load branch — stashed
+     a pending id and routed via setRoute()/hash. By the time this
+     script runs, navigation is already done and no `hashchange` will
+     fire (we're already on the target hash). Honour the pending id
+     once on startup so the jump still completes. */
+  (function processInitialPending() {
+    var hash = (location.hash || '').replace(/^#/, '').split('?')[0];
+    if (hash !== 'opportunities') return;
+    var pending = window.__pendingDeepLinkOppId;
+    if (!pending) return;
+    window.__pendingDeepLinkOppId = null;
+    setTimeout(function() { jumpToCard(pending); }, 200);
+  })();
 })();
 </script>
 
