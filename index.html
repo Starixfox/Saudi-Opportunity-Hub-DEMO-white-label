@@ -2388,12 +2388,12 @@ footer {
   line-height: 1.6;
 }
 
-/* ── APP FOOTER (rich 4-column, sibling of .app-shell)
-   Aligned with the content column on desktop — i.e. offset by the
-   sidebar's 220px so the dark band starts where the topbar/content
-   start, never under the sidebar. On mobile the sidebar is hidden,
-   so the footer reverts to full viewport width. `margin-inline-start`
-   handles RTL automatically (sidebar flips to the right). ──────── */
+/* ── APP FOOTER (rich 4-column, lives INSIDE .app-shell as a grid
+   item in the content column — see `grid-template-areas` above).
+   Grid placement handles the 220px offset past the sidebar on
+   desktop and collapses to full-width on mobile (single-column grid),
+   so no margin-left / width math needed here. Living inside the shell
+   also extends the sticky sidebar's scroll range over the footer. ─ */
 .sh-footer {
   width: 100%;
   padding: 56px clamp(24px, 4vw, 56px) 0;
@@ -2401,14 +2401,6 @@ footer {
   color: rgba(255,255,255,0.72);
   border-top: 1px solid rgba(255,255,255,0.06);
   font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
-}
-@media (min-width: 769px) {
-  /* Sidebar is 220px wide and visible at this breakpoint
-     (see `.app-sidebar { display: none }` at max-width: 768px). */
-  .sh-footer {
-    width: calc(100% - 220px);
-    margin-inline-start: 220px;
-  }
 }
 @media (max-width: 768px) {
   .sh-footer { padding: 40px 18px calc(72px + env(safe-area-inset-bottom, 0px)); }
@@ -4867,13 +4859,21 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
 .app-shell {
   display: grid;
   grid-template-columns: 220px 1fr;
-  grid-template-rows: 56px 1fr;
+  /* Three rows: topbar (56px), content (1fr fills the slack), footer
+     (auto, shrinks to fit). The footer LIVES INSIDE the shell so the
+     sticky sidebar — which spans `grid-area: sidebar` across all
+     three rows — stays visible the whole way down the page, including
+     while the user reads the footer. */
+  grid-template-rows: 56px 1fr auto;
   grid-template-areas:
     "sidebar topbar"
-    "sidebar content";
+    "sidebar content"
+    "sidebar footer";
   min-height: 100vh;
   background: var(--bg);
 }
+/* Footer is placed by grid when it's a child of .app-shell. */
+.app-shell > .sh-footer { grid-area: footer; }
 .app-sidebar {
   grid-area: sidebar;
   background: var(--surface);
@@ -5665,10 +5665,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 @media (max-width: 767px) {
   .app-shell {
     grid-template-columns: 1fr;
-    grid-template-rows: 56px 1fr;
+    grid-template-rows: 56px 1fr auto;
     grid-template-areas:
       "topbar"
-      "content";
+      "content"
+      "footer";
   }
   .app-sidebar { display: none; }
   .app-bottom-tabs {
@@ -9973,17 +9974,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       <i data-lucide="info"></i><span data-ar="حول المنصة">About</span>
     </button>
   </nav>
-</div><!-- /.app-shell -->
 
-<!-- ═══════════════════════════════════════════
-     FOOTER — sits below .app-shell as a sibling.
-     On desktop (≥769px) it's inset by the 220px sidebar
-     width via `margin-inline-start` so it aligns with the
-     topbar/content column and never extends under the
-     sidebar. On mobile the sidebar is hidden and the
-     footer spans the full viewport. RTL flips automatically.
-═══════════════════════════════════════════ -->
-<footer class="sh-footer" role="contentinfo" aria-label="Site footer">
+  <!-- ═══════════════════════════════════════════
+       FOOTER — placed in row 3, column 2 of the .app-shell grid
+       so it sits in the content column (right of the sidebar) and
+       the sticky sidebar's containing block extends over it, keeping
+       the sidebar visible while the user reads the footer. On mobile
+       the shell is a single column so the footer takes full width.
+  ═══════════════════════════════════════════ -->
+  <footer class="sh-footer" role="contentinfo" aria-label="Site footer">
   <div class="sh-footer-grid">
 
     <div class="sh-footer-brand">
@@ -10065,7 +10064,8 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   <script>
     (function(){ var y = document.getElementById('shFooterYear'); if (y) y.textContent = new Date().getFullYear(); })();
   </script>
-</footer>
+  </footer>
+</div><!-- /.app-shell -->
 
 <!-- ══ WORKSPACE PANEL (Watchlist + Saved Searches) ══════════════════ -->
 <div class="ws-panel-overlay" id="wsPanelOverlay"></div>
