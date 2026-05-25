@@ -24832,9 +24832,16 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
             opps.forEach(function(o){
               byId[String(o.id)] = o;
               var card = buildCard(o, prefKeySet);
-              card.addEventListener('click', function() {
-                if (typeof window.__openDetailPanel === 'function') window.__openDetailPanel(o);
-              });
+              (function(opp) {
+                card.addEventListener('click', function() {
+                  if (typeof window.__deepLinkToOpportunity === 'function') {
+                    window.__deepLinkToOpportunity(opp.id);
+                  } else if (typeof window.__openDetailPanel === 'function') {
+                    /* Fallback while the deep-link helper isn't loaded yet */
+                    window.__openDetailPanel(opp);
+                  }
+                });
+              })(o);
               grid.appendChild(card);
             });
             setState('grid');
@@ -24908,6 +24915,167 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   onHashChange();
 
   window.__renderRecentInSector = safeRender;
+})();
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     DEEP-LINK TO OPPORTUNITY — click handler used by the home
+     "Recently Added in Your Sector" cards (and reusable from anywhere
+     else that needs to jump to a specific record on the Opportunities
+     page). Navigates, clears any blocking filters, scrolls the
+     matching .opp-card-row[data-id="…"] into view, and pulses the
+     accent outline so the user can see which card was linked.
+════════════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  var HIGHLIGHT_CLASS    = 'opp-card-deeplinked';
+  var HIGHLIGHT_DURATION = 3000;
+  var FIND_TIMEOUT_MS    = 4000;   /* how long to keep retrying findCard() */
+  var POLL_INTERVAL_MS   = 100;
+
+  /* Inject the highlight CSS once. Uses the existing --green token so
+     the pulse picks up whatever theme is currently active (Swift Solve,
+     NEOM, etc.). Respects prefers-reduced-motion: no animation, but the
+     outline still flashes so the user can spot the card. */
+  (function injectStyle() {
+    if (document.getElementById('oh-deeplink-style')) return;
+    var s = document.createElement('style');
+    s.id = 'oh-deeplink-style';
+    s.textContent = [
+      '.opp-card-row.' + HIGHLIGHT_CLASS + ' {',
+      '  position: relative;',
+      '  outline: 2px solid var(--green, #006C35);',
+      '  outline-offset: 3px;',
+      '  border-radius: 26px;',
+      '  animation: ohDeepLinkPulse 3s ease-out forwards;',
+      '}',
+      '@keyframes ohDeepLinkPulse {',
+      '  0%   { box-shadow: 0 0 0 0    var(--green-glow,      rgba(0,108,53,0.55)); }',
+      '  30%  { box-shadow: 0 0 0 14px var(--green-highlight, rgba(0,108,53,0.18)); }',
+      '  100% { box-shadow: 0 0 0 0    rgba(0,0,0,0); outline-color: transparent; }',
+      '}',
+      '@media (prefers-reduced-motion: reduce) {',
+      '  .opp-card-row.' + HIGHLIGHT_CLASS + ' {',
+      '    animation: none;',
+      '    transition: outline-color 0.2s ease;',
+      '  }',
+      '}'
+    ].join('\n');
+    document.head.appendChild(s);
+  })();
+
+  function findCard(id) {
+    if (!id) return null;
+    /* Cards live in #oppsTableBody — `data-id` is the canonical hook */
+    var safeId = String(id).replace(/"/g, '\\"');
+    return document.querySelector('#view-opportunities .opp-card-row[data-id="' + safeId + '"]')
+        || document.querySelector('.opp-card-row[data-id="' + safeId + '"]');
+  }
+
+  function reducedMotion() {
+    try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+    catch (e) { return false; }
+  }
+
+  function scrollAndHighlight(card) {
+    if (!card) return;
+    try {
+      card.scrollIntoView({
+        behavior: reducedMotion() ? 'auto' : 'smooth',
+        block: 'center'
+      });
+    } catch (e) { /* older browsers */ card.scrollIntoView(); }
+
+    /* Strip any stale highlight so re-clicks restart the pulse */
+    card.classList.remove(HIGHLIGHT_CLASS);
+    /* Force a reflow so removing + re-adding the class restarts the
+       animation instead of being collapsed away by the browser. */
+    void card.offsetWidth;
+    card.classList.add(HIGHLIGHT_CLASS);
+
+    setTimeout(function() {
+      card.classList.remove(HIGHLIGHT_CLASS);
+    }, HIGHLIGHT_DURATION);
+  }
+
+  /* Reset filters so the target card is guaranteed visible after the
+     jump. Uses the existing #resetFilters button if present (which
+     also re-runs applyFilters and re-renders the grid). */
+  function clearOppFilters() {
+    var reset = document.getElementById('resetFilters');
+    if (reset) {
+      try { reset.click(); return true; } catch (e) {}
+    }
+    return false;
+  }
+
+  /* Poll for the target card. Cards are rendered async (some are even
+     paginated), so a single setTimeout isn't reliable. We:
+       1) wait one tick for showView('opportunities') to swap views,
+       2) reset filters (so the card isn't filtered out),
+       3) poll for the .opp-card-row[data-id=…] until found or timeout.
+     If the card is in a non-visible pagination page, the reset above
+     also drops the user back to page 1 where every card is visible
+     up to the lazy-load threshold. */
+  function jumpToCard(id) {
+    if (!id) return;
+    var t0 = Date.now();
+    /* First quick try (already on opportunities + card already present) */
+    var card = findCard(id);
+    if (card) { scrollAndHighlight(card); return; }
+
+    clearOppFilters();
+
+    var poller = setInterval(function() {
+      var found = findCard(id);
+      if (found) {
+        clearInterval(poller);
+        scrollAndHighlight(found);
+        return;
+      }
+      if (Date.now() - t0 > FIND_TIMEOUT_MS) {
+        clearInterval(poller);
+        console.warn('[deeplink] card not found after', FIND_TIMEOUT_MS, 'ms for id=', id);
+      }
+    }, POLL_INTERVAL_MS);
+  }
+
+  /* Public entry point */
+  window.__deepLinkToOpportunity = function(id) {
+    if (!id) return;
+    /* Stash so other handlers (e.g. the RIS sector-pref filter on opp
+       view mount) don't override our target by accident. */
+    window.__pendingDeepLinkOppId = String(id);
+    /* Clear the sector-pref filter so it doesn't shadow our reset */
+    window.__sectorPrefFilter = null;
+
+    /* Route to opportunities — same code path as the sidebar nav item */
+    if (typeof window.setRoute === 'function') {
+      window.setRoute('opportunities');
+    } else {
+      window.location.hash = '#opportunities';
+    }
+
+    /* Wait one frame for showView() to swap .active, then jump */
+    setTimeout(function() {
+      var pending = window.__pendingDeepLinkOppId;
+      window.__pendingDeepLinkOppId = null;
+      jumpToCard(pending);
+    }, 300);
+  };
+
+  /* If a deep-link was initiated before the listener wired up
+     (race on cold load), honour it on hashchange too. */
+  window.addEventListener('hashchange', function() {
+    var hash = (location.hash || '').replace(/^#/, '').split('?')[0];
+    if (hash !== 'opportunities') return;
+    var pending = window.__pendingDeepLinkOppId;
+    if (!pending) return;
+    window.__pendingDeepLinkOppId = null;
+    setTimeout(function() { jumpToCard(pending); }, 200);
+  });
 })();
 </script>
 
