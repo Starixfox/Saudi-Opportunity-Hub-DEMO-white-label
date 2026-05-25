@@ -5976,11 +5976,23 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     pointer-events: none;
     text-anchor: middle;
   }
+  /* Label rendered INSIDE a country (large country only — small ones
+     keep the dark-on-page label outside the shape). White-with-alpha
+     so it reads on the Saudi-green choropleth fill. */
+  .oh-enh2-gcc-label--in {
+    fill: rgba(255,255,255,0.88);
+    font-size: 9px;
+  }
   .oh-enh2-gcc-count {
-    font-size: 11px; font-weight: 700;
+    font-size: 13px; font-weight: 700;
     fill: #fff;
     pointer-events: none;
     text-anchor: middle;
+    /* Drop a subtle shadow so a high-count value stays legible even
+       when the underlying fill is the lighter end of the ramp. */
+    paint-order: stroke fill;
+    stroke: rgba(0,0,0,0.18);
+    stroke-width: 0.6;
   }
   .oh-enh2-gcc-legend {
     display: flex; align-items: center; gap: 6px;
@@ -22775,21 +22787,38 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     });
   }
 
-  /* GCC heatmap — simplified positional layout (6 countries + a "Saudi" anchor) */
+  /* GCC choropleth map — simplified country outlines as SVG paths.
+     Coordinates are a rough lon/lat projection of the Arabian peninsula
+     onto a 360×230 viewBox (35°E→x=0, 60°E→x=360, 32°N→y=0, 16°N→y=240).
+     Saudi Arabia is drawn first so the smaller neighbours layer over it.
+     For the tiny countries (KW/QA/BH) labels sit outside the shape with
+     the count inline; for the larger ones (SA/OM/UAE) the count is shown
+     inside the country with the ISO code below it. */
   var GCC_COUNTRIES = [
-    /* roughly arranged on a simplified Arabian peninsula */
     { id: 'sa', name: T('Saudi Arabia','السعودية'), shortName: 'SA',
-      keywords: ['saudi'], cx: 110, cy: 110, r: 60 },
-    { id: 'ae', name: T('UAE','الإمارات'), shortName: 'UAE',
-      keywords: ['uae','emirates'], cx: 215, cy: 130, r: 25 },
+      keywords: ['saudi'],
+      path: 'M 43 45 L 130 0 L 158 37 L 194 52 L 216 90 L 230 115 L 245 135 L 288 135 L 288 195 L 259 225 L 101 225 L 86 180 L 58 135 L 29 105 L 0 45 Z',
+      cx: 130, cy: 145, countInside: true },
     { id: 'om', name: T('Oman','عُمان'), shortName: 'OM',
-      keywords: ['oman'], cx: 250, cy: 175, r: 28 },
+      keywords: ['oman'],
+      path: 'M 270 135 L 295 110 L 320 105 L 350 120 L 360 155 L 345 200 L 310 225 L 280 220 L 270 195 L 275 165 Z',
+      cx: 315, cy: 168, countInside: true },
+    { id: 'ae', name: T('UAE','الإمارات'), shortName: 'UAE',
+      keywords: ['uae','emirates'],
+      path: 'M 240 110 L 270 105 L 295 110 L 290 130 L 270 135 L 245 130 Z',
+      cx: 270, cy: 120, countInside: true },
     { id: 'qa', name: T('Qatar','قطر'), shortName: 'QA',
-      keywords: ['qatar'], cx: 190, cy: 102, r: 17 },
-    { id: 'bh', name: T('Bahrain','البحرين'), shortName: 'BH',
-      keywords: ['bahrain'], cx: 175, cy: 85, r: 12 },
+      keywords: ['qatar'],
+      path: 'M 226 90 L 236 87 L 240 100 L 237 115 L 230 113 Z',
+      cx: 233, cy: 100, labelX: 259, labelY: 103, countInside: false },
     { id: 'kw', name: T('Kuwait','الكويت'), shortName: 'KW',
-      keywords: ['kuwait'], cx: 135, cy: 50, r: 16 }
+      keywords: ['kuwait'],
+      path: 'M 158 30 L 195 28 L 200 45 L 187 52 L 165 50 Z',
+      cx: 180, cy: 42, labelX: 180, labelY: 70, countInside: false },
+    { id: 'bh', name: T('Bahrain','البحرين'), shortName: 'BH',
+      keywords: ['bahrain'],
+      path: 'M 220 85 L 224 84 L 226 90 L 224 96 L 221 95 L 219 90 Z',
+      cx: 222, cy: 90, labelX: 202, labelY: 88, countInside: false }
   ];
 
   function renderGccHeatmap(data) {
@@ -22813,16 +22842,25 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       return 'rgba(0,108,53,' + alpha.toFixed(2) + ')';
     }
 
-    var svg = '<svg class="oh-enh2-gcc-svg" viewBox="0 0 320 220" role="img" aria-label="GCC opportunity density">';
-    /* Faint backdrop */
-    svg += '<rect x="0" y="0" width="320" height="220" fill="var(--surface-2,#f9fafb)" rx="8"/>';
-    /* Countries */
+    var svg = '<svg class="oh-enh2-gcc-svg" viewBox="0 0 360 230" role="img" aria-label="GCC opportunity density">';
+    /* Faint backdrop standing in for the Persian Gulf / Red Sea water */
+    svg += '<rect x="0" y="0" width="360" height="230" fill="var(--surface-2,#f3f5f9)" rx="8"/>';
+    /* Countries (Saudi first so its border lines sit under the smaller
+       overlays — they each carve their footprint visually on top). */
     GCC_COUNTRIES.forEach(function (c) {
       var n = counts[c.id];
-      svg += '<g class="oh-enh2-gcc-group" data-id="' + c.id + '" data-name="' + esc(c.name) + '" data-count="' + n + '" tabindex="0" aria-label="' + esc(c.name) + ': ' + n + ' opportunities">' +
-        '<circle class="oh-enh2-gcc-country" cx="' + c.cx + '" cy="' + c.cy + '" r="' + c.r + '" fill="' + colorFor(n) + '"/>' +
-        (c.r >= 18 ? '<text class="oh-enh2-gcc-count" x="' + c.cx + '" y="' + (c.cy + 4) + '">' + n + '</text>' : '') +
-        '<text class="oh-enh2-gcc-label" x="' + c.cx + '" y="' + (c.cy + c.r + 13) + '">' + esc(c.shortName) + '</text>' +
+      var label = c.shortName + (c.countInside ? '' : (' · ' + n));
+      var parts = [
+        '<path class="oh-enh2-gcc-country" d="' + c.path + '" fill="' + colorFor(n) + '"/>'
+      ];
+      if (c.countInside) {
+        parts.push('<text class="oh-enh2-gcc-count" x="' + c.cx + '" y="' + c.cy + '">' + n + '</text>');
+        parts.push('<text class="oh-enh2-gcc-label oh-enh2-gcc-label--in" x="' + c.cx + '" y="' + (c.cy + 13) + '">' + esc(c.shortName) + '</text>');
+      } else {
+        parts.push('<text class="oh-enh2-gcc-label" x="' + (c.labelX || c.cx) + '" y="' + (c.labelY || (c.cy + 15)) + '">' + esc(label) + '</text>');
+      }
+      svg += '<g class="oh-enh2-gcc-group" data-id="' + c.id + '" data-name="' + esc(c.name) + '" data-count="' + n + '" tabindex="0" role="button" aria-label="' + esc(c.name) + ': ' + n + ' opportunities">' +
+        parts.join('') +
       '</g>';
     });
     svg += '</svg>';
