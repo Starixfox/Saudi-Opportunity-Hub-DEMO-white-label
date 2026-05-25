@@ -9525,9 +9525,13 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
             <span data-ar="الحالة">Status</span>
           </label>
           <select id="statusFilter" class="filter-select" aria-label="Filter by status">
+            <!-- Values are the canonical status keys returned by
+                 canonStatus(); raw DB rows like "Open"/"open"/"OPEN",
+                 "Rolling"/"recurring", and "closed_but_recurring" all
+                 normalize to one of these three buckets. -->
             <option value="all" data-ar="جميع الحالات">All statuses</option>
             <option value="open" data-ar="مفتوح">Open</option>
-            <option value="closed_but_recurring" data-ar="دوري">Recurring</option>
+            <option value="recurring" data-ar="دوري">Recurring</option>
             <option value="closed" data-ar="مغلق">Closed</option>
           </select>
         </div>
@@ -11310,24 +11314,29 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       indexAxis: 'y'
     }));
 
-    // Status (pie) — DB has both "Open" and "open", both "Recurring" and
-    // "recurring", etc. tally(data,'status') was bucketing those as
-    // separate slices. Route every raw value through __statusFormat
-    // (same helper the card pills and detail-panel badge use) so each
-    // status collapses to one slice with the canonical label.
+    // Status (pie) — bucket via window.canonStatus so "Open"/"open",
+    // "Rolling"/"recurring"/"closed_but_recurring", and ongoing/open
+    // all collapse to the same three slices that the filter dropdown
+    // exposes. Falls back to a simpler normalizer if canonStatus
+    // isn't loaded yet (the filter IIFE owns it).
     var statusMap = {};
     var statusLabelByKey = {};
-    var _statusKey = function(raw){
-      return String(raw == null ? 'unknown' : raw).toLowerCase().trim().replace(/[\s-]+/g, '_') || 'unknown';
-    };
+    var _statusKey = (typeof window.canonStatus === 'function')
+      ? window.canonStatus
+      : function(raw){
+          return String(raw == null ? 'unknown' : raw).toLowerCase().trim().replace(/[\s-]+/g, '_') || 'unknown';
+        };
     data.forEach(function(r){
-      var key = _statusKey(r.status);
+      var key = _statusKey(r.status) || 'unknown';
       var fmt = (typeof window.__statusFormat === 'function')
         ? window.__statusFormat(r.status)
         : { label: r.status || 'Unknown' };
       statusMap[key] = (statusMap[key] || 0) + 1;
-      /* Keep the prettiest label we've seen for this key (later wins
-         is fine because __statusFormat is deterministic per key). */
+      /* Keep the prettiest label we've seen for this key. Later wins
+         is fine because __statusFormat is deterministic per raw value;
+         when multiple raw values map to one canonical key (e.g.
+         "Rolling" + "recurring" → "recurring"), whichever appears
+         last in the data sets the displayed label. */
       statusLabelByKey[key] = fmt.label || key;
     });
     var statusKeys = Object.keys(statusMap);
@@ -13854,8 +13863,29 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     _filterCache.sector = sectorRaw === 'all' ? 'all' : _canonSecKey(sectorRaw);
     _filterCache.country = norm(document.getElementById('countryFilter')?.value || 'all');
     _filterCache.type = canonType(document.getElementById('typeFilter')?.value || 'all');
-    _filterCache.status = norm(document.getElementById('statusFilter')?.value || 'all');
+    _filterCache.status = canonStatus(document.getElementById('statusFilter')?.value || 'all');
   }
+
+  /* Status synonyms — same idea as TYPE_ALIASES. DB rows arrive with
+     wildly inconsistent casing and separators ("Open", "open", "OPEN",
+     "Closed - Recurring", "closed_but_recurring", "Rolling", ...) so
+     normalize to a 3-bucket vocabulary that lines up with the filter
+     dropdown: open / recurring / closed. canonStatus is the canonical
+     entry point for every status comparison in the filter path. */
+  var STATUS_ALIASES = {
+    ongoing:              'open',
+    rolling:              'recurring',
+    closed_but_recurring: 'recurring'
+  };
+  function canonStatus(v) {
+    if (v === 'all') return 'all';
+    var k = String(v || '').toLowerCase().trim().replace(/[\s-]+/g, '_');
+    return STATUS_ALIASES[k] || k;
+  }
+  /* Exposed so the chart + admin + RIS code paths can group by the
+     same key the filter uses, instead of by raw r.status which splits
+     "Open" / "open" / "Rolling" / "recurring" into multiple slices. */
+  window.canonStatus = canonStatus;
 
   /* Synonyms — DB has both short and long-form variants of the same
      concept (legacy data + multiple importers). Collapse them so the
@@ -13900,12 +13930,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (sector !== 'all' && !(Array.isArray(item.sectors) && item.sectors.map(_canonSecKey).includes(sector))) return false;
     if (country !== 'all' && regionGroup(item) !== country) return false;
     if (type !== 'all' && canonType(item.type) !== type) return false;
-    if (status !== 'all') {
-      var s = norm(item.status);
-      if (status === 'open' && !s.includes('open')) return false;
-      if (status === 'closedbutrecurring' && !(s.includes('recurring') || s.includes('closed_but_recurring'))) return false;
-      if (status === 'closed' && (s.includes('open') || s.includes('recurring'))) return false;
-    }
+    if (status !== 'all' && canonStatus(item.status) !== status) return false;
     if (!profileMatch(item)) return false;
     return true;
   }
