@@ -16500,6 +16500,32 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       }
     }
   });
+
+  /* Public helper: switch the opportunities table to whatever page
+     contains the row with the given id. Returns the 1-based page
+     number on success, or -1 if the id isn't in the current dataset
+     yet (e.g. data still loading). The "Recently Added in Your
+     Sector" deep-link uses this to guarantee the target card is in
+     the DOM before the highlight runs — without it, any card beyond
+     the first PER_PAGE rows was never rendered and the find-poll
+     loop silently timed out. */
+  window.__navigateToOppPage = function(id) {
+    if (id === undefined || id === null || id === '') return -1;
+    var target = String(id);
+    var rows = (sortedData && sortedData.length) ? sortedData : filteredData;
+    if (!rows || !rows.length) return -1;
+    var idx = -1;
+    for (var i = 0; i < rows.length; i++) {
+      if (String(rows[i].id) === target) { idx = i; break; }
+    }
+    if (idx < 0) return -1;
+    var page = Math.floor(idx / PER_PAGE) + 1;
+    if (page !== currentPage) {
+      currentPage = page;
+      renderCards();
+    }
+    return page;
+  };
 })();
 </script>
 <script>
@@ -25028,7 +25054,18 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
     clearOppFilters();
 
+    /* Pagination defaults to 10 rows/page — without this, any card
+       past the first page is never in the DOM and findCard() polls
+       to timeout. Call once up front in case data is already loaded,
+       then again on every poll tick in case data arrives mid-flight. */
+    if (typeof window.__navigateToOppPage === 'function') {
+      window.__navigateToOppPage(id);
+    }
+
     var poller = setInterval(function() {
+      if (typeof window.__navigateToOppPage === 'function') {
+        window.__navigateToOppPage(id);
+      }
       var found = findCard(id);
       if (found) {
         clearInterval(poller);
