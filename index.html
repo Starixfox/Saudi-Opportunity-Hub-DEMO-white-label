@@ -10685,9 +10685,20 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
      We don't use created_at either — that's the raw Supabase insert
      timestamp, which gets bulk-load-contaminated whenever a batch is
      imported and would falsely mark every row as new. */
+  /* "New this week" = ADDED to the database within the past 7 days.
+     Drives the topbar "N new" badge, the "New" filter chip, the card
+     corner badge, the home-page lists, and the dashboard KPI.
+
+     Uses created_at — the Supabase insert timestamp — exactly as
+     requested. Trade-off: a bulk-import batch will share a single
+     created_at and read as "new" together for a week. That's the
+     intended contract here — the badge counts what was actually
+     added, not what was last reviewed (last_verified). */
   window.__isNewThisWeek = function(item) {
-    if (!item || !item.last_verified) return false;
-    var d = new Date(item.last_verified);
+    if (!item) return false;
+    var raw = item.created_at;
+    if (!raw) return false;
+    var d = new Date(raw);
     if (isNaN(d.getTime())) return false;
     return d.getTime() >= (Date.now() - 7 * 24 * 60 * 60 * 1000);
   };
