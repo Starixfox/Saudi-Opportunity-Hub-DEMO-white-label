@@ -11310,12 +11310,30 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       indexAxis: 'y'
     }));
 
-    // Status (pie)
-    var statusMap = tally(data, 'status');
-    var statusLabels = Object.keys(statusMap);
+    // Status (pie) — DB has both "Open" and "open", both "Recurring" and
+    // "recurring", etc. tally(data,'status') was bucketing those as
+    // separate slices. Route every raw value through __statusFormat
+    // (same helper the card pills and detail-panel badge use) so each
+    // status collapses to one slice with the canonical label.
+    var statusMap = {};
+    var statusLabelByKey = {};
+    var _statusKey = function(raw){
+      return String(raw == null ? 'unknown' : raw).toLowerCase().trim().replace(/[\s-]+/g, '_') || 'unknown';
+    };
+    data.forEach(function(r){
+      var key = _statusKey(r.status);
+      var fmt = (typeof window.__statusFormat === 'function')
+        ? window.__statusFormat(r.status)
+        : { label: r.status || 'Unknown' };
+      statusMap[key] = (statusMap[key] || 0) + 1;
+      /* Keep the prettiest label we've seen for this key (later wins
+         is fine because __statusFormat is deterministic per key). */
+      statusLabelByKey[key] = fmt.label || key;
+    });
+    var statusKeys = Object.keys(statusMap);
     makeChart('chartStatus', 'pie', {
-      labels: statusLabels.map(function (k) { return t(k); }),
-      datasets: [{ data: statusLabels.map(function (k) { return statusMap[k]; }), backgroundColor: PALETTE, borderWidth: 0 }]
+      labels: statusKeys.map(function (k) { return statusLabelByKey[k] || k; }),
+      datasets: [{ data: statusKeys.map(function (k) { return statusMap[k]; }), backgroundColor: PALETTE, borderWidth: 0 }]
     }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: tc, font: { size: 11 } } } } });
 
     // Countries (bar, top 8)
@@ -17778,12 +17796,17 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       });
     }
 
-    /* —— CHART 2: Status breakdown in filtered data (donut) —— */
+    /* —— CHART 2: Status breakdown in filtered data (donut) ——
+       Normalize the raw value so "Open"/"open"/"OPEN" all bucket
+       together. Also collapse "rolling" into "recurring" (same
+       semantic — ongoing repeat cycle, same CSS class downstream)
+       so the chart doesn't show two slices for one concept. */
     var statusMap = {};
     filtered.forEach(function(r){
-      var s = r.status||'unknown';
-      if (s==='closed_but_recurring') s='recurring';
-      statusMap[s]=(statusMap[s]||0)+1;
+      var s = String(r.status == null ? '' : r.status).toLowerCase().trim().replace(/[\s-]+/g,'_') || 'unknown';
+      if (s === 'closed_but_recurring' || s === 'rolling') s = 'recurring';
+      if (s === 'ongoing') s = 'open';
+      statusMap[s] = (statusMap[s] || 0) + 1;
     });
     var statusLabelsMap = { open:ar?'\u0645\u0641\u062a\u0648\u062d':'Open', recurring:ar?'\u062f\u0648\u0631\u064a':'Recurring', closed:ar?'\u0645\u063a\u0644\u0642':'Closed', unknown:ar?'\u063a\u064a\u0631 \u0645\u062d\u062f\u062f':'Unknown' };
     var statusColorMap  = { open:'#00a651', recurring:'#f5a623', closed:'#ef9090', unknown:'#7c89ab' };
