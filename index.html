@@ -5961,7 +5961,16 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
   /* GCC heatmap */
   .oh-enh2-gcc-wrap { position: relative; padding: 6px 0 0; }
-  .oh-enh2-gcc-svg { width: 100%; height: 220px; cursor: pointer; }
+  /* aspect-ratio drives height so the viewBox (480×280) doesn't get
+     letterboxed top/bottom when the card is wide. max-height keeps
+     the card from blowing up vertically on narrow viewports. */
+  .oh-enh2-gcc-svg {
+    width: 100%;
+    aspect-ratio: 480 / 280;
+    max-height: 280px;
+    cursor: pointer;
+    display: block;
+  }
   .oh-enh2-gcc-country {
     transition: opacity .15s, stroke-width .15s;
     stroke: var(--surface, #fff); stroke-width: 1.5;
@@ -6156,7 +6165,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     .oh-enh2-similar-tooltip { width: 240px; padding: 10px; }
     .oh-enh2-funding-chip { font-size: 9.5px; padding: 1px 5px; }
     .oh-enh2-radar-wrap { height: 220px; }
-    .oh-enh2-gcc-svg { height: 180px; }
+    .oh-enh2-gcc-svg { max-height: 200px; }
   }
 
 /* ============================================================
@@ -22787,38 +22796,54 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     });
   }
 
-  /* GCC choropleth map — simplified country outlines as SVG paths.
-     Coordinates are a rough lon/lat projection of the Arabian peninsula
-     onto a 360×230 viewBox (35°E→x=0, 60°E→x=360, 32°N→y=0, 16°N→y=240).
-     Saudi Arabia is drawn first so the smaller neighbours layer over it.
-     For the tiny countries (KW/QA/BH) labels sit outside the shape with
-     the count inline; for the larger ones (SA/OM/UAE) the count is shown
-     inside the country with the ISO code below it. */
+  /* GCC choropleth map — country outlines drawn from simplified
+     Natural-Earth-style polygons, projected lon/lat onto a 480×320
+     viewBox (33°E → x=0, 60°E → x=480, 33°N → y=0, 12°N → y=320).
+     Saudi Arabia is drawn first as the peninsula background; the
+     smaller GCC neighbours layer over it in their geographic spots.
+     For the tiny countries (KW/QA/BH) labels sit OUTSIDE the shape
+     with the count inline ("KW · 8"); for the larger ones (SA/OM/UAE)
+     the count is shown big inside the country with the ISO code below. */
   var GCC_COUNTRIES = [
+    /* Saudi Arabia — the peninsula body. ~24 vertices trace Jordan/
+       Iraq border across the north, the Persian Gulf coast (with the
+       Kuwait/Qatar/UAE indents implicit because smaller countries
+       sit on top), then Yemen across the south and the Red Sea coast
+       on the west. */
     { id: 'sa', name: T('Saudi Arabia','السعودية'), shortName: 'SA',
       keywords: ['saudi'],
-      path: 'M 43 45 L 130 0 L 158 37 L 194 52 L 216 90 L 230 115 L 245 135 L 288 135 L 288 195 L 259 225 L 101 225 L 86 180 L 58 135 L 29 105 L 0 45 Z',
-      cx: 130, cy: 145, countInside: true },
+      path: 'M 43 53 L 86 53 L 103 30 L 120 23 L 162 23 L 205 15 L 248 53 L 265 61 L 282 68 L 299 84 L 308 99 L 316 111 L 321 122 L 342 137 L 393 160 L 393 213 L 342 228 L 274 236 L 197 243 L 162 228 L 120 183 L 94 137 L 86 107 L 68 76 L 51 76 Z',
+      cx: 180, cy: 158, countInside: true },
+    /* Oman — main body covering the SE corner of the peninsula. The
+       Musandam exclave at the Strait of Hormuz is omitted for clarity
+       (it's a sub-pixel triangle at this scale). */
     { id: 'om', name: T('Oman','عُمان'), shortName: 'OM',
       keywords: ['oman'],
-      path: 'M 270 135 L 295 110 L 320 105 L 350 120 L 360 155 L 345 200 L 310 225 L 280 220 L 270 195 L 275 165 Z',
-      cx: 315, cy: 168, countInside: true },
+      path: 'M 393 160 L 393 213 L 402 221 L 410 221 L 428 206 L 445 191 L 462 160 L 479 145 L 470 137 L 462 130 L 445 122 L 428 130 L 410 130 Z',
+      cx: 432, cy: 178, countInside: true },
+    /* UAE — Persian Gulf coast east of Qatar, sloping NE toward the
+       Strait of Hormuz. */
     { id: 'ae', name: T('UAE','الإمارات'), shortName: 'UAE',
       keywords: ['uae','emirates'],
-      path: 'M 240 110 L 270 105 L 295 110 L 290 130 L 270 135 L 245 130 Z',
-      cx: 270, cy: 120, countInside: true },
+      path: 'M 342 137 L 350 133 L 359 130 L 376 122 L 393 119 L 410 117 L 410 130 L 402 145 L 393 160 L 342 145 Z',
+      cx: 376, cy: 138, countInside: true },
+    /* Qatar — peninsula thumb sticking up from Saudi's east coast. */
     { id: 'qa', name: T('Qatar','قطر'), shortName: 'QA',
       keywords: ['qatar'],
-      path: 'M 226 90 L 236 87 L 240 100 L 237 115 L 230 113 Z',
-      cx: 233, cy: 100, labelX: 259, labelY: 103, countInside: false },
+      path: 'M 325 128 L 335 130 L 335 105 L 330 103 L 326 108 L 323 117 L 324 127 Z',
+      cx: 330, cy: 117, labelX: 358, labelY: 117, countInside: false },
+    /* Kuwait — small NE corner above the Saudi border. */
     { id: 'kw', name: T('Kuwait','الكويت'), shortName: 'KW',
       keywords: ['kuwait'],
-      path: 'M 158 30 L 195 28 L 200 45 L 187 52 L 165 50 Z',
-      cx: 180, cy: 42, labelX: 180, labelY: 70, countInside: false },
+      path: 'M 248 46 L 265 44 L 281 49 L 281 58 L 274 65 L 257 65 Z',
+      cx: 265, cy: 54, labelX: 265, labelY: 82, countInside: false },
+    /* Bahrain — tiny island in the Persian Gulf between Saudi and
+       Qatar. Drawn slightly larger than scale so it's still visible
+       and clickable at this resolution. */
     { id: 'bh', name: T('Bahrain','البحرين'), shortName: 'BH',
       keywords: ['bahrain'],
-      path: 'M 220 85 L 224 84 L 226 90 L 224 96 L 221 95 L 219 90 Z',
-      cx: 222, cy: 90, labelX: 202, labelY: 88, countInside: false }
+      path: 'M 314 100 L 320 100 L 322 107 L 320 113 L 314 112 L 313 106 Z',
+      cx: 317, cy: 106, labelX: 296, labelY: 106, countInside: false }
   ];
 
   function renderGccHeatmap(data) {
@@ -22842,9 +22867,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       return 'rgba(0,108,53,' + alpha.toFixed(2) + ')';
     }
 
-    var svg = '<svg class="oh-enh2-gcc-svg" viewBox="0 0 360 230" role="img" aria-label="GCC opportunity density">';
+    var svg = '<svg class="oh-enh2-gcc-svg" viewBox="0 0 480 280" role="img" aria-label="GCC opportunity density" preserveAspectRatio="xMidYMid meet">';
     /* Faint backdrop standing in for the Persian Gulf / Red Sea water */
-    svg += '<rect x="0" y="0" width="360" height="230" fill="var(--surface-2,#f3f5f9)" rx="8"/>';
+    svg += '<rect x="0" y="0" width="480" height="280" fill="var(--surface-2,#f3f5f9)" rx="8"/>';
     /* Countries (Saudi first so its border lines sit under the smaller
        overlays — they each carve their footprint visually on top). */
     GCC_COUNTRIES.forEach(function (c) {
