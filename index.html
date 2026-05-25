@@ -9499,21 +9499,23 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
             <span data-ar="النوع">Type</span>
           </label>
           <select id="typeFilter" class="filter-select" aria-label="Filter by opportunity type">
+            <!-- Long-form variants ("loan_program", "grant_program",
+                 "investment_program", "training_program") are collapsed
+                 into their shorter canonical buckets by canonType() —
+                 see the TYPE_ALIASES map. Listing both options here used
+                 to read as a duplicate to the user. -->
             <option value="all" data-ar="جميع الأنواع">All types</option>
             <option value="accelerator" data-ar="مسرّعة">Accelerator</option>
             <option value="competition" data-ar="مسابقة">Competition</option>
             <option value="financing" data-ar="تمويل">Financing</option>
             <option value="grant" data-ar="منحة">Grant</option>
-            <option value="grant_program" data-ar="منحة / برنامج">Grant/Program</option>
             <option value="incentive" data-ar="حافز">Incentive</option>
             <option value="incubator" data-ar="حاضنة">Incubator</option>
             <option value="investment" data-ar="استثمار">Investment</option>
-            <option value="investment_program" data-ar="برنامج استثماري">Investment Program</option>
             <option value="licensing" data-ar="ترخيص">Licensing</option>
             <option value="loan" data-ar="قرض">Loan</option>
             <option value="program" data-ar="برنامج">Program</option>
             <option value="training" data-ar="تدريب">Training</option>
-            <option value="training_program" data-ar="برنامج تدريبي">Training Program</option>
           </select>
         </div>
 
@@ -11260,8 +11262,16 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       datasets: [{ label: t('Opportunities'), data: sectorTop.map(function (x) { return x[1]; }), backgroundColor: GREEN, borderRadius: 6 }]
     }, Object.assign({}, baseOpts, { plugins: { legend: { display: false } }, indexAxis: 'y' }));
 
-    // Types (doughnut)
-    var typeMap = tally(data, 'type');
+    // Types (doughnut) — canonType collapses synonyms so the legend
+    // doesn't show "Loan" and "Loan Program" as separate slices.
+    var typeMap = {};
+    var _ct = (typeof window.canonType === 'function')
+      ? window.canonType
+      : function(v){ return String(v||'').toLowerCase().trim().replace(/[\s_\-\/]+/g,'_'); };
+    data.forEach(function(r){
+      var k = _ct(r.type);
+      if (k) typeMap[k] = (typeMap[k] || 0) + 1;
+    });
     var typeLabels = Object.keys(typeMap);
     makeChart('chartTypes', 'doughnut', {
       labels: typeLabels.map(function (k) { return t(k); }),
@@ -13797,13 +13807,27 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     _filterCache.status = norm(document.getElementById('statusFilter')?.value || 'all');
   }
 
+  /* Synonyms — DB has both short and long-form variants of the same
+     concept (legacy data + multiple importers). Collapse them so the
+     filter dropdown, the chart legend, and the card pill all show
+     ONE bucket per concept. Map the long `_program` variant onto the
+     shorter canonical key so the labels read more naturally. */
+  var TYPE_ALIASES = {
+    loan_program:       'loan',
+    investment_program: 'investment',
+    training_program:   'training',
+    grant_program:      'grant'
+  };
   /* Type-filter canonicalizer: lowercase, then collapse spaces / hyphens /
      underscores / slashes into a single underscore. So "Grant", "grant",
      "Investment Program", "investment_program", and "Grant/Program" reach
-     "grant", "investment_program", and "grant_program" respectively — every
-     case + separator variant in the messy DB maps to one filter key. */
+     "grant", "investment_program", and "grant_program" respectively — and
+     then the alias table merges synonyms ("loan_program" → "loan", etc.)
+     so every case + separator + naming variant in the messy DB maps to
+     one filter key. */
   function canonType(v) {
-    return String(v || '').toLowerCase().trim().replace(/[\s_\-\/]+/g, '_');
+    var key = String(v || '').toLowerCase().trim().replace(/[\s_\-\/]+/g, '_');
+    return TYPE_ALIASES[key] || key;
   }
   /* Exposed so the analytics chart (separate IIFE below) can group by the
      same canonical key the filter uses, instead of by raw r.type which
@@ -13973,7 +13997,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
       return '<div class="la-card' + (isMatch ? ' la-match' : '') + '" data-id="' + esc(item.id || '') + '">' +
         '<div class="la-card-top">' +
-          '<span class="pill ' + typeClass(item.type) + ' pill-xs">' + t(pretty(item.type || 'Other')) + '</span>' +
+          '<span class="pill ' + typeClass(item.type) + ' pill-xs">' + t(pretty((window.canonType ? window.canonType(item.type) : item.type) || 'Other')) + '</span>' +
           matchBadge +
           '<span class="la-status-dot ' + statusDotCls + '" title="' + statusTitle + '"></span>' +
         '</div>' +
@@ -14536,7 +14560,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (currentView === 'compact') {
       tbody.innerHTML = pageItems.map(function(item) {
         // Compact: derive the 6 highest-value data points only
-        var typeLabel  = t(pretty(item.type || 'Other'));
+        /* Route the raw DB type through canonType so synonyms collapse
+           (e.g. "loan_program" → "loan") and the pill on the card shows
+           the same label as the filter dropdown + chart legend. */
+        var _typeKey   = (window.canonType ? window.canonType(item.type) : (item.type || 'other'));
+        var typeLabel  = t(pretty(_typeKey || 'Other'));
         var _status    = window.__statusFormat ? window.__statusFormat(item.status) : { label: item.status || '', cls: statusClass(item.status), dotColor: '#94a3b8' };
         var statusCls  = _status.cls;
         var statusDot  = _status.dotColor;
@@ -14608,7 +14636,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       const _canonSec = window.__canonicalizeSector || pretty;
       const _canonSecList = Array.from(new Set((item.sectors || []).map(_canonSec).filter(Boolean))).slice(0,2);
       const chips = [pretty(item.funding_type), ...(item.profiles || []).slice(0,2).map(pretty), ..._canonSecList].filter(Boolean).slice(0,5);
-      const typeStr   = t(pretty(item.type || 'Other'));
+      const typeStr   = t(pretty((window.canonType ? window.canonType(item.type) : item.type) || 'Other'));
       const countryStr = t(item.country || pretty(item.eligibility_region) || 'Global');
       const _stat       = window.__statusFormat ? window.__statusFormat(item.status) : { label: item.status || 'Unknown', cls: 'status-closed' };
       const statusStr   = _stat.label;
@@ -17129,7 +17157,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     // undefined value.
     var _panelStat = window.__statusFormat ? window.__statusFormat(item.status) : { label: pretty(item.status || 'Unknown'), cls: 'status-closed' };
     panelBadges.innerHTML =
-      badge(pretty(item.type || 'Other')) +
+      badge(pretty((window.canonType ? window.canonType(item.type) : item.type) || 'Other')) +
       badge(item.country || pretty(item.eligibility_region) || 'Global') +
       badge(_panelStat.label, _panelStat.cls) +
       ((window.__isNewThisWeek && window.__isNewThisWeek(item)) ? badge(t('New'), 'badge-new') : '');
@@ -17458,16 +17486,23 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     'Corporate':           'corporate'
   };
 
-  /* type display names EN/AR */
+  /* Type display names EN/AR \u2014 keyed by the CANONICAL post-alias form
+     (see TYPE_ALIASES in the main filter IIFE: loan_program \u2192 loan,
+     investment_program \u2192 investment, training_program \u2192 training,
+     grant_program \u2192 grant). Any raw DB key that survives the alias
+     pass (e.g. "tender", "competition", "bootcamp") falls back to a
+     snake_case \u2192 Title Case prettify in _typeLabel. */
   var TYPE_NAMES_EN = {
     grant:'Grant', tender:'Tender', accelerator:'Accelerator',
-    investment_program:'Investment Program', fellowship:'Fellowship',
-    loan_program:'Loan Program', partnership_program:'Partnership', other:'Other'
+    investment:'Investment', fellowship:'Fellowship',
+    loan:'Loan', training:'Training',
+    partnership_program:'Partnership', other:'Other'
   };
   var TYPE_NAMES_AR = {
     grant:'\u0645\u0646\u062d\u0629', tender:'\u0639\u0637\u0627\u0621',
-    accelerator:'\u0645\u0633\u0631\u0651\u0639\u0629', investment_program:'\u0628\u0631\u0646\u0627\u0645\u062c \u0627\u0633\u062a\u062b\u0645\u0627\u0631\u064a',
-    fellowship:'\u0632\u0645\u0627\u0644\u0629', loan_program:'\u0628\u0631\u0646\u0627\u0645\u062c \u0642\u0631\u0648\u0636',
+    accelerator:'\u0645\u0633\u0631\u0651\u0639\u0629', investment:'\u0628\u0631\u0646\u0627\u0645\u062c \u0627\u0633\u062a\u062b\u0645\u0627\u0631\u064a',
+    fellowship:'\u0632\u0645\u0627\u0644\u0629', loan:'\u0642\u0631\u0636',
+    training:'\u062a\u062f\u0631\u064a\u0628',
     partnership_program:'\u0634\u0631\u0627\u0643\u0629', other:'\u0623\u062e\u0631\u0649'
   };
 
@@ -24809,7 +24844,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     return k.charAt(0).toUpperCase() + k.slice(1);
   }
   function typeLabel(t) {
-    var s = String(t || '').replace(/_/g, ' ').trim();
+    /* Run through canonType first so RIS card pills collapse synonyms
+       the same way the filter / chart / opp-card pill do. Without this
+       a row stored as "loan_program" would show "Loan Program" here
+       while the chart legend shows "Loan". */
+    var canon = (window.canonType ? window.canonType(t) : t);
+    var s = String(canon || '').replace(/_/g, ' ').trim();
     if (!s) return '';
     return s.replace(/\b\w/g, function(c){ return c.toUpperCase(); });
   }
