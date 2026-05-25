@@ -11262,8 +11262,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       datasets: [{ label: t('Opportunities'), data: sectorTop.map(function (x) { return x[1]; }), backgroundColor: GREEN, borderRadius: 6 }]
     }, Object.assign({}, baseOpts, { plugins: { legend: { display: false } }, indexAxis: 'y' }));
 
-    // Types (doughnut) — canonType collapses synonyms so the legend
-    // doesn't show "Loan" and "Loan Program" as separate slices.
+    // Types (horizontal bar, sorted desc) — used to be a doughnut, but
+    // with 14+ canonical type buckets the legend dominated the card
+    // and tiny slices were unreadable. Horizontal bars line up the
+    // categories on the y-axis so the user can compare counts at a
+    // glance — no separate legend needed. Matches the visual style of
+    // the chartSectors bar chart immediately above.
     var typeMap = {};
     var _ct = (typeof window.canonType === 'function')
       ? window.canonType
@@ -11272,11 +11276,27 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       var k = _ct(r.type);
       if (k) typeMap[k] = (typeMap[k] || 0) + 1;
     });
-    var typeLabels = Object.keys(typeMap);
-    makeChart('chartTypes', 'doughnut', {
-      labels: typeLabels.map(function (k) { return t(k); }),
-      datasets: [{ data: typeLabels.map(function (k) { return typeMap[k]; }), backgroundColor: PALETTE, borderWidth: 0 }]
-    }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: tc, font: { size: 11 } } } } });
+    function _prettyType(k) {
+      var tx = t(k);
+      if (tx && tx !== k) return tx;
+      return String(k).replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+    }
+    var typeEntries = Object.keys(typeMap)
+      .map(function(k){ return [k, typeMap[k]]; })
+      .sort(function(a, b){ return b[1] - a[1]; });
+    makeChart('chartTypes', 'bar', {
+      labels:   typeEntries.map(function(e){ return _prettyType(e[0]); }),
+      datasets: [{
+        label: t('Opportunities'),
+        data:  typeEntries.map(function(e){ return e[1]; }),
+        backgroundColor: GREEN,
+        borderRadius: 6,
+        maxBarThickness: 22
+      }]
+    }, Object.assign({}, baseOpts, {
+      plugins: { legend: { display: false } },
+      indexAxis: 'y'
+    }));
 
     // Status (pie)
     var statusMap = tally(data, 'status');
