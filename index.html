@@ -19988,17 +19988,21 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     cards.querySelectorAll('.rec-card').forEach(function(card) {
       function activate() {
         var id = card.dataset.id;
-        var allData = window.opportunitiesData || window.allOpportunities || window._wsDataset || [];
-        var item = allData.find(function(d) { return d.id === id; });
-        if (!item) return;
-        if (typeof window.__openDetailPanel === 'function') {
-          window.__openDetailPanel(item);
+        if (!id) return;
+        /* Deep-link to the card on the Opportunities page — never
+           open the side detail panel from a recommendation. Same
+           contract as .home-ris-card and .home-opp-item: user sees
+           the card highlighted in the list, in context. */
+        if (typeof window.__deepLinkToOpportunity === 'function') {
+          window.__deepLinkToOpportunity(id);
+          return;
+        }
+        window.__pendingDeepLinkOppId = String(id);
+        window.__sectorPrefFilter = null;
+        if (typeof window.setRoute === 'function') {
+          window.setRoute('opportunities');
         } else {
-          document.getElementById('opportunities')?.scrollIntoView({ behavior: 'smooth' });
-          setTimeout(function() {
-            var btn = document.querySelector('[data-id="' + id + '"] .opp-insights-btn');
-            if (btn) btn.click();
-          }, 600);
+          window.location.hash = '#opportunities';
         }
       }
       card.addEventListener('click', activate);
