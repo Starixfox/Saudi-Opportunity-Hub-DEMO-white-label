@@ -4885,13 +4885,24 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
   position: sticky;
   top: 0;
   height: 100vh;
+  /* Dynamic viewport: tracks the *actually visible* area on mobile
+     browsers (Safari/Chrome shrink as the URL bar collapses). Plain
+     100vh would lock the sidebar to the larger value, hiding the
+     bottom items even after this scroll fix. Falls back to 100vh
+     above for older engines. */
+  height: 100dvh;
   /* Internal scroll so Settings / Sign out stay reachable on short
      viewports (≤ ~600px) or when the user zooms in. Without this the
-     sticky 100vh container would clip its tail and there'd be no way
-     to scroll to it — the page scroll happens on the document, not
-     inside the sidebar. */
+     sticky 100dvh container would clip its tail and there'd be no
+     way to scroll to it — the page scroll happens on the document,
+     not inside the sidebar. */
   overflow-y: auto;
   overflow-x: hidden;
+  /* Prevent scroll-chaining: when the sidebar reaches its end, the
+     document shouldn't start scrolling under the cursor — and vice
+     versa when the document is scrolled and the cursor passes over
+     a sidebar that has no overflow. */
+  overscroll-behavior: contain;
   /* Firefox */
   scrollbar-width: thin;
   scrollbar-color: rgba(127,127,127,0.18) transparent;
