@@ -11284,14 +11284,26 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var typeEntries = Object.keys(typeMap)
       .map(function(k){ return [k, typeMap[k]]; })
       .sort(function(a, b){ return b[1] - a[1]; });
+    /* Cap to top 12 categories so the long tail of small / one-off
+       types doesn't read as "empty rows" in the chart. The full list
+       still shows up in the filter dropdown — this is just for the
+       at-a-glance dashboard chart. */
+    var TYPE_CHART_MAX = 12;
+    var typeEntriesShown = typeEntries.slice(0, TYPE_CHART_MAX);
     makeChart('chartTypes', 'bar', {
-      labels:   typeEntries.map(function(e){ return _prettyType(e[0]); }),
+      labels:   typeEntriesShown.map(function(e){ return _prettyType(e[0]); }),
       datasets: [{
         label: t('Opportunities'),
-        data:  typeEntries.map(function(e){ return e[1]; }),
+        data:  typeEntriesShown.map(function(e){ return e[1]; }),
         backgroundColor: GREEN,
         borderRadius: 6,
-        maxBarThickness: 22
+        /* No maxBarThickness — let Chart.js auto-size the bars to
+           their category slot. With a fixed thickness, each bar
+           sat at the top of an oversized slot and the chart read
+           as "everything pushed to the top". categoryPercentage
+           below controls the visual gap between bars. */
+        categoryPercentage: 0.85,
+        barPercentage: 0.92
       }]
     }, Object.assign({}, baseOpts, {
       plugins: { legend: { display: false } },
