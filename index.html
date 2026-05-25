@@ -22796,54 +22796,41 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     });
   }
 
-  /* GCC choropleth map — country outlines drawn from simplified
-     Natural-Earth-style polygons, projected lon/lat onto a 480×320
-     viewBox (33°E → x=0, 60°E → x=480, 33°N → y=0, 12°N → y=320).
-     Saudi Arabia is drawn first as the peninsula background; the
-     smaller GCC neighbours layer over it in their geographic spots.
-     For the tiny countries (KW/QA/BH) labels sit OUTSIDE the shape
-     with the count inline ("KW · 8"); for the larger ones (SA/OM/UAE)
-     the count is shown big inside the country with the ISO code below. */
+  /* GCC choropleth map — country outlines projected from public-domain
+     GeoJSON (glynnbird/countriesgeojson for SA/KW/QA/OM/UAE; the
+     georgique/world-geojson set for Bahrain) onto a 480×320 viewBox.
+     Projection: 33°E → x=0, 60°E → x=480, 33°N → y=0, 12°N → y=320.
+     Paths are simplified with Ramer–Douglas–Peucker so each country
+     reads as a recognizable outline at this size without bloating the
+     HTML. Bahrain is rendered at 2.5× actual scale around its centroid
+     so the island is visible and clickable; the other five are 1:1.
+     Saudi Arabia draws first as the peninsula background; the smaller
+     neighbours overlay it in their geographic positions. */
   var GCC_COUNTRIES = [
-    /* Saudi Arabia — the peninsula body. ~24 vertices trace Jordan/
-       Iraq border across the north, the Persian Gulf coast (with the
-       Kuwait/Qatar/UAE indents implicit because smaller countries
-       sit on top), then Yemen across the south and the Red Sea coast
-       on the west. */
     { id: 'sa', name: T('Saudi Arabia','السعودية'), shortName: 'SA',
       keywords: ['saudi'],
-      path: 'M 43 53 L 86 53 L 103 30 L 120 23 L 162 23 L 205 15 L 248 53 L 265 61 L 282 68 L 299 84 L 308 99 L 316 111 L 321 122 L 342 137 L 393 160 L 393 213 L 342 228 L 274 236 L 197 243 L 162 228 L 120 183 L 94 137 L 86 107 L 68 76 L 51 76 Z',
-      cx: 180, cy: 158, countInside: true },
-    /* Oman — main body covering the SE corner of the peninsula. The
-       Musandam exclave at the Strait of Hormuz is omitted for clarity
-       (it's a sub-pixel triangle at this scale). */
+      path: 'M 173.9 253.7 L 171.5 247.2 L 166.2 242.7 L 164.8 236.6 L 155.6 231.1 L 146.2 218.3 L 141.1 205.9 L 128.8 195.4 L 120.9 192.9 L 109.1 178.4 L 107.1 167.8 L 107.8 158.8 L 97.6 141.9 L 89.3 135.9 L 79.7 132.8 L 73.9 124.1 L 74.8 120.6 L 69.9 112.7 L 64.7 109.3 L 57.8 98.0 L 37.9 75.2 L 29.0 75.3 L 34.8 55.5 L 54.6 57.9 L 62.2 53.3 L 66.5 47.8 L 80.1 45.7 L 83.0 40.6 L 88.9 38.0 L 71.1 22.7 L 106.8 15.1 L 110.1 12.8 L 131.6 16.9 L 158.0 27.6 L 208.2 58.2 L 257.1 60.9 L 261.5 68.2 L 274.1 67.8 L 281.0 80.9 L 289.8 84.4 L 292.8 89.8 L 304.9 96.2 L 306.0 102.4 L 304.2 107.5 L 306.5 112.6 L 311.6 116.9 L 316.6 125.6 L 322.0 128.7 L 326.9 127.6 L 330.3 133.4 L 331.0 136.9 L 337.8 152.4 L 391.2 160.0 L 394.8 156.8 L 403.0 167.6 L 391.1 198.1 L 337.8 213.3 L 286.5 219.2 L 269.9 226.0 L 257.2 242.0 L 248.9 244.6 L 244.4 239.5 L 237.6 240.3 L 220.4 238.7 L 217.2 237.2 L 196.7 237.6 L 191.8 238.9 L 184.5 235.0 L 179.8 242.5 L 181.7 248.9 L 173.9 253.7 Z',
+      cx: 200, cy: 170, countInside: true },
     { id: 'om', name: T('Oman','عُمان'), shortName: 'OM',
       keywords: ['oman'],
-      path: 'M 393 160 L 393 213 L 402 221 L 410 221 L 428 206 L 445 191 L 462 160 L 479 145 L 470 137 L 462 130 L 445 122 L 428 130 L 410 130 Z',
-      cx: 432, cy: 178, countInside: true },
-    /* UAE — Persian Gulf coast east of Qatar, sloping NE toward the
-       Strait of Hormuz. */
+      path: 'M 459.8 181.1 L 453.1 191.6 L 445.1 190.8 L 441.4 194.4 L 438.5 202.1 L 440.7 212.3 L 439.0 214.2 L 430.8 214.1 L 419.7 219.8 L 418.0 227.2 L 413.9 230.5 L 402.9 230.3 L 395.9 234.2 L 396.0 240.3 L 387.4 244.6 L 377.6 243.1 L 365.7 248.3 L 357.5 249.1 L 337.8 213.3 L 391.1 198.1 L 403.0 167.6 L 394.8 156.8 L 395.3 150.7 L 400.5 144.4 L 400.5 138.2 L 408.6 135.2 L 405.4 133.0 L 406.9 123.1 L 415.9 123.1 L 423.9 133.5 L 433.8 139.0 L 446.9 141.0 L 457.4 143.8 L 470.2 157.6 L 476.6 159.5 L 476.6 162.9 L 467.2 176.2 L 459.8 181.1 Z',
+      cx: 425, cy: 200, countInside: true },
     { id: 'ae', name: T('UAE','الإمارات'), shortName: 'UAE',
       keywords: ['uae','emirates'],
-      path: 'M 342 137 L 350 133 L 359 130 L 376 122 L 393 119 L 410 117 L 410 130 L 402 145 L 393 160 L 342 145 Z',
-      cx: 376, cy: 138, countInside: true },
-    /* Qatar — peninsula thumb sticking up from Saudi's east coast. */
+      path: 'M 330.3 133.4 L 333.5 132.7 L 334.1 136.8 L 348.0 134.4 L 373.5 135.3 L 385.7 125.0 L 398.9 115.2 L 410.1 105.8 L 413.5 111.0 L 415.9 123.1 L 406.9 123.1 L 405.4 133.0 L 408.6 135.2 L 400.5 138.2 L 400.5 144.4 L 395.3 150.7 L 394.8 156.8 L 391.2 160.0 L 337.8 152.4 L 331.0 136.9 L 330.3 133.4 Z',
+      cx: 372, cy: 142, countInside: true },
     { id: 'qa', name: T('Qatar','قطر'), shortName: 'QA',
       keywords: ['qatar'],
-      path: 'M 325 128 L 335 130 L 335 105 L 330 103 L 326 108 L 323 117 L 324 127 Z',
-      cx: 330, cy: 117, labelX: 358, labelY: 117, countInside: false },
-    /* Kuwait — small NE corner above the Saudi border. */
+      path: 'M 316.6 125.6 L 315.4 114.6 L 320.2 106.6 L 325.1 104.9 L 330.5 109.7 L 330.8 118.6 L 326.9 127.6 L 322.0 128.7 L 316.6 125.6 Z',
+      cx: 323, cy: 117, labelX: 352, labelY: 118, countInside: false },
     { id: 'kw', name: T('Kuwait','الكويت'), shortName: 'KW',
       keywords: ['kuwait'],
-      path: 'M 248 46 L 265 44 L 281 49 L 281 58 L 274 65 L 257 65 Z',
-      cx: 265, cy: 54, labelX: 265, labelY: 82, countInside: false },
-    /* Bahrain — tiny island in the Persian Gulf between Saudi and
-       Qatar. Drawn slightly larger than scale so it's still visible
-       and clickable at this resolution. */
+      path: 'M 266.2 46.1 L 269.9 52.8 L 268.3 56.3 L 274.1 67.8 L 261.5 68.2 L 257.1 60.9 L 241.2 59.4 L 254.3 44.8 L 266.2 46.1 Z',
+      cx: 258, cy: 56, labelX: 258, labelY: 84, countInside: false },
     { id: 'bh', name: T('Bahrain','البحرين'), shortName: 'BH',
       keywords: ['bahrain'],
-      path: 'M 314 100 L 320 100 L 322 107 L 320 113 L 314 112 L 313 106 Z',
-      cx: 317, cy: 106, labelX: 296, labelY: 106, countInside: false }
+      path: 'M 315.5 95.1 L 314.7 95.8 L 315.0 96.5 L 314.5 97.0 L 313.0 96.6 L 313.7 97.6 L 313.0 98.3 L 310.9 98.5 L 309.0 97.6 L 307.2 98.5 L 306.9 99.3 L 307.5 100.4 L 307.4 102.6 L 308.7 104.4 L 308.9 106.2 L 307.6 108.6 L 307.9 109.6 L 311.9 113.5 L 313.1 115.8 L 313.4 114.8 L 314.6 114.9 L 315.5 114.1 L 314.6 112.5 L 315.7 107.4 L 315.8 106.2 L 315.3 105.4 L 315.5 103.8 L 316.1 103.2 L 315.9 102.7 L 316.9 102.9 L 316.6 102.1 L 317.7 101.8 L 315.7 101.9 L 315.6 99.7 L 316.3 99.5 L 316.9 100.7 L 316.6 101.0 L 318.3 100.7 L 318.2 99.5 L 318.6 99.6 L 319.4 101.0 L 319.8 100.9 L 318.9 99.0 L 317.1 98.6 L 318.0 97.3 L 317.5 96.5 L 316.5 96.3 L 317.0 95.2 L 315.5 95.1 Z',
+      cx: 313, cy: 106, labelX: 290, labelY: 107, countInside: false }
   ];
 
   function renderGccHeatmap(data) {
