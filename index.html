@@ -5980,28 +5980,43 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     stroke-width: 2;
   }
   .oh-enh2-gcc-label {
-    font-size: 10px; font-weight: 600;
+    font-size: 11px; font-weight: 600;
     fill: var(--text, #1a1f36);
     pointer-events: none;
     text-anchor: middle;
+    dominant-baseline: middle;
+    /* White halo so outside labels ("KW · 20", "BH · 8") stay legible
+       whether they end up sitting on Saudi's dark-green fill or on
+       the light water/background. paint-order:stroke-fill paints the
+       halo UNDER the glyph. */
+    paint-order: stroke fill;
+    stroke: var(--surface, #fff);
+    stroke-width: 3px;
+    stroke-linejoin: round;
   }
   /* Label rendered INSIDE a country (large country only — small ones
      keep the dark-on-page label outside the shape). White-with-alpha
-     so it reads on the Saudi-green choropleth fill. */
+     so it reads on the Saudi-green choropleth fill; thin dark halo
+     so it still reads on the lighter end of the ramp. */
   .oh-enh2-gcc-label--in {
-    fill: rgba(255,255,255,0.88);
-    font-size: 9px;
+    fill: rgba(255,255,255,0.95);
+    font-size: 10px;
+    stroke: rgba(0,0,0,0.30);
+    stroke-width: 0.8px;
   }
   .oh-enh2-gcc-count {
-    font-size: 13px; font-weight: 700;
+    font-size: 14px; font-weight: 700;
     fill: #fff;
     pointer-events: none;
     text-anchor: middle;
-    /* Drop a subtle shadow so a high-count value stays legible even
-       when the underlying fill is the lighter end of the ramp. */
+    dominant-baseline: middle;
+    /* Stronger dark halo so multi-digit counts (e.g. "1251" or "140")
+       stay legible across the whole color ramp — including the lighter
+       fills used for low-count countries. */
     paint-order: stroke fill;
-    stroke: rgba(0,0,0,0.18);
-    stroke-width: 0.6;
+    stroke: rgba(0,0,0,0.45);
+    stroke-width: 1.2px;
+    stroke-linejoin: round;
   }
   .oh-enh2-gcc-legend {
     display: flex; align-items: center; gap: 6px;
