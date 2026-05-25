@@ -13120,7 +13120,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var rows = [];
     data().forEach(function(it) {
       var missing = [];
-      if (!it.deadline_date) missing.push('deadline');
+      var statusLower = String(it.status || '').toLowerCase();
+      var deadlineNeeded = (statusLower === 'open' || statusLower === 'closing soon');
+      if (!it.deadline_date && deadlineNeeded) missing.push('deadline');
       if (!it.sectors || !it.sectors.length) missing.push('sector');
       if (!it.application_link) missing.push('url');
       if (!it.description_short) missing.push('description');
