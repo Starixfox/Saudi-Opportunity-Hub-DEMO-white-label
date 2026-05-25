@@ -2388,8 +2388,12 @@ footer {
   line-height: 1.6;
 }
 
-/* ── APP FOOTER (rich 4-column, sibling of .app-shell so it spans
-        full viewport width — including under the sidebar column) ──── */
+/* ── APP FOOTER (rich 4-column, sibling of .app-shell)
+   Aligned with the content column on desktop — i.e. offset by the
+   sidebar's 220px so the dark band starts where the topbar/content
+   start, never under the sidebar. On mobile the sidebar is hidden,
+   so the footer reverts to full viewport width. `margin-inline-start`
+   handles RTL automatically (sidebar flips to the right). ──────── */
 .sh-footer {
   width: 100%;
   padding: 56px clamp(24px, 4vw, 56px) 0;
@@ -2397,6 +2401,14 @@ footer {
   color: rgba(255,255,255,0.72);
   border-top: 1px solid rgba(255,255,255,0.06);
   font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+}
+@media (min-width: 769px) {
+  /* Sidebar is 220px wide and visible at this breakpoint
+     (see `.app-sidebar { display: none }` at max-width: 768px). */
+  .sh-footer {
+    width: calc(100% - 220px);
+    margin-inline-start: 220px;
+  }
 }
 @media (max-width: 768px) {
   .sh-footer { padding: 40px 18px calc(72px + env(safe-area-inset-bottom, 0px)); }
@@ -9915,11 +9927,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 </div><!-- /.app-shell -->
 
 <!-- ═══════════════════════════════════════════
-     FOOTER — full-width, sits below .app-shell so it
-     spans under the sidebar column too. The sticky
-     sidebar (height:100vh, top:0) naturally scrolls
-     off-screen once the shell ends, so the footer
-     reads as edge-to-edge.
+     FOOTER — sits below .app-shell as a sibling.
+     On desktop (≥769px) it's inset by the 220px sidebar
+     width via `margin-inline-start` so it aligns with the
+     topbar/content column and never extends under the
+     sidebar. On mobile the sidebar is hidden and the
+     footer spans the full viewport. RTL flips automatically.
 ═══════════════════════════════════════════ -->
 <footer class="sh-footer" role="contentinfo" aria-label="Site footer">
   <div class="sh-footer-grid">
