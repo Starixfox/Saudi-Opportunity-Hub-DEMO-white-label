@@ -8839,7 +8839,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 .ob-form-label {
   font-size: 12px;
   font-weight: 700;
-  color: var(--text-muted, #64748b);
+  /* Form labels sit on the dark onboarding modal (#0d1117), so the
+     stock --text-muted token reads too dark. Force a dimmed white. */
+  color: rgba(255,255,255,0.7);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -21024,10 +21026,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 
     panel.innerHTML =
       '<div class="ob-profile-form">' +
+        /* Modal background is the dark #0d1117 — explicit light text
+           colors so the wizard header reads regardless of app theme. */
         '<div style="margin-bottom:4px;">' +
-          '<div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">' + (ar ? 'الخطوة 2 من 4' : 'Step 2 of 4') + '</div>' +
-          '<div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px;">' + (ar ? 'أخبرنا عنك' : 'Tell us about you') + '</div>' +
-          '<div style="font-size:13px;color:var(--text-muted);">' + (ar ? 'يساعدنا ذلك في تخصيص الفرص المناسبة لك' : 'This helps us surface the most relevant opportunities for you') + '</div>' +
+          '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">' + (ar ? 'الخطوة 2 من 4' : 'Step 2 of 4') + '</div>' +
+          '<div style="font-size:20px;font-weight:800;color:#ffffff;margin-bottom:4px;">' + (ar ? 'أخبرنا عنك' : 'Tell us about you') + '</div>' +
+          '<div style="font-size:13px;color:rgba(255,255,255,0.78);">' + (ar ? 'يساعدنا ذلك في تخصيص الفرص المناسبة لك' : 'This helps us surface the most relevant opportunities for you') + '</div>' +
         '</div>' +
         '<div class="ob-form-group">' +
           '<label class="ob-form-label" for="obNameInput">' + (ar ? 'الاسم الكامل' : 'Display Name') + '</label>' +
@@ -21081,10 +21085,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var ar = isAr();
     panel.innerHTML =
       '<div class="ob-pref-list">' +
+        /* Same dark-modal text contrast fix as Step 2 above. */
         '<div style="margin-bottom:8px;">' +
-          '<div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">' + (ar ? 'الخطوة 3 من 4' : 'Step 3 of 4') + '</div>' +
-          '<div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px;">' + (ar ? 'تفضيلاتك' : 'Your Preferences') + '</div>' +
-          '<div style="font-size:13px;color:var(--text-muted);">' + (ar ? 'يمكنك تغيير هذه الإعدادات لاحقاً' : 'You can change these anytime in Settings') + '</div>' +
+          '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">' + (ar ? 'الخطوة 3 من 4' : 'Step 3 of 4') + '</div>' +
+          '<div style="font-size:20px;font-weight:800;color:#ffffff;margin-bottom:4px;">' + (ar ? 'تفضيلاتك' : 'Your Preferences') + '</div>' +
+          '<div style="font-size:13px;color:rgba(255,255,255,0.78);">' + (ar ? 'يمكنك تغيير هذه الإعدادات لاحقاً' : 'You can change these anytime in Settings') + '</div>' +
         '</div>' +
         '<div class="ob-pref-row">' +
           '<div class="ob-pref-info">' +
