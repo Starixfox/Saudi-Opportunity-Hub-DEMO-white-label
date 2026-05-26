@@ -1,0 +1,278 @@
+/* ============================================================================
+   Saudi Opportunity Hub — polish overrides
+   ----------------------------------------------------------------------------
+   Loaded AFTER legacy-app.css so these rules win the cascade. Targets the
+   surfaces the user actually sees behind auth: home dashboard greeting,
+   KPI tile row, quick-action chips, opportunity cards.
+
+   Every rule uses var(--accent) so the white-label theme switch
+   (default green, NEOM cyan, MISA navy, Monsha'at orange, ADIO blue,
+   SDB purple, Swift Solve navy) drives the colour without code changes.
+============================================================================ */
+
+/* ─────────────────────────────────────────────────────────── HOME — HERO */
+
+/* Turn the bare greeting block into a real hero with restrained
+   mashrabiya pattern behind the title. The pattern fades to nothing
+   at the edges via mask-image so it never competes with the headline. */
+.home-greeting {
+  position: relative;
+  isolation: isolate;
+  padding: 32px 36px 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.04),
+    0 1px 2px rgba(15, 23, 42, 0.03);
+  overflow: hidden;
+}
+
+.home-greeting::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96' width='96' height='96'><g fill='none' stroke='currentColor' stroke-width='0.7' opacity='0.75'><path d='M48 8l9 28 28 9-28 9-9 28-9-28-28-9 28-9z'/><path d='M48 8l-9 28-28 9 28 9 9 28 9-28 28-9-28-9z'/><circle cx='48' cy='48' r='5'/></g></svg>");
+  background-size: 96px 96px;
+  background-repeat: repeat;
+  color: var(--accent);
+  opacity: 0.06;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse 70% 80% at 80% 30%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 80% at 80% 30%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0) 100%);
+}
+
+[data-theme="dark"] .home-greeting::before { opacity: 0.10; }
+
+/* Tighter, more confident greeting badge */
+.home-greeting-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  padding: 5px 10px;
+  background: var(--accent-light, rgba(0,108,53,0.08));
+  border-color: transparent;
+  margin-bottom: 14px;
+}
+
+/* Bigger, more present title. Uses the fluid display scale. */
+.home-title {
+  font-size: clamp(1.75rem, 1.0rem + 2.4vw, 2.875rem);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+.home-title span { color: var(--accent); }
+
+.home-sub {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  max-width: 50ch;
+  line-height: 1.5;
+}
+
+/* ─────────────────────────────────────────────────── HOME — QUICK ACTIONS */
+
+.home-quick-actions {
+  gap: 10px;
+  padding-top: 16px;
+}
+
+.home-qa-btn {
+  padding: 11px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 10px;
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.30, 1),
+    color            160ms cubic-bezier(0.16, 1, 0.30, 1),
+    border-color     160ms cubic-bezier(0.16, 1, 0.30, 1),
+    box-shadow       220ms cubic-bezier(0.16, 1, 0.30, 1),
+    transform        160ms cubic-bezier(0.16, 1, 0.30, 1);
+  color: var(--text);
+  min-height: 40px;
+}
+.home-qa-btn:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 8px rgba(15, 23, 42, 0.06),
+    0 1px 2px rgba(15, 23, 42, 0.04);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.home-qa-btn:active { transform: translateY(0); }
+.home-qa-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-glow, rgba(0,108,53,0.25));
+  border-color: var(--accent);
+}
+
+.home-qa-btn--primary {
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.10),
+    0 4px 12px var(--accent-glow, rgba(0,108,53,0.25));
+}
+.home-qa-btn--primary:hover {
+  transform: translateY(-1px);
+  color: #fff;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.12),
+    0 8px 20px var(--accent-glow, rgba(0,108,53,0.35));
+}
+
+.home-qa-btn [data-lucide] { width: 15px; height: 15px; }
+
+/* ───────────────────────────────────────────────────── HOME — KPI TILES */
+
+.home-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.home-stat {
+  position: relative;
+  padding: 20px 22px 18px;
+  border-left: none;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  transition:
+    box-shadow 220ms cubic-bezier(0.16, 1, 0.30, 1),
+    border-color 220ms cubic-bezier(0.16, 1, 0.30, 1),
+    transform 220ms cubic-bezier(0.16, 1, 0.30, 1);
+  isolation: isolate;
+  overflow: hidden;
+}
+.home-stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 220ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+.home-stat:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.06),
+    0 4px 8px rgba(15, 23, 42, 0.04);
+  border-color: var(--border);
+}
+.home-stat:hover::before { opacity: 1; }
+
+/* The "primary" stat tile gets a permanent accent rule on top */
+.home-stat:first-child::before { opacity: 0.7; }
+.home-stat--green::before { background: var(--accent); opacity: 0.7 !important; }
+.home-stat--gold::before  { background: var(--gold, #C9A66B); opacity: 0.7 !important; }
+
+.home-stat-val {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 1.5rem + 0.5vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.home-stat-lbl {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  color: var(--text-muted);
+}
+
+/* ──────────────────────────────────────────────────────── TOPBAR STATS */
+
+.app-tb-stat {
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.30, 1),
+    border-color     160ms cubic-bezier(0.16, 1, 0.30, 1),
+    transform        160ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+.app-tb-stat:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ──────────────────────────────────────────────────────── SIDEBAR ITEM */
+
+.app-nav-item {
+  transition:
+    background-color 180ms cubic-bezier(0.16, 1, 0.30, 1),
+    color            180ms cubic-bezier(0.16, 1, 0.30, 1),
+    border-color     180ms cubic-bezier(0.16, 1, 0.30, 1);
+  position: relative;
+}
+.app-nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+/* ─────────────────────────────────────────────────── OPPORTUNITY CARDS */
+
+.opp-card {
+  transition:
+    box-shadow 220ms cubic-bezier(0.16, 1, 0.30, 1),
+    border-color 220ms cubic-bezier(0.16, 1, 0.30, 1),
+    transform 220ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+.opp-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.08),
+    0 4px 8px rgba(15, 23, 42, 0.04);
+  border-color: var(--accent);
+}
+
+[data-theme="dark"] .home-stat:hover {
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.40),
+    0 4px 8px rgba(0, 0, 0, 0.20);
+}
+[data-theme="dark"] .opp-card:hover {
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.45),
+    0 4px 8px rgba(0, 0, 0, 0.25);
+}
+[data-theme="dark"] .home-qa-btn:hover {
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.30),
+    0 1px 2px rgba(0, 0, 0, 0.20);
+}
+
+/* ──────────────────────────────────────────────────── REDUCED MOTION */
+
+@media (prefers-reduced-motion: reduce) {
+  .home-qa-btn, .home-qa-btn:hover,
+  .home-stat, .home-stat:hover,
+  .app-tb-stat, .app-tb-stat:hover,
+  .opp-card, .opp-card:hover {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ──────────────────────────────────────────────────── RTL ADJUSTMENTS */
+
+[dir="rtl"] .home-greeting::before {
+  mask-image: radial-gradient(ellipse 70% 80% at 20% 30%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 80% at 20% 30%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0) 100%);
+}
+
+[dir="rtl"] .app-nav-item.active::before {
+  left: auto;
+  right: 0;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
