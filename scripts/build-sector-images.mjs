@@ -29,7 +29,7 @@ const SECTORS = {
   'agriculture':        'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200',
   'education':          'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200',
   'finance':            'https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=1200',
-  'tourism':            'https://images.unsplash.com/photo-1564506474071-fd0c4f49abc5?w=1200',
+  'tourism':            'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200',
   'mining':             'https://images.unsplash.com/photo-1582719471384-894fbb16e074?w=1200',
   'manufacturing':      'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1200',
   'transport':          'https://images.unsplash.com/photo-1494412519320-aa613dfb7738?w=1200',
@@ -67,9 +67,17 @@ async function main() {
 
   await fs.mkdir(OUT, { recursive: true });
 
+  const skipped = [];
   for (const [sector, url] of Object.entries(SECTORS)) {
     process.stdout.write(`${sector.padEnd(15)} `);
-    const buf = await fetch(url);
+    let buf;
+    try {
+      buf = await fetch(url);
+    } catch (e) {
+      console.log(`SKIP (${e.message})`);
+      skipped.push(sector);
+      continue;
+    }
     const img = sharp(buf).resize(1200, 800, { fit: 'cover', position: 'attention' });
 
     await Promise.all([
@@ -104,6 +112,7 @@ async function main() {
 `;
   await fs.writeFile(TEMPLATE_OUT, template);
   console.log('\nTemplate written to ' + path.relative(ROOT, TEMPLATE_OUT));
+  if (skipped.length) console.log('Skipped (source URL unavailable): ' + skipped.join(', '));
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });
