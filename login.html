@@ -51,8 +51,13 @@
   }
   </script>
 
+  <!-- Open the CDN connection early — supabase-js is render-blocking and
+       the TLS handshake to a fresh host costs ~150-300ms otherwise. -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+
   <!-- Supabase JS client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 
   <!-- Fonts: Inter (Latin body+display) | IBM Plex Sans Arabic (RTL) | Space Grotesk (display) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1245,7 +1250,7 @@
      HOW TO CONNECT SUPABASE
      ──────────────────────────────────────────────────────────
      1. Add the Supabase CDN before this script block:
-        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 
      2. Replace the placeholder constants below with your real keys:
         const SUPABASE_URL = 'https://xxxx.supabase.co'

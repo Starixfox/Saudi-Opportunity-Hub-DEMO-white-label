@@ -4,8 +4,16 @@
 <head>
 <meta charset="UTF-8">
 
+<!-- Performance: open CDN + Supabase connections early. supabase-js is
+     render-blocking; the realtime websocket connection to Supabase opens
+     immediately on session restore. Both benefit from preconnect. -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://dshrbbnjahjcwxzvzygh.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://dshrbbnjahjcwxzvzygh.supabase.co">
+
 <!-- Supabase JS client -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <!-- Session guard: redirect to login if not authenticated -->
 <script>
 // ── Super-admin / owner gate — only this UID gets the Theme Manager
@@ -448,12 +456,12 @@ window.applyTheme = function (key) {
      onclick="…" attributes for CSP-tightening and audit hygiene. -->
 <script defer src="assets/polish-delegated-actions.js"></script>
 
-<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4" crossorigin="anonymous"></script>
 <!-- Lucide: synchronous load, explicit UMD path. Icons are painted at the
      end of <body> via lucide.createIcons() so the DOM is fully built. -->
-<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js" integrity="sha384-hJnF5AwidE18GSWTAGHv3ByzzvfNZ1Tcx5y1UUV3WkauuMCEzBJBMSwSt/PUPXnM" crossorigin="anonymous"></script>
 <!-- jsPDF: pre-loaded so PDF exports do not rely on dynamic injection -->
-<script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" integrity="sha384-en/ztfPSRkGfME4KIm05joYXynqzUgbsG5nMrj/xEFAHXkeZfO3yMK8QQ+mP7p1/" crossorigin="anonymous"></script>
 <!-- ─── Extracted from inline <style>; original block was 8,608 lines (Phase 2 follow-up) ─── -->
 <link rel="stylesheet" href="assets/legacy-app.css">
 

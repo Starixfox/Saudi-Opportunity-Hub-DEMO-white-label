@@ -1,0 +1,28 @@
+# Saudi Opportunity Hub — security.txt
+# Compliant with RFC 9116.
+# Auto-discovered by security researchers at /.well-known/security.txt.
+
+Contact: mailto:jblancoapodaca@gmail.com
+Expires: 2027-05-26T23:59:59Z
+Preferred-Languages: en, ar
+
+# What to report:
+# - Anything that could expose user accounts, watchlists, or saved searches.
+# - RLS bypasses in the Supabase project that allow reading or writing data
+#   outside of the authenticated user's scope.
+# - XSS, CSRF, or clickjacking vectors in any of the public-facing pages
+#   (index.html, login.html, contact.html, api.html, 404.html,
+#   reset-password.html).
+# - Misconfigurations in the Content-Security-Policy meta tags or in the
+#   GitHub Pages hosting layer.
+# - Supply-chain concerns affecting the SRI-pinned CDN scripts.
+
+# Out of scope:
+# - Social-engineering or phishing against staff.
+# - DoS / volumetric attacks.
+# - Findings against third-party services we link to but do not control
+#   (Supabase, Formspree, GitHub Pages, jsDelivr, Google Fonts).
+
+# This is a private demo. We do not currently run a bug-bounty programme,
+# but we acknowledge reports promptly and credit researchers who follow
+# coordinated disclosure.

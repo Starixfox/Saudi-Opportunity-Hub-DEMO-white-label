@@ -94,25 +94,24 @@ flip cleanly._
 - [ ] `Referrer-Policy: strict-origin-when-cross-origin` present
 - [ ] HSTS enabled at the GitHub Pages / Cloudflare / Vercel layer (GH Pages enables it by default with custom domains)
 
-### Subresource Integrity (SRI) on CDN scripts
+### Subresource Integrity (SRI) on CDN scripts — **SHIPPED**
 
-`index.html` pulls four scripts from `cdn.jsdelivr.net`. A compromised
-CDN could ship modified JS to every visitor. SRI prevents that.
+All 4 CDN scripts now pinned + SRI'd in `index.html`, `login.html`,
+`reset-password.html`. Verified live (supabase loads cleanly, browser
+doesn't block on integrity mismatch).
 
-- [ ] Pin `lucide@latest` to a specific version (e.g. `lucide@0.485.0`).
-      Leaving `@latest` makes SRI impossible — the hash changes silently.
-- [ ] For each pinned CDN script, fetch its SRI hash from
-      `https://data.jsdelivr.com/v1/package/npm/<name>@<version>/integrity`
-      or compute locally:
-      ```bash
-      curl -fsSL <script-url> | openssl dgst -sha384 -binary | openssl base64 -A
-      ```
-- [ ] Add `integrity="sha384-…"` and `crossorigin="anonymous"` to every
-      `<script src="https://cdn.jsdelivr.net/…">` in `index.html`
-      (`supabase-js@2`, `chart.js@4.4.1`, `lucide@<pinned>`, `jspdf@2.5.2`).
-- [ ] Re-run `/login.html` and the dashboard view after the SRI changes —
-      browsers silently 403 scripts whose hashes don't match. Confirm
-      no console errors and that Chart.js + Lucide icons still render.
+- [x] `@supabase/supabase-js@2.45.4` — `sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug`
+- [x] `chart.js@4.4.1` — `sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4`
+- [x] `lucide@0.469.0` (previously `@latest`) — `sha384-hJnF5AwidE18GSWTAGHv3ByzzvfNZ1Tcx5y1UUV3WkauuMCEzBJBMSwSt/PUPXnM`
+- [x] `jspdf@2.5.2` — `sha384-en/ztfPSRkGfME4KIm05joYXynqzUgbsG5nMrj/xEFAHXkeZfO3yMK8QQ+mP7p1/`
+
+**When you next update a CDN dep:** re-compute the integrity hash
+```bash
+curl -fsSL <script-url> | openssl dgst -sha384 -binary | openssl base64 -A
+```
+and update the `integrity=` attribute alongside the version bump.
+Browsers silently 403 scripts whose hashes don't match — you'll see it
+as a console "blocked by SRI" error and the dependent feature breaking.
 
 ---
 
