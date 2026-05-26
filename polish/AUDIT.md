@@ -10,7 +10,17 @@ credible to Saudi government and Vision 2030 audiences."
 
 - ✅ done — landed and verified
 - ⚠️ partial — addressed for the public-page surface, SPA-side work pending
-- ⏳ pending — not started in this pass
+- ⏳ pending — not started in this pass; tracked as a GitHub issue
+
+**Open tracked follow-ups** (created 2026-05-26 after Round 6):
+
+- [#13 — bump .btn min-height to 44px (WCAG 2.5.5 best-practice)](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/13)
+- [#14 — tighten CSP, drop `'unsafe-inline'` from script-src](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/14)
+- [#15 — AVIF/WebP `<picture>` for sector card imagery](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/15)
+- [#16 — behind-auth smoke test of `data-action` conversions](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/16)
+- [#17 — Lighthouse baseline on the live URL post-polish-pass](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/17)
+
+**CI**: [`.github/workflows/polish-quality-gate.yml`](../.github/workflows/polish-quality-gate.yml) catches regressions of the polish-pass invariants (SRI, pinning, inline onclick, brace balance, JS syntax, JSON-LD validity, sitemap shape) on every push and PR to `main`.
 
 ---
 
@@ -77,8 +87,8 @@ credible to Saudi government and Vision 2030 audiences."
 | P1-5 | 1,089 hex color literals | index.html | ⏳ pending | Same dependency — falls out of P0-2 extraction. |
 | P1-6 | No JSON-LD beyond what GH Pages infers | All HTML | ✅ done | Organization + WebSite + ContactPage on head; per-opportunity `Grant` / `GovernmentService` / `EducationalOccupationalProgram` / `FundingScheme` via `assets/opportunity-schema.js`, wired into `openPanel`/`closePanel`. Graph-linked via `@id`. |
 | P1-7 | No bilingual hreflang | index.html head | ✅ done | `<link rel="alternate" hreflang="{en,ar,x-default}">` on `index.html`. Sitemap also carries `xhtml:link rel="alternate"` for the root. |
-| P1-8 | No `<picture>`/AVIF/WebP for sector imagery | index.html:14674 | ⏳ pending | Performance-only concern; pre-requires a sector-image inventory. |
-| P1-9 | Inline `<script>` in `<head>` doing auth check, blocking render | index.html:7-56 | ⏳ pending | Architectural — the auth check is intentionally synchronous to gate render. Splitting it needs care. |
+| P1-8 | No `<picture>`/AVIF/WebP for sector imagery | index.html:14674 | ⏳ tracked [#15](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/15) | Performance-only concern; pre-requires a sector-image inventory. |
+| P1-9 | Inline `<script>` in `<head>` doing auth check, blocking render | index.html:7-56 | ⏳ tracked [#14](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/14) | Folded into the CSP-tighten issue; both depend on moving the head inline scripts to external files. |
 
 ### P2 — quality-of-life
 
