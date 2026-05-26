@@ -11302,17 +11302,20 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       }
     };
 
-    // Sectors (bar, top 10) — AXIS labels stay English in both modes per
-    // i18n policy ("sector names on charts and filters" don't translate).
-    // The dataset LABEL ("Opportunities") is a tooltip-only UI string and
-    // still goes through t().
+    // Sectors (bar, top 10) — axis labels translate with the current
+    // language (previously stayed English regardless of __lang per an
+    // older "no sector translation in charts" policy that's since been
+    // overridden). The dataset LABEL ("Opportunities") goes through t().
     var _sectorTallyMap = {};
     var _nsChart = window.__normalizeSectorKey || function(r){ return String(r||''); };
     data.forEach(function(d){ (d.sectors || []).forEach(function(s){ var k=_nsChart(s); if (k) _sectorTallyMap[k] = (_sectorTallyMap[k]||0)+1; }); });
     var sectorTop = topN(_sectorTallyMap, 10);
     var _sectorEnLabel = function(key) {
-      return (window.SECTOR_NAMES_EN && window.SECTOR_NAMES_EN[key]) ||
-             String(key||'').replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+      var k = String(key || '').toLowerCase();
+      var isAr = window.__lang === 'ar';
+      if (isAr && window.SECTOR_NAMES_AR && window.SECTOR_NAMES_AR[k]) return window.SECTOR_NAMES_AR[k];
+      if (window.SECTOR_NAMES_EN && window.SECTOR_NAMES_EN[k])         return window.SECTOR_NAMES_EN[k];
+      return k.replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
     };
     makeChart('chartSectors', 'bar', {
       labels: sectorTop.map(function (x) { return _sectorEnLabel(x[0]); }),
