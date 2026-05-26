@@ -37,3 +37,7 @@ build/
 # Local Claude / agent state
 .claude/
 .cursor/
+
+# Local audit / enrichment scratch directories (one per run, dated)
+audit-*/
+enrichment-*/
