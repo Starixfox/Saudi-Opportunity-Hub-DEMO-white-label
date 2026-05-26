@@ -82,6 +82,45 @@
     other:        'CreativeWork'
   };
 
+  /* ----------------------------------------------------------- Field aliasing
+     The SPA's dataset stores opportunities with field names that don't quite
+     match the schema-friendly names this module wants (title_ar, deadline_date,
+     sponsor_institution, application_link, funding_amount, etc.). normalise()
+     produces a canonical view that build() then reads, so callers can pass
+     raw dataset records directly without writing an adapter. */
+
+  function firstDefined(/* …values */) {
+    for (var i = 0; i < arguments.length; i++) {
+      var v = arguments[i];
+      if (v !== undefined && v !== null && v !== '') return v;
+    }
+    return undefined;
+  }
+
+  function normalise(raw) {
+    if (!raw) return raw;
+    return {
+      id:             firstDefined(raw.id, raw.opportunity_id, raw.uuid),
+      title:          firstDefined(raw.title, raw.name),
+      title_ar:       firstDefined(raw.title_ar, raw.name_ar),
+      description:    firstDefined(raw.description, raw.description_short, raw.description_full, raw.summary),
+      description_ar: firstDefined(raw.description_ar, raw.description_short_ar, raw.description_full_ar),
+      type:           firstDefined(raw.type, raw.funding_type, raw.opportunity_type),
+      sponsor:        firstDefined(raw.sponsor, raw.sponsor_institution, raw.agency, raw.institution, raw.funder),
+      sponsor_ar:     firstDefined(raw.sponsor_ar, raw.sponsor_institution_ar, raw.agency_ar),
+      sponsor_url:    firstDefined(raw.sponsor_url, raw.institution_url, raw.agency_url),
+      country:        firstDefined(raw.country, raw.eligibility_region, raw.region),
+      sector:         firstDefined(raw.sector, Array.isArray(raw.sectors) ? raw.sectors[0] : raw.sectors),
+      status:         firstDefined(raw.status),
+      deadline:       firstDefined(raw.deadline, raw.deadline_date, raw.application_deadline, raw.closes_at),
+      opens_at:       firstDefined(raw.opens_at, raw.start_date, raw.published_at),
+      url:            firstDefined(raw.url, raw.application_link, raw.source_url, raw.link),
+      amount:         firstDefined(raw.amount, raw.funding_amount, raw.award_amount),
+      currency:       firstDefined(raw.currency, raw.funding_currency),
+      eligibility:    firstDefined(raw.eligibility, raw.eligibility_criteria, raw.audience)
+    };
+  }
+
   /* ------------------------------------------------------------------ Helpers */
 
   function pickSchemaType(typeRaw) {
@@ -200,8 +239,11 @@
    * Build a JSON-LD object for a single opportunity.
    * Returns a plain JS object — call JSON.stringify(…, null, 2) to serialise.
    */
-  function build(opp) {
-    if (!opp) throw new Error('OpportunitySchema.build: opportunity is required');
+  function build(rawOpp) {
+    if (!rawOpp) throw new Error('OpportunitySchema.build: opportunity is required');
+
+    // Accept either canonical schema-shaped objects or raw dataset records.
+    var opp = normalise(rawOpp);
 
     var schemaType = pickSchemaType(opp.type);
     var funder     = buildFunder(opp);
@@ -333,9 +375,10 @@
     inject:  inject,
     clear:   clear,
     // Exposed for tests / debugging.
-    _pickSchemaType: pickSchemaType,
-    _buildFunder:    buildFunder,
-    _buildAreaServed: buildAreaServed
+    _pickSchemaType:  pickSchemaType,
+    _buildFunder:     buildFunder,
+    _buildAreaServed: buildAreaServed,
+    _normalise:       normalise
   };
 
   // Also export as CommonJS for any node-side tooling that wants it.

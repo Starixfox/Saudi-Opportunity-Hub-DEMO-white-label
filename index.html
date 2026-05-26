@@ -436,6 +436,13 @@ window.applyTheme = function (key) {
 
 <!-- ─── Polish pass: consolidated design tokens (single source of truth) ─── -->
 <link rel="stylesheet" href="assets/tokens.css">
+
+<!-- Per-opportunity JSON-LD emitter — exposes window.OpportunitySchema.
+     Wired into openPanel() / closePanel() below so each opportunity the
+     user opens gets schema.org/Grant (or GovernmentService etc.) markup
+     visible to AI crawlers and search engines. -->
+<script defer src="assets/opportunity-schema.js"></script>
+
 <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <!-- Lucide: synchronous load, explicit UMD path. Icons are painted at the
      end of <body> via lucide.createIcons() so the DOM is fully built. -->
@@ -17380,6 +17387,14 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (!panel || !item) return;
     var isAr = (window.__lang === 'ar');
 
+    /* Emit per-opportunity JSON-LD so AI crawlers and search engines see
+       schema.org/Grant (or GovernmentService / EducationalOccupationalProgram
+       depending on type) for the opportunity currently in view. The module
+       handles field-name aliasing from the dataset (sponsor_institution →
+       sponsor, deadline_date → deadline, etc.). Safe-noop if the module
+       isn't loaded yet (deferred script). */
+    try { window.OpportunitySchema && window.OpportunitySchema.inject(item); } catch (e) {}
+
     /* Title — prefer authored Arabic when present, fall back to the
        English title. Never auto-translate; the title_ar column stays
        NULL until a human authors it. */
@@ -17585,6 +17600,10 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     if (overlay) { overlay.classList.remove('visible'); overlay.setAttribute('aria-hidden', 'true'); }
     document.body.classList.remove('panel-open');
     if (window.__releaseFocus) window.__releaseFocus(panel);
+
+    /* Drop the per-opportunity JSON-LD so the page doesn't accumulate stale
+       schema after the user closes one panel and never opens another. */
+    try { window.OpportunitySchema && window.OpportunitySchema.clear(); } catch (e) {}
   }
 
   // Wire close button and overlay
