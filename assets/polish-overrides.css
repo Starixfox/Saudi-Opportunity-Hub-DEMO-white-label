@@ -276,3 +276,310 @@
   right: 0;
   border-radius: var(--radius-sm) 0 0 var(--radius-sm);
 }
+
+/* ============================================================================
+   PUBLIC PAGES — same polish vocabulary applied to login, contact, api, 404,
+   reset-password. Each page's own inline <style> still defines its base
+   layout; these overrides add the hero motif, hover lifts, and refined
+   focus rings the SPA dashboard just got.
+============================================================================ */
+
+/* ─────────────────────────────────────────── shared utility: mashrabiya */
+
+/* Applied to any card-hero by adding class="has-mashrabiya". Pages that
+   want the pattern just add the class on the wrapping container. */
+.has-mashrabiya {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.has-mashrabiya::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96' width='96' height='96'><g fill='none' stroke='currentColor' stroke-width='0.7' opacity='0.75'><path d='M48 8l9 28 28 9-28 9-9 28-9-28-28-9 28-9z'/><path d='M48 8l-9 28-28 9 28 9 9 28 9-28 28-9-28-9z'/><circle cx='48' cy='48' r='5'/></g></svg>");
+  background-size: 96px 96px;
+  background-repeat: repeat;
+  color: var(--accent);
+  opacity: 0.05;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse 75% 80% at 80% 25%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.45) 60%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 80% at 80% 25%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.45) 60%, rgba(0,0,0,0) 100%);
+}
+[dir="rtl"] .has-mashrabiya::before {
+  mask-image: radial-gradient(ellipse 75% 80% at 20% 25%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.45) 60%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 80% at 20% 25%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.45) 60%, rgba(0,0,0,0) 100%);
+}
+
+/* ───────────────────────────────────────────── contact.html · card hero */
+
+/* The contact form card gets the mashrabiya treatment in the header band
+   plus a slight hover lift and a stronger shadow that matches the home
+   stat tiles. Tighter typography on the title + subtitle. */
+body > .card,
+main > .card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.05),
+    0 4px 24px rgba(15, 23, 42, 0.04);
+  transition: box-shadow 220ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+body > .card:hover,
+main > .card:hover {
+  box-shadow:
+    0 2px 6px rgba(15, 23, 42, 0.06),
+    0 10px 40px rgba(15, 23, 42, 0.06);
+}
+body > .card::before,
+main > .card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96' width='96' height='96'><g fill='none' stroke='currentColor' stroke-width='0.7' opacity='0.75'><path d='M48 8l9 28 28 9-28 9-9 28-9-28-28-9 28-9z'/><path d='M48 8l-9 28-28 9 28 9 9 28 9-28 28-9-28-9z'/><circle cx='48' cy='48' r='5'/></g></svg>");
+  background-size: 96px 96px;
+  background-repeat: repeat;
+  color: var(--accent, #006C35);
+  opacity: 0.05;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse 75% 50% at 50% 0%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 50% at 50% 0%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0) 100%);
+}
+
+.card-title {
+  font-family: var(--font-display, 'Space Grotesk', system-ui, sans-serif);
+  letter-spacing: -0.02em;
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 1.875rem);
+  line-height: 1.15;
+}
+.card-subtitle {
+  color: var(--text-muted, #6b6560);
+  line-height: 1.5;
+  max-width: 52ch;
+}
+
+/* contact + reset-password form polish — refined focus ring + transitions */
+.form-input,
+.form-select,
+.form-textarea {
+  transition:
+    border-color 160ms cubic-bezier(0.16, 1, 0.30, 1),
+    box-shadow   220ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--accent, var(--green, #006C35));
+  box-shadow: 0 0 0 3px var(--accent-glow, rgba(0, 108, 53, 0.20));
+}
+
+/* Submit button polish — lifts on hover with accent-coloured glow */
+.btn-submit {
+  position: relative;
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.30, 1),
+    box-shadow       220ms cubic-bezier(0.16, 1, 0.30, 1),
+    transform        160ms cubic-bezier(0.16, 1, 0.30, 1);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.10),
+    0 4px 12px var(--accent-glow, rgba(0, 108, 53, 0.20));
+}
+.btn-submit:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.12),
+    0 8px 20px var(--accent-glow, rgba(0, 108, 53, 0.30));
+}
+.btn-submit:active { transform: translateY(0); }
+.btn-submit:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px var(--accent-glow, rgba(0, 108, 53, 0.35)),
+    0 4px 12px var(--accent-glow, rgba(0, 108, 53, 0.20));
+}
+
+/* ───────────────────────────────────────────────── api.html · hero + cards */
+
+.api-hero {
+  position: relative;
+  isolation: isolate;
+}
+.api-hero::before {
+  content: '';
+  position: absolute;
+  inset: -40px -40px auto auto;
+  width: 480px;
+  height: 480px;
+  z-index: -1;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96' width='96' height='96'><g fill='none' stroke='currentColor' stroke-width='0.7' opacity='0.75'><path d='M48 8l9 28 28 9-28 9-9 28-9-28-28-9 28-9z'/><path d='M48 8l-9 28-28 9 28 9 9 28 9-28 28-9-28-9z'/><circle cx='48' cy='48' r='5'/></g></svg>");
+  background-size: 96px 96px;
+  background-repeat: repeat;
+  color: var(--accent, var(--green, #006C35));
+  opacity: 0.06;
+  pointer-events: none;
+  mask-image: radial-gradient(circle at 70% 30%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0) 90%);
+  -webkit-mask-image: radial-gradient(circle at 70% 30%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0) 90%);
+}
+
+/* Endpoint cards lift on hover */
+.endpoint-card {
+  transition:
+    border-color 220ms cubic-bezier(0.16, 1, 0.30, 1),
+    box-shadow   220ms cubic-bezier(0.16, 1, 0.30, 1),
+    transform    220ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+.endpoint-card:hover {
+  border-color: var(--accent, var(--green));
+  transform: translateY(-2px);
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.06),
+    0 4px 8px rgba(15, 23, 42, 0.04);
+}
+
+/* api CTA button matches the home primary chip */
+.btn-cta {
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.30, 1),
+    transform        160ms cubic-bezier(0.16, 1, 0.30, 1),
+    box-shadow       220ms cubic-bezier(0.16, 1, 0.30, 1);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.10),
+    0 4px 12px var(--accent-glow, rgba(0, 108, 53, 0.20));
+}
+.btn-cta:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.12),
+    0 8px 20px var(--accent-glow, rgba(0, 108, 53, 0.30));
+}
+
+/* code blocks: subtle accent rail on hover so they feel scannable */
+.code-block {
+  position: relative;
+  transition: box-shadow 220ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+.code-block:hover {
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.10);
+}
+
+/* ─────────────────────────────────────────────────── 404.html · hero card */
+
+main.wrap,
+.wrap {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.05),
+    0 20px 60px rgba(15, 23, 42, 0.06);
+  transition: box-shadow 220ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+main.wrap::before,
+.wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96' width='96' height='96'><g fill='none' stroke='currentColor' stroke-width='0.7' opacity='0.75'><path d='M48 8l9 28 28 9-28 9-9 28-9-28-28-9 28-9z'/><path d='M48 8l-9 28-28 9 28 9 9 28 9-28 28-9-28-9z'/><circle cx='48' cy='48' r='5'/></g></svg>");
+  background-size: 96px 96px;
+  background-repeat: repeat;
+  color: var(--accent, var(--green, #006C35));
+  opacity: 0.05;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 10%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 10%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%);
+}
+
+/* 404's massive 4-0-4 number gets a subtle gradient + crisp tabular feel */
+.code {
+  background: linear-gradient(180deg, var(--accent, var(--green)) 0%, var(--accent-hover, var(--green-hover, #005228)) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 404 buttons — same hover lift idiom */
+a.btn--primary,
+a.btn--ghost {
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.30, 1),
+    border-color     160ms cubic-bezier(0.16, 1, 0.30, 1),
+    color            160ms cubic-bezier(0.16, 1, 0.30, 1),
+    box-shadow       220ms cubic-bezier(0.16, 1, 0.30, 1),
+    transform        160ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+a.btn--primary {
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.10),
+    0 4px 12px var(--accent-glow, rgba(0, 108, 53, 0.20));
+}
+a.btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.12),
+    0 8px 20px var(--accent-glow, rgba(0, 108, 53, 0.30));
+}
+a.btn--ghost:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent, var(--green));
+  color: var(--accent, var(--green));
+}
+
+/* ────────────────────────────────────────── login.html · form polish only */
+
+/* The login brand panel already has its own mashrabiya from an earlier
+   commit. These rules touch the auth-form side: tab indicators, button. */
+.auth-tab {
+  transition:
+    color 160ms cubic-bezier(0.16, 1, 0.30, 1),
+    border-color 160ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+.auth-tab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-glow, rgba(0, 108, 53, 0.20));
+  border-radius: var(--radius-sm, 6px);
+}
+
+.btn-submit-auth,
+button[type="submit"]:not(.btn-cta):not(.btn--primary) {
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.30, 1),
+    box-shadow       220ms cubic-bezier(0.16, 1, 0.30, 1),
+    transform        160ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+
+/* OAuth / sign-in-with buttons: gentle hover lift */
+.oauth-btn,
+.btn-oauth {
+  transition: transform 160ms cubic-bezier(0.16, 1, 0.30, 1), box-shadow 220ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+.oauth-btn:hover:not([disabled]),
+.btn-oauth:hover:not([disabled]) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+/* ──────────────────────────────────────── reduced-motion on public pages */
+
+@media (prefers-reduced-motion: reduce) {
+  body > .card, main > .card,
+  .api-hero::before, .endpoint-card, .endpoint-card:hover,
+  .btn-cta, .btn-cta:hover,
+  .btn-submit, .btn-submit:hover,
+  main.wrap, .wrap,
+  a.btn--primary, a.btn--ghost,
+  .auth-tab, .oauth-btn, .btn-oauth {
+    transform: none !important;
+    transition: none !important;
+  }
+}
