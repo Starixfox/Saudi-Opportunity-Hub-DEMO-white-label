@@ -8845,6 +8845,25 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
+
+/* Safety net for any inline-styled descendant of the dark onboarding
+   modal that still uses the app-theme text tokens. Several wizard
+   step templates set `style="color:var(--text)"` directly in JS-
+   built innerHTML — those win over class-based rules without
+   !important, and they render dark navy on the dark modal background.
+   These attribute selectors catch any past or future occurrence. */
+.ob-modal [style*="color:var(--text)"],
+.ob-modal [style*="color: var(--text)"] {
+  color: #ffffff !important;
+}
+.ob-modal [style*="color:var(--text-muted)"],
+.ob-modal [style*="color: var(--text-muted)"] {
+  color: rgba(255,255,255,0.78) !important;
+}
+.ob-modal [style*="color:var(--text-faint)"],
+.ob-modal [style*="color: var(--text-faint)"] {
+  color: rgba(255,255,255,0.55) !important;
+}
 .ob-form-input {
   padding: 10px 14px;
   border: 1.5px solid var(--border, #e2e8f0);
