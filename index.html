@@ -4018,9 +4018,18 @@ body.page-entering {
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--text);
-  white-space: nowrap;
+  line-height: 1.4;
+  /* Two-line clamp — single-line nowrap+ellipsis truncated bidirectional
+     and pure-Arabic titles oddly (Chrome hid the START of the line in RTL
+     mode, leaving fragments like "(2026" visible with no context). A
+     line-clamp wraps the title to up to two lines and ellipsizes only
+     when it really overflows. Works the same in LTR and RTL. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  word-break: break-word;
 }
 .ws-item-meta {
   font-size: 0.75rem;
@@ -19248,8 +19257,28 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
           '<div class="ws-item-content">' +
             '<div class="ws-item-title">' + esc(item.title) + '</div>' +
             '<div class="ws-item-meta">' +
-              (item.sector ? '<span>' + esc(ar && window.t ? window.t(item.sector.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();})) : item.sector.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();})) + '</span>' : '') +
-              (item.type ? '<span>· ' + esc(ar && window.t ? window.t(item.type.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();})) : item.type.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();})) + '</span>' : '') +
+              /* Translate sector/type via the canonical AR/EN dicts (set in the
+                 v2 IIFE — line ~17613) instead of bouncing them off window.t(),
+                 which only knows static UI strings. The dicts are keyed by the
+                 lowercased canonical key, so a raw DB value like "ict" or
+                 "accelerator" resolves to "تقنية المعلومات" / "مسرّعة". */
+              (function() {
+                var sectorKey = String(item.sector || '').toLowerCase().replace(/[\s\-\/]+/g,'_');
+                var typeKey   = String(item.type   || '').toLowerCase().replace(/[\s\-\/]+/g,'_');
+                function pretty(k){ return k.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}); }
+                var sectorLabel = item.sector
+                  ? ((ar && window.SECTOR_NAMES_AR && window.SECTOR_NAMES_AR[sectorKey]) ||
+                     (window.SECTOR_NAMES_EN && window.SECTOR_NAMES_EN[sectorKey]) ||
+                     pretty(sectorKey))
+                  : '';
+                var typeLabelStr = item.type
+                  ? ((ar && window.TYPE_NAMES_AR && window.TYPE_NAMES_AR[typeKey]) ||
+                     (window.TYPE_NAMES_EN && window.TYPE_NAMES_EN[typeKey]) ||
+                     pretty(typeKey))
+                  : '';
+                return (sectorLabel ? '<span>' + esc(sectorLabel) + '</span>' : '') +
+                       (typeLabelStr ? '<span>· ' + esc(typeLabelStr) + '</span>' : '');
+              })() +
               '<span style="color:var(--text-faint);">' + timeAgo(item.savedAt) + '</span>' +
             '</div>' +
             (hasNote
