@@ -22799,12 +22799,22 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     });
     var top = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; }).slice(0, 8);
     if (!top.length) return;
-    function pretty(s) { return s.replace(/_/g,' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); }); }
+    /* Resolve each sector key to its AR or EN display name via SECTOR_META
+       (e.g. 'ict' → 'تقنية المعلومات' in AR mode, 'ICT' in EN). Falls back
+       to a title-cased short key only when the sector isn't in SECTOR_META.
+       Pre-fix this was a plain title-case ('ict' → 'Ict') in both languages,
+       which is why the radar axis stayed English even after the user
+       switched the UI to Arabic. */
+    function _radarLabel(key) {
+      var meta = (window.SECTOR_META && window.SECTOR_META[key]) || null;
+      if (meta) return isAr() ? (meta.ar || meta.en) : meta.en;
+      return String(key).replace(/_/g,' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+    }
     if (canvas._ohChart) canvas._ohChart.destroy();
     canvas._ohChart = new Chart(canvas.getContext('2d'), {
       type: 'radar',
       data: {
-        labels: top.map(pretty),
+        labels: top.map(_radarLabel),
         datasets: [
           {
             label: T('All','الكل'),
@@ -23244,6 +23254,21 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     observeCards2();
     injectRadarAndHeatmap();
     observePanel();
+
+    /* Hook into the dashboard's rebuildChartsAr so the radar + GCC map
+       also re-render when the user toggles language. The dashboard
+       charts (rebuildChartsAr in the v2 IIFE) only rebuild themselves
+       — Phase 2 chart axes/legend stayed in whatever language was
+       active at first render, which is why the radar's axis labels
+       and "All / Open" legend kept reading English in AR mode. */
+    if (typeof window.rebuildChartsAr === 'function' && !window.rebuildChartsAr.__phase2Hooked) {
+      var _origRebuild = window.rebuildChartsAr;
+      window.rebuildChartsAr = function() {
+        try { _origRebuild(); } catch (e) {}
+        try { refreshPhase2Analytics(); } catch (e) {}
+      };
+      window.rebuildChartsAr.__phase2Hooked = true;
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
