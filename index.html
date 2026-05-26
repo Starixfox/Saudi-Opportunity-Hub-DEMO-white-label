@@ -24170,6 +24170,59 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
      ════════════════════════════════════════════════════════ */
   var sectorsSortMode = 'count'; // 'count' | 'alpha' | 'open'
 
+  /* Top-sponsor institution names come from the DB as English-only — the
+     `sponsor_institution` column has no `_ar` sibling. This map covers
+     the major Saudi institutions that surface on the Sector cards. Each
+     entry matches by acronym or signature substring so any DB variant
+     ("NTDP", "National Technology Development Program", "National
+     Technology Development Program (NTDP)") collapses to the same AR
+     label. Unknown sponsors fall through to the original English string. */
+  var SPONSOR_AR_MAP = [
+    { rx: /\bNTDP\b|National Technology Development/i,                ar: 'برنامج تطوير التقنية الوطنية' },
+    { rx: /\bKAUST\b|King Abdullah University of Science/i,           ar: 'جامعة الملك عبدالله للعلوم والتقنية' },
+    { rx: /\bKACST\b|King Abdulaziz City for Science/i,               ar: 'مدينة الملك عبدالعزيز للعلوم والتقنية' },
+    { rx: /\bKAUST Innovation Ventures\b/i,                           ar: 'جامعة الملك عبدالله — مشاريع الابتكار' },
+    { rx: /\bSIDF\b|Saudi Industrial Development Fund/i,              ar: 'صندوق التنمية الصناعية السعودي' },
+    { rx: /\bMonsha['ʼ’]?at\b|Small and Medium Enterprises/i,    ar: 'منشآت — الهيئة العامة للمنشآت الصغيرة والمتوسطة' },
+    { rx: /\bRDIA\b|Research,?\s+Development\s+and\s+Innovation\s+Authority/i, ar: 'هيئة البحث والتطوير والابتكار' },
+    { rx: /\bPIF\b|Public Investment Fund/i,                          ar: 'صندوق الاستثمارات العامة' },
+    { rx: /\bMISA\b|Ministry of Investment/i,                         ar: 'وزارة الاستثمار' },
+    { rx: /\bMEWA\b|Ministry of Environment,?\s+Water and Agriculture/i, ar: 'وزارة البيئة والمياه والزراعة' },
+    { rx: /\bNIDLP\b|National Industrial Development and Logistics/i, ar: 'برنامج تطوير الصناعة الوطنية والخدمات اللوجستية' },
+    { rx: /\bMISK\b|Misk Foundation/i,                                ar: 'مؤسسة مسك الخيرية' },
+    { rx: /\bNEOM\b/i,                                                ar: 'نيوم' },
+    { rx: /\bSDAIA\b|Saudi Data and AI Authority/i,                   ar: 'الهيئة السعودية للبيانات والذكاء الاصطناعي' },
+    { rx: /\bSAGIA\b/i,                                               ar: 'الهيئة العامة للاستثمار' },
+    { rx: /\bSAMA\b|Saudi Central Bank/i,                             ar: 'البنك المركزي السعودي' },
+    { rx: /\bHRDF\b|Human Resources Development Fund/i,               ar: 'صندوق تنمية الموارد البشرية' },
+    { rx: /\bSABIC\b/i,                                               ar: 'سابك' },
+    { rx: /\bSTC\b|Saudi Telecom Company/i,                           ar: 'الاتصالات السعودية' },
+    { rx: /Saudi Aramco|\bAramco\b/i,                                 ar: 'أرامكو السعودية' },
+    { rx: /Ministry of Tourism/i,                                     ar: 'وزارة السياحة' },
+    { rx: /Ministry of Energy/i,                                      ar: 'وزارة الطاقة' },
+    { rx: /Ministry of Education/i,                                   ar: 'وزارة التعليم' },
+    { rx: /Ministry of Health/i,                                      ar: 'وزارة الصحة' },
+    { rx: /Ministry of Commerce/i,                                    ar: 'وزارة التجارة' },
+    { rx: /Ministry of Communications and Information Technology|\bMCIT\b/i, ar: 'وزارة الاتصالات وتقنية المعلومات' },
+    { rx: /Ministry of Industry and Mineral Resources/i,              ar: 'وزارة الصناعة والثروة المعدنية' },
+    { rx: /Ministry of Human Resources/i,                             ar: 'وزارة الموارد البشرية' },
+    { rx: /Ministry of Culture/i,                                     ar: 'وزارة الثقافة' },
+    { rx: /Ministry of Sport/i,                                       ar: 'وزارة الرياضة' },
+    { rx: /Saudi Vision 2030|Vision 2030/i,                           ar: 'رؤية السعودية 2030' },
+    { rx: /Garage Riyadh|\bThe Garage\b/i,                            ar: 'القراج' },
+    { rx: /\bSTV\b|Saudi Technology Ventures/i,                       ar: 'إس تي في' },
+    { rx: /\bSANED\b/i,                                               ar: 'ساند' },
+    { rx: /Saudi Space Agency|Saudi Space Commission/i,               ar: 'وكالة الفضاء السعودية' }
+  ];
+  function sponsorLabel(raw) {
+    if (!raw) return '';
+    if (!isAr()) return raw;
+    for (var i = 0; i < SPONSOR_AR_MAP.length; i++) {
+      if (SPONSOR_AR_MAP[i].rx.test(raw)) return SPONSOR_AR_MAP[i].ar;
+    }
+    return raw;
+  }
+
   function buildSectorStats(data) {
     var stats = {};
     var norm = window.__normalizeSectorKey || function(r){ return String(r||''); };
@@ -24297,9 +24350,12 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
         '</div>' +
         '<div class="oh4-sector-bar" aria-hidden="true"><div class="oh4-sector-bar-fill" style="width:' + openPct + '%"></div></div>' +
         '<div class="oh4-sector-foot">' +
-          '<div class="oh4-sector-sponsor" title="' + esc(e.topSponsor || '') + '">' +
-            (e.topSponsor ? esc(e.topSponsor) : '<span style="color:var(--text-faint)">' + T('No sponsor data','لا توجد بيانات الجهة') + '</span>') +
-          '</div>' +
+          (function() {
+            var sp = sponsorLabel(e.topSponsor);
+            return '<div class="oh4-sector-sponsor" title="' + esc(sp || '') + '">' +
+              (sp ? esc(sp) : '<span style="color:var(--text-faint)">' + T('No sponsor data','لا توجد بيانات الجهة') + '</span>') +
+            '</div>';
+          })() +
           '<span class="oh4-sector-arrow" aria-hidden="true">' + iconSvg('arrow-right') + '</span>' +
         '</div>' +
       '</a>';
