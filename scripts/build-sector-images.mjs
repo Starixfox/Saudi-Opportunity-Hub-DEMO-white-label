@@ -20,24 +20,27 @@ const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'assets', 'sectors');
 const TEMPLATE_OUT = path.join(ROOT, 'polish', 'picture-template.html');
 
-// Map sectors → Unsplash photo URLs. Extracted from the sectorImg()
-// function in index.html. Update this list when sectors change.
+// Map sectors → Unsplash photo URLs. Keys match the SECTOR_IMAGES dict in
+// index.html so the <picture> template can swap in zero-config. Covers all
+// 17 CANONICAL_SECTORS. Update this list whenever CANONICAL_SECTORS changes.
 const SECTORS = {
-  'ict':                'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200',
-  'healthcare':         'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=1200',
-  'energy':             'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=1200',
-  'agriculture':        'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200',
-  'education':          'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200',
-  'finance':            'https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=1200',
-  'tourism':            'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200',
-  'mining':             'https://images.unsplash.com/photo-1582719471384-894fbb16e074?w=1200',
-  'manufacturing':      'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1200',
-  'transport':          'https://images.unsplash.com/photo-1494412519320-aa613dfb7738?w=1200',
-  'real-estate':        'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1200',
-  'sports':             'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=1200',
-  'entertainment':      'https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=1200',
-  'innovation':         'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1200',
-  'environment':        'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200'
+  'ict':            'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200',
+  'innovation':     'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200',
+  'financial':      'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=1200',
+  'industrial':     'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1200',
+  'healthcare':     'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200',
+  'environment':    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200',
+  'energy':         'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=1200',
+  'realestate':     'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200',
+  'education':      'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200',
+  'pharma':         'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=1200',
+  'chemicals':      'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=1200',
+  'agriculture':    'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200',
+  'tourism':        'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=1200',
+  'transport':      'https://images.unsplash.com/photo-1494412651409-8963ce7935a7?w=1200',
+  'mining':         'https://images.unsplash.com/photo-1582719471384-894fbb16e074?w=1200',
+  'private':        'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200',
+  'humanitarian':   'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1200'
 };
 
 function fetch(url) {
