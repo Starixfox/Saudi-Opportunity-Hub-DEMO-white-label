@@ -723,7 +723,32 @@
     </footer>
   </div>
 
+  <!-- Per-opportunity JSON-LD emitter — exposes window.OpportunitySchema. -->
+  <script src="../assets/opportunity-schema.js"></script>
+
   <script>
+    // Demonstrate the schema module live by emitting JSON-LD for the first
+    // opportunity card. The SPA will call this every time a panel opens.
+    (function () {
+      if (!window.OpportunitySchema) return;
+      window.OpportunitySchema.inject({
+        id: 'monshaat-sme-cohort-12',
+        title: 'SME Growth Acceleration Grant — Cohort 12',
+        description: 'Equity-free funding of up to SAR 500,000 for Saudi-registered small businesses with proven traction. Six-month programme.',
+        type: 'grant',
+        sponsor: "Monsha'at — SME General Authority",
+        sponsor_ar: 'منشآت — الهيئة العامة للمنشآت',
+        sponsor_url: 'https://monshaat.gov.sa',
+        country: 'KSA',
+        sector: 'SME / Entrepreneurship',
+        status: 'open',
+        deadline: '2026-06-30',
+        amount: 500000,
+        currency: 'SAR',
+        eligibility: 'Saudi-registered SMEs with proven traction'
+      });
+    })();
+
     // Three-way toggle: light / dark / RTL.
     // RTL just adds dir="rtl" to <html>; the colour theme stays whatever
     // is currently set so RTL works in both modes.
