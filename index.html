@@ -22799,16 +22799,18 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     });
     var top = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; }).slice(0, 8);
     if (!top.length) return;
-    /* Resolve each sector key to its AR or EN display name via SECTOR_META
-       (e.g. 'ict' → 'تقنية المعلومات' in AR mode, 'ICT' in EN). Falls back
-       to a title-cased short key only when the sector isn't in SECTOR_META.
-       Pre-fix this was a plain title-case ('ict' → 'Ict') in both languages,
-       which is why the radar axis stayed English even after the user
-       switched the UI to Arabic. */
+    /* Resolve each sector key to its AR or EN display name via the globally
+       exposed SECTOR_NAMES_AR / SECTOR_NAMES_EN maps (set at the top of the
+       v2 IIFE, line ~17613). Earlier draft used window.SECTOR_META, which
+       was never exposed on window — only declared locally inside the
+       Sectors-view IIFE — so the lookup always missed and fell through to
+       the title-case fallback, which is why the axis kept reading 'Ict /
+       Innovation / Financial' even in Arabic mode. */
     function _radarLabel(key) {
-      var meta = (window.SECTOR_META && window.SECTOR_META[key]) || null;
-      if (meta) return isAr() ? (meta.ar || meta.en) : meta.en;
-      return String(key).replace(/_/g,' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+      var k = String(key || '').toLowerCase();
+      if (isAr() && window.SECTOR_NAMES_AR && window.SECTOR_NAMES_AR[k]) return window.SECTOR_NAMES_AR[k];
+      if (window.SECTOR_NAMES_EN && window.SECTOR_NAMES_EN[k])           return window.SECTOR_NAMES_EN[k];
+      return k.replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
     }
     if (canvas._ohChart) canvas._ohChart.destroy();
     canvas._ohChart = new Chart(canvas.getContext('2d'), {
