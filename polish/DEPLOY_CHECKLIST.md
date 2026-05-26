@@ -48,6 +48,12 @@ flip cleanly._
   - `--text` 17.72:1 light / 15.32:1 dark
   - `--text-muted` 7.73:1 / 7.57:1
   - `--text-faint` 4.83:1 / 5.28:1
+- [ ] Touch-target AA (WCAG 2.2 SC 2.5.8, 24×24 CSS px) — verified for the
+      showcase footer + theme toggle. **Best-practice 44×44 (Apple HIG,
+      Material) is NOT yet met** for: theme-toggle pills (32×32), default
+      `.btn` (39px tall), opp-card pill / chevron sub-buttons. Roll a
+      separate `.btn-touch` variant or bump `--btn-min-height` to 44px
+      in a future polish round; impacts every page that uses `.btn`.
 - [ ] Run Lighthouse on `login.html` and `polish/showcase.html` — target ≥95 accessibility
 - [ ] Run axe DevTools or Chrome's "Issues" panel — zero serious / critical
 - [ ] Tab through `/login.html` with keyboard only — every interactive element shows a visible focus ring, tab order is sensible

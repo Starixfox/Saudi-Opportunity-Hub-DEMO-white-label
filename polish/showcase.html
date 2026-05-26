@@ -369,6 +369,31 @@
       .hero-stats { flex-wrap: wrap; gap: var(--space-5); }
       .page { padding: var(--space-8) var(--space-4); }
     }
+
+    /* WCAG 2.2 SC 2.5.8 (Target Size — Minimum, AA) requires interactive
+       targets to be ≥24×24 CSS px. The doc footer's inline links would
+       otherwise render at 16px tall; padding lifts them past the bar
+       without disrupting the visual rhythm. */
+    .doc-footer a {
+      display: inline-block;
+      padding: var(--space-1) var(--space-2);
+      margin: calc(-1 * var(--space-1)) calc(-1 * var(--space-2));
+      border-radius: var(--radius-sm);
+    }
+    .doc-footer a:hover { background: var(--surface-overlay); }
+    .doc-footer a:focus-visible {
+      outline: none;
+      background: var(--surface-overlay);
+      box-shadow: var(--focus-ring);
+    }
+
+    /* Theme-toggle pills should also clear 24px. The .btn-sm in styles.css
+       gives 8px+12px padding around var(--text-xs) text (~12px line-height)
+       = ~28px, but the showcase override at .theme-toggle-group .btn shrinks
+       the padding. Restore a comfortable hit area. */
+    .theme-toggle-group .btn {
+      min-height: 32px;
+    }
   </style>
 </head>
 <body>
@@ -712,7 +737,7 @@
 
     </main>
 
-    <footer style="margin-top: var(--space-24); padding-top: var(--space-8); border-top: 1px solid var(--border); display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4); color: var(--text-muted); font-size: var(--text-sm);">
+    <footer class="doc-footer" style="margin-top: var(--space-24); padding-top: var(--space-8); border-top: 1px solid var(--border); display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4); color: var(--text-muted); font-size: var(--text-sm);">
       <div>
         <strong style="color: var(--text);">Saudi Opportunity Hub</strong> · Design system reference ·
         <a href="../polish/AUDIT.md">Audit</a> · <a href="../polish/BRAND.md">Brand</a> · <a href="../polish/DESIGN_SYSTEM.md">System</a>
