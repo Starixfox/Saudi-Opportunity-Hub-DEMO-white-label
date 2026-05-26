@@ -1,0 +1,436 @@
+/* ============================================================================
+   Saudi Opportunity Hub — Design Tokens
+   Single source of truth. All pages import this file.
+   Light + dark + RTL. Surfaces compose; primitives don't change at runtime.
+
+   Layer model (Tailwind/Material-style three layers):
+     1. Primitive  — raw values (--color-green-600, --space-4, --text-lg)
+     2. Semantic   — role-bound aliases (--accent, --surface, --text)
+     3. Component  — set inside the component file, never here
+
+   Theme switching: [data-theme="light"] / [data-theme="dark"] on <html>.
+   White-label accents: --accent and friends are overridable per theme via
+   the existing window.OH_THEMES → applyTheme() mechanism in index.html.
+============================================================================ */
+
+/* ---------------------------------------------------------------------------
+   1. PRIMITIVES — never reference directly from components
+--------------------------------------------------------------------------- */
+
+:root {
+  /* Saudi green — primary brand colour. 600 is the canonical #006C35. */
+  --color-green-50:  #e8f5ed;
+  --color-green-100: #c5e4d1;
+  --color-green-200: #9ed1b3;
+  --color-green-300: #76bd94;
+  --color-green-400: #4fa97a;
+  --color-green-500: #008c46;
+  --color-green-600: #006c35;   /* CANONICAL Saudi green */
+  --color-green-700: #005228;
+  --color-green-800: #003c1d;
+  --color-green-900: #002612;
+
+  /* Gold — secondary accent. Calligraphy gold, not Vegas gold. */
+  --color-gold-50:  #fdf6ec;
+  --color-gold-100: #f8e8c8;
+  --color-gold-200: #efd49b;
+  --color-gold-300: #e3bd6c;
+  --color-gold-400: #d4ab48;
+  --color-gold-500: #c9a66b;   /* CANONICAL warm gold */
+  --color-gold-600: #a88947;
+  --color-gold-700: #876d36;
+  --color-gold-800: #5e4b23;
+  --color-gold-900: #3a2e15;
+
+  /* Neutral ramp — 9 steps + true black/white. Slate-ish, slightly warm. */
+  --color-neutral-0:   #ffffff;
+  --color-neutral-50:  #fafafa;
+  --color-neutral-100: #f4f4f5;
+  --color-neutral-200: #e4e4e7;
+  --color-neutral-300: #d4d4d8;
+  --color-neutral-400: #a1a1aa;
+  --color-neutral-500: #71717a;
+  --color-neutral-600: #52525b;
+  --color-neutral-700: #3f3f46;
+  --color-neutral-800: #27272a;
+  --color-neutral-900: #18181b;
+  --color-neutral-950: #09090b;
+
+  /* Warm cream — preserved for login/contact/404 family. */
+  --color-cream-50:  #fefcf8;
+  --color-cream-100: #fdf8f2;   /* CANONICAL cream background */
+  --color-cream-200: #f8f2e8;
+  --color-cream-300: #e2ddd5;
+  --color-cream-400: #a89f95;
+  --color-cream-500: #6b6560;
+
+  /* Status — semantic state colours, accessible against light + dark. */
+  --color-success-500: #10b981;
+  --color-success-100: #d1fae5;
+  --color-warning-500: #f59e0b;
+  --color-warning-100: #fef3c7;
+  --color-danger-500:  #ef4444;
+  --color-danger-100:  #fee2e2;
+  --color-info-500:    #4f9cf9;
+  --color-info-100:    #dbeafe;
+
+  /* Pill / category accents — used for opportunity-type badges. */
+  --color-pill-grant:    #10b981;   /* green */
+  --color-pill-tender:   #f59e0b;   /* amber */
+  --color-pill-accel:    #4f9cf9;   /* blue */
+  --color-pill-invest:   #b071f9;   /* violet */
+  --color-pill-fellow:   #f6b384;   /* peach */
+  --color-pill-other:    #9da6bf;   /* slate */
+
+  /* ----- Type primitives ----- */
+  /* Font families. Loaded via <link> in each page's <head>. */
+  --font-sans:    'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+                  'Segoe UI', sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-arabic:  'IBM Plex Sans Arabic', 'Noto Kufi Arabic',
+                  system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+
+  /* Type scale — 6 steps + display. Fluid via clamp() on viewport. */
+  --text-xs:      clamp(0.70rem,  0.65rem + 0.25vw, 0.813rem);
+  --text-sm:      clamp(0.813rem, 0.75rem + 0.30vw, 0.938rem);
+  --text-base:    clamp(0.938rem, 0.88rem + 0.25vw, 1.063rem);
+  --text-lg:      clamp(1.063rem, 0.95rem + 0.60vw, 1.375rem);
+  --text-xl:      clamp(1.375rem, 1.10rem + 1.10vw, 2.125rem);
+  --text-2xl:     clamp(1.875rem, 1.20rem + 2.30vw, 3.375rem);
+  --text-display: clamp(2.500rem, 1.50rem + 4.50vw, 5.500rem);
+
+  /* Line heights */
+  --leading-tight:   1.15;
+  --leading-snug:    1.30;
+  --leading-normal:  1.55;
+  --leading-relaxed: 1.70;
+
+  /* Letter spacing */
+  --tracking-tight:  -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide:    0.04em;
+  --tracking-caps:    0.08em;
+
+  /* Font weights */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* ----- Spacing — 4px base ----- */
+  --space-0:   0;
+  --space-1:   0.25rem;   /*  4px */
+  --space-2:   0.5rem;    /*  8px */
+  --space-3:   0.75rem;   /* 12px */
+  --space-4:   1rem;      /* 16px */
+  --space-5:   1.25rem;   /* 20px */
+  --space-6:   1.5rem;    /* 24px */
+  --space-8:   2rem;      /* 32px */
+  --space-10:  2.5rem;    /* 40px */
+  --space-12:  3rem;      /* 48px */
+  --space-16:  4rem;      /* 64px */
+  --space-20:  5rem;      /* 80px */
+  --space-24:  6rem;      /* 96px */
+  --space-32:  8rem;      /* 128px */
+
+  /* ----- Radii ----- */
+  --radius-sm:   0.375rem;
+  --radius-md:   0.5rem;
+  --radius-lg:   0.75rem;
+  --radius-xl:   1rem;
+  --radius-2xl:  1.5rem;
+  --radius-full: 9999px;
+
+  /* ----- Borders ----- */
+  --border-width-1: 1px;
+  --border-width-2: 2px;
+  --border-width-4: 4px;
+
+  /* ----- Shadows — Linear-style, soft and layered. -----
+     Each shadow stacks two layers: a tight one for definition,
+     a wider one for depth. Light mode uses neutral-900 at low alpha;
+     dark mode boosts alpha (defined in the dark theme block below). */
+  --shadow-xs:    0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm:    0 1px 3px rgba(15, 23, 42, 0.06),
+                  0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md:    0 4px 6px rgba(15, 23, 42, 0.06),
+                  0 2px 4px rgba(15, 23, 42, 0.04);
+  --shadow-lg:    0 10px 24px rgba(15, 23, 42, 0.08),
+                  0 4px 8px rgba(15, 23, 42, 0.04);
+  --shadow-xl:    0 20px 40px rgba(15, 23, 42, 0.10),
+                  0 8px 16px rgba(15, 23, 42, 0.06);
+  --shadow-2xl:   0 30px 80px rgba(15, 23, 42, 0.12),
+                  0 12px 32px rgba(15, 23, 42, 0.08);
+  --shadow-inner: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+
+  /* ----- Motion ----- */
+  /* Easings — same curve family Linear & Vercel use. */
+  --ease-out:    cubic-bezier(0.16, 1, 0.30, 1);     /* default — natural decel */
+  --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);  /* gentle overshoot */
+  --ease-linear: linear;
+
+  /* Durations — kept tight per the brief (150-250ms range). */
+  --duration-instant: 80ms;
+  --duration-fast:    160ms;
+  --duration-base:    220ms;   /* default page transition / hover */
+  --duration-slow:    320ms;
+  --duration-slower:  480ms;
+
+  /* Composed transitions for direct use. */
+  --transition-base:    var(--duration-base) var(--ease-out);
+  --transition-color:   color var(--duration-fast) var(--ease-out),
+                        background-color var(--duration-fast) var(--ease-out),
+                        border-color var(--duration-fast) var(--ease-out);
+  --transition-transform: transform var(--duration-base) var(--ease-out);
+  --transition-shadow:    box-shadow var(--duration-base) var(--ease-out);
+
+  /* ----- Z-index scale ----- */
+  --z-base:     0;
+  --z-raised:   10;
+  --z-sticky:   50;
+  --z-overlay:  100;
+  --z-modal:    200;
+  --z-toast:    300;
+  --z-tooltip:  400;
+  --z-max:      9999;
+
+  /* ----- Layout ----- */
+  --content-narrow: 720px;
+  --content-base:   960px;
+  --content-wide:   1280px;
+  --content-max:    1440px;
+  --nav-height:     60px;
+  --sidebar-width:  248px;
+}
+
+/* ---------------------------------------------------------------------------
+   2. SEMANTIC — light theme (default)
+   These are the names components should reference.
+--------------------------------------------------------------------------- */
+
+:root,
+[data-theme="light"] {
+  /* Surfaces */
+  --surface:           var(--color-neutral-0);
+  --surface-raised:    var(--color-neutral-0);
+  --surface-sunken:    var(--color-neutral-100);
+  --surface-overlay:   rgba(15, 23, 42, 0.04);
+
+  /* Background flavour: index.html uses cool slate; auth/marketing pages
+     use warm cream. We expose both so each page picks its character. */
+  --bg-app:            #f8fafc;          /* cool slate for the app shell */
+  --bg-marketing:      var(--color-cream-100);   /* warm cream for login/contact/404 */
+
+  /* Text */
+  --text:              var(--color-neutral-900);
+  --text-muted:        var(--color-neutral-600);
+  --text-faint:        var(--color-neutral-400);
+  --text-inverse:      var(--color-neutral-0);
+  --text-on-accent:    var(--color-neutral-0);
+
+  /* Borders + dividers */
+  --border:            var(--color-neutral-200);
+  --border-strong:     var(--color-neutral-300);
+  --border-subtle:     rgba(228, 228, 231, 0.6);
+  --divider:           var(--color-neutral-200);
+
+  /* Accent — Saudi green by default; per-theme override hooks below. */
+  --accent:            var(--color-green-600);
+  --accent-hover:      var(--color-green-700);
+  --accent-pressed:    var(--color-green-800);
+  --accent-soft:       rgba(0, 108, 53, 0.10);
+  --accent-softer:     rgba(0, 108, 53, 0.06);
+  --accent-glow:       rgba(0, 108, 53, 0.25);
+  --accent-ring:       rgba(0, 108, 53, 0.35);
+  --on-accent:         var(--color-neutral-0);
+
+  /* Gold — secondary accent, used sparingly */
+  --gold:              var(--color-gold-500);
+  --gold-soft:         rgba(201, 166, 107, 0.12);
+
+  /* Status — opportunity lifecycle */
+  --status-open-bg:     rgba(16, 185, 129, 0.10);
+  --status-open-text:   #047857;
+  --status-open-border: rgba(16, 185, 129, 0.30);
+  --status-closed-bg:   rgba(239, 68, 68, 0.08);
+  --status-closed-text: #b91c1c;
+  --status-closed-border: rgba(239, 68, 68, 0.22);
+  --status-review-bg:   rgba(245, 158, 11, 0.10);
+  --status-review-text: #b45309;
+  --status-review-border: rgba(245, 158, 11, 0.30);
+
+  /* Sidebar (the app's dark navigation rail in index.html) */
+  --sidebar-bg:           #0f172a;
+  --sidebar-text:         #94a3b8;
+  --sidebar-text-active:  #ffffff;
+  --sidebar-active-bg:    rgba(0, 108, 53, 0.18);
+  --sidebar-active-border:var(--color-green-600);
+  --sidebar-logo:         #ffffff;
+
+  /* Focus ring — 3px around accent, WCAG-bright */
+  --focus-ring: 0 0 0 3px var(--accent-ring);
+}
+
+/* ---------------------------------------------------------------------------
+   2b. SEMANTIC — dark theme
+--------------------------------------------------------------------------- */
+
+[data-theme="dark"] {
+  /* Surfaces */
+  --surface:           #0f1420;
+  --surface-raised:    #141928;
+  --surface-sunken:    #0a0d14;
+  --surface-overlay:   rgba(255, 255, 255, 0.04);
+
+  --bg-app:            #0a0d14;
+  --bg-marketing:      #0a0d14;
+
+  /* Text */
+  --text:              #e8eaf2;
+  --text-muted:        #9da6bf;
+  --text-faint:        #5b6480;
+  --text-inverse:      var(--color-neutral-900);
+  --text-on-accent:    var(--color-neutral-0);
+
+  /* Borders */
+  --border:            rgba(255, 255, 255, 0.10);
+  --border-strong:     rgba(255, 255, 255, 0.18);
+  --border-subtle:     rgba(255, 255, 255, 0.06);
+  --divider:           rgba(255, 255, 255, 0.08);
+
+  /* Accent — pure #006C35 reads dim on dark backgrounds; lift one step. */
+  --accent:            #34d97b;
+  --accent-hover:      #4ee08c;
+  --accent-pressed:    #80efb1;
+  --accent-soft:       rgba(52, 217, 123, 0.14);
+  --accent-softer:     rgba(52, 217, 123, 0.08);
+  --accent-glow:       rgba(52, 217, 123, 0.30);
+  --accent-ring:       rgba(52, 217, 123, 0.40);
+  --on-accent:         #002612;
+
+  /* Gold lift */
+  --gold:              #e3bd6c;
+  --gold-soft:         rgba(227, 189, 108, 0.16);
+
+  /* Status — dark-mode contrasts */
+  --status-open-bg:     rgba(16, 185, 129, 0.14);
+  --status-open-text:   #34d97b;
+  --status-open-border: rgba(16, 185, 129, 0.32);
+  --status-closed-bg:   rgba(239, 83, 80, 0.12);
+  --status-closed-text: #ef9090;
+  --status-closed-border: rgba(239, 83, 80, 0.26);
+  --status-review-bg:   rgba(245, 158, 11, 0.14);
+  --status-review-text: #f5c842;
+  --status-review-border: rgba(245, 158, 11, 0.32);
+
+  /* Sidebar */
+  --sidebar-bg:           #060810;
+  --sidebar-text:         #7c89ab;
+  --sidebar-text-active:  #ffffff;
+  --sidebar-active-bg:    rgba(52, 217, 123, 0.16);
+  --sidebar-active-border:#34d97b;
+  --sidebar-logo:         #ffffff;
+
+  /* Shadows — bolder alpha on dark, otherwise invisible */
+  --shadow-xs:    0 1px 2px rgba(0, 0, 0, 0.30);
+  --shadow-sm:    0 1px 3px rgba(0, 0, 0, 0.40),
+                  0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-md:    0 4px 8px rgba(0, 0, 0, 0.45),
+                  0 2px 4px rgba(0, 0, 0, 0.30);
+  --shadow-lg:    0 10px 24px rgba(0, 0, 0, 0.50),
+                  0 4px 8px rgba(0, 0, 0, 0.30);
+  --shadow-xl:    0 20px 40px rgba(0, 0, 0, 0.60),
+                  0 8px 16px rgba(0, 0, 0, 0.35);
+  --shadow-2xl:   0 30px 80px rgba(0, 0, 0, 0.70),
+                  0 12px 32px rgba(0, 0, 0, 0.40);
+
+  --focus-ring: 0 0 0 3px var(--accent-ring);
+}
+
+/* Respect user OS preference when no explicit theme is set on <html>. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    /* Re-declare the dark semantic block so unattributed roots also benefit.
+       Keep this list in sync with [data-theme="dark"] above. */
+    --surface:           #0f1420;
+    --surface-raised:    #141928;
+    --surface-sunken:    #0a0d14;
+    --surface-overlay:   rgba(255, 255, 255, 0.04);
+    --bg-app:            #0a0d14;
+    --bg-marketing:      #0a0d14;
+    --text:              #e8eaf2;
+    --text-muted:        #9da6bf;
+    --text-faint:        #5b6480;
+    --border:            rgba(255, 255, 255, 0.10);
+    --border-strong:     rgba(255, 255, 255, 0.18);
+    --accent:            #34d97b;
+    --accent-hover:      #4ee08c;
+    --accent-soft:       rgba(52, 217, 123, 0.14);
+    --accent-glow:       rgba(52, 217, 123, 0.30);
+    --accent-ring:       rgba(52, 217, 123, 0.40);
+    --on-accent:         #002612;
+    --sidebar-bg:        #060810;
+    --shadow-md:    0 4px 8px rgba(0, 0, 0, 0.45),
+                    0 2px 4px rgba(0, 0, 0, 0.30);
+    --shadow-lg:    0 10px 24px rgba(0, 0, 0, 0.50),
+                    0 4px 8px rgba(0, 0, 0, 0.30);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   3. RTL adjustments
+   Only roles that change between LTR and RTL belong here. Logical CSS
+   properties (margin-inline-start, padding-inline-end) handle most cases
+   automatically — these are for the few that don't.
+--------------------------------------------------------------------------- */
+
+[dir="rtl"] {
+  /* Default body font when document direction is RTL. */
+  --font-sans: var(--font-arabic);
+
+  /* Letter-spacing tightens that work for Latin look noisy in Arabic. */
+  --tracking-tight:  0;
+  --tracking-caps:   0;
+}
+
+/* ---------------------------------------------------------------------------
+   4. REDUCED MOTION
+   Honour user preference; durations drop to near-zero, easings flatten.
+--------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 0ms;
+    --duration-fast:    0ms;
+    --duration-base:    0ms;
+    --duration-slow:    0ms;
+    --duration-slower:  0ms;
+    --ease-out:    linear;
+    --ease-in-out: linear;
+    --ease-spring: linear;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   5. PRINT
+   Keep colours readable on paper. Government users print briefs.
+--------------------------------------------------------------------------- */
+
+@media print {
+  :root {
+    --surface:        #ffffff;
+    --bg-app:         #ffffff;
+    --text:           #000000;
+    --text-muted:     #333333;
+    --border:         #cccccc;
+    --shadow-xs: none;
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+    --shadow-xl: none;
+    --shadow-2xl: none;
+  }
+}
