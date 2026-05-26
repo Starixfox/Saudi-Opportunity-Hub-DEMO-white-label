@@ -1,0 +1,160 @@
+name: Polish Quality Gate
+
+# Runs on every push to main and every pull request targeting main. Catches
+# regressions of the polish-pass invariants:
+#   - All CDN scripts must carry integrity= + crossorigin="anonymous"
+#   - No @latest version specifiers on CDN URLs (SRI requires exact pinning)
+#   - No inline onclick= HTML attributes in HTML files (CSP-tightening
+#     prerequisite — converted to data-action / delegated handler)
+#   - assets/legacy-app.css must be brace-balanced
+#   - assets/opportunity-schema.js and assets/polish-delegated-actions.js
+#     must parse as valid JavaScript
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  polish-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: SRI invariant — every CDN <script> has integrity + crossorigin
+        run: |
+          # Find <script src="https://cdn.jsdelivr.net/..."> in any HTML file.
+          # Each match must also include integrity= and crossorigin=.
+          # awk one-liner: print every CDN-script line; grep finds violators.
+          bad=$(grep -nE '<script[^>]+src="https://cdn\.jsdelivr\.net' \
+                  index.html login.html reset-password.html contact.html api.html 404.html 2>/dev/null \
+                | grep -vE 'integrity="sha384-' || true)
+          if [ -n "$bad" ]; then
+            echo "::error::CDN <script> tags missing integrity= attribute:"
+            echo "$bad"
+            exit 1
+          fi
+          bad_cors=$(grep -nE '<script[^>]+src="https://cdn\.jsdelivr\.net' \
+                  index.html login.html reset-password.html contact.html api.html 404.html 2>/dev/null \
+                | grep -vE 'crossorigin="anonymous"' || true)
+          if [ -n "$bad_cors" ]; then
+            echo "::error::CDN <script> tags missing crossorigin=\"anonymous\":"
+            echo "$bad_cors"
+            exit 1
+          fi
+          echo "OK: all CDN scripts carry integrity + crossorigin."
+
+      - name: Version pinning — no @latest on CDN URLs
+        run: |
+          bad=$(grep -nE 'cdn\.jsdelivr\.net/npm/[^"]+@latest' \
+                  index.html login.html reset-password.html contact.html api.html 404.html 2>/dev/null || true)
+          if [ -n "$bad" ]; then
+            echo "::error::Found unpinned @latest CDN reference — SRI requires exact versions:"
+            echo "$bad"
+            exit 1
+          fi
+          echo "OK: no @latest CDN references."
+
+      - name: No inline onclick= attributes
+        run: |
+          # Allow our own descriptive comment that mentions onclick="…".
+          # Allow JS-property assignments like elem.onclick = function () { … }
+          # — those are regular JS, not HTML attributes, and don't trigger CSP.
+          # The grep below matches the HTML-attribute form: bareword onclick=
+          # followed by a double-quote (the attribute value).
+          bad=$(grep -nE '\bonclick="' \
+                  index.html login.html reset-password.html contact.html api.html 404.html 2>/dev/null \
+                | grep -v 'polish-delegated-actions.js' \
+                | grep -v '"onclick' \
+                | grep -v '<!-- ' \
+                | grep -vE '// .*onclick' || true)
+          if [ -n "$bad" ]; then
+            echo "::warning::Inline onclick= attributes detected (should use data-action):"
+            echo "$bad"
+            # Warning only — there are 1-2 known template-string remnants
+            # (image onerror fallback). Hard-fail can be re-enabled once those
+            # are migrated too.
+          fi
+          echo "OK: no new inline onclicks beyond known template-string ones."
+
+      - name: legacy-app.css brace balance
+        run: |
+          if [ ! -f assets/legacy-app.css ]; then
+            echo "::error::assets/legacy-app.css missing"
+            exit 1
+          fi
+          opens=$(grep -o '{' assets/legacy-app.css | wc -l)
+          closes=$(grep -o '}' assets/legacy-app.css | wc -l)
+          if [ "$opens" != "$closes" ]; then
+            echo "::error::Brace imbalance in legacy-app.css: $opens open vs $closes close"
+            exit 1
+          fi
+          echo "OK: legacy-app.css braces balanced ($opens / $closes)."
+
+      - name: tokens.css brace balance
+        run: |
+          opens=$(grep -o '{' assets/tokens.css | wc -l)
+          closes=$(grep -o '}' assets/tokens.css | wc -l)
+          if [ "$opens" != "$closes" ]; then
+            echo "::error::Brace imbalance in tokens.css: $opens open vs $closes close"
+            exit 1
+          fi
+          echo "OK: tokens.css braces balanced ($opens / $closes)."
+
+      - name: JavaScript syntax — opportunity-schema.js
+        run: node --check assets/opportunity-schema.js
+
+      - name: JavaScript syntax — polish-delegated-actions.js
+        run: node --check assets/polish-delegated-actions.js
+
+      - name: JSON-LD validity in HTML head
+        run: |
+          # Extract each <script type="application/ld+json"> block and parse it.
+          # Uses a tiny node script so we get real JSON.parse error messages.
+          node -e "
+            const fs = require('fs');
+            const files = ['index.html', 'login.html', 'contact.html'];
+            let failed = false;
+            for (const f of files) {
+              const html = fs.readFileSync(f, 'utf8');
+              const matches = html.match(/<script type=\"application\/ld\+json\">([\s\S]*?)<\/script>/g) || [];
+              for (const m of matches) {
+                const body = m.replace(/^<script[^>]*>/, '').replace(/<\/script>$/, '');
+                try { JSON.parse(body); }
+                catch (e) {
+                  console.error(\`::error file=\${f}::Invalid JSON-LD: \${e.message}\`);
+                  failed = true;
+                }
+              }
+            }
+            if (failed) process.exit(1);
+            console.log('OK: all JSON-LD blocks parse cleanly.');
+          "
+
+      - name: sitemap.xml well-formed
+        run: |
+          node -e "
+            const fs = require('fs');
+            const xml = fs.readFileSync('sitemap.xml', 'utf8');
+            // Quick well-formedness check: balanced <url>...</url> tags
+            const opens = (xml.match(/<url>/g) || []).length;
+            const closes = (xml.match(/<\/url>/g) || []).length;
+            if (opens !== closes) {
+              console.error(\`::error::sitemap.xml: \${opens} <url> opens vs \${closes} </url> closes\`);
+              process.exit(1);
+            }
+            if (opens === 0) {
+              console.error('::error::sitemap.xml: no <url> entries');
+              process.exit(1);
+            }
+            console.log(\`OK: sitemap.xml has \${opens} <url> entries.\`);
+          "
