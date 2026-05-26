@@ -272,28 +272,31 @@
        Naming each panel lets the browser snapshot it before the dir
        change and animate it from the OLD column to the NEW column,
        so EN↔AR swaps as a smooth crossing slide instead of a hard pop.
+       Tuned for "more smooth": longer duration, ease-out-quart curve,
+       and the cross-fade on the named regions is suppressed so the
+       slide reads as a clean glide instead of a fade-and-slide blur.
     ────────────────────────────────────────────────────────────── */
     .auth-brand      { view-transition-name: brand-panel; }
     .auth-form-panel { view-transition-name: form-panel; }
 
-    ::view-transition-group(brand-panel),
-    ::view-transition-group(form-panel) {
-      animation-duration: 520ms;
-      animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+    /* Animate just the duration + easing on every layer the transition
+       produces. Keeps the browser's well-tuned default cross-fade on the
+       old/new snapshots and only tunes the timing.
+       Easing: cubic-bezier(0.22, 1, 0.36, 1) is ease-out-quart — starts
+       fast, decelerates smoothly to rest, no overshoot.
+       Duration: 750ms reads as deliberate / premium without feeling slow. */
+    ::view-transition-group(*),
+    ::view-transition-image-pair(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+      animation-duration: 750ms;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
     }
-    ::view-transition-old(brand-panel),
-    ::view-transition-new(brand-panel),
-    ::view-transition-old(form-panel),
-    ::view-transition-new(form-panel) {
-      animation-duration: 520ms;
-      animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
-    }
-    /* The default root animation is a snappy cross-fade — slow it slightly
-       so the panel slide feels of a piece with the text content swapping. */
+    /* The root cross-fade is slightly faster so the text-content swap
+       feels in-step with the panel slide rather than dragging. */
     ::view-transition-old(root),
     ::view-transition-new(root) {
-      animation-duration: 320ms;
-      animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+      animation-duration: 550ms;
     }
 
     /* Reduced-motion: skip the named transitions so the browser falls back
