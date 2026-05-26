@@ -301,13 +301,35 @@
       animation-duration: 1150ms;
     }
 
-    /* Hold-then-swap keyframes removed: they created two discrete
-       phases (75% slide-then-fade) that read as a non-smooth handoff.
-       Going back to the browser's default fade-in/fade-out across the
-       full 1500ms — opacity, position, and content cross-fade all
-       progress together at the same easing curve. With the panel mask
-       gone (so circles cover the full panel surface) the slide is
-       perceptible throughout without needing the synthetic hold. */
+    /* Asymmetric opacity curves on the named-region old/new layers.
+       The browser's default fade is symmetric — both OLD and NEW pass
+       through 50% opacity at the midpoint, which reads as a static
+       cross-blend rather than a slide. These curves keep OLD high
+       (and visibly sliding) for most of the duration, then fade it
+       quickly at the end while NEW rises symmetrically. No discrete
+       phases — just two smooth curves shaped to bias visibility
+       toward whichever panel is in motion. */
+    @keyframes oh-fade-out { from { opacity: 1; } to { opacity: 0; } }
+    @keyframes oh-fade-in  { from { opacity: 0; } to { opacity: 1; } }
+
+    ::view-transition-old(brand-panel),
+    ::view-transition-old(form-panel) {
+      /* ease-in-style — opacity stays high (value ~1) through ~70%
+         of the slide, then decays. The panel-with-its-circles stays
+         visible while it moves. */
+      animation-name: oh-fade-out;
+      animation-duration: 1500ms;
+      animation-timing-function: cubic-bezier(0.7, 0.05, 0.85, 0.4);
+    }
+    ::view-transition-new(brand-panel),
+    ::view-transition-new(form-panel) {
+      /* Mirror — opacity stays at 0 early, rises smoothly toward the
+         end. By the time NEW becomes visible, OLD has already slid
+         most of the way. */
+      animation-name: oh-fade-in;
+      animation-duration: 1500ms;
+      animation-timing-function: cubic-bezier(0.15, 0.6, 0.3, 0.95);
+    }
 
     /* Reduced-motion: skip the named transitions so the browser falls back
        to an instant swap. Honours the user's OS preference. */
