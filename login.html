@@ -241,15 +241,23 @@
       color: #fff;
     }
 
-    /* Subtle geometric texture overlay */
+    /* Mashrabiya — restrained eight-point star lattice + atmospheric gradients.
+       The SVG is inline so there's zero extra request; opacity is intentionally
+       low so the pattern reads as texture, not decoration. */
     .auth-brand::before {
       content: '';
       position: absolute;
       inset: 0;
       background-image:
-        radial-gradient(circle at 20% 20%, rgba(201,166,107,.12) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(0,108,53,.3) 0%, transparent 50%);
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96' width='96' height='96'><g fill='none' stroke='%23c9a66b' stroke-width='0.7' opacity='0.55'><path d='M48 8l9 28 28 9-28 9-9 28-9-28-28-9 28-9z'/><path d='M48 8l-9 28-28 9 28 9 9 28 9-28 28-9-28-9z'/><circle cx='48' cy='48' r='5'/></g></svg>"),
+        radial-gradient(circle at 20% 22%, rgba(201,166,107,.14) 0%, transparent 52%),
+        radial-gradient(circle at 82% 82%, rgba(0,108,53,.32) 0%, transparent 55%);
+      background-size: 96px 96px, 100% 100%, 100% 100%;
+      background-repeat: repeat, no-repeat, no-repeat;
+      opacity: 0.95;
       pointer-events: none;
+      mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0.55) 100%);
+      -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0.55) 100%);
     }
 
     /* Gold geometric accent lines */
@@ -856,12 +864,12 @@
 
     <div class="brand-middle">
       <h2 class="brand-tagline">
-        <span data-en="Unlock Saudi Arabia's" data-ar="اكتشف فرص">Unlock Saudi Arabia's</span><br>
-        <em data-en="investment landscape" data-ar="المملكة العربية السعودية الاستثمارية">investment landscape</em>
+        <span data-en="Every Saudi grant," data-ar="كل منحة سعودية،">Every Saudi grant,</span><br>
+        <em data-en="in one place." data-ar="في مكان واحد.">in one place.</em>
       </h2>
-      <p class="brand-desc" data-en="A curated intelligence platform tracking grants, tenders, accelerators, and investment programs across 15 key sectors — updated in real time." data-ar="منصة ذكاء متكاملة لتتبع المنح والمناقصات والمسرّعات وبرامج الاستثمار عبر 15 قطاعًا رئيسيًا — محدّثة في الوقت الفعلي.">
-        A curated intelligence platform tracking grants, tenders, accelerators,
-        and investment programs across 15 key sectors — updated in real time.
+      <p class="brand-desc" data-en="Grants, tenders, accelerators, and investment programmes across 15 sectors. Verified weekly. English and Arabic." data-ar="المنح والمناقصات والمسرّعات وبرامج الاستثمار عبر 15 قطاعًا. يتم التحقق منها أسبوعيًا. باللغتين الإنجليزية والعربية.">
+        Grants, tenders, accelerators, and investment programmes across
+        15 sectors. Verified weekly. English and Arabic.
       </p>
 
       <div class="brand-stats">
@@ -898,7 +906,11 @@
 
     <!-- Language toggle button -->
     <button class="lang-toggle" id="lang-toggle" type="button" aria-label="Switch language">
-      <span class="lang-toggle-globe">🌐</span>
+      <svg class="lang-toggle-globe" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M2 12h20"></path>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+      </svg>
       <span id="lang-toggle-label">العربية</span>
     </button>
 
