@@ -583,24 +583,40 @@
       background-repeat: no-repeat, no-repeat, no-repeat;
       background-size: 100% 100%, 100% 100%, 100% 100%;
       opacity: 1;
-      /* Form-card vignette — clear band in the centre so the stars
-         compose around the form rather than behind it. Slightly tighter
-         than before so the focal star reads at full presence in the
-         top-right area. */
-      mask-image: radial-gradient(ellipse 62% 72% at 42% 55%, transparent 0%, transparent 30%, rgba(0,0,0,0.6) 62%, rgba(0,0,0,1) 100%);
-      -webkit-mask-image: radial-gradient(ellipse 62% 72% at 42% 55%, transparent 0%, transparent 30%, rgba(0,0,0,0.6) 62%, rgba(0,0,0,1) 100%);
+      /* Mask removed (was clipping the holes away from the form-card
+         centre band — when the panel slid, the centre band slid with
+         it, so the holes appeared to flash in/out instead of
+         visibly traversing). The form sits inside .auth-box now which
+         provides its own readable backdrop, so circles can populate
+         the full panel surface and the slide is unambiguous. */
     }
 
-    /* RTL — flip the composition horizontally so the large star bleeds
-       off the top-LEFT (the "outside" corner relative to the form card,
-       which is now on the right). */
-    [dir="rtl"] .auth-form-panel::before {
-      transform: scaleX(-1);
-    }
+    /* RTL — composition stays identical in both directions. Previously
+       the pseudo was flipped via scaleX(-1) so the focal hole moved to
+       the top-LEFT in RTL, but the flip happened as part of the
+       cross-fade at the END of the slide, making the holes "snap" to
+       their mirrored positions rather than tracking with the slide.
+       Keeping the same composition lets the eye lock onto the holes
+       and see them move continuously from one side to the other. */
 
     .auth-box {
       width: 100%;
       max-width: 420px;
+      /* Card backdrop — sits on top of the panel's hole-composition
+         background so form text always has a clean surface. Soft shadow
+         + crisp rounded corners give it the "floating card on patterned
+         paper" feel that lets the holes populate the full panel surface
+         (no mask required) while the form itself stays pristine. */
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius, 12px);
+      padding: 36px 32px;
+      box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.04),
+        0 12px 32px rgba(0, 0, 0, 0.06);
+    }
+    @media (max-width: 640px) {
+      .auth-box { padding: 28px 22px; }
     }
 
     /* Header */
