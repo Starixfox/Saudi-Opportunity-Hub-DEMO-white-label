@@ -13840,7 +13840,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       'recurring':            'status-recurring',
       'closed':               'status-closed',
       'closed_but_recurring': 'status-closed',
-      'coming_soon':          'status-closed'
+      'coming_soon':          'status-recurring',
+      'upcoming':             'status-recurring',
+      'closing_soon':         'status-recurring'
     };
 
     /* Display labels — en-dash U+2013, not hyphen-minus, per spec. */
@@ -13851,7 +13853,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       'recurring':            'Recurring',
       'closed':               'Closed',
       'closed_but_recurring': 'Closed – Recurring',
-      'coming_soon':          'Coming Soon'
+      'coming_soon':          'Coming Soon',
+      'upcoming':             'Upcoming',
+      'closing_soon':         'Closing Soon'
     };
     var AR = {
       'open':                 'مفتوح',
@@ -13860,7 +13864,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       'recurring':            'يتكرر',
       'closed':               'مغلق',
       'closed_but_recurring': 'مغلق – يتكرر',
-      'coming_soon':          'قريبًا'
+      'coming_soon':          'قريبًا',
+      'upcoming':             'قادم',
+      'closing_soon':         'ينتهي قريبًا'
     };
 
     /* Status-dot tints used by the table-row render. Aligned with the
@@ -13872,7 +13878,9 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
       'recurring':            '#d97706',
       'closed':               '#94a3b8',
       'closed_but_recurring': '#94a3b8',
-      'coming_soon':          '#94a3b8'
+      'coming_soon':          '#d97706',
+      'upcoming':             '#d97706',
+      'closing_soon':         '#d97706'
     };
 
     var dict = isAr ? AR : EN;
