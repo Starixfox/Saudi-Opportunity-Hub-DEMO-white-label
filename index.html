@@ -372,6 +372,56 @@ window.applyTheme = function (key) {
 <meta property="og:site_name" content="Saudi Opportunity Hub">
 <link rel="canonical" href="https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/">
 
+<!-- Bilingual hreflang pairs. Self-referencing for both languages plus
+     x-default. The Arabic variant is the same URL today (UI swaps via
+     in-page language toggle); when a separate /ar/ subpath ships, change
+     these to point at the localised paths. -->
+<link rel="alternate" hreflang="en" href="https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/">
+<link rel="alternate" hreflang="ar" href="https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/">
+<link rel="alternate" hreflang="x-default" href="https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/">
+
+<!-- Structured data: Organization + WebSite. Per-opportunity Grant /
+     GovernmentService schema is emitted dynamically by the SPA when
+     individual opportunity panels render (Phase 5 — script work). -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/#organization",
+      "name": "Saudi Opportunity Hub",
+      "alternateName": ["Opportunity Hub", "منصة الفرص السعودية"],
+      "url": "https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/",
+      "description": "Curated intelligence platform tracking grants, tenders, accelerators, and investment programmes across Saudi Arabia, the GCC, and globally — aligned with Vision 2030.",
+      "areaServed": [
+        { "@type": "Country", "name": "Saudi Arabia" },
+        { "@type": "AdministrativeArea", "name": "Gulf Cooperation Council" }
+      ],
+      "knowsAbout": [
+        "Vision 2030", "RDIA", "Monsha'at", "MISA", "NEOM",
+        "PIF", "KAUST", "Misk Foundation",
+        "grants", "tenders", "accelerators", "fellowships",
+        "investment programmes"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/#website",
+      "url": "https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/",
+      "name": "Saudi Opportunity Hub",
+      "publisher": { "@id": "https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/#organization" },
+      "inLanguage": ["en", "ar"],
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/#opportunities?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ]
+}
+</script>
+
 <!-- PWA manifest + favicon (inline SVG: Saudi-green palm-style 'O' on cream) -->
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23006C35'/><path d='M32 14a18 18 0 1 0 18 18 18 18 0 0 0-18-18zm0 6a12 12 0 1 1-12 12 12 12 0 0 1 12-12z' fill='%23fdf8f2'/><circle cx='32' cy='32' r='4' fill='%23C9A66B'/></svg>">

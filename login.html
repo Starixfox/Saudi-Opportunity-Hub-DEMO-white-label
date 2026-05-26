@@ -15,6 +15,42 @@
   <title>Sign In — Opportunity Hub</title>
   <link rel="manifest" href="manifest.webmanifest" />
 
+  <!-- Structured data (Organization + WebSite). Even on a noindex'd demo,
+       this preps the page for AI crawlers (ChatGPT, Perplexity) which
+       respect noindex less consistently than traditional search engines. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/#organization",
+        "name": "Saudi Opportunity Hub",
+        "alternateName": ["Opportunity Hub", "منصة الفرص السعودية"],
+        "url": "https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/",
+        "description": "Curated intelligence platform tracking grants, tenders, accelerators, and investment programmes across Saudi Arabia, the GCC, and globally — aligned with Vision 2030.",
+        "areaServed": [
+          { "@type": "Country", "name": "Saudi Arabia" },
+          { "@type": "AdministrativeArea", "name": "Gulf Cooperation Council" }
+        ],
+        "knowsAbout": [
+          "Vision 2030", "RDIA", "Monsha'at", "MISA", "NEOM",
+          "PIF", "KAUST", "Misk Foundation",
+          "grants", "tenders", "accelerators", "fellowships"
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/#website",
+        "url": "https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/",
+        "name": "Saudi Opportunity Hub",
+        "publisher": { "@id": "https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/#organization" },
+        "inLanguage": ["en", "ar"]
+      }
+    ]
+  }
+  </script>
+
   <!-- Supabase JS client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
