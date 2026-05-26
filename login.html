@@ -267,6 +267,43 @@
       min-height: 100vh;
     }
 
+    /* ──────────────────────────────────────────────────────────────
+       LANGUAGE SWITCH ANIMATION — View Transitions API
+       Naming each panel lets the browser snapshot it before the dir
+       change and animate it from the OLD column to the NEW column,
+       so EN↔AR swaps as a smooth crossing slide instead of a hard pop.
+    ────────────────────────────────────────────────────────────── */
+    .auth-brand      { view-transition-name: brand-panel; }
+    .auth-form-panel { view-transition-name: form-panel; }
+
+    ::view-transition-group(brand-panel),
+    ::view-transition-group(form-panel) {
+      animation-duration: 520ms;
+      animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+    }
+    ::view-transition-old(brand-panel),
+    ::view-transition-new(brand-panel),
+    ::view-transition-old(form-panel),
+    ::view-transition-new(form-panel) {
+      animation-duration: 520ms;
+      animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+    }
+    /* The default root animation is a snappy cross-fade — slow it slightly
+       so the panel slide feels of a piece with the text content swapping. */
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation-duration: 320ms;
+      animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    /* Reduced-motion: skip the named transitions so the browser falls back
+       to an instant swap. Honours the user's OS preference. */
+    @media (prefers-reduced-motion: reduce) {
+      .auth-brand, .auth-form-panel { view-transition-name: none; }
+      ::view-transition-old(root),
+      ::view-transition-new(root) { animation-duration: 0ms; }
+    }
+
     /* ── LEFT: Branding panel ─────────────────────────────────── */
     .auth-brand {
       position: relative;
@@ -1420,8 +1457,28 @@
 
   /* ──────────────────────────────────────────────────────────────
      LANGUAGE SWITCH
+     Wrapped in document.startViewTransition() so modern browsers
+     (Chrome/Edge 111+, Safari 18+) animate the LTR↔RTL panel swap
+     instead of popping. Brand + form panels each get a
+     view-transition-name (declared in CSS) so the browser tracks
+     them across the dir flip and slides them between columns. The
+     data-* text swaps cross-fade inside their respective regions.
+     Firefox and other engines without VT support fall through to
+     the immediate swap — same behaviour as before.
   ────────────────────────────────────────────────────────────── */
   function switchLang(lang) {
+    if (typeof document.startViewTransition === 'function') {
+      // Only animate when the language is actually changing.
+      if (lang === currentLang) return _applyLang(lang);
+      try {
+        document.startViewTransition(function () { _applyLang(lang); });
+        return;
+      } catch (_) { /* fall through to immediate swap */ }
+    }
+    _applyLang(lang);
+  }
+
+  function _applyLang(lang) {
     currentLang = lang;
     localStorage.setItem('oh-login-lang', lang);
 
