@@ -291,14 +291,14 @@
     ::view-transition-image-pair(*),
     ::view-transition-old(*),
     ::view-transition-new(*) {
-      animation-duration: 1100ms;
+      animation-duration: 1500ms;
       animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
     }
-    /* The root cross-fade is slightly faster so the text-content swap
-       feels in-step with the panel slide rather than dragging. */
+    /* The root cross-fade keeps pace with the longer slide so text
+       content swaps in step with the panel motion. */
     ::view-transition-old(root),
     ::view-transition-new(root) {
-      animation-duration: 850ms;
+      animation-duration: 1150ms;
     }
 
     /* Reduced-motion: skip the named transitions so the browser falls back
@@ -538,15 +538,20 @@
       z-index: -1;
       pointer-events: none;
       background-image:
-        /* Layer 1: scattered circular "holes" — Swiss-cheese composition.
-           Each circle has a soft dark fill (suggests depth, like a hole
-           through paper) plus a thin defining stroke. Sizes vary
-           organically from a 220px focal hole bleeding off the top-right
-           down to 14-22px micro-holes for rhythm. Eight holes total —
-           dense enough to read as a designed surface, sparse enough that
-           the asymmetric composition (everything biased to the upper-
-           right where the focal hole anchors) stays legible. */
-        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800' preserveAspectRatio='xMaxYMin slice'><defs><radialGradient id='h' cx='35%25' cy='35%25' r='75%25'><stop offset='0%25' stop-color='%23000' stop-opacity='0.12'/><stop offset='100%25' stop-color='%23000' stop-opacity='0.04'/></radialGradient></defs><g><circle cx='720' cy='80' r='220' fill='url(%23h)' stroke='%23000' stroke-width='1.6' stroke-opacity='0.22'/><circle cx='200' cy='540' r='62' fill='url(%23h)' stroke='%23000' stroke-width='1.2' stroke-opacity='0.20'/><circle cx='620' cy='615' r='44' fill='url(%23h)' stroke='%23000' stroke-width='1' stroke-opacity='0.18'/><circle cx='430' cy='305' r='38' fill='url(%23h)' stroke='%23000' stroke-width='1' stroke-opacity='0.18'/><circle cx='90' cy='235' r='30' fill='url(%23h)' stroke='%23000' stroke-width='0.9' stroke-opacity='0.18'/><circle cx='340' cy='655' r='22' fill='url(%23h)' stroke='%23000' stroke-width='0.8' stroke-opacity='0.16'/><circle cx='560' cy='460' r='18' fill='url(%23h)' stroke='%23000' stroke-width='0.7' stroke-opacity='0.16'/><circle cx='140' cy='720' r='15' fill='url(%23h)' stroke='%23000' stroke-width='0.7' stroke-opacity='0.14'/></g></svg>"),
+        /* Layer 1: three large bleeding "holes" — composition feels like
+           the cream surface has openings cut through it that reveal a
+           darker layer beneath. Each hole uses a radial gradient with
+           three stops:
+             · centre: light wash (catches ambient light on the back wall
+               of the hole)
+             · 75-85%: deepest shadow (rim shadow cast by the surface above
+               the hole onto the inner wall)
+             · 100%: lifts back slightly (rim catching light at the very
+               edge)
+           Plus a 1px outer stroke that reads as the cut edge of the cream.
+           All three circles intentionally exceed the panel — only ~50-65%
+           of each is visible inside the viewBox. */
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800' preserveAspectRatio='xMaxYMin slice'><defs><radialGradient id='hole' cx='50%25' cy='32%25' r='60%25'><stop offset='0%25' stop-color='%232a2a2a' stop-opacity='0.10'/><stop offset='50%25' stop-color='%23171717' stop-opacity='0.18'/><stop offset='82%25' stop-color='%23050505' stop-opacity='0.32'/><stop offset='100%25' stop-color='%23000000' stop-opacity='0.12'/></radialGradient></defs><g><circle cx='780' cy='120' r='420' fill='url(%23hole)' stroke='%23000' stroke-width='1.4' stroke-opacity='0.22'/><circle cx='-60' cy='480' r='320' fill='url(%23hole)' stroke='%23000' stroke-width='1.2' stroke-opacity='0.20'/><circle cx='480' cy='860' r='260' fill='url(%23hole)' stroke='%23000' stroke-width='1.1' stroke-opacity='0.20'/></g></svg>"),
         /* Layer 2: diagonal warm-gold sweep, top-right to bottom-left */
         linear-gradient(225deg, rgba(201, 166, 107, 0.22) 0%, rgba(201, 166, 107, 0.05) 35%, transparent 65%),
         /* Layer 3: cool green hint, bottom-left third */
