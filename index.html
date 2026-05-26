@@ -8179,6 +8179,14 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   background: var(--bg, var(--bg-base, #f7f6f2));
   flex-direction: column;
 }
+/* RTL: the .app-shell grid flips so the sidebar lives on the physical
+   right. The default left:220px / right:0 above would push the panel
+   under the right-hand sidebar. Swap the two so the 220px gutter
+   matches the sidebar's actual side. */
+[dir="rtl"] #wsPanel {
+  left: 0 !important;
+  right: 220px !important;
+}
 #wsPanel.active,
 #wsPanel.open {
   display: flex !important;
