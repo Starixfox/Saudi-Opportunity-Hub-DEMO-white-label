@@ -260,11 +260,51 @@
     /* ─────────────────────────────────────────────────────────────
        SPLIT LAYOUT
     ───────────────────────────────────────────────────────────── */
+    /* ────────────────────────────────────────────────────────────
+       FULL-PAGE VIDEO BACKGROUND
+       The <video class="auth-bg-video"> + .auth-bg-overlay siblings
+       up at the start of <body> cover the entire viewport. Auth
+       layout panels sit on top with transparent backgrounds so the
+       video shows through.
+    ──────────────────────────────────────────────────────────── */
+    .auth-bg-video {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      z-index: -2;
+      pointer-events: none;
+      /* Tiny saturation boost makes the muted footage feel more cinematic
+         under the dark overlay. */
+      filter: saturate(1.1);
+    }
+    /* Dark scrim above the video, below the content. Keeps brand-side
+       text readable across any frame of the loop. */
+    .auth-bg-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.30) 0%, rgba(0, 0, 0, 0.45) 60%, rgba(0, 0, 0, 0.55) 100%);
+    }
+
+    /* Reduced-motion: replace the video with a static still by pausing it.
+       Browsers that honour the spec will already not autoplay; the
+       JavaScript pause is belt-and-suspenders. */
+    @media (prefers-reduced-motion: reduce) {
+      .auth-bg-video { animation-play-state: paused; }
+    }
+
     .auth-layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
       width: 100%;
       min-height: 100vh;
+      position: relative;
+      z-index: 1;
     }
 
     /* ──────────────────────────────────────────────────────────────
@@ -343,11 +383,11 @@
     .auth-brand {
       position: relative;
       overflow: hidden;
-      background: linear-gradient(160deg,
-        #012d18 0%,
-        #006C35 40%,
-        #014d26 70%,
-        #1a0e00 100%);
+      /* Background gradient removed — the page-level video shows through.
+         Text-shadow on every foreground element keeps brand-side titles
+         and stats readable regardless of which frame the video is on. */
+      background: transparent;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55), 0 0 12px rgba(0, 0, 0, 0.20);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -355,36 +395,11 @@
       color: #fff;
     }
 
-    /* Mashrabiya — restrained eight-point star lattice + atmospheric gradients.
-       The SVG is inline so there's zero extra request; opacity is intentionally
-       low so the pattern reads as texture, not decoration. */
-    .auth-brand::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96' width='96' height='96'><g fill='none' stroke='%23c9a66b' stroke-width='0.7' opacity='0.55'><path d='M48 8l9 28 28 9-28 9-9 28-9-28-28-9 28-9z'/><path d='M48 8l-9 28-28 9 28 9 9 28 9-28 28-9-28-9z'/><circle cx='48' cy='48' r='5'/></g></svg>"),
-        radial-gradient(circle at 20% 22%, rgba(201,166,107,.14) 0%, transparent 52%),
-        radial-gradient(circle at 82% 82%, rgba(0,108,53,.32) 0%, transparent 55%);
-      background-size: 96px 96px, 100% 100%, 100% 100%;
-      background-repeat: repeat, no-repeat, no-repeat;
-      opacity: 0.95;
-      pointer-events: none;
-      mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0.55) 100%);
-      -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0.55) 100%);
-    }
-
-    /* Gold geometric accent lines */
-    .auth-brand::after {
-      content: '';
-      position: absolute;
-      top: 0; right: 0;
-      width: 280px; height: 280px;
-      border-left: 1px solid rgba(201,166,107,.2);
-      border-bottom: 1px solid rgba(201,166,107,.2);
-      border-radius: 0 0 0 100%;
-      pointer-events: none;
-    }
+    /* Brand-panel mashrabiya pattern + gold accent lines retired.
+       The page-level video is now the only background per
+       "no other background." */
+    .auth-brand::before,
+    .auth-brand::after { display: none; }
 
     .brand-top { position: relative; z-index: 1; }
 
@@ -542,68 +557,21 @@
       align-items: center;
       justify-content: center;
       padding: 48px 40px;
-      /* Deep emerald → midnight → black gradient. Stays in the Saudi-
-         green family but at a different angle from the brand panel, so
-         the two halves feel of a piece without looking like duplicates. */
-      background:
-        radial-gradient(ellipse 80% 60% at 30% 10%, rgba(255, 255, 255, 0.04), transparent 60%),
-        linear-gradient(220deg, #0e2a1c 0%, #082015 40%, #051208 100%);
+      /* Background removed — the page-level video shows through. The
+         glass-card .auth-box still floats on top with its own
+         backdrop-filter blur. */
+      background: transparent;
       overflow-y: auto;
       position: relative;
       isolation: isolate;
-      /* Light scheme so any default browser controls (autofill etc) on
-         this dark surface request dark UA chrome. */
       color-scheme: dark;
     }
 
-    /* ────────────────────────────────────────────────────────────
-       FORM PANEL BACKGROUND — asymmetric Saudi-inspired composition
-       Single editorial layout, not a tiled pattern:
-         · One large eight-point Islamic star bleeds off the top-right
-           corner as the focal point (only its lower-left arc is
-           visible inside the panel)
-         · Two smaller satellite stars are scattered off-center for
-           rhythm
-         · A long diagonal gold sweep travels top-right → bottom-left
-         · A subtle cool-green hint sits in the bottom-left third
-       Stars are drawn at ~3-4% opacity so they're texture, not
-       decoration. Form area is masked clean.
-    ──────────────────────────────────────────────────────────── */
-    .auth-form-panel::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      z-index: -1;
-      pointer-events: none;
-      background-image:
-        /* Layer 1: three large bleeding "holes" — composition feels like
-           the cream surface has openings cut through it that reveal a
-           darker layer beneath. Each hole uses a radial gradient with
-           three stops:
-             · centre: light wash (catches ambient light on the back wall
-               of the hole)
-             · 75-85%: deepest shadow (rim shadow cast by the surface above
-               the hole onto the inner wall)
-             · 100%: lifts back slightly (rim catching light at the very
-               edge)
-           Plus a 1px outer stroke that reads as the cut edge of the cream.
-           All three circles intentionally exceed the panel — only ~50-65%
-           of each is visible inside the viewBox. */
-        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800' preserveAspectRatio='xMaxYMin slice'><defs><radialGradient id='hole' cx='50%25' cy='32%25' r='60%25'><stop offset='0%25' stop-color='%23ffffff' stop-opacity='0.06'/><stop offset='60%25' stop-color='%23ffffff' stop-opacity='0.02'/><stop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/></radialGradient></defs><g fill='url(%23hole)' stroke='%23ffffff' stroke-opacity='0.35'><circle cx='780' cy='120' r='420' stroke-width='2'/><circle cx='-60' cy='480' r='320' stroke-width='1.8'/><circle cx='480' cy='860' r='260' stroke-width='1.6'/></g></svg>"),
-        /* Layer 2: warm gold haze from the top-right (echoes brand-side accents) */
-        radial-gradient(circle at 90% 12%, rgba(201, 166, 107, 0.10) 0%, transparent 50%),
-        /* Layer 3: cool teal hint from the bottom-left for depth */
-        radial-gradient(circle at 15% 90%, rgba(80, 140, 160, 0.08) 0%, transparent 55%);
-      background-repeat: no-repeat, no-repeat, no-repeat;
-      background-size: 100% 100%, 100% 100%, 100% 100%;
-      opacity: 1;
-      /* Mask removed (was clipping the holes away from the form-card
-         centre band — when the panel slid, the centre band slid with
-         it, so the holes appeared to flash in/out instead of
-         visibly traversing). The form sits inside .auth-box now which
-         provides its own readable backdrop, so circles can populate
-         the full panel surface and the slide is unambiguous. */
-    }
+    /* Form-panel decorative pseudo retired — the full-page video is now
+       the only background, per the user's "no other background" directive.
+       Keeping the empty rule shape so any later additions land in the
+       right place. */
+    .auth-form-panel::before { display: none; }
 
     /* RTL — composition stays identical in both directions. Previously
        the pseudo was flipped via scaleX(-1) so the focal hole moved to
@@ -1216,6 +1184,19 @@
   </style>
 </head>
 <body>
+
+<!-- Full-page atmospheric background. The video is pre-rendered as
+     forward+reversed concat so plain `loop` ping-pongs seamlessly with
+     zero JavaScript reverse-play work. Muted + playsinline + autoplay
+     are required for mobile autoplay; preload="auto" lets the browser
+     stream as soon as possible. aria-hidden because it's decorative.
+     prefers-reduced-motion users get a still poster frame via CSS. -->
+<video class="auth-bg-video" id="auth-bg-video"
+       autoplay muted loop playsinline preload="auto"
+       aria-hidden="true">
+  <source src="assets/bg-login-loop.mp4" type="video/mp4">
+</video>
+<div class="auth-bg-overlay" aria-hidden="true"></div>
 
 <div class="auth-layout">
 
