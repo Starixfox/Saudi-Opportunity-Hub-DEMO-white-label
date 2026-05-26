@@ -1,5 +1,6 @@
-# Saudi Opportunity Hub — private demo build
-# Not for public distribution. Discourage search-engine indexing.
+# Saudi Opportunity Hub - private demo build.
+# Discourage search-engine indexing while in demo. Flip the Disallow
+# below to Allow when the site is ready for a public launch.
 
 User-agent: *
 Disallow: /

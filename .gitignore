@@ -41,3 +41,8 @@ build/
 # Local audit / enrichment scratch directories (one per run, dated)
 audit-*/
 enrichment-*/
+
+# Playwright test artefacts
+test-results/
+playwright-report/
+playwright/.cache/

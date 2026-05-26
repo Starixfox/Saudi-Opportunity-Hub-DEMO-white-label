@@ -14,11 +14,11 @@ credible to Saudi government and Vision 2030 audiences."
 
 **Open tracked follow-ups** (created 2026-05-26 after Round 6):
 
-- [#13 — bump .btn min-height to 44px (WCAG 2.5.5 best-practice)](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/13)
-- [#14 — tighten CSP, drop `'unsafe-inline'` from script-src](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/14)
-- [#15 — AVIF/WebP `<picture>` for sector card imagery](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/15)
-- [#16 — behind-auth smoke test of `data-action` conversions](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/16)
-- [#17 — Lighthouse baseline on the live URL post-polish-pass](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/17)
+- [#13 — bump .btn min-height to 44px (WCAG 2.5.5 best-practice)](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/13) — runnable via [`scripts/smoke.spec.mjs`](../scripts/smoke.spec.mjs) (Playwright visual regression)
+- [#14 — tighten CSP, drop `'unsafe-inline'` from script-src](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/14) — head bootstrap extracted to [`assets/auth-bootstrap.js`](../assets/auth-bootstrap.js) (commit-pending); SPA-body inline scripts still need to move
+- [#15 — AVIF/WebP `<picture>` for sector card imagery](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/15) — runnable via [`scripts/build-sector-images.mjs`](../scripts/build-sector-images.mjs)
+- [#16 — behind-auth smoke test of `data-action` conversions](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/16) — runnable via [`scripts/smoke.spec.mjs`](../scripts/smoke.spec.mjs)
+- [#17 — Lighthouse baseline on the live URL post-polish-pass](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/17) — **baseline shipped** in `polish/lighthouse/`. Login.html: Performance 97, Accessibility 96, Best Practices 96, SEO 54 (noindex+robots-disallow intentional). Run [`scripts/run-lighthouse.sh`](../scripts/run-lighthouse.sh) for fresh numbers.
 
 **CI**: [`.github/workflows/polish-quality-gate.yml`](../.github/workflows/polish-quality-gate.yml) catches regressions of the polish-pass invariants (SRI, pinning, inline onclick, brace balance, JS syntax, JSON-LD validity, sitemap shape) on every push and PR to `main`.
 
@@ -116,6 +116,9 @@ credible to Saudi government and Vision 2030 audiences."
 | N7 | `script.js` is dead code (IIFE never closed, syntax-errors at line 609, never executes in browsers) | script.js | ✅ done | Investigated: not referenced by any `<script src="…">` tag in any HTML file. Confirmed dead code (file truly unused, not just broken). Deleted the file outright + cleaned the two stale comment references in `index.html` ("rendered by script.js" → "rendered inline by the SPA's body scripts"). |
 | N8 | Touch-target failures on showcase footer + theme toggle (WCAG 2.2 SC 2.5.8) | polish/showcase.html | ✅ done | Probed via in-browser bounding-rect check: 3 footer links rendered at 16px tall (failed AA 24×24); 11 buttons under 44×44 (best-practice). Footer links bumped to 28px tall via padding-inline-block; theme toggle pills bumped to 32px via min-height. The 44px-best-practice gap captured in deploy checklist for a future polish round. |
 | N9 | Touch-target AA on showcase verified after fix | polish/showcase.html | ✅ done | All 6 previously-marginal targets now ≥24×24: footer "Audit" 48×28, "Brand" 52×28, "System" 62×28; theme "Light" 61×32, "Dark" 60×32, "RTL" 55×32. |
+| N11 | Head-inline bootstrap script blocks cache + holds 'unsafe-inline' open | index.html | ✅ done | 339-line head `<script>` block (Supabase session check + super-admin gate + OH_THEMES registry + applyTheme + observer) extracted to `assets/auth-bootstrap.js`. Synchronous external load preserves the auth-redirect-before-render behaviour. The CSP can drop `'unsafe-inline'` once the SPA-body inline scripts also move (tracked in #14). |
+| N12 | robots.txt invalidates as Lighthouse 'invalid robots-txt' (CRLF + em-dash in comment) | robots.txt | ✅ done | Normalised to LF + ASCII-only comments. Lighthouse SEO score should recover 5-10 points on re-run; the remaining 40-point gap is the intentional `Disallow: /` (lifts when the demo goes public). |
+| N13 | No Lighthouse baseline captured | polish/lighthouse/ | ✅ done | Live URL Lighthouse report shipped at `polish/lighthouse/login.report.{json,html}`. Pre-polish-of-this-round numbers: Performance 97, Accessibility 96, Best Practices 96, SEO 54. |
 
 ---
 
