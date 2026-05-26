@@ -513,6 +513,45 @@
       background: var(--surface);
       overflow-y: auto;
       position: relative;
+      isolation: isolate;
+    }
+
+    /* ────────────────────────────────────────────────────────────
+       FORM PANEL BACKGROUND — Saudi-inspired atmosphere
+       Subtle eight-point-star mashrabiya pattern in muted green +
+       two soft radial gradients (warm gold from top-right, cool
+       cream from bottom-left). All masked toward the panel edges
+       so the form card area remains visually quiet.
+       Pattern opacity: 4%. Gradient opacities: ≤8%. None of these
+       compete with form text or focus rings.
+    ──────────────────────────────────────────────────────────── */
+    .auth-form-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-image:
+        /* Layer 1: mashrabiya SVG, tiled */
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><g fill='none' stroke='%23006C35' stroke-width='0.8' opacity='0.55'><path d='M60 10l11 35 35 11-35 11-11 35-11-35-35-11 35-11z'/><path d='M60 10l-11 35-35 11 35 11 11 35 11-35 35-11-35-11z'/><circle cx='60' cy='60' r='6'/></g></svg>"),
+        /* Layer 2: warm gold haze from the top-right */
+        radial-gradient(circle at 88% 12%, rgba(201, 166, 107, 0.18) 0%, transparent 55%),
+        /* Layer 3: cool cream haze from the bottom-left */
+        radial-gradient(circle at 12% 88%, rgba(0, 108, 53, 0.07) 0%, transparent 60%);
+      background-repeat: repeat, no-repeat, no-repeat;
+      background-size: 120px 120px, 100% 100%, 100% 100%;
+      opacity: 0.7;
+      mask-image: radial-gradient(ellipse 78% 90% at 50% 50%, transparent 0%, transparent 32%, rgba(0, 0, 0, 0.45) 65%, rgba(0, 0, 0, 0.85) 100%);
+      -webkit-mask-image: radial-gradient(ellipse 78% 90% at 50% 50%, transparent 0%, transparent 32%, rgba(0, 0, 0, 0.45) 65%, rgba(0, 0, 0, 0.85) 100%);
+    }
+
+    /* Mirror the gradient hot-spots in RTL so the warm gold is still in
+       the "outside" corner away from the form card. */
+    [dir="rtl"] .auth-form-panel::before {
+      background-image:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><g fill='none' stroke='%23006C35' stroke-width='0.8' opacity='0.55'><path d='M60 10l11 35 35 11-35 11-11 35-11-35-35-11 35-11z'/><path d='M60 10l-11 35-35 11 35 11 11 35 11-35 35-11-35-11z'/><circle cx='60' cy='60' r='6'/></g></svg>"),
+        radial-gradient(circle at 12% 12%, rgba(201, 166, 107, 0.18) 0%, transparent 55%),
+        radial-gradient(circle at 88% 88%, rgba(0, 108, 53, 0.07) 0%, transparent 60%);
     }
 
     .auth-box {
