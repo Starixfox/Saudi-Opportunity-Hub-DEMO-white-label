@@ -223,10 +223,14 @@
   --bg-app:            #f8fafc;          /* cool slate for the app shell */
   --bg-marketing:      var(--color-cream-100);   /* warm cream for login/contact/404 */
 
-  /* Text */
-  --text:              var(--color-neutral-900);
-  --text-muted:        var(--color-neutral-600);
-  --text-faint:        var(--color-neutral-400);
+  /* Text — all three roles meet WCAG 2.1 AA (4.5:1) against --surface.
+     --text-faint was originally neutral-400 (#a1a1aa, 2.56:1) — failed AA
+     even for large text. Bumped to neutral-500 (#71717a, 4.83:1) so the
+     micro-labels and captions that use it (.demo-tile-label,
+     .opp-card-sponsor, .pair-label) are legible to low-vision readers. */
+  --text:              var(--color-neutral-900);   /* 17.72:1 on white */
+  --text-muted:        var(--color-neutral-600);   /*  7.73:1 on white */
+  --text-faint:        var(--color-neutral-500);   /*  4.83:1 on white */
   --text-inverse:      var(--color-neutral-0);
   --text-on-accent:    var(--color-neutral-0);
 
@@ -287,10 +291,12 @@
   --bg-app:            #0a0d14;
   --bg-marketing:      #0a0d14;
 
-  /* Text */
-  --text:              #e8eaf2;
-  --text-muted:        #9da6bf;
-  --text-faint:        #5b6480;
+  /* Text — dark theme. All three meet WCAG 2.1 AA against the dark
+     --surface (#0f1420). --text-faint was #5b6480 (3.14:1, borderline);
+     lifted to #7c89ab (5.28:1) for full AA. */
+  --text:              #e8eaf2;                    /* 15.32:1 on #0f1420 */
+  --text-muted:        #9da6bf;                    /*  7.57:1 on #0f1420 */
+  --text-faint:        #7c89ab;                    /*  5.28:1 on #0f1420 */
   --text-inverse:      var(--color-neutral-900);
   --text-on-accent:    var(--color-neutral-0);
 
@@ -363,7 +369,7 @@
     --bg-marketing:      #0a0d14;
     --text:              #e8eaf2;
     --text-muted:        #9da6bf;
-    --text-faint:        #5b6480;
+    --text-faint:        #7c89ab;   /* WCAG AA — 5.28:1 on #0f1420 */
     --border:            rgba(255, 255, 255, 0.10);
     --border-strong:     rgba(255, 255, 255, 0.18);
     --accent:            #34d97b;
