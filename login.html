@@ -542,10 +542,18 @@
       align-items: center;
       justify-content: center;
       padding: 48px 40px;
-      background: var(--surface);
+      /* Deep emerald → midnight → black gradient. Stays in the Saudi-
+         green family but at a different angle from the brand panel, so
+         the two halves feel of a piece without looking like duplicates. */
+      background:
+        radial-gradient(ellipse 80% 60% at 30% 10%, rgba(255, 255, 255, 0.04), transparent 60%),
+        linear-gradient(220deg, #0e2a1c 0%, #082015 40%, #051208 100%);
       overflow-y: auto;
       position: relative;
       isolation: isolate;
+      /* Light scheme so any default browser controls (autofill etc) on
+         this dark surface request dark UA chrome. */
+      color-scheme: dark;
     }
 
     /* ────────────────────────────────────────────────────────────
@@ -581,11 +589,11 @@
            Plus a 1px outer stroke that reads as the cut edge of the cream.
            All three circles intentionally exceed the panel — only ~50-65%
            of each is visible inside the viewBox. */
-        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800' preserveAspectRatio='xMaxYMin slice'><defs><radialGradient id='hole' cx='50%25' cy='32%25' r='60%25'><stop offset='0%25' stop-color='%232a2a2a' stop-opacity='0.10'/><stop offset='50%25' stop-color='%23171717' stop-opacity='0.18'/><stop offset='82%25' stop-color='%23050505' stop-opacity='0.32'/><stop offset='100%25' stop-color='%23000000' stop-opacity='0.12'/></radialGradient></defs><g fill='url(%23hole)' stroke='%23000' stroke-opacity='1'><circle cx='780' cy='120' r='420' stroke-width='2.5'/><circle cx='-60' cy='480' r='320' stroke-width='2.2'/><circle cx='480' cy='860' r='260' stroke-width='2'/></g></svg>"),
-        /* Layer 2: diagonal warm-gold sweep, top-right to bottom-left */
-        linear-gradient(225deg, rgba(201, 166, 107, 0.22) 0%, rgba(201, 166, 107, 0.05) 35%, transparent 65%),
-        /* Layer 3: cool green hint, bottom-left third */
-        radial-gradient(circle at 15% 85%, rgba(0, 108, 53, 0.08) 0%, transparent 45%);
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800' preserveAspectRatio='xMaxYMin slice'><defs><radialGradient id='hole' cx='50%25' cy='32%25' r='60%25'><stop offset='0%25' stop-color='%23ffffff' stop-opacity='0.06'/><stop offset='60%25' stop-color='%23ffffff' stop-opacity='0.02'/><stop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/></radialGradient></defs><g fill='url(%23hole)' stroke='%23ffffff' stroke-opacity='0.35'><circle cx='780' cy='120' r='420' stroke-width='2'/><circle cx='-60' cy='480' r='320' stroke-width='1.8'/><circle cx='480' cy='860' r='260' stroke-width='1.6'/></g></svg>"),
+        /* Layer 2: warm gold haze from the top-right (echoes brand-side accents) */
+        radial-gradient(circle at 90% 12%, rgba(201, 166, 107, 0.10) 0%, transparent 50%),
+        /* Layer 3: cool teal hint from the bottom-left for depth */
+        radial-gradient(circle at 15% 90%, rgba(80, 140, 160, 0.08) 0%, transparent 55%);
       background-repeat: no-repeat, no-repeat, no-repeat;
       background-size: 100% 100%, 100% 100%, 100% 100%;
       opacity: 1;
@@ -608,21 +616,173 @@
     .auth-box {
       width: 100%;
       max-width: 420px;
-      /* Card backdrop — sits on top of the panel's hole-composition
-         background so form text always has a clean surface. Soft shadow
-         + crisp rounded corners give it the "floating card on patterned
-         paper" feel that lets the holes populate the full panel surface
-         (no mask required) while the form itself stays pristine. */
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius, 12px);
-      padding: 36px 32px;
+      /* Frosted-glass card on the night-sky panel — backdrop-filter
+         blurs whatever's behind (the gradient + constellation marks)
+         so the form sits on a soft glow without losing the atmosphere.
+         Border + double box-shadow give the rim a subtle inner light
+         (top) and a depth shadow (bottom). */
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 18px;
+      padding: 40px 36px;
       box-shadow:
-        0 1px 3px rgba(0, 0, 0, 0.04),
-        0 12px 32px rgba(0, 0, 0, 0.06);
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 20px 60px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(24px) saturate(140%);
+      -webkit-backdrop-filter: blur(24px) saturate(140%);
+      color: rgba(255, 255, 255, 0.95);
     }
     @media (max-width: 640px) {
-      .auth-box { padding: 28px 22px; }
+      .auth-box { padding: 30px 24px; border-radius: 14px; }
+    }
+
+    /* ────────────────────────────────────────────────────────────
+       FORM CONTENT INSIDE THE GLASS CARD
+       Everything inside .auth-box adapts to the dark surface — text
+       white-tinted, inputs underline-only, button solid white with
+       brand-green ink for a single high-contrast accent moment.
+    ──────────────────────────────────────────────────────────── */
+    .auth-form-panel .auth-header h1 { color: rgba(255, 255, 255, 0.96); }
+    .auth-form-panel .auth-header p,
+    .auth-form-panel #auth-subtitle  { color: rgba(255, 255, 255, 0.65); }
+
+    .auth-form-panel .auth-tabs {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+    .auth-form-panel .auth-tab          { color: rgba(255, 255, 255, 0.55); }
+    .auth-form-panel .auth-tab.is-active{
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.20);
+    }
+    .auth-form-panel .auth-tab:hover:not(.is-active) { color: rgba(255, 255, 255, 0.85); }
+
+    .auth-form-panel .form-label {
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 500;
+    }
+
+    /* Underline-only inputs — no full box, no rounded fill. Just a
+       bottom rule that lights up on focus. Matches the reference. */
+    .auth-form-panel .form-input {
+      background: transparent;
+      border: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 0;
+      padding: 12px 0 10px;
+      color: #ffffff;
+      transition:
+        border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow   220ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .auth-form-panel .form-input::placeholder { color: rgba(255, 255, 255, 0.40); }
+    .auth-form-panel .form-input:hover  { border-bottom-color: rgba(255, 255, 255, 0.45); }
+    .auth-form-panel .form-input:focus  {
+      outline: none;
+      border-bottom-color: rgba(255, 255, 255, 0.85);
+      box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.85);
+    }
+
+    /* Autofill on dark — Chrome's default yellow box would look awful
+       on the glass card. Pin it to the dark glass surface. */
+    .auth-form-panel .form-input:-webkit-autofill,
+    .auth-form-panel .form-input:-webkit-autofill:hover,
+    .auth-form-panel .form-input:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.04) inset !important;
+      -webkit-text-fill-color: #ffffff !important;
+      caret-color: #ffffff;
+      transition: background-color 9999s 0s;
+    }
+
+    .auth-form-panel .password-wrap .toggle-pwd { color: rgba(255, 255, 255, 0.55); }
+    .auth-form-panel .password-wrap .toggle-pwd:hover { color: #ffffff; }
+
+    .auth-form-panel .auth-extras .checkbox-wrap { color: rgba(255, 255, 255, 0.75); }
+    .auth-form-panel .auth-extras .checkbox-wrap input[type="checkbox"] {
+      accent-color: var(--green, #006C35);
+    }
+    .auth-form-panel .forgot-link {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .auth-form-panel .forgot-link:hover { color: #ffffff; }
+
+    /* The primary CTA: pure white block with brand green ink. This is
+       the only high-contrast object in the form, intentionally — the
+       eye lands here. */
+    .auth-form-panel .btn-submit {
+      background: #ffffff;
+      color: var(--green, #006C35);
+      border: 0;
+      border-radius: 12px;
+      font-weight: 700;
+      padding: 14px 18px;
+      box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.20),
+        0 12px 28px rgba(0, 0, 0, 0.25);
+      transition:
+        transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .auth-form-panel .btn-submit:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.22),
+        0 18px 36px rgba(0, 0, 0, 0.30);
+    }
+    .auth-form-panel .btn-submit:focus-visible {
+      outline: none;
+      box-shadow:
+        0 0 0 3px rgba(255, 255, 255, 0.55),
+        0 12px 28px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Divider + OR-CONTINUE-WITH on dark */
+    .auth-form-panel .sso-divider {
+      color: rgba(255, 255, 255, 0.55);
+    }
+    .auth-form-panel .sso-divider::before,
+    .auth-form-panel .sso-divider::after {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    /* OAuth ghost buttons on dark */
+    .auth-form-panel .btn-sso {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.22);
+      color: rgba(255, 255, 255, 0.92);
+    }
+    .auth-form-panel .btn-sso:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.32);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    .auth-form-panel .btn-sso[aria-disabled="true"] {
+      background: rgba(255, 255, 255, 0.04);
+      color: rgba(255, 255, 255, 0.55);
+    }
+    .auth-form-panel .btn-sso-unavailable {
+      color: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.20);
+    }
+
+    /* Footer line */
+    .auth-form-panel .auth-footer {
+      color: rgba(255, 255, 255, 0.55);
+    }
+    .auth-form-panel .auth-footer a { color: rgba(255, 255, 255, 0.88); }
+    .auth-form-panel .auth-footer a:hover { color: #ffffff; }
+
+    /* Language toggle — pill on dark */
+    .auth-form-panel .lang-toggle {
+      background: rgba(255, 255, 255, 0.10);
+      border-color: rgba(255, 255, 255, 0.22);
+      color: #ffffff;
+    }
+    .auth-form-panel .lang-toggle:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.32);
     }
 
     /* Header */
