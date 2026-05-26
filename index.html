@@ -17615,6 +17615,11 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   /* BUG-013 FIX: expose sector name maps globally so other IIFEs can use them */
   window.SECTOR_NAMES_EN = SECTOR_NAMES_EN;
   window.SECTOR_NAMES_AR = SECTOR_NAMES_AR;
+  /* Same trick for the programme-type maps so the RIS card builder,
+     the rec-card builder, and anywhere else outside this IIFE can
+     read AR labels without redefining the dictionary. */
+  window.TYPE_NAMES_EN = TYPE_NAMES_EN;
+  window.TYPE_NAMES_AR = TYPE_NAMES_AR;
 
   /* map prefs.role strings -> profile keys used in data */
   var ROLE_TO_PROFILE = {
@@ -25125,11 +25130,16 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     /* Run through canonType first so RIS card pills collapse synonyms
        the same way the filter / chart / opp-card pill do. Without this
        a row stored as "loan_program" would show "Loan Program" here
-       while the chart legend shows "Loan". */
+       while the chart legend shows "Loan". Then look up the AR/EN
+       display name via the globally-exposed TYPE_NAMES_AR / _EN maps
+       (set in the v2 IIFE) so Arabic mode shows Arabic labels.
+       Falls back to title-case for any key not in the maps. */
     var canon = (window.canonType ? window.canonType(t) : t);
-    var s = String(canon || '').replace(/_/g, ' ').trim();
-    if (!s) return '';
-    return s.replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+    var key = String(canon || '').toLowerCase();
+    if (!key) return '';
+    if (ar() && window.TYPE_NAMES_AR && window.TYPE_NAMES_AR[key]) return window.TYPE_NAMES_AR[key];
+    if (window.TYPE_NAMES_EN && window.TYPE_NAMES_EN[key])         return window.TYPE_NAMES_EN[key];
+    return key.replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
   }
 
   function sectorLabel(key) {
