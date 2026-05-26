@@ -39,16 +39,23 @@ test.describe('Polish-pass data-action delegated handler', () => {
   });
 
   // --- 1. Sidebar workspace button ----------------------------------------
+  // The workspace panel signals "open" via #wsPanel.active + a route change
+  // to #workspace — NOT body.panel-open (that's the opp-detail panel).
   test('open-panel:watchlist via sidebar', async ({ page }) => {
     await page.locator('#sidebarWorkspace').click();
-    await expect(page.locator('body')).toHaveClass(/.*panel-open.*/);
+    await expect.poll(() => page.url(), { timeout: 5000 }).toContain('#workspace');
+    await expect(page.locator('#wsPanel')).toHaveClass(/active/);
+    const activeTab = await page.evaluate(() => window.__wsActiveTab);
+    expect(activeTab).toBe('watchlist');
   });
 
   // --- 2. Topbar settings -------------------------------------------------
+  // Settings dialog is the modal — match the role+class precisely to avoid
+  // matching the trigger buttons (which had a Settings aria-label).
   test('open-settings via topbar', async ({ page }) => {
     await page.locator('#appTbSettings').click();
-    // Settings modal should be visible
-    await expect(page.locator('.settings-modal, [aria-label*="Settings" i]')).toBeVisible({ timeout: 5000 });
+    const dialog = page.locator('[role="dialog"].settings-modal, .settings-modal[role="dialog"]').first();
+    await expect(dialog).toBeVisible({ timeout: 5000 });
   });
 
   // --- 3-6. Home tile routing ---------------------------------------------
@@ -70,9 +77,15 @@ test.describe('Polish-pass data-action delegated handler', () => {
   });
 
   // --- 8. Bookmark toggle (template-injected onclick → data-action) ------
+  // Don't hard-navigate; the SPA can take longer to render cards after a
+  // direct URL hit because the Supabase query runs after the route change.
+  // Click into Opportunities from the home tile and wait for the listing.
   test('toggle-bookmark fires WS.toggleBookmark', async ({ page }) => {
-    await page.goto(`${BASE}/index.html#opportunities`);
-    await page.waitForSelector('.opp-card', { state: 'visible', timeout: 10000 });
+    await page.locator('button[data-action="set-route"][data-arg="opportunities"]').first().click();
+    await expect.poll(() => page.url(), { timeout: 5000 }).toContain('#opportunities');
+    // Cards render asynchronously after the Supabase fetch. Be generous —
+    // network on cold cache can take 8s+ on a fresh session.
+    await page.waitForSelector('.opp-card', { state: 'visible', timeout: 30000 });
     const bookmark = page.locator('.opp-card .card-bookmark-btn[data-action="toggle-bookmark"]').first();
     await expect(bookmark).toBeVisible();
     const before = await bookmark.getAttribute('aria-pressed');
@@ -90,9 +103,14 @@ test.describe('Polish-pass data-action delegated handler', () => {
     page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()); });
     await page.goto(`${BASE}/index.html`);
     await page.waitForLoadState('networkidle', { timeout: 15000 });
-    // Filter out known third-party noise (translate widget, etc.)
+    // Filter out:
+    //  - third-party noise (Google Translate widget)
+    //  - favicon 404s
+    //  - browser ad/extension blocks
+    //  - the frame-ancestors-in-meta warning (we removed it from <meta>,
+    //    but cached pages might still trip it on staging deploys; harmless)
     const realErrors = errors.filter((e) =>
-      !/translate\.google|favicon|net::ERR_BLOCKED_BY_CLIENT/i.test(e)
+      !/translate\.google|favicon|net::ERR_BLOCKED_BY_CLIENT|frame-ancestors.*ignored.*meta/i.test(e)
     );
     expect(realErrors).toEqual([]);
   });
@@ -103,6 +121,19 @@ test.describe('Visual regression — .btn sizing (issue #13)', () => {
   // surfaces. Run this BEFORE applying the .btn { min-height: 44px }
   // change, commit the baseline, then run again AFTER and Playwright
   // will emit a diff for review.
+
+  // Wait for everything that can shift layout to finish:
+  //   - All web fonts loaded (document.fonts.ready)
+  //   - Any pending animations done
+  //   - One extra frame to flush
+  async function settle(page) {
+    await page.evaluate(async () => {
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      const anims = (document.getAnimations && document.getAnimations()) || [];
+      await Promise.allSettled(anims.map(a => a.finished));
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    });
+  }
 
   test.beforeEach(async ({ page }) => {
     await page.goto(`${BASE}/login.html`);
@@ -116,9 +147,14 @@ test.describe('Visual regression — .btn sizing (issue #13)', () => {
     test(`screenshot:${view}`, async ({ page }) => {
       await page.goto(`${BASE}/index.html#${view}`);
       await page.waitForLoadState('networkidle', { timeout: 15000 });
+      await settle(page);
       await expect(page).toHaveScreenshot(`btn-sizing-${view}.png`, {
         fullPage: true,
-        maxDiffPixelRatio: 0.02
+        maxDiffPixelRatio: 0.02,
+        // Skeleton shimmer + ::before mashrabiya can each shift a few
+        // pixels frame-to-frame; give Playwright a couple of attempts.
+        animations: 'disabled',
+        timeout: 20000
       });
     });
   }
@@ -126,9 +162,12 @@ test.describe('Visual regression — .btn sizing (issue #13)', () => {
   test('showcase (public)', async ({ page }) => {
     await page.goto(`${BASE}/polish/showcase.html`);
     await page.waitForLoadState('networkidle');
+    await settle(page);
     await expect(page).toHaveScreenshot('btn-sizing-showcase.png', {
       fullPage: true,
-      maxDiffPixelRatio: 0.02
+      maxDiffPixelRatio: 0.02,
+      animations: 'disabled',
+      timeout: 20000
     });
   });
 });
