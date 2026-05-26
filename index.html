@@ -17633,18 +17633,68 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
      grant_program \u2192 grant). Any raw DB key that survives the alias
      pass (e.g. "tender", "competition", "bootcamp") falls back to a
      snake_case \u2192 Title Case prettify in _typeLabel. */
+  /* Keys are canonical (post-canonType) lowercase + underscored. Add new
+     entries here whenever the DB starts surfacing a new programme type so
+     it reads properly in both languages on every chart, pill, and badge. */
   var TYPE_NAMES_EN = {
-    grant:'Grant', tender:'Tender', accelerator:'Accelerator',
-    investment:'Investment', fellowship:'Fellowship',
-    loan:'Loan', training:'Training',
-    partnership_program:'Partnership', other:'Other'
+    grant:               'Grant',
+    tender:              'Tender',
+    accelerator:         'Accelerator',
+    investment:          'Investment',
+    fellowship:          'Fellowship',
+    loan:                'Loan',
+    training:            'Training',
+    partnership_program: 'Partnership',
+    competition:         'Competition',
+    program:             'Program',
+    incubator:           'Incubator',
+    innovation_grant:    'Innovation Grant',
+    equity:              'Equity',
+    bootcamp:            'Bootcamp',
+    financing:           'Financing',
+    leadership_training: 'Leadership Training',
+    research_challenge:  'Research Challenge',
+    licensing:           'Licensing',
+    incentive:           'Incentive',
+    venture_capital:     'Venture Capital',
+    fund:                'Fund',
+    subsidy:             'Subsidy',
+    support_program:     'Support Program',
+    innovation_hub:      'Innovation Hub',
+    training_grant:      'Training Grant',
+    supplier_development:'Supplier Development',
+    investment_opportunity: 'Investment Opportunity',
+    other:               'Other'
   };
   var TYPE_NAMES_AR = {
-    grant:'\u0645\u0646\u062d\u0629', tender:'\u0639\u0637\u0627\u0621',
-    accelerator:'\u0645\u0633\u0631\u0651\u0639\u0629', investment:'\u0628\u0631\u0646\u0627\u0645\u062c \u0627\u0633\u062a\u062b\u0645\u0627\u0631\u064a',
-    fellowship:'\u0632\u0645\u0627\u0644\u0629', loan:'\u0642\u0631\u0636',
-    training:'\u062a\u062f\u0631\u064a\u0628',
-    partnership_program:'\u0634\u0631\u0627\u0643\u0629', other:'\u0623\u062e\u0631\u0649'
+    grant:               '\u0645\u0646\u062d\u0629',
+    tender:              '\u0639\u0637\u0627\u0621',
+    accelerator:         '\u0645\u0633\u0631\u0651\u0639\u0629',
+    investment:          '\u0628\u0631\u0646\u0627\u0645\u062c \u0627\u0633\u062a\u062b\u0645\u0627\u0631\u064a',
+    fellowship:          '\u0632\u0645\u0627\u0644\u0629',
+    loan:                '\u0642\u0631\u0636',
+    training:            '\u062a\u062f\u0631\u064a\u0628',
+    partnership_program: '\u0634\u0631\u0627\u0643\u0629',
+    competition:         '\u0645\u0633\u0627\u0628\u0642\u0629',
+    program:             '\u0628\u0631\u0646\u0627\u0645\u062c',
+    incubator:           '\u062d\u0627\u0636\u0646\u0629',
+    innovation_grant:    '\u0645\u0646\u062d\u0629 \u0627\u0628\u062a\u0643\u0627\u0631',
+    equity:              '\u062d\u0635\u0635 \u0633\u0647\u0645\u064a\u0629',
+    bootcamp:            '\u0645\u0639\u0633\u0643\u0631 \u062a\u062f\u0631\u064a\u0628\u064a',
+    financing:           '\u062a\u0645\u0648\u064a\u0644',
+    leadership_training: '\u062a\u062f\u0631\u064a\u0628 \u0642\u064a\u0627\u062f\u064a',
+    research_challenge:  '\u062a\u062d\u062f\u0651\u064d \u0628\u062d\u062b\u064a',
+    licensing:           '\u062a\u0631\u062e\u064a\u0635',
+    incentive:           '\u062d\u0627\u0641\u0632',
+    venture_capital:     '\u0631\u0623\u0633 \u0645\u0627\u0644 \u0645\u063a\u0627\u0645\u0631',
+    fund:                '\u0635\u0646\u062f\u0648\u0642',
+    subsidy:             '\u062f\u0639\u0645',
+    support_program:     '\u0628\u0631\u0646\u0627\u0645\u062c \u062f\u0639\u0645',
+    innovation_hub:      '\u0645\u0631\u0643\u0632 \u0627\u0628\u062a\u0643\u0627\u0631',
+    training_grant:      '\u0645\u0646\u062d\u0629 \u062a\u062f\u0631\u064a\u0628',
+    supplier_development:'\u062a\u0637\u0648\u064a\u0631 \u0627\u0644\u0645\u0648\u0631\u0651\u062f\u064a\u0646',
+    investment_opportunity: '\u0641\u0631\u0635\u0629 \u0627\u0633\u062a\u062b\u0645\u0627\u0631\u064a\u0629',
+    other:               '\u0623\u062e\u0631\u0649'
   };
 
   /* profile display names EN/AR */
