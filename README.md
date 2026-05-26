@@ -10,7 +10,7 @@ A private demo platform that aggregates **grants, tenders, accelerators, investm
 
 | File | Purpose |
 | --- | --- |
-| `index.html` | Single-page app: shell, sidebar, topbar, all views, CSS, JS |
+| `index.html` | Single-page app: shell, sidebar, topbar, all views |
 | `login.html` | Supabase email/password sign-in |
 | `reset-password.html` | Password reset flow |
 | `contact.html` | Standalone contact / feedback form |
@@ -19,6 +19,13 @@ A private demo platform that aggregates **grants, tenders, accelerators, investm
 | `manifest.webmanifest` | PWA manifest (installable) |
 | `robots.txt` / `sitemap.xml` | SEO basics |
 | `script.js` | Shared helpers loaded by static pages |
+| `assets/tokens.css` | Design tokens — single source of truth (colour, type, spacing, shadows, motion, light/dark/RTL) |
+| `assets/styles.css` | Foundation utilities — reset, `.btn`, `.card`, `.pill`, `.skeleton`, `.skip-link`, `.bg-mashrabiya` |
+| `assets/opportunity-schema.js` | Per-opportunity JSON-LD emitter (Grant / GovernmentService / EducationalOccupationalProgram). Called by `openPanel()` / `closePanel()` in `index.html`. |
+| `polish/BRAND.md` | Brand voice — attributes, do/don't, GCC funding terminology, bilingual rules |
+| `polish/DESIGN_SYSTEM.md` | Design system reference — layer model, theming, components |
+| `polish/AUDIT.md` | Polish-pass audit with prioritised punch list |
+| `polish/showcase.html` | Public design-system showcase + QA harness ([live](https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/polish/showcase.html)) |
 
 The frontend is **vanilla JavaScript** (IIFEs, no framework). Charts via [Chart.js](https://www.chartjs.org/), icons via [Lucide](https://lucide.dev/), data + auth via [Supabase](https://supabase.com/).
 
@@ -34,6 +41,48 @@ The frontend is **vanilla JavaScript** (IIFEs, no framework). Charts via [Chart.
 │                  │      │   • PostgREST (rest/v1)      │
 └──────────────────┘      └──────────────────────────────┘
 ```
+
+## Design system
+
+The platform's visual identity lives in a three-layer token system, all in
+`assets/tokens.css`:
+
+```
+Primitive   --color-green-600, --space-4, --text-lg, --ease-out
+                 ↓
+Semantic    --accent, --surface, --text, --border, --shadow-md
+                 ↓
+Component   .btn-primary { background: var(--accent); … }
+```
+
+Components reference **semantic** tokens (`var(--accent)`, `var(--surface)`).
+Primitives are only used when a semantic role doesn't exist yet — and at
+that point the answer is usually to add the role to `tokens.css`, not to
+hardcode.
+
+- **Brand**: Saudi green `#006C35` (canonical) is the `--accent`. Gold
+  `#C9A66B` is the secondary moment. The platform's 7-tenant white-label
+  registry (`window.OH_THEMES`) overrides `--accent` per tenant, so
+  components never need to know which theme is active.
+- **Type**: Inter (body) + Space Grotesk (display) + IBM Plex Sans Arabic
+  (automatically swapped in when `dir="rtl"`). 6-step fluid scale via
+  `clamp()`.
+- **Spacing**: 4px base scale, `--space-1` (4px) through `--space-32`
+  (128px). The skipped values (`--space-7`, `--space-9`…) are deliberate.
+- **Shadows**: Linear-style two-layer (tight + diffuse), 6 tokens. Dark
+  mode boosts alpha automatically.
+- **Motion**: Default ease `cubic-bezier(0.16, 1, 0.30, 1)`, default
+  duration 220ms. `prefers-reduced-motion: reduce` flattens all durations
+  to 0ms and easings to linear.
+- **RTL**: `dir="rtl"` automatically swaps `--font-sans` to the Arabic
+  family and flattens letter-spacing tokens. Use logical properties
+  (`margin-inline-start`, `padding-inline-end`) for everything except
+  absolutely positioned overlays.
+
+The full reference + every component rendered in light, dark, and RTL
+side-by-side lives at **[`polish/showcase.html`](polish/showcase.html)**.
+Brand voice (do/don't, GCC funding terminology, bilingual rules) is in
+**[`polish/BRAND.md`](polish/BRAND.md)**.
 
 ## Views
 
@@ -127,10 +176,39 @@ Modern evergreen browsers (Chromium 100+, Firefox 100+, Safari 15+). The page is
 
 ## Accessibility
 
-- Skip-to-content link at the top of `<body>` for keyboard / screen-reader users.
+- Skip-to-content link at the top of `<body>` for keyboard / screen-reader users (the `.skip-link` utility is in `assets/styles.css`).
 - `<noscript>` fallback explaining the JS requirement.
-- ARIA labels and roles on all primary navigation, dialogs, charts, and inputs.
+- 230+ ARIA labels and roles across navigation, dialogs, charts, and inputs.
 - Focus trap inside modals and panels; Escape dismisses them.
+- Every interactive element renders a `--focus-ring` (3px accent-coloured glow) on `:focus-visible`. Focus colour is theme-aware (Saudi green light, lifted green dark).
+- `@media (prefers-reduced-motion: reduce)` zeroes all token durations and flattens easings; skeleton shimmer goes static at 60% opacity.
+- Status pills carry redundant visual cues (icon-dot + colour + label text) so colour alone never carries meaning.
+
+## SEO &amp; AI visibility
+
+Even though the live demo is intentionally `noindex,nofollow` (lift via
+`robots.txt` + the meta tag on each page when ready for public launch),
+the structured-data surface is built so the platform is ready to be
+cited by AI crawlers (ChatGPT, Perplexity, Claude) and indexed cleanly
+by traditional search:
+
+- **Head-level JSON-LD** on `index.html`, `login.html`, `contact.html`:
+  `Organization` + `WebSite` (+ `ContactPage` on contact), graph-linked
+  via `@id` so search engines see the publisher relationship.
+- **Bilingual `hreflang`** (en, ar, x-default) declared on `index.html`.
+- **Per-opportunity JSON-LD** is emitted live by `assets/opportunity-schema.js`
+  whenever a user opens an opportunity panel — picks the right schema
+  type (`Grant`, `MonetaryGrant`, `GovernmentService`,
+  `EducationalOccupationalProgram`, `FundingScheme`) based on the
+  opportunity's internal `funding_type`. Funder, area served (KSA/GCC/
+  global typed as `Country` / `AdministrativeArea` / `Place`),
+  `applicationDeadline`, `eligibilityCriteria`, and amount (as a
+  `MonetaryAmount` defaulting to SAR) are all populated. The script is
+  wired into `openPanel()` / `closePanel()` so each navigation refreshes
+  the in-DOM schema.
+- `SearchAction` declared in the WebSite node points crawlers at the
+  in-app `#opportunities` hash route so AI assistants can model the
+  platform's search surface.
 
 ## Security notes
 
