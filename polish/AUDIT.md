@@ -1,10 +1,16 @@
 # Saudi Opportunity Hub — Polish Pass Audit
 
-_Branch: `polish/world-class-2026` · Date: 2026-05-26 · Author: Claude Opus 4.7_
+_Branch: `polish/world-class-2026` (merged to `main` 2026-05-26) · Author: Claude Opus 4.7_
 
 This audit is the entry point for a comprehensive polish pass targeting
 "more polished than Stripe, Linear, and Vercel combined — while staying
 credible to Saudi government and Vision 2030 audiences."
+
+**Status legend** (added 2026-05-26 to keep the punch list honest):
+
+- ✅ done — landed and verified
+- ⚠️ partial — addressed for the public-page surface, SPA-side work pending
+- ⏳ pending — not started in this pass
 
 ---
 
@@ -51,40 +57,52 @@ credible to Saudi government and Vision 2030 audiences."
 
 ### P0 — block "world-class" claim
 
-| # | Issue | Where | Why it matters |
-|---|---|---|---|
-| P0-1 | **Four divergent token namespaces** across the 6 HTML files | index.html, login.html, contact.html, api.html, 404.html, reset-password.html | No single source of truth for color/type/spacing. Brand looks subtly different on every page. |
-| P0-2 | **~8,700 lines of inline CSS** in `index.html` | index.html:392-8903, 21482-21523, 24292-24466 | Cannot be cached, makes diffs unreadable, blocks performance work (no critical CSS strategy possible). |
-| P0-3 | **Two Saudi greens in production** | `#006C35` (canonical) vs `#007a3d` (api.html:52) | Brand integrity. Government audience will notice. |
-| P0-4 | **No IBM Plex Sans Arabic** despite RTL claims; mix of Satoshi/Inter/Noto Kufi Arabic/Space Grotesk loaded ad-hoc per page | login.html:21-25 vs index.html:385 vs api.html:18 | Typography is a brand-identity primary. Each page reads as a different product. |
-| P0-5 | **No proper RTL mirroring** beyond font-swap | All pages | "Stays credible to Saudi government audiences" requires real RTL: mirrored layouts, mirrored icons where directional, logical CSS properties (`margin-inline-start`), proper bidi text handling. |
-| P0-6 | **Hero, opportunity listing, opportunity detail** are visually generic — no Vision 2030 or Saudi visual culture motif yet | index.html body | This is "the part the user wants to be surprised by." |
+| # | Issue | Where | Status | Resolution |
+|---|---|---|---|---|
+| P0-1 | **Four divergent token namespaces** across the 6 HTML files | All HTML pages | ⚠️ partial | `assets/tokens.css` shipped as single source of truth + linked from every page (commit `644856f`). Each page's inline `<style>` still defines its own duplicates; those win on the cascade today. Removing them is the deferred 8,700-line extraction. |
+| P0-2 | **~8,700 lines of inline CSS** in `index.html` | index.html:392-8903, 21482-21523, 24292-24466 | ⏳ deferred | Too risky to do inline alongside the rest of the pass. Token-wiring is in place to do this incrementally in a focused later session. |
+| P0-3 | **Two Saudi greens in production** | api.html `#007a3d` | ✅ done | Restored to canonical `#006C35` (commit `644856f`). |
+| P0-4 | **No IBM Plex Sans Arabic** despite RTL claims | All HTML pages | ✅ done | IBM Plex Sans Arabic loaded on every page. Satoshi removed from login/contact/api/reset-password. Font tokens unified in `tokens.css`. |
+| P0-5 | **No proper RTL mirroring** beyond font-swap | All pages | ⚠️ partial | `tokens.css` swaps `--font-sans` to Arabic on `[dir="rtl"]`, flattens letter-spacing. The user has been doing the SPA RTL work in parallel (29 commits during this pass). Logical-property migration still incremental. |
+| P0-6 | **Hero, opportunity listing, opportunity detail** visually generic | index.html body | ⚠️ partial | Showcase (`polish/showcase.html`) prototypes the redesigned hero (with mashrabiya motif), opportunity card, and dark/RTL variants. Login.html hero already received the redesign treatment. SPA-side swap-in deferred. |
 
 ### P1 — meaningful polish
 
-| # | Issue | Where | Why it matters |
-|---|---|---|---|
-| P1-1 | `alert()` in feedback form | script.js:119 | Not screen-reader-friendly; breaks design language. Replace with inline `aria-live` region. |
-| P1-2 | 28 inline event handlers (`onclick=`, `onerror=`) | index.html | Mixes structure and behaviour; can't be CSP-tightened (currently allows `'unsafe-inline'`). Move to delegated listeners. |
-| P1-3 | No proper loading skeletons; relies on JS-injected containers | script.js:51-58 (`ensureContainer`) | Loading flash looks unprofessional. Skeletons + intentional empty states needed. |
-| P1-4 | 131 `box-shadow:` declarations, mostly hand-tuned | index.html | Soft Linear-style shadows are a brand cue; current values are inconsistent. Consolidate to 4-5 tokens. |
-| P1-5 | 1,089 hex color literals (many duplicated between dark/light) | index.html | Tokenise everything that isn't a one-off accent. |
-| P1-6 | No JSON-LD beyond what GitHub Pages might infer | All HTML | Even for noindex'd demo, schema preps for future. Organization + WebSite + Grant/GovernmentService per opportunity. |
-| P1-7 | No bilingual hreflang | index.html head | `og:locale:alternate` exists but no `<link rel="alternate" hreflang>`. |
-| P1-8 | No `<picture>`/AVIF/WebP for sector imagery | index.html:14674 | Sector card images load eager-ish via `loading="lazy"` only. |
-| P1-9 | Inline `<script>` in `<head>` doing auth check, blocking render | index.html:7-56 | Pushing TTI later than necessary. Defer non-critical, inline only the auth boot. |
+| # | Issue | Where | Status | Resolution |
+|---|---|---|---|---|
+| P1-1 | `alert()` in feedback form | script.js:119 | ⚠️ moot | **Discovered during the polish pass:** `script.js` is an IIFE that never closes (`(function(){…}` at line 1 has no matching `})();`). `node --check` fails at line 609 with `SyntaxError: Unexpected end of input`. Browsers refuse to execute syntactically invalid scripts, so the `alert()` has never fired in production — the form is bound by the SPA's inline JS in `index.html` instead. P1-1 is therefore moot by observation. The deeper issue (`script.js` is dead code) is captured as N7 below. |
+| P1-2 | 28 inline event handlers (`onclick=`, `onerror=`) | index.html | ⏳ pending | Real risk: tightening CSP requires this. Tracked for a focused refactor session — touches a lot of markup. |
+| P1-3 | No proper loading skeletons | script.js / index.html | ⚠️ partial | Skeleton system shipped in `styles.css` (`.skeleton` + `.skeleton-container` with built-in screen-reader announcement). SPA wiring pending. Demonstrated in `polish/showcase.html`. |
+| P1-4 | 131 `box-shadow:` declarations, hand-tuned | index.html | ⏳ pending | Six-token shadow system shipped in `tokens.css` (Linear-style two-layer). Migration depends on the inline-CSS extraction (P0-2). |
+| P1-5 | 1,089 hex color literals | index.html | ⏳ pending | Same dependency — falls out of P0-2 extraction. |
+| P1-6 | No JSON-LD beyond what GH Pages infers | All HTML | ✅ done | Organization + WebSite + ContactPage on head; per-opportunity `Grant` / `GovernmentService` / `EducationalOccupationalProgram` / `FundingScheme` via `assets/opportunity-schema.js`, wired into `openPanel`/`closePanel`. Graph-linked via `@id`. |
+| P1-7 | No bilingual hreflang | index.html head | ✅ done | `<link rel="alternate" hreflang="{en,ar,x-default}">` on `index.html`. Sitemap also carries `xhtml:link rel="alternate"` for the root. |
+| P1-8 | No `<picture>`/AVIF/WebP for sector imagery | index.html:14674 | ⏳ pending | Performance-only concern; pre-requires a sector-image inventory. |
+| P1-9 | Inline `<script>` in `<head>` doing auth check, blocking render | index.html:7-56 | ⏳ pending | Architectural — the auth check is intentionally synchronous to gate render. Splitting it needs care. |
 
 ### P2 — quality-of-life
 
-| # | Issue | Where | Why it matters |
-|---|---|---|---|
-| P2-1 | Hardcoded Supabase URL/key in two places | index.html:20-21, api/server.js:88-91 | Anon key + RLS is the design, but having it twice in source is a refactor smell. |
-| P2-2 | DOM queries by `aria-label` text | script.js:13-23 | Brittle to copy changes. Use `data-*` hooks for behaviour, keep `aria-label` for users. |
-| P2-3 | `audit-*/` and `enrichment-*/` weren't gitignored | repo root | Fixed in commit `9822564` on this branch. |
-| P2-4 | No `.well-known/security.txt` | repo root | Not strictly required for a demo, but signals seriousness to government auditors. |
-| P2-5 | Logo path falls through to `onerror` swatch fallback when asset missing | index.html:14674, theme manager | Works, but a real `<picture>` with AVIF + low-quality placeholder is the polished move. |
-| P2-6 | No print stylesheet pass beyond a tiny block (lines 21482-21523) | index.html | Government users may print briefs. Bonus polish. |
-| P2-7 | No `prefers-reduced-motion` audit | index.html CSS | 131 box-shadows and `--transition` token need a reduced-motion respect pass. |
+| # | Issue | Where | Status | Resolution |
+|---|---|---|---|---|
+| P2-1 | Hardcoded Supabase URL/key in two places | index.html:20-21, api/server.js:88-91 | ⏳ pending | Anon key is fine (RLS-gated by design); the duplication is the smell. |
+| P2-2 | DOM queries by `aria-label` text | script.js:13-23 | ⏳ pending | Real fragility. Better fix in the same pass that handles P1-2. |
+| P2-3 | `audit-*/` and `enrichment-*/` weren't gitignored | repo root | ✅ done | Commit `1757e64`. |
+| P2-4 | No `.well-known/security.txt` | repo root | ⏳ pending | Cheap to add when a public launch is imminent. |
+| P2-5 | Logo path falls through to `onerror` swatch fallback when asset missing | index.html:14674, theme manager | ⏳ pending | Works today; aesthetic upgrade. |
+| P2-6 | No print stylesheet pass beyond a tiny block | index.html | ⏳ pending | Government users print briefs. Audit-flagged, low risk to add. |
+| P2-7 | No `prefers-reduced-motion` audit | index.html CSS | ✅ done | Token-level coverage: `tokens.css` collapses all durations to 0ms and easings to linear under reduced-motion. `styles.css` skeleton goes static. Inline-CSS pieces in `index.html` still need a sweep — falls out of P0-2. |
+
+### Issues found AFTER the initial audit
+
+| # | Issue | Where | Status | Resolution |
+|---|---|---|---|---|
+| N1 | `--text-faint` token failed WCAG 2.1 AA contrast | tokens.css | ✅ done | Light bumped from `#a1a1aa` (2.56:1) to `#71717a` (4.83:1); dark from `#5b6480` (3.14:1) to `#7c89ab` (5.28:1). Probed via in-browser sRGB→linear-light calc. |
+| N2 | "Unlock Saudi Arabia's investment landscape" in login.html — forbidden phrasing per BRAND.md | login.html | ✅ done | Rewritten to "Every Saudi grant, in one place." |
+| N3 | 🌐 emoji on language toggle violates BRAND.md no-emoji rule | login.html | ✅ done | Replaced with inline SVG globe. |
+| N4 | "Message sent!" + filler thanks copy on contact form | contact.html | ✅ done | Tightened to BRAND.md success pattern ("Message sent." + concrete SLA). |
+| N5 | `sitemap.xml` missed the showcase page and lacked `xhtml:link` alternates | sitemap.xml | ✅ done | Showcase added; root entry now carries hreflang alternates. |
+| N6 | CDN scripts have no SRI hashes | index.html | ⏳ pending | Hashes need real bytes at deploy time. Captured as a step in `polish/DEPLOY_CHECKLIST.md`. |
+| N7 | `script.js` is dead code (IIFE never closed, syntax-errors at line 609, never executes in browsers) | script.js | ⏳ decision-needed | The file has been unparsable since 2024 per `git log`. Production behaviour comes entirely from `index.html`'s inline JS. Two options: **(a)** close the IIFE and dedupe whatever it tries to bind against the SPA's existing handlers; **(b)** delete the file and the `<script src="script.js">` reference in `index.html`. (a) is risky without behind-auth testing; (b) is cleaner but needs a quick code-review of what script.js _intended_ to provide vs what the SPA already does. |
 
 ---
 

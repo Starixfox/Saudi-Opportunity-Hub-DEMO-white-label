@@ -296,6 +296,14 @@ p + p, ul + p, p + ul { margin-top: var(--space-3); }
 
 /* ---------------------------------------------------------------------------
    Loading skeleton
+   ----------------------------------------------------------------------------
+   To announce loading state to screen readers, wrap the skeleton block in:
+     <div role="status" aria-live="polite" aria-busy="true">
+       <span class="sr-only">Loading opportunities</span>
+       <div class="skeleton">…</div>
+     </div>
+   …and when content arrives, set aria-busy="false" and replace the block.
+   Or use the .skeleton-container helper below which bakes those attributes in.
 --------------------------------------------------------------------------- */
 
 .skeleton {
@@ -310,6 +318,25 @@ p + p, ul + p, p + ul { margin-top: var(--space-3); }
   border-radius: var(--radius-sm);
   color: transparent;
   user-select: none;
+}
+
+/* Drop-in container for skeleton groups. JS sets aria-busy="false" + replaces
+   the contents when real data arrives — screen readers announce both states. */
+.skeleton-container {
+  position: relative;
+}
+.skeleton-container[aria-busy="true"]::before {
+  /* Visually-hidden announcement: read by screen readers only. */
+  content: attr(data-loading-message);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 @keyframes skeleton-shimmer {
