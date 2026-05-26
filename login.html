@@ -301,29 +301,13 @@
       animation-duration: 1150ms;
     }
 
-    /* Hold-then-swap: the default cross-fade made the panels look like
-       they teleported with a soft blur between positions. Holding the
-       OLD layer at full opacity until 75% of the slide is done — then
-       quickly handing off to the NEW layer at 80%+ — lets you actually
-       see the panel (with its three holes) physically traverse from
-       one column to the other. The group animation handles the spatial
-       interpolation; these keyframes just control when the swap occurs. */
-    @keyframes oh-hold-then-fade-out {
-      0%, 75% { opacity: 1; }
-      100%    { opacity: 0; }
-    }
-    @keyframes oh-wait-then-fade-in {
-      0%, 75% { opacity: 0; }
-      100%    { opacity: 1; }
-    }
-    ::view-transition-old(brand-panel),
-    ::view-transition-old(form-panel) {
-      animation: 1500ms cubic-bezier(0.19, 1, 0.22, 1) both oh-hold-then-fade-out;
-    }
-    ::view-transition-new(brand-panel),
-    ::view-transition-new(form-panel) {
-      animation: 1500ms cubic-bezier(0.19, 1, 0.22, 1) both oh-wait-then-fade-in;
-    }
+    /* Hold-then-swap keyframes removed: they created two discrete
+       phases (75% slide-then-fade) that read as a non-smooth handoff.
+       Going back to the browser's default fade-in/fade-out across the
+       full 1500ms — opacity, position, and content cross-fade all
+       progress together at the same easing curve. With the panel mask
+       gone (so circles cover the full panel surface) the slide is
+       perceptible throughout without needing the synthetic hold. */
 
     /* Reduced-motion: skip the named transitions so the browser falls back
        to an instant swap. Honours the user's OS preference. */
