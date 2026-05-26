@@ -18944,17 +18944,18 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
     var diff = Date.now() - new Date(isoStr).getTime();
     var mins = Math.floor(diff / 60000);
     if (mins < 1) return ar ? 'للتو' : 'just now';
-    /* Numeric values + time units always render in English regardless of
-       UI language, per the i18n policy: data labels / numbers / units
-       stay Latin so they're legible to all users. Only the pure UI text
-       ("just now") translates. */
-    if (mins < 60) return mins + 'm ago';
+    /* In AR mode use the "منذ N <unit>" format with short Arabic unit
+       letters (د/س/ي/ش), matching the relative-time conventions used
+       elsewhere in the app. Pre-fix the entire string was Latin-only
+       per an older i18n policy that's been overridden — Arabic users
+       want a fully-localized timestamp. */
+    if (mins < 60) return ar ? ('منذ ' + mins + ' د') : (mins + 'm ago');
     var hrs = Math.floor(mins / 60);
-    if (hrs < 24)  return hrs + 'h ago';
+    if (hrs < 24)  return ar ? ('منذ ' + hrs + ' س') : (hrs + 'h ago');
     var days = Math.floor(hrs / 24);
-    if (days < 30) return days + 'd ago';
+    if (days < 30) return ar ? ('منذ ' + days + ' ي') : (days + 'd ago');
     var months = Math.floor(days / 30);
-    return months + 'mo ago';
+    return ar ? ('منذ ' + months + ' ش') : (months + 'mo ago');
   }
   function uid() {
     return Math.random().toString(36).slice(2, 10);
