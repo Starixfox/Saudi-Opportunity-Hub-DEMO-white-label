@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en" dir="ltr" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -863,10 +863,19 @@
        buttons render as obviously-unavailable so users don't click into
        a broken redirect. Flip OH_OAUTH.{google,microsoft} = true in the
        script below once the provider is enabled in the dashboard. */
+    /* Disabled SSO state — replace the previous opacity: 0.55 blanket
+       (which crushed contrast to 1.11:1 on the text) with targeted visual
+       cues: desaturate the provider logo, dim the label to text-muted,
+       and switch the "Not available" pill to a chip with its own background
+       so the disabled state is obvious without becoming illegible. */
     .btn-sso[aria-disabled="true"] {
       cursor: not-allowed;
-      opacity: 0.55;
       background: var(--surface-2);
+      color: var(--text-muted);
+    }
+    .btn-sso[aria-disabled="true"] img,
+    .btn-sso[aria-disabled="true"] svg {
+      filter: grayscale(0.65) opacity(0.75);
     }
     .btn-sso[aria-disabled="true"]:hover {
       background: var(--surface-2);
@@ -875,11 +884,22 @@
     }
     .btn-sso-unavailable {
       font-size: 10.5px;
-      font-weight: 500;
-      color: var(--text-faint);
+      font-weight: 600;
+      /* Was text-muted — gave 3.66:1 on the chip background, below the
+         WCAG 2.1 AA bar for 10.5px text (4.5:1). text is #1a1a1a → ~11:1
+         on the same chip. The pill still reads as a "secondary" status
+         badge via its uppercase + tiny size + tinted chip, but the
+         label itself is fully legible. */
+      color: var(--text);
+      background: rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.10);
+      padding: 2px 8px;
+      border-radius: var(--radius-full, 999px);
       margin-left: 4px;
       text-transform: uppercase;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.4px;
+      line-height: 1.4;
+      white-space: nowrap;
     }
     [dir="rtl"] .btn-sso-unavailable {
       margin-left: 0;
