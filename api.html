@@ -12,16 +12,19 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23006C35'/><path d='M32 14a18 18 0 1 0 18 18 18 18 0 0 0-18-18zm0 6a12 12 0 1 1-12 12 12 12 0 0 1 12-12z' fill='%23fdf8f2'/><circle cx='32' cy='32' r='4' fill='%23C9A66B'/></svg>" />
   <title>API Access — Saudi Opportunity Hub</title>
 
-  <link rel="preconnect" href="https://api.fontshare.com" />
-  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap" rel="stylesheet" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- ─── Polish pass: consolidated design tokens (single source of truth) ─── -->
+  <link rel="stylesheet" href="assets/tokens.css" />
 
   <style>
     /* ── TOKENS ──────────────────────────────────── */
     :root {
-      --font-display: 'Satoshi', 'Inter', system-ui, sans-serif;
+      --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
       --font-body:    'Inter', system-ui, sans-serif;
+      --font-arabic:  'IBM Plex Sans Arabic', system-ui, sans-serif;
       --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
 
       --space-1:  0.25rem;  --space-2:  0.5rem;   --space-3:  0.75rem;
@@ -49,10 +52,11 @@
       --text:             #1a1f36;
       --text-muted:       #64748b;
       --text-faint:       #94a3b8;
-      --green:            #007a3d;
-      --green-hover:      #006232;
-      --green-dim:        #e0f5ec;
-      --green-glow:       rgba(0,122,61,0.10);
+      /* Saudi green — aligned to canonical brand colour (#006C35). */
+      --green:            #006c35;
+      --green-hover:      #005228;
+      --green-dim:        #e8f5ed;
+      --green-glow:       rgba(0,108,53,0.10);
       --gold:             #b45309;
       --gold-dim:         #fef3c7;
       --code-bg:          #0f1420;
