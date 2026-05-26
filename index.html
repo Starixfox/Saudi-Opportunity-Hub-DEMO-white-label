@@ -8795,22 +8795,25 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 .ob-progress-step {
   width: 24px; height: 24px;
   border-radius: 50%;
-  background: var(--surface-2, #f1f5f9);
-  border: 2px solid var(--border, #e2e8f0);
+  /* Onboarding modal is #0d1117 — the previous "f1f5f9 on a light page"
+     defaults were invisible here. Use a subtle white tint instead so
+     untouched steps still read as a pill on the dark background. */
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.18);
   display: flex; align-items: center; justify-content: center;
-  font-size: 10px; font-weight: 700;
-  color: var(--text-faint, #94a3b8);
+  font-size: 11px; font-weight: 700;
+  color: rgba(255,255,255,0.85);
   transition: all 0.25s ease;
 }
 .ob-progress-step.active {
   background: var(--green, #006C35);
   border-color: var(--green, #006C35);
-  color: #fff;
+  color: #ffffff;
 }
 .ob-progress-step.done {
   background: var(--green, #006C35);
   border-color: var(--green, #006C35);
-  color: #fff;
+  color: #ffffff;
   font-size: 0;
 }
 .ob-progress-step.done::before { content: '✓'; font-size: 11px; }
@@ -8932,12 +8935,15 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 }
 .ob-ready-title {
   font-size: 20px; font-weight: 800;
-  color: var(--text, #1a1f36);
+  /* Onboarding modal background is #0d1117 — always use light text
+     regardless of the app theme (var(--text) is dark in light mode). */
+  color: #ffffff;
   margin-bottom: 8px;
 }
 .ob-ready-sub {
   font-size: 13px;
-  color: var(--text-muted, #64748b);
+  /* Sub-headline — slightly dimmed white so the title still stands out. */
+  color: rgba(255,255,255,0.78);
   max-width: 36ch;
   margin: 0 auto 20px;
   line-height: 1.6;
