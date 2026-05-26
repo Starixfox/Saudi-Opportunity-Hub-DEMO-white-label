@@ -159,6 +159,9 @@ p + p, ul + p, p + ul { margin-top: var(--space-3); }
   justify-content: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-5);
+  /* WCAG 2.5.5 / Apple HIG / Material — interactive targets ≥44×44 by default.
+     Compact variants (.btn-sm, .theme-toggle-group .btn) explicitly opt out. */
+  min-height: 44px;
   font-family: var(--font-sans);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
@@ -225,7 +228,9 @@ p + p, ul + p, p + ul { margin-top: var(--space-3); }
 .btn-quiet:hover { background: var(--accent-softer); color: var(--accent-hover); }
 
 /* Sizing variants */
-.btn-sm { padding: var(--space-2) var(--space-3); font-size: var(--text-xs); }
+/* Compact opt-out — explicitly under the 44px bar for dense contexts
+   (filter rails, toolbars, micro-actions inside dense rows). */
+.btn-sm { padding: var(--space-2) var(--space-3); font-size: var(--text-xs); min-height: 32px; }
 .btn-lg { padding: var(--space-4) var(--space-6); font-size: var(--text-base); }
 
 /* ---------------------------------------------------------------------------

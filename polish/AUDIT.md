@@ -14,7 +14,7 @@ credible to Saudi government and Vision 2030 audiences."
 
 **Open tracked follow-ups** (created 2026-05-26 after Round 6):
 
-- [#13 — bump .btn min-height to 44px (WCAG 2.5.5 best-practice)](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/13) — runnable via [`scripts/smoke.spec.mjs`](../scripts/smoke.spec.mjs) (Playwright visual regression)
+- [#13 — bump .btn min-height to 44px (WCAG 2.5.5 best-practice)](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/13) — ✅ **shipped**: `.btn` base set to `min-height: 44px` in `assets/styles.css`; `.btn-sm` explicit opt-out at 32px for dense contexts; `.home-qa-btn` bumped 40→44 in `polish-overrides.css`. Verified via preview-tools sweep: showcase has 0 controls under 24px (AA) and 10 controls now ≥44px (best-practice); 404 buttons both at 44px; login `.btn-submit` 74px / `.auth-tab` 63px (unchanged — separate selectors). The 8 controls between 24-43px are intentional opt-outs (`.btn-sm` toggles + doc footer mini-links).
 - [#14 — tighten CSP, drop `'unsafe-inline'` from script-src](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/14) — head bootstrap extracted to [`assets/auth-bootstrap.js`](../assets/auth-bootstrap.js) (commit-pending); SPA-body inline scripts still need to move
 - [#15 — AVIF/WebP `<picture>` for sector card imagery](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/15) — runnable via [`scripts/build-sector-images.mjs`](../scripts/build-sector-images.mjs)
 - [#16 — behind-auth smoke test of `data-action` conversions](https://github.com/Starixfox/Saudi-Opportunity-Hub-DEMO-white-label/issues/16) — runnable via [`scripts/smoke.spec.mjs`](../scripts/smoke.spec.mjs)
