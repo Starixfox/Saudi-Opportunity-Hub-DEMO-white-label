@@ -1,10 +1,12 @@
 {
+  "id": "/Saudi-Opportunity-Hub-DEMO-white-label/",
   "name": "Saudi Opportunity Hub",
   "short_name": "Opportunity Hub",
-  "description": "Discover grants, tenders, accelerators, fellowships, and investment programs across Saudi Arabia, the GCC, and global initiatives.",
+  "description": "Grants, tenders, accelerators, fellowships, and investment programmes across Saudi Arabia, the GCC, and globally. Aligned with Vision 2030.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
   "orientation": "any",
   "background_color": "#0a0d14",
   "theme_color": "#006C35",
@@ -13,16 +15,72 @@
   "categories": ["business", "finance", "productivity", "education"],
   "icons": [
     {
-      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%23006C35'/><text x='96' y='124' font-family='system-ui,sans-serif' font-size='110' font-weight='700' text-anchor='middle' fill='white'>SH</text></svg>",
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%23006C35'/><path d='M96 42a54 54 0 1 0 54 54 54 54 0 0 0-54-54zm0 18a36 36 0 1 1-36 36 36 36 0 0 1 36-36z' fill='%23fdf8f2'/><circle cx='96' cy='96' r='12' fill='%23C9A66B'/></svg>",
       "sizes": "192x192",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%23006C35'/><text x='256' y='332' font-family='system-ui,sans-serif' font-size='290' font-weight='700' text-anchor='middle' fill='white'>SH</text></svg>",
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%23006C35'/><path d='M256 112a144 144 0 1 0 144 144 144 144 0 0 0-144-144zm0 48a96 96 0 1 1-96 96 96 96 0 0 1 96-96z' fill='%23fdf8f2'/><circle cx='256' cy='256' r='32' fill='%23C9A66B'/></svg>",
       "sizes": "512x512",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='38' fill='%23006C35'/><path d='M96 56a40 40 0 1 0 40 40 40 40 0 0 0-40-40z' fill='%23fdf8f2'/><circle cx='96' cy='96' r='10' fill='%23C9A66B'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%23006C35'/><path d='M256 144a112 112 0 1 0 112 112 112 112 0 0 0-112-112z' fill='%23fdf8f2'/><circle cx='256' cy='256' r='28' fill='%23C9A66B'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Opportunities",
+      "short_name": "Opportunities",
+      "description": "Browse every open grant, tender, accelerator, and fellowship.",
+      "url": "./index.html#opportunities",
+      "icons": [
+        {
+          "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23006C35' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/><rect width='8' height='4' x='8' y='2' rx='1' ry='1'/></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "New this week",
+      "short_name": "New",
+      "description": "Opportunities added in the past 7 days.",
+      "url": "./index.html#opportunities?new=this-week"
+    },
+    {
+      "name": "Saved",
+      "short_name": "Saved",
+      "description": "Your watchlist of saved opportunities.",
+      "url": "./index.html#saved"
+    },
+    {
+      "name": "Analytics",
+      "short_name": "Analytics",
+      "description": "Sector and status breakdowns of the dataset.",
+      "url": "./index.html#dashboard"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "polish/showcase.html",
+      "sizes": "1280x720",
+      "type": "text/html",
+      "label": "Design-system showcase",
+      "form_factor": "wide"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }

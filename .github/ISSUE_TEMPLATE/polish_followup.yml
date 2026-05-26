@@ -1,0 +1,57 @@
+name: Polish-pass follow-up
+description: An item flagged in polish/AUDIT.md that someone is picking up.
+title: "[Polish] "
+labels: ["polish"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this when you're claiming an item from
+        [polish/AUDIT.md](../blob/main/polish/AUDIT.md) or extending the
+        polish pass. For brand-new product features use the bug report or
+        a plain blank issue.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Which audit row, or which surface is this addressing?
+      placeholder: |
+        polish/AUDIT.md → P1-2 (28 inline event handlers). The
+        template-injected onclicks in script.js:5673 still need to move.
+    validations:
+      required: true
+
+  - type: textarea
+    id: plan
+    attributes:
+      label: Plan
+      description: What's the proposed change?
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - Public page (no auth)
+        - SPA dashboard (behind auth)
+        - Token / design-system level (affects everything)
+        - Build tooling / CI
+        - Docs only
+    validations:
+      required: true
+
+  - type: input
+    id: blocks
+    attributes:
+      label: What needs to be unblocked first (if anything)
+      placeholder: "Behind-auth visual sweep, image-processing toolchain, etc."
+
+  - type: textarea
+    id: success
+    attributes:
+      label: Success criteria
+      placeholder: |
+        - polish/AUDIT.md row updates to ✅ done
+        - polish-quality-gate CI stays green
+        - No visual regression in Lighthouse against polish/lighthouse/login.report.json

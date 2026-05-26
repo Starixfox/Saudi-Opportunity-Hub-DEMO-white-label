@@ -583,3 +583,317 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
     transition: none !important;
   }
 }
+
+/* ============================================================================
+   SPA — additional views (Analytics, Opportunities listing, Sectors, About,
+   Saved). Same polish vocabulary as the home dashboard: hover lifts, accent
+   accents on hover, refined typography, accent-glow focus rings.
+============================================================================ */
+
+/* ───────────────────────────────────────────────── ANALYTICS — KPI CARDS */
+
+.kpi-grid {
+  gap: 14px;
+}
+
+.kpi-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 22px 24px 20px;
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    box-shadow 220ms cubic-bezier(0.16, 1, 0.30, 1),
+    border-color 220ms cubic-bezier(0.16, 1, 0.30, 1),
+    transform 220ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 220ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.06),
+    0 4px 8px rgba(15, 23, 42, 0.04);
+}
+.kpi-card:hover::before { opacity: 1; }
+.kpi-value {
+  font-family: var(--font-display);
+  font-size: clamp(1.875rem, 1.4rem + 1.2vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.kpi-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ───────────────────────────────────────────────── ANALYTICS — CHART CARDS */
+
+.chart-card {
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition:
+    box-shadow 220ms cubic-bezier(0.16, 1, 0.30, 1),
+    border-color 220ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+.chart-card:hover {
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.06),
+    0 4px 8px rgba(15, 23, 42, 0.04);
+}
+.chart-grid {
+  gap: 16px;
+}
+
+/* ─────────────────────────────────────── OPPORTUNITIES — FILTER SIDEBAR */
+
+.filter-bar {
+  padding: 18px 20px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.filter-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.filter-input,
+.filter-select {
+  transition:
+    border-color 160ms cubic-bezier(0.16, 1, 0.30, 1),
+    box-shadow 220ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+.filter-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow, rgba(0, 108, 53, 0.20));
+}
+
+/* ─────────────────────────────────────── OPPORTUNITIES — LISTING CARDS */
+
+.opp-card-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.opp-card-sponsor {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.opp-card-desc {
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Type / status chips inside opp cards */
+.opp-card-chip {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  transition: background-color 160ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+
+/* Save / bookmark / compare action buttons on opp cards */
+.opp-card-action-btn,
+.opp-card-save-btn,
+.card-bookmark-btn {
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.30, 1),
+    color 160ms cubic-bezier(0.16, 1, 0.30, 1),
+    transform 160ms cubic-bezier(0.16, 1, 0.30, 1),
+    box-shadow 220ms cubic-bezier(0.16, 1, 0.30, 1);
+  border-radius: var(--radius-md);
+}
+.opp-card-action-btn:hover,
+.opp-card-save-btn:hover,
+.card-bookmark-btn:hover {
+  background: var(--accent-soft, var(--accent-light, rgba(0,108,53,0.10)));
+  color: var(--accent);
+  transform: scale(1.04);
+}
+.opp-card-action-btn:focus-visible,
+.opp-card-save-btn:focus-visible,
+.card-bookmark-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-glow, rgba(0, 108, 53, 0.25));
+}
+
+.opp-card-stats {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+}
+.opp-card-stat-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─────────────────────────────────────────────── ABOUT / WHITE-LABEL VIEW */
+
+.about-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: var(--on-accent, #fff);
+  padding: 12px 22px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.30, 1),
+    transform 160ms cubic-bezier(0.16, 1, 0.30, 1),
+    box-shadow 220ms cubic-bezier(0.16, 1, 0.30, 1);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.10),
+    0 4px 12px var(--accent-glow, rgba(0, 108, 53, 0.20));
+}
+.about-cta:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.12),
+    0 8px 20px var(--accent-glow, rgba(0, 108, 53, 0.30));
+}
+
+.about-meta-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--divider, var(--border));
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.about-meta-label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.about-meta-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+}
+
+.about-wl-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  transition:
+    border-color 220ms cubic-bezier(0.16, 1, 0.30, 1),
+    transform 220ms cubic-bezier(0.16, 1, 0.30, 1),
+    box-shadow 220ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+.about-wl-item:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.06),
+    0 4px 8px rgba(15, 23, 42, 0.04);
+}
+
+/* ───────────────────────────────────────────────────────── SAVED VIEW */
+
+.saved-empty {
+  text-align: center;
+  padding: 48px 24px;
+  background: var(--surface);
+  border: 1px dashed var(--border-strong, var(--border));
+  border-radius: var(--radius-xl);
+  color: var(--text-muted);
+}
+.saved-workspace-btn {
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.30, 1),
+    color 160ms cubic-bezier(0.16, 1, 0.30, 1),
+    transform 160ms cubic-bezier(0.16, 1, 0.30, 1),
+    box-shadow 220ms cubic-bezier(0.16, 1, 0.30, 1);
+}
+.saved-workspace-btn:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 12px var(--accent-glow, rgba(0, 108, 53, 0.20));
+}
+
+/* ────────────────────────────────────────── reduced-motion · SPA views */
+
+@media (prefers-reduced-motion: reduce) {
+  .kpi-card, .kpi-card:hover, .kpi-card::before,
+  .chart-card, .chart-card:hover,
+  .filter-input, .filter-select,
+  .opp-card-action-btn, .opp-card-save-btn, .card-bookmark-btn,
+  .opp-card-action-btn:hover, .opp-card-save-btn:hover, .card-bookmark-btn:hover,
+  .about-cta, .about-cta:hover,
+  .about-wl-item, .about-wl-item:hover,
+  .saved-workspace-btn, .saved-workspace-btn:hover {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ============================================================================
+   VIEW TRANSITIONS API
+   ----------------------------------------------------------------------------
+   Modern browsers (Chrome 111+, Edge 111+, Safari 18+) support smooth page-to-
+   page transitions via the View Transitions API. We opt-in here for the SPA
+   hash-route changes — no JS required if browsers support cross-document
+   transitions; for older Chrome the @starting-style fallback provides a
+   plain fade. Browsers that don't recognise the property simply ignore it.
+============================================================================ */
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 280ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.30, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0ms !important;
+  }
+}
