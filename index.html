@@ -4134,6 +4134,22 @@ body.page-entering {
 }
 [data-theme="light"] .ws-panel { background: #fff; box-shadow: -4px 0 20px rgba(0,0,0,0.08); }
 
+/* RTL: sidebar sits on the physical right in Arabic mode, so the
+   workspace panel — which originally also lived on the right
+   (right:0 + translateX(100%)) — overlapped it and visually sat
+   "under the sidebar". Flip the panel to the LEFT edge instead so
+   the two surfaces don't collide. Mirrored shadow and border too. */
+[dir="rtl"] .ws-panel {
+  right: auto;
+  left: 0;
+  border-left: 1px solid var(--border);
+  border-right: none;
+  transform: translateX(-100%);
+  box-shadow: 8px 0 32px rgba(0,0,0,0.2);
+}
+[dir="rtl"] .ws-panel.open { transform: translateX(0); }
+[dir="rtl"][data-theme="light"] .ws-panel { box-shadow: 4px 0 20px rgba(0,0,0,0.08); }
+
 /* ── SEARCH SAVE BUTTON ─────────────────────────────────── */
 .save-search-btn {
   display: inline-flex;
