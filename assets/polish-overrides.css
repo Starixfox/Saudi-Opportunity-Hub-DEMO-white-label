@@ -1101,7 +1101,7 @@ html[data-theme="dark"] .app-tb-user:hover {
 }
 
 html[data-theme="dark"] .app-nav-item {
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(255, 255, 255, 0.80);
 }
 html[data-theme="dark"] .app-nav-item:hover {
   background: rgba(255, 255, 255, 0.06);
@@ -1126,7 +1126,7 @@ html[data-theme="dark"] .home-greeting-badge {
 }
 html[data-theme="dark"] .home-title { color: #ffffff; }
 html[data-theme="dark"] .home-title span { color: var(--accent); }
-html[data-theme="dark"] .home-sub { color: rgba(255, 255, 255, 0.65); }
+html[data-theme="dark"] .home-sub { color: rgba(255, 255, 255, 0.80); }
 
 /* Quick-action chips — glass on dark */
 html[data-theme="dark"] .home-qa-btn {
@@ -1158,7 +1158,7 @@ html[data-theme="dark"] .home-stat:hover {
     0 4px 8px rgba(0, 0, 0, 0.20);
 }
 html[data-theme="dark"] .home-stat-val { color: #ffffff; }
-html[data-theme="dark"] .home-stat-lbl { color: rgba(255, 255, 255, 0.60); }
+html[data-theme="dark"] .home-stat-lbl { color: rgba(255, 255, 255, 0.78); }
 
 /* .home-card bg/border/blur live in the consolidated card recipe. */
 html[data-theme="dark"] .home-card-hdr {
@@ -1170,8 +1170,8 @@ html[data-theme="dark"] .home-card-badge { color: rgba(255, 255, 255, 0.75); }
 
 /* .kpi-card + .chart-card bg/border/blur live in the consolidated card recipe. */
 html[data-theme="dark"] .kpi-value { color: #ffffff; }
-html[data-theme="dark"] .kpi-label { color: rgba(255, 255, 255, 0.65); }
-html[data-theme="dark"] .kpi-hint  { color: rgba(255, 255, 255, 0.50); }
+html[data-theme="dark"] .kpi-label { color: rgba(255, 255, 255, 0.80); }
+html[data-theme="dark"] .kpi-hint  { color: rgba(255, 255, 255, 0.70); }
 
 /* ──────────────────────────────────────────────────── Opportunity cards */
 
@@ -1191,7 +1191,7 @@ html[data-theme="dark"] .opp-card-title,
 html[data-theme="dark"] .opp-card-desc { color: rgba(255, 255, 255, 0.92); }
 html[data-theme="dark"] .opp-card-sponsor,
 html[data-theme="dark"] .opp-card-meta,
-html[data-theme="dark"] .opp-card-stats { color: rgba(255, 255, 255, 0.65); }
+html[data-theme="dark"] .opp-card-stats { color: rgba(255, 255, 255, 0.80); }
 
 /* ─────────────────────────────────────────────────────── Filter bar */
 
@@ -1202,14 +1202,14 @@ html[data-theme="dark"] .filter-select {
   border: 1px solid rgba(255, 255, 255, 0.14);
   color: #ffffff;
 }
-html[data-theme="dark"] .filter-input::placeholder { color: rgba(255, 255, 255, 0.40); }
+html[data-theme="dark"] .filter-input::placeholder { color: rgba(255, 255, 255, 0.65); }
 html[data-theme="dark"] .filter-input:focus,
 html[data-theme="dark"] .filter-select:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-glow, rgba(255, 255, 255, 0.15));
 }
-html[data-theme="dark"] .filter-label { color: rgba(255, 255, 255, 0.70); }
+html[data-theme="dark"] .filter-label { color: rgba(255, 255, 255, 0.85); }
 
 /* ─────────────────────────────────────────────────────── Modals + panels */
 
@@ -1334,7 +1334,7 @@ html[data-theme="dark"] select {
 }
 html[data-theme="dark"] input::placeholder,
 html[data-theme="dark"] textarea::placeholder {
-  color: rgba(255, 255, 255, 0.40);
+  color: rgba(255, 255, 255, 0.65);
 }
 html[data-theme="dark"] input:focus,
 html[data-theme="dark"] textarea:focus,
@@ -1396,7 +1396,7 @@ html[data-theme="dark"] body.page-entering {
 html[data-theme="dark"] .liv2-kpi__value { color: #ffffff; }
 html[data-theme="dark"] .liv2-kpi__label,
 html[data-theme="dark"] .liv2-chart-card__sub,
-html[data-theme="dark"] .liv2-insight-text { color: rgba(255, 255, 255, 0.65); }
+html[data-theme="dark"] .liv2-insight-text { color: rgba(255, 255, 255, 0.80); }
 html[data-theme="dark"] .liv2-chart-card__title { color: rgba(255, 255, 255, 0.95); }
 
 /* Insight cards — bg/border/blur in the consolidated card recipe.
@@ -1406,7 +1406,7 @@ html[data-theme="dark"] .insight-block__title,
 html[data-theme="dark"] .market-stat__value { color: rgba(255, 255, 255, 0.95); }
 html[data-theme="dark"] .insight-card-sub,
 html[data-theme="dark"] .market-stat__label,
-html[data-theme="dark"] .market-footnote { color: rgba(255, 255, 255, 0.60); }
+html[data-theme="dark"] .market-footnote { color: rgba(255, 255, 255, 0.78); }
 
 /* Workspace bar + recently-added widget — bg/border/blur in the
    consolidated card recipe. Inner header divider stays here. */
@@ -1420,14 +1420,14 @@ html[data-theme="dark"] .widget-badge { color: rgba(255, 255, 255, 0.92); }
 /* .la-card bg/border/blur in the consolidated card recipe. */
 html[data-theme="dark"] .la-card-title  { color: rgba(255, 255, 255, 0.95); }
 html[data-theme="dark"] .la-card-desc,
-html[data-theme="dark"] .la-card-meta   { color: rgba(255, 255, 255, 0.65); }
+html[data-theme="dark"] .la-card-meta   { color: rgba(255, 255, 255, 0.80); }
 
 /* Audience / feedback / who cards — bg in canonical recipe. */
 html[data-theme="dark"] .audience-role,
 html[data-theme="dark"] .feedback-banner-text,
 html[data-theme="dark"] .who-role { color: rgba(255, 255, 255, 0.95); }
 html[data-theme="dark"] .audience-desc,
-html[data-theme="dark"] .who-desc { color: rgba(255, 255, 255, 0.65); }
+html[data-theme="dark"] .who-desc { color: rgba(255, 255, 255, 0.80); }
 
 /* Detail panel (opportunity drawer) inner surfaces */
 html[data-theme="dark"] .panel-trust-bar,
@@ -1439,7 +1439,7 @@ html[data-theme="dark"] .panel-title,
 html[data-theme="dark"] .panel-field-value,
 html[data-theme="dark"] .panel-description { color: rgba(255, 255, 255, 0.92); }
 html[data-theme="dark"] .panel-field-label,
-html[data-theme="dark"] .panel-trust-label { color: rgba(255, 255, 255, 0.60); }
+html[data-theme="dark"] .panel-trust-label { color: rgba(255, 255, 255, 0.78); }
 
 /* Tooltip boxes + active filter chips */
 html[data-theme="dark"] .tooltip-box {
@@ -1481,7 +1481,7 @@ html[data-theme="dark"] .sh-footer {
 html[data-theme="dark"] .sh-footer-brand-mark,
 html[data-theme="dark"] .sh-footer-cta { color: rgba(255, 255, 255, 0.92); }
 html[data-theme="dark"] .sh-footer-bottom-links a,
-html[data-theme="dark"] .sh-footer-brand-credit { color: rgba(255, 255, 255, 0.55); }
+html[data-theme="dark"] .sh-footer-brand-credit { color: rgba(255, 255, 255, 0.72); }
 
 /* Theme manager cards — bg/border/blur in the canonical recipe. */
 html[data-theme="dark"] .oh-tm-card--active {
@@ -1522,7 +1522,7 @@ html[data-theme="dark"] .settings-row {
 }
 html[data-theme="dark"] .settings-section-title,
 html[data-theme="dark"] .settings-label { color: rgba(255, 255, 255, 0.92); }
-html[data-theme="dark"] .settings-sublabel { color: rgba(255, 255, 255, 0.55); }
+html[data-theme="dark"] .settings-sublabel { color: rgba(255, 255, 255, 0.72); }
 html[data-theme="dark"] .settings-select {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -1741,7 +1741,7 @@ html[data-theme="dark"] .ws-empty-state,
 html[data-theme="dark"] .ob-empty {
   background: rgba(255, 255, 255, 0.03);
   border: 1px dashed rgba(255, 255, 255, 0.14);
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(255, 255, 255, 0.80);
 }
 
 /* Sub-sections inside the detail panel (mashrabiya pseudo-children) */

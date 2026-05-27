@@ -132,9 +132,11 @@
   --divider:          #161d30;
 
   --text:             #e8eaf2;
-  --text-muted:       #7c89ab;
-  --text-2:           #7c89ab;
-  --text-faint:       #3f4a68;
+  /* Bumped for legibility: muted #7c89ab (5.28:1) → #c4cce0 (11.4:1),
+     faint #3f4a68 (3.14:1, BELOW AA) → #a3aec9 (8.0:1). */
+  --text-muted:       #c4cce0;
+  --text-2:           #c4cce0;
+  --text-faint:       #a3aec9;
   --text-inverse:     #080c14;
 
   /* Brand --green tokens point at gold (user: "all themes should be
@@ -194,9 +196,10 @@
   --divider:          #edf2f7;
 
   --text:             #1a1f36;
-  --text-muted:       #64748b;
-  --text-2:           #64748b;
-  --text-faint:       #94a3b8;
+  /* Light theme — bumped for legibility */
+  --text-muted:       #3f3f46;
+  --text-2:           #3f3f46;
+  --text-faint:       #52525b;
   --text-inverse:     #f8fafc;
 
   /* Light-theme --green tokens point at gold for parity with the dark
@@ -2024,18 +2027,18 @@ footer {
 .sh-footer-brand-mark svg { color: var(--accent); }
 .sh-footer-brand-ar {
   font-family: 'Noto Kufi Arabic', sans-serif;
-  font-size: 14px; color: rgba(255,255,255,0.55); direction: rtl;
+  font-size: 14px; color: rgba(255,255,255,0.72); direction: rtl;
 }
 .sh-footer-brand-tag {
-  font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.55);
+  font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.72);
   max-width: 32ch;
 }
 .sh-footer-brand-credit {
   font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
-  color: rgba(255,255,255,0.4); margin-top: 6px;
+  color: rgba(255,255,255,0.65); margin-top: 6px;
 }
 .sh-footer-brand-credit a {
-  color: rgba(255,255,255,0.7); text-decoration: none;
+  color: rgba(255,255,255,0.85); text-decoration: none;
   border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 1px;
 }
 .sh-footer-brand-credit a:hover { color: #fff; border-bottom-color: var(--accent); }
@@ -2082,7 +2085,7 @@ footer {
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 50%;
-  color: rgba(255,255,255,0.7);
+  color: rgba(255,255,255,0.85);
   transition: all 0.15s ease;
 }
 .sh-footer-social a:hover {
@@ -2096,11 +2099,11 @@ footer {
   align-items: center; justify-content: space-between;
   padding: 22px 0;
   border-top: 1px solid rgba(255,255,255,0.08);
-  font-size: 12px; color: rgba(255,255,255,0.45);
+  font-size: 12px; color: rgba(255,255,255,0.65);
 }
 .sh-footer-bottom-links { display: flex; flex-wrap: wrap; gap: 22px; }
 .sh-footer-bottom-links a {
-  color: rgba(255,255,255,0.55); text-decoration: none;
+  color: rgba(255,255,255,0.72); text-decoration: none;
 }
 .sh-footer-bottom-links a:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
 .sh-footer-demo-pill {
@@ -2309,9 +2312,10 @@ html[data-theme="light"] {
   --divider:          #e8edf5;
 
   --text:             #12243a;
-  --text-muted:       #4a5568;
-  --text-2:           #4a5568;
-  --text-faint:       #8fa0b8;
+  /* IS Light theme — bumped for legibility */
+  --text-muted:       #2d3748;
+  --text-2:           #2d3748;
+  --text-faint:       #4a5568;
   --text-inverse:     #ffffff;
 
   /* Status badges */
@@ -2639,11 +2643,11 @@ footer {
   background: #12243a;
   border-top: 3px solid var(--accent);
 }
-.footer-logo-text { color: rgba(255,255,255,0.6); }
+.footer-logo-text { color: rgba(255,255,255,0.78); }
 .footer-logo-text span { color: #C9A66B; }
-.footer-links a { color: rgba(255,255,255,0.55); }
+.footer-links a { color: rgba(255,255,255,0.72); }
 .footer-links a:hover { color: rgba(255,255,255,0.9); }
-.footer-attribution { color: rgba(255,255,255,0.45); }
+.footer-attribution { color: rgba(255,255,255,0.65); }
 .footer-attribution a { color: #C9A66B; }
 .footer-disclaimer { color: rgba(255,255,255,0.38); border-top-color: rgba(255,255,255,0.1); }
 
@@ -2822,11 +2826,11 @@ body[dir="rtl"] .hero-badge { flex-direction: row-reverse; }
 
 /* IS Footer in dark mode (already dark) */
 [data-theme="dark"] footer { background: #060810; border-top-color: var(--accent); }
-[data-theme="dark"] .footer-logo-text { color: rgba(255,255,255,0.45); }
+[data-theme="dark"] .footer-logo-text { color: rgba(255,255,255,0.65); }
 [data-theme="dark"] .footer-logo-text span { color: #C9A66B; }
 
 /* IS Lang buttons in dark mode */
-[data-theme="dark"] .is-lang-btn { color: rgba(255,255,255,0.7); }
+[data-theme="dark"] .is-lang-btn { color: rgba(255,255,255,0.85); }
 [data-theme="dark"] .is-lang-btn.is-lang-active { color: #C9A66B; }
 [data-theme="dark"] .is-lang-sep { color: rgba(255,255,255,0.3); }
 
@@ -4101,7 +4105,7 @@ body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
 .ob-hero-eyebrow {
   font-size: 10px; font-weight: 800; letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.55);
+  color: rgba(255,255,255,0.72);
   margin-bottom: 12px;
   display: flex; align-items: center; gap: 8px;
 }
@@ -4144,7 +4148,7 @@ body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
 .ob-stat-val span { color: #C9A66B; }
 .ob-stat-lbl {
   font-size: 10px; font-weight: 600;
-  color: rgba(255,255,255,0.45);
+  color: rgba(255,255,255,0.65);
   text-transform: uppercase; letter-spacing: 0.08em;
 }
 
@@ -4160,7 +4164,7 @@ body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
 }
 .ob-about-text {
   font-size: 13px; line-height: 1.65;
-  color: rgba(255,255,255,0.65);
+  color: rgba(255,255,255,0.80);
   margin: 0;
 }
 
@@ -4197,7 +4201,7 @@ body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
   display: block; font-size: 12px; font-weight: 700;
   color: #fff; margin-bottom: 2px;
 }
-.ob-feature-text span { font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.4; }
+.ob-feature-text span { font-size: 11px; color: rgba(255,255,255,0.70); line-height: 1.4; }
 
 /* ── Sector tags ── */
 .ob-sectors {
@@ -4238,7 +4242,7 @@ body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
 .ob-btn-primary:active { transform: none; }
 .ob-btn-skip {
   padding: 13px 18px;
-  background: transparent; color: rgba(255,255,255,0.4);
+  background: transparent; color: rgba(255,255,255,0.65);
   border: 1px solid rgba(255,255,255,0.12); border-radius: 10px;
   font-size: 13px; cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
@@ -8424,7 +8428,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   font-weight: 700;
   /* Form labels sit on the dark onboarding modal (#0d1117), so the
      stock --text-muted token reads too dark. Force a dimmed white. */
-  color: rgba(255,255,255,0.7);
+  color: rgba(255,255,255,0.85);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -8445,7 +8449,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 }
 .ob-modal [style*="color:var(--text-faint)"],
 .ob-modal [style*="color: var(--text-faint)"] {
-  color: rgba(255,255,255,0.55) !important;
+  color: rgba(255,255,255,0.72) !important;
 }
 .ob-form-input {
   padding: 10px 14px;

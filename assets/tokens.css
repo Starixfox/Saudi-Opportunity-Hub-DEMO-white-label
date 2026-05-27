@@ -229,8 +229,8 @@
      micro-labels and captions that use it (.demo-tile-label,
      .opp-card-sponsor, .pair-label) are legible to low-vision readers. */
   --text:              var(--color-neutral-900);   /* 17.72:1 on white */
-  --text-muted:        var(--color-neutral-600);   /*  7.73:1 on white */
-  --text-faint:        var(--color-neutral-500);   /*  4.83:1 on white */
+  --text-muted:        var(--color-neutral-700);   /* 10.31:1 on white — bumped from 600 for readability */
+  --text-faint:        var(--color-neutral-600);   /*  7.73:1 on white — bumped from 500 for readability */
   --text-inverse:      var(--color-neutral-0);
   --text-on-accent:    var(--color-neutral-0);
 
@@ -298,8 +298,8 @@
      --surface (#0f1420). --text-faint was #5b6480 (3.14:1, borderline);
      lifted to #7c89ab (5.28:1) for full AA. */
   --text:              #e8eaf2;                    /* 15.32:1 on #0f1420 */
-  --text-muted:        #9da6bf;                    /*  7.57:1 on #0f1420 */
-  --text-faint:        #7c89ab;                    /*  5.28:1 on #0f1420 */
+  --text-muted:        #c4cce0;                    /* 11.4:1 on #0f1420 — bumped from #9da6bf */
+  --text-faint:        #a3aec9;                    /*  8.0:1 on #0f1420 — bumped from #7c89ab */
   --text-inverse:      var(--color-neutral-900);
   --text-on-accent:    var(--color-neutral-0);
 
@@ -372,8 +372,8 @@
     --bg-app:            #0a0d14;
     --bg-marketing:      #0a0d14;
     --text:              #e8eaf2;
-    --text-muted:        #9da6bf;
-    --text-faint:        #7c89ab;   /* WCAG AA — 5.28:1 on #0f1420 */
+    --text-muted:        #c4cce0;   /* 11.4:1 on #0f1420 — bumped */
+    --text-faint:        #a3aec9;   /*  8.0:1 on #0f1420 — bumped */
     --border:            rgba(255, 255, 255, 0.10);
     --border-strong:     rgba(255, 255, 255, 0.18);
     --accent:            #e3bd6c;
