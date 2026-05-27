@@ -142,11 +142,19 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 700;
-      font-size: 15px;
-      color: #C9A66B;
-      letter-spacing: -0.5px;
       flex-shrink: 0;
+      /* "OH" text replaced by SVG hub mark via ::before. */
+      font-size: 0;
+      color: #C9A66B;
+    }
+    .nav-logo .nav-logo-mark::before {
+      content: '';
+      width: 22px;
+      height: 22px;
+      display: block;
+      background: currentColor;
+      -webkit-mask: url('assets/logo-oh-mark.svg') center/contain no-repeat;
+              mask: url('assets/logo-oh-mark.svg') center/contain no-repeat;
     }
     .nav-logo-text { display: flex; flex-direction: column; line-height: 1.1; }
     .nav-logo-name { font-size: 15px; color: rgba(255, 255, 255, 0.95); letter-spacing: -0.2px; }

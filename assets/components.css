@@ -133,12 +133,23 @@ body.oh-atmospheric::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--color-gold-500);   /* #C9A66B */
-  letter-spacing: -0.5px;
   flex-shrink: 0;
+  /* Hide any literal "OH" text the markup still ships — replaced by the
+     SVG mark below. font-size:0 keeps the box layout intact but renders
+     the text invisible. */
+  font-size: 0;
+  color: var(--color-gold-500);
+}
+.oh-brand-mark::before {
+  content: '';
+  width: 24px;
+  height: 24px;
+  display: block;
+  /* Mask the hub-and-spokes SVG with currentColor so the icon inherits
+     the gold/white context the parent sets. */
+  background: currentColor;
+  -webkit-mask: url('logo-oh-mark.svg') center/contain no-repeat;
+          mask: url('logo-oh-mark.svg') center/contain no-repeat;
 }
 
 .oh-brand-text {

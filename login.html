@@ -432,12 +432,20 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 18px;
-      color: var(--gold);
-      letter-spacing: -0.5px;
       flex-shrink: 0;
+      /* Hide any literal "OH" text the markup still ships — replaced by
+         the SVG mark below. */
+      font-size: 0;
+      color: var(--gold);
+    }
+    .brand-logo-mark::before {
+      content: '';
+      width: 24px;
+      height: 24px;
+      display: block;
+      background: currentColor;
+      -webkit-mask: url('assets/logo-oh-mark.svg') center/contain no-repeat;
+              mask: url('assets/logo-oh-mark.svg') center/contain no-repeat;
     }
 
     .brand-logo-name {
@@ -1603,11 +1611,15 @@
     border: 1.5px solid rgba(201,166,107,.45);
     border-radius: 14px;
     display: flex; align-items: center; justify-content: center;
-    font-family: 'Satoshi', system-ui, sans-serif;
-    font-weight: 700; font-size: 24px;
-    color: #C9A66B;
-    letter-spacing: -0.5px;
-  ">OH</div>
+    flex-shrink: 0;
+  " role="img" aria-label="Opportunity Hub">
+    <span style="
+      width: 34px; height: 34px; display: block;
+      background: #C9A66B;
+      -webkit-mask: url('assets/logo-oh-mark.svg') center/contain no-repeat;
+              mask: url('assets/logo-oh-mark.svg') center/contain no-repeat;
+    "></span>
+  </div>
   <!-- Spinner -->
   <div style="
     width: 32px; height: 32px;
