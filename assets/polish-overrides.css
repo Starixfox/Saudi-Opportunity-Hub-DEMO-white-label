@@ -1297,3 +1297,188 @@ html[data-theme="dark"] *::-webkit-scrollbar-thumb {
 html[data-theme="dark"] *::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.18);
 }
+
+/* ============================================================================
+   GLASS EVERYWHERE — surfaces the earlier rules missed
+   ----------------------------------------------------------------------------
+   The blocks above paint the headline cards (home-greeting, kpi-card,
+   opp-card, modal, panel, sector/saved/about) as glass. Below covers
+   every OTHER surface that legacy-app.css still paints as a solid
+   token-driven box: workspace bar, analytics LIV2 tiles, insight cards,
+   audience/feedback cards, recently-added widget, large-list cards,
+   tooltip boxes, active-chips, footer panels, theme manager cards. All
+   share the same 1px white border + low-alpha white fill + 14-20px
+   backdrop blur so the planet bg can read through every container.
+============================================================================ */
+
+/* Analytics view — LIV2 KPI tiles + chart cards + insight strip */
+html[data-theme="dark"] .liv2-kpi,
+html[data-theme="dark"] .liv2-chart-card,
+html[data-theme="dark"] .liv2-insight-strip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+          backdrop-filter: blur(20px) saturate(150%);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.30);
+}
+html[data-theme="dark"] .liv2-kpi__value { color: #ffffff; }
+html[data-theme="dark"] .liv2-kpi__label,
+html[data-theme="dark"] .liv2-chart-card__sub,
+html[data-theme="dark"] .liv2-insight-text { color: rgba(255, 255, 255, 0.65); }
+html[data-theme="dark"] .liv2-chart-card__title { color: rgba(255, 255, 255, 0.95); }
+
+/* Insight cards (general) — used across home, dashboard, sector views */
+html[data-theme="dark"] .insight-card,
+html[data-theme="dark"] .insight-block,
+html[data-theme="dark"] .market-stat {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+          backdrop-filter: blur(18px) saturate(140%);
+}
+html[data-theme="dark"] .insight-card-title,
+html[data-theme="dark"] .insight-block__title,
+html[data-theme="dark"] .market-stat__value { color: rgba(255, 255, 255, 0.95); }
+html[data-theme="dark"] .insight-card-sub,
+html[data-theme="dark"] .market-stat__label,
+html[data-theme="dark"] .market-footnote { color: rgba(255, 255, 255, 0.60); }
+
+/* Workspace bar (top of every view) + recently-added widget */
+html[data-theme="dark"] .ws-bar,
+html[data-theme="dark"] .recently-added-widget {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+          backdrop-filter: blur(18px) saturate(140%);
+}
+html[data-theme="dark"] .widget-header {
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+html[data-theme="dark"] .widget-title,
+html[data-theme="dark"] .widget-badge { color: rgba(255, 255, 255, 0.92); }
+
+/* La-cards (large recently-added card variant) */
+html[data-theme="dark"] .la-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+          backdrop-filter: blur(16px) saturate(140%);
+}
+html[data-theme="dark"] .la-card-title  { color: rgba(255, 255, 255, 0.95); }
+html[data-theme="dark"] .la-card-desc,
+html[data-theme="dark"] .la-card-meta   { color: rgba(255, 255, 255, 0.65); }
+
+/* Audience cards (About view) */
+html[data-theme="dark"] .audience-card,
+html[data-theme="dark"] .feedback-card,
+html[data-theme="dark"] .who-strip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+          backdrop-filter: blur(16px) saturate(140%);
+}
+html[data-theme="dark"] .audience-role,
+html[data-theme="dark"] .feedback-banner-text,
+html[data-theme="dark"] .who-role { color: rgba(255, 255, 255, 0.95); }
+html[data-theme="dark"] .audience-desc,
+html[data-theme="dark"] .who-desc { color: rgba(255, 255, 255, 0.65); }
+
+/* Detail panel (opportunity drawer) inner surfaces */
+html[data-theme="dark"] .panel-trust-bar,
+html[data-theme="dark"] .panel-sector-context {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+html[data-theme="dark"] .panel-title,
+html[data-theme="dark"] .panel-field-value,
+html[data-theme="dark"] .panel-description { color: rgba(255, 255, 255, 0.92); }
+html[data-theme="dark"] .panel-field-label,
+html[data-theme="dark"] .panel-trust-label { color: rgba(255, 255, 255, 0.60); }
+
+/* Tooltip boxes + active filter chips */
+html[data-theme="dark"] .tooltip-box {
+  background: rgba(10, 26, 18, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.92);
+  -webkit-backdrop-filter: blur(16px);
+          backdrop-filter: blur(16px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.40);
+}
+html[data-theme="dark"] .active-chip {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* Pagination buttons + sort dropdowns */
+html[data-theme="dark"] .page-btn,
+html[data-theme="dark"] .sort-select,
+html[data-theme="dark"] .reset-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.85);
+}
+html[data-theme="dark"] .page-btn:hover,
+html[data-theme="dark"] .reset-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* App footer (rich 4-column footer inside .app-shell) */
+html[data-theme="dark"] .sh-footer {
+  background: rgba(0, 0, 0, 0.35);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+          backdrop-filter: blur(20px) saturate(140%);
+  color: rgba(255, 255, 255, 0.75);
+}
+html[data-theme="dark"] .sh-footer-brand-mark,
+html[data-theme="dark"] .sh-footer-cta { color: rgba(255, 255, 255, 0.92); }
+html[data-theme="dark"] .sh-footer-bottom-links a,
+html[data-theme="dark"] .sh-footer-brand-credit { color: rgba(255, 255, 255, 0.55); }
+
+/* Theme manager cards (super-admin only — keeps the swatch grid feeling
+   like glass tiles rather than flat tiles when viewed against the planet bg) */
+html[data-theme="dark"] .oh-tm-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+          backdrop-filter: blur(16px) saturate(140%);
+}
+html[data-theme="dark"] .oh-tm-card--active {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.30);
+}
+
+/* Settings modal sub-surfaces — settings-row dividers, chip groups */
+html[data-theme="dark"] .settings-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+html[data-theme="dark"] .settings-section-title,
+html[data-theme="dark"] .settings-label { color: rgba(255, 255, 255, 0.92); }
+html[data-theme="dark"] .settings-sublabel { color: rgba(255, 255, 255, 0.55); }
+html[data-theme="dark"] .settings-select {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* Bump the existing glass surfaces slightly — the previous values
+   (rgba 0.04 bg, rgba 0.10 border) were tuned for a flat dark backdrop.
+   Against the planet image they need a touch more presence to read as
+   defined cards rather than smudges. */
+html[data-theme="dark"] .home-greeting,
+html[data-theme="dark"] .home-stat,
+html[data-theme="dark"] .home-card,
+html[data-theme="dark"] .kpi-card,
+html[data-theme="dark"] .chart-card,
+html[data-theme="dark"] .opp-card,
+html[data-theme="dark"] .filter-bar,
+html[data-theme="dark"] .sector-card,
+html[data-theme="dark"] .saved-card,
+html[data-theme="dark"] .about-grid > *,
+html[data-theme="dark"] .about-wl-item {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+}
