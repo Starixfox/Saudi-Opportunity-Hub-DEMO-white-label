@@ -130,7 +130,7 @@
      Targets the home dashboard greeting + KPI tiles + quick-action chips
      + sidebar + opportunity cards. Uses var(--accent) so it adapts to
      whatever white-label theme is active. ─── -->
-<link rel="stylesheet" href="assets/polish-overrides.css?v=brighter-text">
+<link rel="stylesheet" href="assets/polish-overrides.css?v=chart-labels">
 
 <!-- ─── Shared dark-glass component library extracted from login.html.
      Loaded AFTER polish-overrides so .oh-* classes (and the gold-leaning
@@ -138,7 +138,7 @@
      and polish-overrides is bumped whenever the SPA's atmospheric layer
      changes, so users on a stale cache pick up the new bg + body rules
      without waiting for the browser's max-age to expire. ─── -->
-<link rel="stylesheet" href="assets/components.css?v=brighter-text">
+<link rel="stylesheet" href="assets/components.css?v=chart-labels">
 
 <!-- SPA-specific gold-accent layer — bridges polish-overrides (which paints
      emphasis in --accent, i.e. the tenant green) with the login aesthetic
@@ -14317,13 +14317,29 @@
       },
       options: {
         responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 10 } } },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              font: { size: 11 },
+              boxWidth: 10,
+              color: 'rgba(255, 255, 255, 0.92)'
+            }
+          }
+        },
         scales: {
           r: {
             beginAtZero: true,
-            grid: { color: 'rgba(124,137,171,0.15)' },
-            angleLines: { color: 'rgba(124,137,171,0.15)' },
-            pointLabels: { font: { size: 10 } },
+            grid: { color: 'rgba(255, 255, 255, 0.12)' },
+            angleLines: { color: 'rgba(255, 255, 255, 0.12)' },
+            pointLabels: {
+              font: { size: 11, weight: 600 },
+              /* Bright on dark surfaces — the previous default (Chart.js
+                 ~#666) washed out completely against the planet bg in the
+                 lower-right corner of the .oh-enh-card glass surface. */
+              color: 'rgba(255, 255, 255, 0.95)',
+              padding: 6
+            },
             ticks: { display: false }
           }
         }
@@ -16250,6 +16266,15 @@
      the time this block runs. */
   if (window.Chart && Chart.defaults) {
     var dur = REDUCED ? 0 : 850;
+    /* Brighten ALL Chart.js text globally — labels, ticks, legends, tooltips.
+       Chart.js default is '#666' which washes out completely on the glass
+       cards over the planet bg, especially where the bg has bright purples/
+       pinks (right side of the viewport). User: "this is still not fully
+       visible" against a radar chart. Setting the default once here applies
+       to every chart on the platform without editing each chart config. */
+    Chart.defaults.color           = 'rgba(255, 255, 255, 0.92)';
+    Chart.defaults.borderColor     = 'rgba(255, 255, 255, 0.12)';
+    Chart.defaults.font.weight     = 600;
     Chart.defaults.animation = Object.assign({}, Chart.defaults.animation, {
       duration: dur,
       easing: 'easeOutQuart'
