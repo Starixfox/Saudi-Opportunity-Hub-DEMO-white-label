@@ -1001,6 +1001,44 @@ html[data-theme="dark"] .view {
   background: transparent !important;
 }
 
+/* ─────────────────────────────────────────────── Mobile bottom tab bar
+   User: "on the phone there is a bottom bar i want everything that
+   scrolls under that bar to become invisible only the video in the
+   background can still be visible behind the bottom bar."
+
+   Two pieces:
+   1. Mask the scrolling content (.app-content) so its bottom 70 px +
+      safe-area-inset-bottom is transparent. Anything that scrolls into
+      that band stops rendering. The background <video> is position:
+      fixed (z-index -2) and NOT a descendant of .app-content, so the
+      mask doesn't touch it — it stays fully visible.
+   2. Drop the bar's solid var(--surface) bg + box-shadow in dark mode
+      to a clear-glass recipe (rgba 0.04 white + blur 60px + saturate
+      180% + 1 px hairline top border). The bar still reads as a defined
+      surface but the video underneath shows through cleanly.
+   Both rules scoped to (max-width: 767px) so desktop is unaffected. */
+@media (max-width: 767px) {
+  html[data-theme="dark"] .app-content {
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      #000 calc(100% - 70px - env(safe-area-inset-bottom, 0px)),
+      transparent calc(100% - 70px - env(safe-area-inset-bottom, 0px))
+    );
+            mask-image: linear-gradient(
+      to bottom,
+      #000 calc(100% - 70px - env(safe-area-inset-bottom, 0px)),
+      transparent calc(100% - 70px - env(safe-area-inset-bottom, 0px))
+    );
+  }
+  html[data-theme="dark"] .app-bottom-tabs {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.10) !important;
+    -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
+            backdrop-filter: blur(60px) saturate(180%) !important;
+    box-shadow: none !important;
+  }
+}
+
 /* ─────────────────────────────────────────────────────── Top navigation
    Reshaped as a centered floating "Dynamic Island" pill — instead of
    spanning the full content column, the topbar is taken out of the
