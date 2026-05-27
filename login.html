@@ -341,34 +341,34 @@
       animation-duration: 1150ms;
     }
 
-    /* Asymmetric opacity curves on the named-region old/new layers.
-       The browser's default fade is symmetric — both OLD and NEW pass
-       through 50% opacity at the midpoint, which reads as a static
-       cross-blend rather than a slide. These curves keep OLD high
-       (and visibly sliding) for most of the duration, then fade it
-       quickly at the end while NEW rises symmetrically. No discrete
-       phases — just two smooth curves shaped to bias visibility
-       toward whichever panel is in motion. */
+    /* Decoupled timing: the GROUP (panel position) animates over the
+       full 1500ms slide; the OLD/NEW opacity cross-fade is compressed
+       into a ~500ms window in the MIDDLE of the slide. Result:
+         · 0–500ms   panel slides with OLD content fully visible
+         · 500–1000ms brief opacity hand-off (OLD fades out, NEW fades in)
+         · 1000–1500ms panel slides the last leg with NEW content visible
+       So the text content swap is done by ~1000ms instead of bleeding
+       all the way to 1500ms, which is what was making EN and AR look
+       like they overlapped. The slide itself stays smooth at the full
+       1500ms duration. */
     @keyframes oh-fade-out { from { opacity: 1; } to { opacity: 0; } }
     @keyframes oh-fade-in  { from { opacity: 0; } to { opacity: 1; } }
 
     ::view-transition-old(brand-panel),
     ::view-transition-old(form-panel) {
-      /* ease-in-style — opacity stays high (value ~1) through ~70%
-         of the slide, then decays. The panel-with-its-circles stays
-         visible while it moves. */
       animation-name: oh-fade-out;
-      animation-duration: 1500ms;
-      animation-timing-function: cubic-bezier(0.7, 0.05, 0.85, 0.4);
+      animation-duration: 500ms;
+      animation-delay: 450ms;
+      animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+      animation-fill-mode: both;
     }
     ::view-transition-new(brand-panel),
     ::view-transition-new(form-panel) {
-      /* Mirror — opacity stays at 0 early, rises smoothly toward the
-         end. By the time NEW becomes visible, OLD has already slid
-         most of the way. */
       animation-name: oh-fade-in;
-      animation-duration: 1500ms;
-      animation-timing-function: cubic-bezier(0.15, 0.6, 0.3, 0.95);
+      animation-duration: 500ms;
+      animation-delay: 550ms;
+      animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+      animation-fill-mode: both;
     }
 
     /* Reduced-motion: skip the named transitions so the browser falls back
