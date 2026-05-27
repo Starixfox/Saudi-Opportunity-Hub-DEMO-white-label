@@ -1093,22 +1093,11 @@ html[data-theme="dark"] .app-tb-user:hover {
 }
 
 /* ─────────────────────────────────────────────────────── Sidebar
-   The previous treatment was rgba(5, 18, 10, 0.70) — too opaque, read
-   as a solid dark rail. Switched to the same rgba-white glass pattern
-   the cards use, with a heavier blur so the planet bg actually frosts
-   through it rather than just shows muted-through. */
-
-html[data-theme="dark"] .app-sidebar {
-  background: rgba(255, 255, 255, 0.04);
-  border-right: 1px solid rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(60px) saturate(180%);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.04);
-}
+   See the consolidated sidebar rule near the bottom of this file.
+   Kept the RTL flip-side here because it doesn't fight the main rule. */
 [dir="rtl"] html[data-theme="dark"] .app-sidebar {
-  border-right: 0;
-  border-left: 1px solid rgba(255, 255, 255, 0.10);
-  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.04);
+  border-right: 0 !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 html[data-theme="dark"] .app-nav-item {
@@ -1128,15 +1117,8 @@ html[data-theme="dark"] .app-nav-item.active {
 /* Override the previous home-greeting card colours to match the new
    dark-glass language. The mashrabiya pseudo from the earlier round
    stays in place; we just shift the card surface to glass. */
-html[data-theme="dark"] .home-greeting {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    0 20px 60px rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(60px) saturate(180%);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-}
+/* .home-greeting bg/border/blur live in the consolidated card recipe
+   near the bottom of this file. */
 html[data-theme="dark"] .home-greeting-badge {
   background: rgba(255, 255, 255, 0.10);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -1167,16 +1149,7 @@ html[data-theme="dark"] .home-qa-btn--primary:hover {
   border-color: var(--accent-hover, var(--accent));
 }
 
-/* KPI / stat tiles — glass on dark */
-html[data-theme="dark"] .home-stat {
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(60px) saturate(180%);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.10),
-    0 12px 32px rgba(0, 0, 0, 0.30);
-}
+/* .home-stat bg/border/blur live in the consolidated card recipe. */
 html[data-theme="dark"] .home-stat:hover {
   background: rgba(255, 255, 255, 0.07);
   border-color: rgba(255, 255, 255, 0.18);
@@ -1187,16 +1160,7 @@ html[data-theme="dark"] .home-stat:hover {
 html[data-theme="dark"] .home-stat-val { color: #ffffff; }
 html[data-theme="dark"] .home-stat-lbl { color: rgba(255, 255, 255, 0.60); }
 
-/* Home cards (Recently Added in Your Sector, Watchlist, etc.) */
-html[data-theme="dark"] .home-card {
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(60px) saturate(180%);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.10),
-    0 12px 32px rgba(0, 0, 0, 0.30);
-}
+/* .home-card bg/border/blur live in the consolidated card recipe. */
 html[data-theme="dark"] .home-card-hdr {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -1204,31 +1168,17 @@ html[data-theme="dark"] .home-card-badge { color: rgba(255, 255, 255, 0.75); }
 
 /* ──────────────────────────────────────────────── Dashboard KPIs + charts */
 
-html[data-theme="dark"] .kpi-card,
-html[data-theme="dark"] .chart-card {
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(60px) saturate(180%);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.10),
-    0 12px 32px rgba(0, 0, 0, 0.30);
-}
+/* .kpi-card + .chart-card bg/border/blur live in the consolidated card recipe. */
 html[data-theme="dark"] .kpi-value { color: #ffffff; }
 html[data-theme="dark"] .kpi-label { color: rgba(255, 255, 255, 0.65); }
 html[data-theme="dark"] .kpi-hint  { color: rgba(255, 255, 255, 0.50); }
 
 /* ──────────────────────────────────────────────────── Opportunity cards */
 
+/* .opp-card bg/border/blur/shadow live in the consolidated card recipe.
+   Only the text-on-dark color stays here. */
 html[data-theme="dark"] .opp-card {
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(60px) saturate(180%);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
   color: rgba(255, 255, 255, 0.92);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 12px 32px rgba(0, 0, 0, 0.30);
 }
 html[data-theme="dark"] .opp-card:hover {
   background: rgba(255, 255, 255, 0.07);
@@ -1245,12 +1195,7 @@ html[data-theme="dark"] .opp-card-stats { color: rgba(255, 255, 255, 0.65); }
 
 /* ─────────────────────────────────────────────────────── Filter bar */
 
-html[data-theme="dark"] .filter-bar {
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(60px) saturate(180%);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-}
+/* .filter-bar bg/border/blur live in the consolidated card recipe. */
 html[data-theme="dark"] .filter-input,
 html[data-theme="dark"] .filter-select {
   background: rgba(255, 255, 255, 0.06);
@@ -1303,14 +1248,12 @@ html[data-theme="dark"] .panel-overlay {
 
 /* ─────────────────────────────────────────────────── Sector + about cards */
 
+/* .sector-card / .saved-card / .about-grid > * / .about-wl-item
+   bg/border/blur live in the consolidated card recipe. */
 html[data-theme="dark"] .sector-card,
 html[data-theme="dark"] .saved-card,
 html[data-theme="dark"] .about-grid > *,
 html[data-theme="dark"] .about-wl-item {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(60px) saturate(180%);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
   color: rgba(255, 255, 255, 0.92);
 }
 
@@ -1448,31 +1391,16 @@ html[data-theme="dark"] body.page-entering {
    backdrop blur so the planet bg can read through every container.
 ============================================================================ */
 
-/* Analytics view — LIV2 KPI tiles + chart cards + insight strip */
-html[data-theme="dark"] .liv2-kpi,
-html[data-theme="dark"] .liv2-chart-card,
-html[data-theme="dark"] .liv2-insight-strip {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-          backdrop-filter: blur(60px) saturate(180%);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.30);
-}
+/* Analytics view — bg/border/blur live in the consolidated card recipe.
+   Text colors stay here. */
 html[data-theme="dark"] .liv2-kpi__value { color: #ffffff; }
 html[data-theme="dark"] .liv2-kpi__label,
 html[data-theme="dark"] .liv2-chart-card__sub,
 html[data-theme="dark"] .liv2-insight-text { color: rgba(255, 255, 255, 0.65); }
 html[data-theme="dark"] .liv2-chart-card__title { color: rgba(255, 255, 255, 0.95); }
 
-/* Insight cards (general) — used across home, dashboard, sector views */
-html[data-theme="dark"] .insight-card,
-html[data-theme="dark"] .insight-block,
-html[data-theme="dark"] .market-stat {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-          backdrop-filter: blur(60px) saturate(180%);
-}
+/* Insight cards — bg/border/blur in the consolidated card recipe.
+   Text colors stay here. */
 html[data-theme="dark"] .insight-card-title,
 html[data-theme="dark"] .insight-block__title,
 html[data-theme="dark"] .market-stat__value { color: rgba(255, 255, 255, 0.95); }
@@ -1480,14 +1408,8 @@ html[data-theme="dark"] .insight-card-sub,
 html[data-theme="dark"] .market-stat__label,
 html[data-theme="dark"] .market-footnote { color: rgba(255, 255, 255, 0.60); }
 
-/* Workspace bar (top of every view) + recently-added widget */
-html[data-theme="dark"] .ws-bar,
-html[data-theme="dark"] .recently-added-widget {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-          backdrop-filter: blur(60px) saturate(180%);
-}
+/* Workspace bar + recently-added widget — bg/border/blur in the
+   consolidated card recipe. Inner header divider stays here. */
 html[data-theme="dark"] .widget-header {
   background: rgba(255, 255, 255, 0.03);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -1495,26 +1417,12 @@ html[data-theme="dark"] .widget-header {
 html[data-theme="dark"] .widget-title,
 html[data-theme="dark"] .widget-badge { color: rgba(255, 255, 255, 0.92); }
 
-/* La-cards (large recently-added card variant) */
-html[data-theme="dark"] .la-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-          backdrop-filter: blur(60px) saturate(180%);
-}
+/* .la-card bg/border/blur in the consolidated card recipe. */
 html[data-theme="dark"] .la-card-title  { color: rgba(255, 255, 255, 0.95); }
 html[data-theme="dark"] .la-card-desc,
 html[data-theme="dark"] .la-card-meta   { color: rgba(255, 255, 255, 0.65); }
 
-/* Audience cards (About view) */
-html[data-theme="dark"] .audience-card,
-html[data-theme="dark"] .feedback-card,
-html[data-theme="dark"] .who-strip {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-          backdrop-filter: blur(60px) saturate(180%);
-}
+/* Audience / feedback / who cards — bg in canonical recipe. */
 html[data-theme="dark"] .audience-role,
 html[data-theme="dark"] .feedback-banner-text,
 html[data-theme="dark"] .who-role { color: rgba(255, 255, 255, 0.95); }
@@ -1575,14 +1483,7 @@ html[data-theme="dark"] .sh-footer-cta { color: rgba(255, 255, 255, 0.92); }
 html[data-theme="dark"] .sh-footer-bottom-links a,
 html[data-theme="dark"] .sh-footer-brand-credit { color: rgba(255, 255, 255, 0.55); }
 
-/* Theme manager cards (super-admin only — keeps the swatch grid feeling
-   like glass tiles rather than flat tiles when viewed against the planet bg) */
-html[data-theme="dark"] .oh-tm-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-          backdrop-filter: blur(60px) saturate(180%);
-}
+/* Theme manager cards — bg/border/blur in the canonical recipe. */
 html[data-theme="dark"] .oh-tm-card--active {
   background: rgba(255, 255, 255, 0.10);
   border-color: rgba(255, 255, 255, 0.30);
@@ -1623,9 +1524,13 @@ html[data-theme="dark"] .settings-select {
 html[data-theme="dark"] .home-greeting,
 html[data-theme="dark"] .home-stat,
 html[data-theme="dark"] .home-card,
+html[data-theme="dark"] .home-opp-item,
 html[data-theme="dark"] .kpi-card,
 html[data-theme="dark"] .chart-card,
 html[data-theme="dark"] .opp-card,
+html[data-theme="dark"] .opp-card-noimg,
+html[data-theme="dark"] .opp-card-row,
+html[data-theme="dark"] .opp-card-cell,
 html[data-theme="dark"] .la-card,
 html[data-theme="dark"] .filter-bar,
 html[data-theme="dark"] .sector-card,
@@ -1649,7 +1554,12 @@ html[data-theme="dark"] .freshness-badge,
 html[data-theme="dark"] .table-wrapper,
 html[data-theme="dark"] .oh-tm-card,
 html[data-theme="dark"] .wl-saved-item,
-html[data-theme="dark"] .ws-item-folder {
+html[data-theme="dark"] .ws-item-folder,
+html[data-theme="dark"] .ws-item-folder-dropdown,
+html[data-theme="dark"] .dfp-inner,
+html[data-theme="dark"] .oh-enh-card,
+html[data-theme="dark"] .oh-enh2-modal,
+html[data-theme="dark"] .oh-enh3-step {
   background: rgba(255, 255, 255, 0.08) !important;
   border: 1px solid rgba(255, 255, 255, 0.18) !important;
   -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
@@ -1680,47 +1590,11 @@ html[data-theme="dark"] .app-sidebar {
    Each block uses the same blur idiom (16-18px + saturate 140%); only
    the border + box-shadow vary slightly so hovers still have rhythm. */
 
-/* Marketing-page surfaces (rare in the SPA but a few legacy uses remain) */
-html[data-theme="dark"] .hiw-step,
-html[data-theme="dark"] .feedback-banner,
-html[data-theme="dark"] .freshness-badge,
-html[data-theme="dark"] .dfp-inner {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-          backdrop-filter: blur(60px) saturate(180%);
-}
-
-/* Table wrapper + its scroll surfaces (Opportunities list view) */
-html[data-theme="dark"] .table-wrapper {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-          backdrop-filter: blur(60px) saturate(180%);
-}
-
-/* Onboarding enhancement panels (oh-enh* — settings flow + folders UI) */
-html[data-theme="dark"] [class^="oh-enh"],
-html[data-theme="dark"] [class*=" oh-enh"] {
-  background-color: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.10);
-}
-html[data-theme="dark"] .oh-enh-card,
-html[data-theme="dark"] .oh-enh2-modal,
-html[data-theme="dark"] .oh-enh3-step {
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-          backdrop-filter: blur(60px) saturate(180%);
-}
-
-/* Watchlist / saved-search items in #wsPanel */
-html[data-theme="dark"] .wl-saved-item,
-html[data-theme="dark"] .ws-item-folder,
-html[data-theme="dark"] .ws-item-folder-dropdown {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-          backdrop-filter: blur(60px) saturate(180%);
-}
+/* All the marketing/legacy/onboarding/watchlist surface rules below
+   were duplicating bg/border/blur values already set by the canonical
+   card recipe near the bottom of this file. Removed to avoid stale
+   declarations winning the cascade by accident. Only non-card-bg
+   styling (chips, dropdown items, etc.) stays. */
 html[data-theme="dark"] .wl-saved-meta-tag {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.14);
