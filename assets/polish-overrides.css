@@ -897,3 +897,381 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
     animation-duration: 0ms !important;
   }
 }
+
+/* ============================================================================
+   SPA DARK-GLASS RESKIN
+   ----------------------------------------------------------------------------
+   Applies the login page's aesthetic to the authenticated SPA:
+     · Deep emerald → midnight → black gradient body background
+     · Frosted-glass treatment (backdrop-filter blur) on every card-like
+       surface — topbar, sidebar, KPI tiles, opportunity cards, modals,
+       workspace panel, settings dialog
+     · White-tinted text on dark surfaces (varying opacity for hierarchy)
+     · Underline-style form inputs (matches login.html)
+     · Per-theme accent (NEOM cyan, MISA navy, Monsha'at orange, etc.)
+       stays intact via window.applyTheme() — it just pops against the
+       dark glass instead of the previous cream/white background
+
+   index.html now boots with `data-theme="dark"` so the existing dark-mode
+   token paths activate; this block layers the glassmorphism on top.
+============================================================================ */
+
+/* ─────────────────────────────────────────────────────── App shell + body */
+
+html[data-theme="dark"] body,
+html[data-theme="dark"] {
+  background:
+    radial-gradient(ellipse 80% 60% at 30% 10%, rgba(255, 255, 255, 0.04), transparent 60%),
+    linear-gradient(220deg, #0e2a1c 0%, #082015 40%, #051208 100%);
+  background-attachment: fixed;
+  color: rgba(255, 255, 255, 0.92);
+  color-scheme: dark;
+}
+
+html[data-theme="dark"] .app-shell {
+  background: transparent;
+}
+
+/* ─────────────────────────────────────────────────────── Top navigation */
+
+html[data-theme="dark"] .app-topbar {
+  background: rgba(8, 24, 16, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+html[data-theme="dark"] .app-tb-stat {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.85);
+}
+html[data-theme="dark"] .app-tb-stat:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--accent, rgba(255, 255, 255, 0.30));
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .app-tb-icon-btn,
+html[data-theme="dark"] .app-tb-bell,
+html[data-theme="dark"] .app-tb-settings,
+html[data-theme="dark"] .app-tb-lang,
+html[data-theme="dark"] .app-tb-user {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: rgba(255, 255, 255, 0.85);
+}
+html[data-theme="dark"] .app-tb-icon-btn:hover,
+html[data-theme="dark"] .app-tb-bell:hover,
+html[data-theme="dark"] .app-tb-settings:hover,
+html[data-theme="dark"] .app-tb-lang:hover,
+html[data-theme="dark"] .app-tb-user:hover {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* ─────────────────────────────────────────────────────── Sidebar */
+
+html[data-theme="dark"] .app-sidebar {
+  background: rgba(5, 18, 10, 0.70);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(28px) saturate(140%);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
+}
+[dir="rtl"] html[data-theme="dark"] .app-sidebar {
+  border-right: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+html[data-theme="dark"] .app-nav-item {
+  color: rgba(255, 255, 255, 0.65);
+}
+html[data-theme="dark"] .app-nav-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+html[data-theme="dark"] .app-nav-item.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+/* ──────────────────────────────────────────────────── Home dashboard */
+
+/* Override the previous home-greeting card colours to match the new
+   dark-glass language. The mashrabiya pseudo from the earlier round
+   stays in place; we just shift the card surface to glass. */
+html[data-theme="dark"] .home-greeting {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 12px 40px rgba(0, 0, 0, 0.40);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+}
+html[data-theme="dark"] .home-greeting-badge {
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.85);
+}
+html[data-theme="dark"] .home-title { color: #ffffff; }
+html[data-theme="dark"] .home-title span { color: var(--accent); }
+html[data-theme="dark"] .home-sub { color: rgba(255, 255, 255, 0.65); }
+
+/* Quick-action chips — glass on dark */
+html[data-theme="dark"] .home-qa-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.85);
+}
+html[data-theme="dark"] .home-qa-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+html[data-theme="dark"] .home-qa-btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent, #ffffff);
+}
+html[data-theme="dark"] .home-qa-btn--primary:hover {
+  background: var(--accent-hover, var(--accent));
+  border-color: var(--accent-hover, var(--accent));
+}
+
+/* KPI / stat tiles — glass on dark */
+html[data-theme="dark"] .home-stat {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
+html[data-theme="dark"] .home-stat:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.40),
+    0 4px 8px rgba(0, 0, 0, 0.20);
+}
+html[data-theme="dark"] .home-stat-val { color: #ffffff; }
+html[data-theme="dark"] .home-stat-lbl { color: rgba(255, 255, 255, 0.60); }
+
+/* Home cards (Recently Added in Your Sector, Watchlist, etc.) */
+html[data-theme="dark"] .home-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
+html[data-theme="dark"] .home-card-hdr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+html[data-theme="dark"] .home-card-badge { color: rgba(255, 255, 255, 0.75); }
+
+/* ──────────────────────────────────────────────── Dashboard KPIs + charts */
+
+html[data-theme="dark"] .kpi-card,
+html[data-theme="dark"] .chart-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.30);
+}
+html[data-theme="dark"] .kpi-value { color: #ffffff; }
+html[data-theme="dark"] .kpi-label { color: rgba(255, 255, 255, 0.65); }
+html[data-theme="dark"] .kpi-hint  { color: rgba(255, 255, 255, 0.50); }
+
+/* ──────────────────────────────────────────────────── Opportunity cards */
+
+html[data-theme="dark"] .opp-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  color: rgba(255, 255, 255, 0.92);
+}
+html[data-theme="dark"] .opp-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: var(--accent);
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.45),
+    0 4px 8px rgba(0, 0, 0, 0.25);
+}
+html[data-theme="dark"] .opp-card-title,
+html[data-theme="dark"] .opp-card-desc { color: rgba(255, 255, 255, 0.92); }
+html[data-theme="dark"] .opp-card-sponsor,
+html[data-theme="dark"] .opp-card-meta,
+html[data-theme="dark"] .opp-card-stats { color: rgba(255, 255, 255, 0.65); }
+
+/* ─────────────────────────────────────────────────────── Filter bar */
+
+html[data-theme="dark"] .filter-bar {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
+html[data-theme="dark"] .filter-input,
+html[data-theme="dark"] .filter-select {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+html[data-theme="dark"] .filter-input::placeholder { color: rgba(255, 255, 255, 0.40); }
+html[data-theme="dark"] .filter-input:focus,
+html[data-theme="dark"] .filter-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow, rgba(255, 255, 255, 0.15));
+}
+html[data-theme="dark"] .filter-label { color: rgba(255, 255, 255, 0.70); }
+
+/* ─────────────────────────────────────────────────────── Modals + panels */
+
+html[data-theme="dark"] .modal,
+html[data-theme="dark"] .ob-modal,
+html[data-theme="dark"] .settings-modal,
+html[data-theme="dark"] #wsPanel,
+html[data-theme="dark"] #wsPanel.active {
+  background: rgba(10, 26, 18, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+}
+
+/* Detail panel (opp-detail) */
+html[data-theme="dark"] #panel,
+html[data-theme="dark"] .opp-detail-panel {
+  background: rgba(10, 26, 18, 0.85);
+  border-left: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: -16px 0 60px rgba(0, 0, 0, 0.55);
+}
+
+/* Overlay behind modals/panels */
+html[data-theme="dark"] .modal-overlay,
+html[data-theme="dark"] #wsPanelOverlay,
+html[data-theme="dark"] .panel-overlay {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* ─────────────────────────────────────────────────── Sector + about cards */
+
+html[data-theme="dark"] .sector-card,
+html[data-theme="dark"] .saved-card,
+html[data-theme="dark"] .about-grid > *,
+html[data-theme="dark"] .about-wl-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* ──────────────────────────────────────────────────── Generic text + links */
+
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4 { color: rgba(255, 255, 255, 0.96); }
+html[data-theme="dark"] p,
+html[data-theme="dark"] span,
+html[data-theme="dark"] div { /* selective — only inherit on unstyled descendants */ }
+html[data-theme="dark"] a:not(.btn):not(.app-nav-item):not(.brand-logo) {
+  color: var(--accent);
+}
+html[data-theme="dark"] a:not(.btn):not(.app-nav-item):not(.brand-logo):hover {
+  color: var(--accent-hover, var(--accent));
+}
+
+/* ────────────────────────────────────────────────────── Buttons (general) */
+
+html[data-theme="dark"] .btn-primary,
+html[data-theme="dark"] button.primary {
+  background: #ffffff;
+  color: var(--accent, #006C35);
+  border: 0;
+  font-weight: 700;
+}
+html[data-theme="dark"] .btn-primary:hover,
+html[data-theme="dark"] button.primary:hover {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+html[data-theme="dark"] .btn-secondary,
+html[data-theme="dark"] button.secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.92);
+}
+html[data-theme="dark"] .btn-secondary:hover,
+html[data-theme="dark"] button.secondary:hover {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+/* ──────────────────────────────────────────────────── Dividers + borders */
+
+html[data-theme="dark"] hr,
+html[data-theme="dark"] .divider {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ──────────────────────────────────────────────────── Status pills */
+
+html[data-theme="dark"] .opp-card-chip,
+html[data-theme="dark"] .opp-status-pill {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ──────────────────────────────────────────────────── Form fields (generic) */
+
+html[data-theme="dark"] input[type="text"],
+html[data-theme="dark"] input[type="email"],
+html[data-theme="dark"] input[type="password"],
+html[data-theme="dark"] input[type="search"],
+html[data-theme="dark"] input[type="tel"],
+html[data-theme="dark"] input[type="url"],
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: rgba(255, 255, 255, 0.40);
+}
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] textarea:focus,
+html[data-theme="dark"] select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow, rgba(255, 255, 255, 0.15));
+}
+
+/* Scrollbars on dark */
+html[data-theme="dark"] *::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+html[data-theme="dark"] *::-webkit-scrollbar-track {
+  background: transparent;
+}
+html[data-theme="dark"] *::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.10);
+  border-radius: 999px;
+}
+html[data-theme="dark"] *::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
