@@ -1580,19 +1580,70 @@ html[data-theme="dark"] .settings-select {
    (rgba 0.04 bg, rgba 0.10 border) were tuned for a flat dark backdrop.
    Against the planet image they need a touch more presence to read as
    defined cards rather than smudges. */
+/* ═══════════════════════════════════════════════════════════════════════
+   CANONICAL CARD RECIPE — every card in the SPA uses the exact same
+   glass styling as the .home-greeting (which itself matches login's
+   .auth-box). One source of truth, no per-class drift.
+
+   Values are the login auth-box recipe verbatim:
+     bg:           rgba(255, 255, 255, 0.08)
+     border:       1px solid rgba(255, 255, 255, 0.18)
+     backdrop:     blur(60px) saturate(180%)
+     box-shadow:   inset 0 1px 0 rgba(255, 255, 255, 0.14),
+                   0 20px 60px rgba(0, 0, 0, 0.45)
+
+   This rule is the LAST card-styling rule in the file, so it wins
+   cascade against every earlier per-class declaration.
+   ═══════════════════════════════════════════════════════════════════════ */
 html[data-theme="dark"] .home-greeting,
 html[data-theme="dark"] .home-stat,
 html[data-theme="dark"] .home-card,
 html[data-theme="dark"] .kpi-card,
 html[data-theme="dark"] .chart-card,
 html[data-theme="dark"] .opp-card,
+html[data-theme="dark"] .la-card,
 html[data-theme="dark"] .filter-bar,
 html[data-theme="dark"] .sector-card,
 html[data-theme="dark"] .saved-card,
 html[data-theme="dark"] .about-grid > *,
-html[data-theme="dark"] .about-wl-item {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.14);
+html[data-theme="dark"] .about-wl-item,
+html[data-theme="dark"] .insight-card,
+html[data-theme="dark"] .insight-block,
+html[data-theme="dark"] .market-stat,
+html[data-theme="dark"] .liv2-kpi,
+html[data-theme="dark"] .liv2-chart-card,
+html[data-theme="dark"] .liv2-insight-strip,
+html[data-theme="dark"] .ws-bar,
+html[data-theme="dark"] .recently-added-widget,
+html[data-theme="dark"] .audience-card,
+html[data-theme="dark"] .feedback-card,
+html[data-theme="dark"] .who-strip,
+html[data-theme="dark"] .hiw-step,
+html[data-theme="dark"] .feedback-banner,
+html[data-theme="dark"] .freshness-badge,
+html[data-theme="dark"] .table-wrapper,
+html[data-theme="dark"] .oh-tm-card,
+html[data-theme="dark"] .wl-saved-item,
+html[data-theme="dark"] .ws-item-folder {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
+          backdrop-filter: blur(60px) saturate(180%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 20px 60px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* ───────────────────────────────────────────────────────── Sidebar override
+   User reports the sidebar doesn't show the video behind it. The earlier
+   rgba(255, 255, 255, 0.04) was apparently still too opaque. Drop the bg
+   even further AND mark !important so legacy-app.css (which paints the
+   sidebar with `background: var(--surface)`) can't win the cascade. */
+html[data-theme="dark"] .app-sidebar {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
+          backdrop-filter: blur(60px) saturate(180%) !important;
 }
 
 /* ─────────────────────────────────────────────────── Backdrop-filter sweep
