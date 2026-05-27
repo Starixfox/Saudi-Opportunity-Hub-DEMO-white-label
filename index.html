@@ -240,36 +240,49 @@
 
   /* ─────────────────────────────────────────────────────────────
      STILL-IMAGE BACKGROUND
-     A cinematic frame from the login bg sequence — same atmospheric
-     dark-stone aesthetic, served as a ~55 KB WebP (with a JPEG fallback)
-     so it renders instantly.
+     The atmosphere is painted DIRECTLY onto body's background — not a
+     separate <picture>/<img> element. Why: the SPA's "arriving from
+     login" fade-in animation applies `transform` to body, which makes
+     body a stacking context, which makes `position: fixed` descendants
+     behave like `position: absolute` relative to body's bounding box.
+     A z-index:-2 fixed <img> ended up being painted under .app-shell's
+     `background: var(--bg)` (set in legacy-app.css), so it vanished
+     once the page finished loading.
 
-     The <picture> sits behind everything (z-index: -2). A dark scrim
-     above it (z-index: -1) gives the glass cards contrast to read.
-     polish-overrides keeps body transparent so the image shows through.
-     ──────────────────────────────────────────────────────────── */
-  .oh-bg-image {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    z-index: -2;
-    pointer-events: none;
-    filter: saturate(1.1);
-  }
-  .oh-bg-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    /* Light scrim — the still is mostly dark stone with a bright orb in
-       the centre. Heavier opacity (42-62%) made it read as fully black.
-       This matches login.html's overlay (30-55%) more closely so the orb
-       and stone walls stay visible behind the glass cards. */
-    background:
-      linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.40) 60%, rgba(0,0,0,0.48) 100%);
+     Painting the still as body bg avoids the entire stacking game —
+     background-image paints at the absolute bottom of the box, behind
+     any descendant content, no z-index needed. The scrim is layered on
+     TOP of the image via the same shorthand (gradient + image-set).
+
+     image-set() lets modern browsers pick the 55 KB WebP and falls
+     back to the 124 KB JPEG on older ones. background-attachment:
+     fixed keeps the image still while the page scrolls. ──────────── */
+  /* !important on every property because legacy-app.css and
+     polish-overrides.css both ship `body { background-* }` rules at
+     equal-or-higher specificity than this inline block, and some
+     orderings of the cascade let them win. The semantic guarantee we
+     actually need is: in dark mode, this is the body's atmosphere.
+     Period. So enforce that. */
+  html[data-theme="dark"] body {
+    background-color: #050810 !important;
+    /* Plain url() — every browser since 2010 understands this and gets
+       the JPEG. */
+    background-image:
+      linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.40) 60%, rgba(0,0,0,0.48) 100%),
+      url("assets/bg-login-still.jpg?v=16s") !important;
+    /* image-set() — modern browsers (Chrome 88+, Safari 14+, Firefox 88+)
+       pick the smaller WebP. The earlier declaration is the fallback for
+       anything that doesn't grok image-set. */
+    background-image:
+      linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.40) 60%, rgba(0,0,0,0.48) 100%),
+      image-set(
+        url("assets/bg-login-still.webp?v=16s") type("image/webp"),
+        url("assets/bg-login-still.jpg?v=16s")  type("image/jpeg")
+      ) !important;
+    background-size:       100% 100%, cover     !important;
+    background-position:   center,    center    !important;
+    background-attachment: fixed,     fixed     !important;
+    background-repeat:     no-repeat, no-repeat !important;
   }
 
 </style>
@@ -277,16 +290,10 @@
 </head>
 <body>
 
-<!-- ══ STILL-IMAGE BACKGROUND ══════════════════════════════════════════════
-     Cinematic frame from the login bg sequence (same atmosphere as the
-     login page), served as a ~55 KB WebP with a JPEG fallback. The
-     overlay sits on top of the image (still behind .app-shell) and
-     adds a dark scrim so glass cards have contrast to read against. ── -->
-<picture aria-hidden="true">
-  <source srcset="assets/bg-login-still.webp?v=16s" type="image/webp">
-  <img class="oh-bg-image" src="assets/bg-login-still.jpg?v=16s" alt="" loading="eager" fetchpriority="high">
-</picture>
-<div class="oh-bg-overlay" aria-hidden="true"></div>
+<!-- The still-image background is painted as body's background-image —
+     see the inline <style> block in <head>. No <img> element here so
+     the image can never be hidden by the SPA's stacking quirks. -->
+
 
 <!-- Skip-to-content link for keyboard / screen-reader users -->
 <a class="oh-skip-link" href="#view-home">Skip to main content</a>
