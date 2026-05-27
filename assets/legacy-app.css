@@ -513,27 +513,9 @@ section:last-of-type { border-bottom: none; }
 /* KPI CARDS */
 .kpi-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-4); }
 
-.kpi-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  padding: var(--space-5) var(--space-6);
-  display: flex; align-items: flex-start; gap: var(--space-4);
-  transition: border-color var(--transition), box-shadow var(--transition);
-  position: relative; overflow: hidden;
-}
-
-.kpi-card::before {
-  content: '';
-  position: absolute; left: 0; top: 0; bottom: 0;
-  width: 3px; border-radius: var(--radius-lg) 0 0 var(--radius-lg);
-}
-
-.kpi-card.saudi::before { background: var(--green); }
-.kpi-card.gcc::before   { background: var(--gold); }
-.kpi-card.global::before { background: var(--blue); }
-
-.kpi-card:hover { border-color: var(--border-light); box-shadow: var(--shadow-md); }
+/* .kpi-card itself is defined canonically in polish-overrides.css (top accent
+   bar, --accent color, lift on hover). Variants .saudi/.gcc/.global were never
+   applied in the DOM — removed. */
 
 .kpi-icon {
   font-size: 1.5rem; flex-shrink: 0;
@@ -1323,8 +1305,8 @@ section:last-of-type { border-bottom: none; }
   overflow: hidden;
 }
 .la-card:hover {
-  box-shadow: 0 4px 16px rgba(0,166,81,0.1);
-  border-color: rgba(0,166,81,0.3);
+  box-shadow: 0 4px 16px var(--accent-soft);
+  border-color: var(--accent-glow);
   transform: translateY(-1px);
 }
 
@@ -1812,6 +1794,7 @@ section:last-of-type { border-bottom: none; }
   border-radius: var(--radius-xl);
   padding: var(--space-8);
   box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
 
 .feedback-banner {
