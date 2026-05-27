@@ -933,8 +933,13 @@ html[data-theme="dark"] {
 }
 
 html[data-theme="dark"] body {
-  background-color: transparent;
-  background-image: none;
+  /* !important: legacy-app.css ships
+     `[data-theme="dark"] body { background-color: var(--bg) !important }`
+     which would otherwise win on cascade. We need body to be transparent
+     so the z-index:-2 background <video> (added in index.html) shows
+     through. */
+  background-color: transparent !important;
+  background-image: none !important;
   color: rgba(255, 255, 255, 0.92);
   min-height: 100dvh;
 }
@@ -1296,6 +1301,24 @@ html[data-theme="dark"] *::-webkit-scrollbar-thumb {
 }
 html[data-theme="dark"] *::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.18);
+}
+
+/* ─────────────────────────────────────────────────────── Page-fade-in
+   Override legacy-app.css's `page-fade-in` keyframes — those animate
+   both opacity AND transform: translateY. The transform promotes body
+   to a stacking context AND makes body the containing block for
+   position: fixed descendants, which hid the background <video> element
+   the SPA paints behind everything at z-index: -2.
+
+   Replacement: opacity-only fade. No transform = no stacking context =
+   the background video stays visible during and after the entrance.
+   Higher specificity than the legacy rule, same selector path. */
+@keyframes oh-page-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+html[data-theme="dark"] body.page-entering {
+  animation: oh-page-fade-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* ============================================================================

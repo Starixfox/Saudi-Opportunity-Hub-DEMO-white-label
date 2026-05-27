@@ -239,50 +239,42 @@
   }
 
   /* ─────────────────────────────────────────────────────────────
-     STILL-IMAGE BACKGROUND
-     The atmosphere is painted DIRECTLY onto body's background — not a
-     separate <picture>/<img> element. Why: the SPA's "arriving from
-     login" fade-in animation applies `transform` to body, which makes
-     body a stacking context, which makes `position: fixed` descendants
-     behave like `position: absolute` relative to body's bounding box.
-     A z-index:-2 fixed <img> ended up being painted under .app-shell's
-     `background: var(--bg)` (set in legacy-app.css), so it vanished
-     once the page finished loading.
+     PING-PONG VIDEO BACKGROUND
+     The atmosphere is the last 3 seconds of bg-login-loop.mp4,
+     pre-rendered as a forward+reverse concat so plain native `loop`
+     ping-pongs seamlessly with zero JavaScript. Two source variants:
 
-     Painting the still as body bg avoids the entire stacking game —
-     background-image paints at the absolute bottom of the box, behind
-     any descendant content, no z-index needed. The scrim is layered on
-     TOP of the image via the same shorthand (gradient + image-set).
+       · assets/bg-login-loop-short.webm — VP9, 232 KB (modern browsers)
+       · assets/bg-login-loop-short.mp4  — H.264, 422 KB (Safari + fallback)
 
-     image-set() lets modern browsers pick the 55 KB WebP and falls
-     back to the 124 KB JPEG on older ones. background-attachment:
-     fixed keeps the image still while the page scrolls. ──────────── */
-  /* !important on every property because legacy-app.css and
-     polish-overrides.css both ship `body { background-* }` rules at
-     equal-or-higher specificity than this inline block, and some
-     orderings of the cascade let them win. The semantic guarantee we
-     actually need is: in dark mode, this is the body's atmosphere.
-     Period. So enforce that. */
-  html[data-theme="dark"] body {
-    background-color: #050810 !important;
-    /* Plain url() — every browser since 2010 understands this and gets
-       the JPEG. */
-    background-image:
-      linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.40) 60%, rgba(0,0,0,0.48) 100%),
-      url("assets/bg-login-still.jpg?v=16s") !important;
-    /* image-set() — modern browsers (Chrome 88+, Safari 14+, Firefox 88+)
-       pick the smaller WebP. The earlier declaration is the fallback for
-       anything that doesn't grok image-set. */
-    background-image:
-      linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.40) 60%, rgba(0,0,0,0.48) 100%),
-      image-set(
-        url("assets/bg-login-still.webp?v=16s") type("image/webp"),
-        url("assets/bg-login-still.jpg?v=16s")  type("image/jpeg")
-      ) !important;
-    background-size:       100% 100%, cover     !important;
-    background-position:   center,    center    !important;
-    background-attachment: fixed,     fixed     !important;
-    background-repeat:     no-repeat, no-repeat !important;
+     The .oh-bg-video element sits behind everything at z-index: -2.
+     polish-overrides.css overrides the legacy page-fade-in animation
+     to drop the `transform` on body (was promoting body to a stacking
+     context and hiding this z-index:-2 video). The .oh-bg-overlay
+     scrim above gives the glass cards contrast.
+     ──────────────────────────────────────────────────────────── */
+  .oh-bg-video {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: -2;
+    pointer-events: none;
+    filter: saturate(1.1);
+  }
+  .oh-bg-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.40) 60%, rgba(0,0,0,0.48) 100%);
+  }
+  /* Reduced-motion: pause the video so the user sees a static frame. */
+  @media (prefers-reduced-motion: reduce) {
+    .oh-bg-video { animation-play-state: paused; }
   }
 
 </style>
@@ -290,9 +282,19 @@
 </head>
 <body>
 
-<!-- The still-image background is painted as body's background-image —
-     see the inline <style> block in <head>. No <img> element here so
-     the image can never be hidden by the SPA's stacking quirks. -->
+<!-- ══ PING-PONG VIDEO BACKGROUND ════════════════════════════════════════
+     Last 3 seconds of bg-login-loop.mp4, pre-rendered as a forward+reverse
+     concat so native `loop` plays forward → backward → forward... with
+     zero JavaScript. autoplay+muted+playsinline are required for mobile
+     autoplay; preload="auto" lets the browser stream as soon as possible.
+     aria-hidden because it's decorative. ── -->
+<video class="oh-bg-video" id="oh-bg-video"
+       autoplay muted loop playsinline preload="auto"
+       aria-hidden="true">
+  <source src="assets/bg-login-loop-short.webm?v=ping-pong" type="video/webm">
+  <source src="assets/bg-login-loop-short.mp4?v=ping-pong"  type="video/mp4">
+</video>
+<div class="oh-bg-overlay" aria-hidden="true"></div>
 
 
 <!-- Skip-to-content link for keyboard / screen-reader users -->
