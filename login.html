@@ -176,8 +176,16 @@
     }
 
     /* Brand logo flip */
+    /* RTL: the brand logo group sits at the right edge of the brand
+       panel (was on the left because flex-direction: row-reverse on
+       the .brand-logo flex container — combined with the RTL document
+       direction — was flipping the items back to a left-pack). With
+       natural row flow in RTL, flex-start = right edge, so the OH
+       mark sits at the right and the name + subtitle to its left.
+       Matches natural Arabic reading order (right-to-left). */
     [dir="rtl"] .brand-logo {
-      flex-direction: row-reverse;
+      flex-direction: row;
+      justify-content: flex-start;
     }
 
     /* Stats row */
