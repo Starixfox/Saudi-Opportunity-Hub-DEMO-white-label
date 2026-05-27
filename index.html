@@ -237,10 +237,9 @@
 
   /* ─────────────────────────────────────────────────────────────
      STILL-IMAGE BACKGROUND
-     A single cinematic frame extracted from bg-login-loop.mp4 — same
-     atmospheric dark-stone aesthetic as the login page, served as a
-     ~37 KB WebP (JPEG fallback) so it renders instantly with no
-     scroll-scrub lag and no streaming-video overhead.
+     A cinematic frame from the login bg sequence — same atmospheric
+     dark-stone aesthetic, served as a ~55 KB WebP (with a JPEG fallback)
+     so it renders instantly.
 
      The <picture> sits behind everything (z-index: -2). A dark scrim
      above it (z-index: -1) gives the glass cards contrast to read.
@@ -276,12 +275,9 @@
 <body>
 
 <!-- ══ STILL-IMAGE BACKGROUND ══════════════════════════════════════════════
-     Single cinematic frame from bg-login-loop.mp4 (same atmosphere as the
-     login page), served as ~37 KB WebP with a JPEG fallback. Picked
-     instead of the live video because scroll-scrubbing a 35 MB MP4
-     hammered the network and stuttered on every scroll frame.
-
-     The overlay sits on top of the image (still behind .app-shell) and
+     Cinematic frame from the login bg sequence (same atmosphere as the
+     login page), served as a ~55 KB WebP with a JPEG fallback. The
+     overlay sits on top of the image (still behind .app-shell) and
      adds a dark scrim so glass cards have contrast to read against. ── -->
 <picture aria-hidden="true">
   <source srcset="assets/bg-login-still.webp" type="image/webp">
