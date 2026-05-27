@@ -262,26 +262,6 @@
       linear-gradient(180deg, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.62) 100%);
   }
 
-  /* The video sits at z-index: -2 inside the body. If body has its own
-     opaque background-color, it paints OVER the video (the painting
-     order within body's stacking context is: body bg → negative z-index
-     descendants → flow content). So body must be transparent.
-
-     The dark fallback colour lives on <html> instead — that paints
-     before body and shows through only if the video fails to load.
-
-     legacy-app.css sets `body { background-color: var(--bg); }` and
-     polish-overrides paints a layered constellation backdrop on body;
-     both are overridden here. !important on body bg because legacy-app
-     and polish-overrides each have rules at the same specificity that
-     would otherwise win on cascade order in some browsers. */
-  html[data-theme="dark"] {
-    background-color: #050810;
-  }
-  html[data-theme="dark"] body {
-    background-image: none !important;
-    background-color: transparent !important;
-  }
 </style>
 
 </head>

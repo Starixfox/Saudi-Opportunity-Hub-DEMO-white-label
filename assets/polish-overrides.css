@@ -917,16 +917,15 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
 ============================================================================ */
 
 /* ─────────────────────────────────────────────────────── App shell + body
-   The SPA's body needs a DRAMATIC layered backdrop for the glass cards
-   to read as glass. Without atmospheric variation behind the card,
-   "white-tint on dark" just looks like a flat dark tile on a flat dark
-   background. So body gets a four-layer composition:
-     · Constellation circles SVG (mashrabiya-adjacent, same family as
-       the login form panel's bg)
-     · Warm gold radial in the upper-right
-     · Cool emerald radial in the lower-left
-     · Deep emerald → midnight → black linear base
-   .app-shell is forced to transparent so all of this shows through. */
+   The SPA paints its atmosphere via a scroll-scrubbed <video> element
+   at z-index: -2 (see index.html). Body must stay transparent so the
+   video shows through — an opaque body bg paints ABOVE the z-index: -2
+   video in the same stacking context and would hide it entirely.
+
+   The dark fallback colour lives on <html> instead: it paints first,
+   below the video, and only becomes visible if the video fails to load.
+   .app-shell + other SPA wrappers are forced to transparent below so
+   the chain stays unbroken. */
 
 html[data-theme="dark"] {
   background-color: #051208;
@@ -934,19 +933,8 @@ html[data-theme="dark"] {
 }
 
 html[data-theme="dark"] body {
-  background-color: #051208;
-  background-image:
-    /* Layer 1: scattered circles (constellation marks) */
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1200' preserveAspectRatio='xMidYMid slice'><g fill='none' stroke='%23ffffff' stroke-opacity='0.10' stroke-width='1.4'><circle cx='1400' cy='160' r='420'/><circle cx='-60' cy='720' r='340'/><circle cx='900' cy='1140' r='240'/><circle cx='220' cy='280' r='90'/><circle cx='1280' cy='820' r='130'/></g></svg>"),
-    /* Layer 2: warm gold haze upper-right */
-    radial-gradient(circle at 90% 12%, rgba(201, 166, 107, 0.12) 0%, transparent 55%),
-    /* Layer 3: cool emerald hint lower-left */
-    radial-gradient(circle at 15% 90%, rgba(0, 108, 53, 0.14) 0%, transparent 55%),
-    /* Layer 4: deep emerald → midnight → black base */
-    linear-gradient(220deg, #0e2a1c 0%, #082015 40%, #051208 100%);
-  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
-  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%;
-  background-attachment: fixed, fixed, fixed, fixed;
+  background-color: transparent;
+  background-image: none;
   color: rgba(255, 255, 255, 0.92);
   min-height: 100dvh;
 }
