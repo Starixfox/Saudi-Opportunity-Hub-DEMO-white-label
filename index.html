@@ -262,8 +262,12 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
+    /* Light scrim — the still is mostly dark stone with a bright orb in
+       the centre. Heavier opacity (42-62%) made it read as fully black.
+       This matches login.html's overlay (30-55%) more closely so the orb
+       and stone walls stay visible behind the glass cards. */
     background:
-      linear-gradient(180deg, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.62) 100%);
+      linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.40) 60%, rgba(0,0,0,0.48) 100%);
   }
 
 </style>
