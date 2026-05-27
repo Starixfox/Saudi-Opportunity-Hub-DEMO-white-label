@@ -1629,15 +1629,24 @@ html[data-theme="dark"] .home-card-hdr {
 }
 
 /* ───────────────────────────────────────────────────────── Sidebar override
-   User reports the sidebar doesn't show the video behind it. The earlier
-   rgba(255, 255, 255, 0.04) was apparently still too opaque. Drop the bg
-   even further AND mark !important so legacy-app.css (which paints the
-   sidebar with `background: var(--surface)`) can't win the cascade. */
+   User: "i want this one to be really clear glass so the entire side bar
+   has to be really clear glass". Fully transparent — the sidebar
+   contributes ZERO whiteness of its own. The 60 px blur still applies, so
+   the video passing behind it gets beautifully smeared, but there's no
+   rgba wash on top.
+
+   Marked !important and `background-color` + `background-image` both
+   explicit so legacy-app.css (which paints .app-sidebar with three
+   different `background:` rules — var(--surface) at line 4496,
+   var(--sidebar-bg) at line 6728, plus the mobile-open state) can't win
+   the cascade. */
 html[data-theme="dark"] .app-sidebar {
-  background: rgba(255, 255, 255, 0.02) !important;
+  background-color: transparent !important;
+  background-image: none !important;
   border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
   -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
           backdrop-filter: blur(60px) saturate(180%) !important;
+  box-shadow: none !important;
 }
 
 /* ─────────────────────────────────────────────────── Backdrop-filter sweep
