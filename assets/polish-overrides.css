@@ -1629,47 +1629,69 @@ html[data-theme="dark"] .home-card-hdr {
 }
 
 /* ───────────────────────────────────────────────────────── Sidebar override
-   User: "use the same glass as [the topbar pill] uses for the side bar."
-   The topbar pill (.app-topbar at line 1018) uses the recipe below —
-   rgba(0.05) white base (lighter than the cards' rgba(0.08)), no
-   gradient overlay, rgba(0.14) border, blur(60px) saturate(180%), plus
-   an inset top highlight. Sidebar now matches that recipe exactly.
-
-   No drop shadow (sidebar is full-height; the topbar pill's
-   0 12px 32px shadow would float below the viewport meaninglessly).
+   User: "make the side bar less see through and more like the other cards"
+   Switched from the topbar-pill recipe (rgba 0.05, no gradient) to the
+   canonical card recipe — same rgba(0.08) base + diagonal gradient +
+   rgba(0.18) border + blur(60px) saturate(180%) as every .home-card /
+   .kpi-card / .home-stat. No drop shadow (sidebar is full-height; the
+   canonical's 0 20px 60px shadow would just hang below the viewport).
 
    !important × all because legacy-app.css ships three competing
    .app-sidebar background rules (var(--surface) at 4496,
    var(--sidebar-bg) at 6728, plus .mobile-open). */
 html[data-theme="dark"] .app-sidebar {
-  background: rgba(255, 255, 255, 0.05) !important;
-  background-image: none !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.14) !important;
+  background:
+    linear-gradient(135deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.00) 45%,
+      rgba(255, 255, 255, 0.03) 100%),
+    rgba(255, 255, 255, 0.08) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.18) !important;
   -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
           backdrop-filter: blur(60px) saturate(180%) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
 }
 
 /* Brand / logo area at the top of the sidebar.
-   User: "change the color of this because the logo on the top is not
-   visible but use colors that match the website."
-   The brand text was rgba(255,255,255,0.95) — fine on solid dark, but
-   washes out against the new clear-glass sidebar when the planet video
-   behind has bright areas. Switched to the Saudi accent green (the
-   tenant's white-label colour by default = var(--accent), which is
-   var(--accent) in dark mode — the lifted version that meets WCAG AA on
-   glass). Added font-weight 800 and a subtle text-shadow for definition
-   against the varied video frame underneath. The "Saudi Vision 2030"
-   subtitle stays white-muted — it's contextual, not the headline. */
+   User: "the part where the logo is needs to be gold"
+   Paint the entire brand area as a solid gold pill so the logo / tenant
+   wordmark always reads as the brand anchor — the only saturated chip
+   in the otherwise glass sidebar.
+
+   !important is needed because index.html ships
+   `.app-sidebar-brand { background: transparent !important; }` inline
+   and auth-bootstrap.js sets `el.style.background = accent` via JS.
+   Higher-specificity !important rule wins both. */
+html[data-theme="dark"] .app-sidebar-brand {
+  background: var(--accent) !important;
+  background-image: none !important;
+  border-radius: 12px;
+  margin: 6px 8px 12px !important;
+  padding: 12px 14px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 4px 12px rgba(0, 0, 0, 0.25);
+}
+/* Wordmark text inside the gold pill = white for high contrast. */
 html[data-theme="dark"] .app-sidebar-brand > span[data-ar] {
-  color: var(--accent) !important;
+  color: #ffffff !important;
   font-weight: 800 !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.50);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.30);
   letter-spacing: 0.01em;
 }
 html[data-theme="dark"] .app-sidebar-brand > span[data-ar]::after {
-  color: rgba(255, 255, 255, 0.70) !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.50);
+  color: rgba(255, 255, 255, 0.78) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.30);
+}
+/* Brand-dot pill (the small "OH" mark / tenant logo container) — needs
+   a white-tinted surface now that it sits on the gold brand pill instead
+   of glass. */
+html[data-theme="dark"] .app-sidebar-brand .brand-dot {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+}
+html[data-theme="dark"] .app-sidebar-brand .brand-dot::after {
+  color: #ffffff !important;
 }
 
 /* ─────────────────────────────────────────────────── Backdrop-filter sweep
