@@ -1031,17 +1031,20 @@ html[data-theme="dark"] .view {
     );
   }
   html[data-theme="dark"] .app-bottom-tabs {
-    /* User: "no i didnt want it to get blured, the objects really have to
-       dissapear behind it, and the background needs to be clearly visible."
-       The mask on .app-content above already makes content invisible in
-       this region. The bar itself contributes ZERO paint — no bg, no
-       blur, no border, no shadow — so the planet video reads through
-       at full clarity. The tab icons / labels are children of the bar
-       and stay visible (they paint at z-index above the transparent
-       surface). */
-    background: transparent !important;
+    /* User: "i dont ask you to delete the bottom bar, so all the pixels
+       that scroll under the bottom bar should also scroll under the
+       video... so nothing is in between them."
+       The bar stays visible as a defined surface, but contributes the
+       absolute minimum paint so the planet video reads through it at
+       full clarity: a very faint rgba 0.03 wash (4× lighter than the
+       cards' 0.08, just enough to register the bar's silhouette) and
+       a 1 px hairline top border to anchor its edge. No blur — that
+       would smear the video. No box-shadow — that would darken the
+       region. The mask on .app-content above is what hides the
+       scrolling content; this rule just keeps the bar itself visible. */
+    background: rgba(255, 255, 255, 0.03) !important;
     background-image: none !important;
-    border-top: 0 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
     -webkit-backdrop-filter: none !important;
             backdrop-filter: none !important;
     box-shadow: none !important;
