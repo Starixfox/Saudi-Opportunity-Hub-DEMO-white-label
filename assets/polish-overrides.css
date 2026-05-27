@@ -1559,7 +1559,16 @@ html[data-theme="dark"] .ws-item-folder-dropdown,
 html[data-theme="dark"] .dfp-inner,
 html[data-theme="dark"] .oh-enh-card,
 html[data-theme="dark"] .oh-enh2-modal,
-html[data-theme="dark"] .oh-enh3-step {
+html[data-theme="dark"] .oh-enh3-step,
+html[data-theme="dark"] .home-ris-card,
+html[data-theme="dark"] .rec-card,
+html[data-theme="dark"] .admin-kpi-card,
+html[data-theme="dark"] .admin-form-card,
+html[data-theme="dark"] .folder-card,
+html[data-theme="dark"] .pipeline-card,
+html[data-theme="dark"] .oh-enh-mom-card,
+html[data-theme="dark"] .oh4-how-card,
+html[data-theme="dark"] .oh4-sector-card {
   background: rgba(255, 255, 255, 0.08) !important;
   border: 1px solid rgba(255, 255, 255, 0.18) !important;
   -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
