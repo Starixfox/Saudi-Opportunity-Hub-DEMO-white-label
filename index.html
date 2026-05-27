@@ -130,12 +130,15 @@
      Targets the home dashboard greeting + KPI tiles + quick-action chips
      + sidebar + opportunity cards. Uses var(--accent) so it adapts to
      whatever white-label theme is active. ─── -->
-<link rel="stylesheet" href="assets/polish-overrides.css">
+<link rel="stylesheet" href="assets/polish-overrides.css?v=bg-still-16s">
 
 <!-- ─── Shared dark-glass component library extracted from login.html.
      Loaded AFTER polish-overrides so .oh-* classes (and the gold-leaning
-     accent overrides below) win the cascade. ─── -->
-<link rel="stylesheet" href="assets/components.css">
+     accent overrides below) win the cascade. The ?v= cache-bust on this
+     and polish-overrides is bumped whenever the SPA's atmospheric layer
+     changes, so users on a stale cache pick up the new bg + body rules
+     without waiting for the browser's max-age to expire. ─── -->
+<link rel="stylesheet" href="assets/components.css?v=bg-still-16s">
 
 <!-- SPA-specific gold-accent layer — bridges polish-overrides (which paints
      emphasis in --accent, i.e. the tenant green) with the login aesthetic
@@ -280,8 +283,8 @@
      overlay sits on top of the image (still behind .app-shell) and
      adds a dark scrim so glass cards have contrast to read against. ── -->
 <picture aria-hidden="true">
-  <source srcset="assets/bg-login-still.webp" type="image/webp">
-  <img class="oh-bg-image" src="assets/bg-login-still.jpg" alt="" loading="eager" fetchpriority="high">
+  <source srcset="assets/bg-login-still.webp?v=16s" type="image/webp">
+  <img class="oh-bg-image" src="assets/bg-login-still.jpg?v=16s" alt="" loading="eager" fetchpriority="high">
 </picture>
 <div class="oh-bg-overlay" aria-hidden="true"></div>
 
