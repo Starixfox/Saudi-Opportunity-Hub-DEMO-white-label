@@ -7078,35 +7078,20 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   border-color: var(--accent);
 }
 
-/* ── 12. HOME PANELS (new this week / watchlist) ────────── */
-.home-card,
-.home-panel {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: 14px;
-  box-shadow: var(--shadow-sm);
-}
-.home-card-hdr,
-.home-panel-hdr {
-  border-bottom: 1px solid var(--border-default);
-  padding: 14px 18px;
-}
-.home-card-hdr h3,
-.home-panel-hdr h3 {
-  font-family: var(--font-display);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-.home-opp-row,
+/* ── 12. HOME PANELS — saved-card list rows only ─────────
+   The .home-card / .home-panel block here was a duplicate of the rule
+   at line 4767, using non-existent tokens (--bg-surface, --border-default,
+   --text-primary). .home-panel, .home-panel-hdr, .home-opp-row are dead
+   classes (no DOM usage). .home-card-hdr h3 doesn't exist — the header
+   uses span.home-card-badge. Removed. Only .wl-saved-card list-row
+   styling kept since JS creates it (index.html:3028). */
 .wl-saved-card {
   border-radius: 8px;
   padding: 10px 12px;
   transition: background-color 160ms ease;
 }
-.home-opp-row:hover,
 .wl-saved-card:hover {
-  background: var(--bg-elevated);
+  background: var(--surface-2);
 }
 
 /* ── 13. ONBOARDING CHECKLIST ──────────────────────────── */
