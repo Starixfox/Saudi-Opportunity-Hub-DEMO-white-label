@@ -1489,20 +1489,31 @@ html[data-theme="dark"] .oh-tm-card--active {
   border-color: rgba(255, 255, 255, 0.30);
 }
 
-/* Home-card list rows. The rows live INSIDE .home-card's glass surface,
-   so they must not have their own bg/border/blur (would stack glass-on-glass
-   and look opaque). They also don't need the per-row divider line in dark
-   mode — the glass surface already separates rows visually. Hover gets a
-   subtle white tint instead of the solid var(--surface-2). */
-html[data-theme="dark"] .home-opp-item {
+/* List rows that live INSIDE a glass parent (.home-card for home-opp-item,
+   the notifications dropdown for notif-item). They must NOT have their own
+   bg/border/blur (would stack glass-on-glass and look opaque) and don't
+   need per-row divider lines — the glass surface already separates rows.
+   Hover gets a subtle white tint instead of the solid var(--surface-2). */
+html[data-theme="dark"] .home-opp-item,
+html[data-theme="dark"] .notif-item {
   background: transparent !important;
   border-bottom: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   box-shadow: none !important;
 }
-html[data-theme="dark"] .home-opp-item:hover {
+html[data-theme="dark"] .home-opp-item:hover,
+html[data-theme="dark"] .notif-item:hover {
   background: rgba(255, 255, 255, 0.06) !important;
+}
+/* Unread notifications keep an accent tint so the user can still see they're
+   unread — but a much subtler glow than the solid var(--green-dim) the
+   legacy rule paints. */
+html[data-theme="dark"] .notif-item.unread {
+  background: var(--accent-soft) !important;
+}
+html[data-theme="dark"] .notif-item.unread:hover {
+  background: var(--accent-glow) !important;
 }
 
 /* Settings modal sub-surfaces — settings-row dividers, chip groups */
@@ -1583,7 +1594,11 @@ html[data-theme="dark"] .folder-card,
 html[data-theme="dark"] .pipeline-card,
 html[data-theme="dark"] .oh-enh-mom-card,
 html[data-theme="dark"] .oh4-how-card,
-html[data-theme="dark"] .oh4-sector-card {
+html[data-theme="dark"] .oh4-sector-card,
+html[data-theme="dark"] .about-card,
+html[data-theme="dark"] .about-meta-item,
+html[data-theme="dark"] .ob-checklist,
+html[data-theme="dark"] .about-wl-section {
   background: rgba(255, 255, 255, 0.08) !important;
   border: 1px solid rgba(255, 255, 255, 0.18) !important;
   -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
