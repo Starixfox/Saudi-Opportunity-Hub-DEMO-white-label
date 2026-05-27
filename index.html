@@ -234,10 +234,61 @@
     letter-spacing: 0;
     text-transform: none;
   }
+
+  /* ─────────────────────────────────────────────────────────────
+     SCROLL-SCRUBBED VIDEO BACKGROUND
+     The <video> sits behind everything (z-index: -2). A dark scrim
+     above it (z-index: -1) gives the glass cards contrast to read.
+     polish-overrides paints the body with a gradient + constellation
+     pattern; that conflicts with the video, so we drop it on the SPA.
+     ──────────────────────────────────────────────────────────── */
+  .oh-bg-video {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: -2;
+    pointer-events: none;
+    filter: saturate(1.1);
+  }
+  .oh-bg-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.62) 100%);
+  }
+
+  /* Replace polish-overrides' layered body backdrop with a flat fallback
+     (only visible if the video fails to load). Specificity matches the
+     polish rule, but this <style> block loads AFTER polish-overrides
+     so cascade order wins. */
+  html[data-theme="dark"] body {
+    background-image: none;
+    background-color: #050810;
+  }
 </style>
 
 </head>
 <body>
+
+<!-- ══ SCROLL-SCRUBBED VIDEO BACKGROUND ════════════════════════════════════
+     The video doesn't autoplay — it's paused and its currentTime is driven
+     by scroll position via the IIFE at the bottom of <body>. By the time
+     the user reaches the end of the page, the video is at its last frame.
+     muted + playsinline + preload="auto" are required for iOS Safari to
+     honour scripted currentTime updates without user interaction. The
+     overlay sits on top of the video (still behind .app-shell) and adds
+     a dark scrim so glass cards have contrast to read against. ── -->
+<video class="oh-bg-video" id="oh-bg-video"
+       muted playsinline preload="auto"
+       aria-hidden="true">
+  <source src="assets/bg-login-loop.mp4?v=5" type="video/mp4">
+</video>
+<div class="oh-bg-overlay" aria-hidden="true"></div>
 
 <!-- Skip-to-content link for keyboard / screen-reader users -->
 <a class="oh-skip-link" href="#view-home">Skip to main content</a>
@@ -260,6 +311,81 @@
       document.body.classList.remove('page-entering');
     }, { once: true });
   }
+})();
+</script>
+
+<!-- ══ SCROLL-SCRUB CONTROLLER ═════════════════════════════════════════════
+     Maps the window scroll progress (0…1) to video.currentTime (0…duration).
+     The video is never `play()`'d — we just paint frames as the user
+     scrolls. So:
+       · While scrolling → frames advance, looks like the video is playing
+       · Stop scrolling  → frame holds (no `play()` was running anyway)
+       · End of page     → currentTime === duration, last frame visible
+     Throttled with rAF so we never set currentTime more than once per
+     paint. Re-evaluated on resize, and on each SPA route change because
+     each view has a different scrollHeight.
+     prefers-reduced-motion: hold the first frame, skip the listener. ── -->
+<script>
+(function(){
+  var video = document.getElementById('oh-bg-video');
+  if (!video) return;
+
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    /* Honour the OS preference — paint frame 0 and never animate. */
+    var holdFirstFrame = function(){ try { video.currentTime = 0.001; } catch(e){} };
+    if (video.readyState >= 1) holdFirstFrame();
+    else video.addEventListener('loadedmetadata', holdFirstFrame, { once: true });
+    return;
+  }
+
+  var ticking = false;
+  var duration = 0;
+
+  function getScrollProgress() {
+    var doc = document.documentElement;
+    var max = (doc.scrollHeight - window.innerHeight) || 0;
+    if (max <= 0) return 0;
+    var y = window.scrollY || doc.scrollTop || 0;
+    return Math.max(0, Math.min(1, y / max));
+  }
+
+  function paint() {
+    ticking = false;
+    if (!duration) return;
+    var target = getScrollProgress() * duration;
+    /* Avoid spamming currentTime — Safari + Firefox stutter when fed
+       sub-frame deltas. 0.02s ≈ 1 frame at 50fps. */
+    if (Math.abs(video.currentTime - target) > 0.02) {
+      try { video.currentTime = target; } catch (e) { /* not ready */ }
+    }
+  }
+
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(paint);
+  }
+
+  function start() {
+    duration = video.duration;
+    if (!isFinite(duration) || duration <= 0) return;
+    /* Make sure the video is paused — we drive currentTime ourselves. */
+    try { video.pause(); } catch (e) {}
+    paint();
+  }
+
+  if (video.readyState >= 1) start();
+  else video.addEventListener('loadedmetadata', start, { once: true });
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+
+  /* SPA route changes swap views with different heights — re-evaluate
+     after each hashchange so the next view's scrollHeight maps cleanly. */
+  window.addEventListener('hashchange', function(){
+    /* Defer a frame so the new view has actually rendered. */
+    requestAnimationFrame(onScroll);
+  });
 })();
 </script>
 
