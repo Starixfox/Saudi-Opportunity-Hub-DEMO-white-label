@@ -47,7 +47,7 @@ body.oh-atmospheric::before {
   pointer-events: none;
   background:
     radial-gradient(ellipse 80% 60% at 70% 20%, rgba(201, 166, 107, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 80% at 20% 80%, rgba(0, 108, 53, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 20% 80%, rgba(227, 189, 108, 0.06) 0%, transparent 60%),
     linear-gradient(135deg, #0c1118 0%, #0a0d14 40%, #060810 100%);
 }
 

@@ -240,15 +240,18 @@
   --border-subtle:     rgba(228, 228, 231, 0.6);
   --divider:           var(--color-neutral-200);
 
-  /* Accent — Saudi green by default; per-theme override hooks below. */
-  --accent:            var(--color-green-600);
-  --accent-hover:      var(--color-green-700);
-  --accent-pressed:    var(--color-green-800);
-  --accent-soft:       rgba(0, 108, 53, 0.10);
-  --accent-softer:     rgba(0, 108, 53, 0.06);
-  --accent-glow:       rgba(0, 108, 53, 0.25);
-  --accent-ring:       rgba(0, 108, 53, 0.35);
-  --on-accent:         var(--color-neutral-0);
+  /* Accent — gold (user: "all themes should be changed to gold so no
+     other theme colors anymore"). Per-tenant white-label can still
+     override via window.OH_THEMES, but every theme there now points
+     at the same gold palette. */
+  --accent:            var(--color-gold-500);
+  --accent-hover:      var(--color-gold-600);
+  --accent-pressed:    var(--color-gold-700);
+  --accent-soft:       rgba(201, 166, 107, 0.10);
+  --accent-softer:     rgba(201, 166, 107, 0.06);
+  --accent-glow:       rgba(201, 166, 107, 0.25);
+  --accent-ring:       rgba(201, 166, 107, 0.35);
+  --on-accent:         var(--color-neutral-900);
 
   /* Gold — secondary accent, used sparingly */
   --gold:              var(--color-gold-500);
@@ -269,8 +272,8 @@
   --sidebar-bg:           #0f172a;
   --sidebar-text:         #94a3b8;
   --sidebar-text-active:  #ffffff;
-  --sidebar-active-bg:    rgba(0, 108, 53, 0.18);
-  --sidebar-active-border:var(--color-green-600);
+  --sidebar-active-bg:    rgba(201, 166, 107, 0.18);
+  --sidebar-active-border:var(--color-gold-500);
   --sidebar-logo:         #ffffff;
 
   /* Focus ring — 3px around accent, WCAG-bright */
@@ -306,15 +309,16 @@
   --border-subtle:     rgba(255, 255, 255, 0.06);
   --divider:           rgba(255, 255, 255, 0.08);
 
-  /* Accent — pure #006C35 reads dim on dark backgrounds; lift one step. */
-  --accent:            #34d97b;
-  --accent-hover:      #4ee08c;
-  --accent-pressed:    #80efb1;
-  --accent-soft:       rgba(52, 217, 123, 0.14);
-  --accent-softer:     rgba(52, 217, 123, 0.08);
-  --accent-glow:       rgba(52, 217, 123, 0.30);
-  --accent-ring:       rgba(52, 217, 123, 0.40);
-  --on-accent:         #002612;
+  /* Accent — gold lifted for dark surfaces. #C9A66B reads dim on dark
+     so we step up to #e3bd6c (color-gold-300, AA against #0f1420). */
+  --accent:            #e3bd6c;
+  --accent-hover:      #d4ab48;
+  --accent-pressed:    #efd49b;
+  --accent-soft:       rgba(227, 189, 108, 0.14);
+  --accent-softer:     rgba(227, 189, 108, 0.08);
+  --accent-glow:       rgba(227, 189, 108, 0.30);
+  --accent-ring:       rgba(227, 189, 108, 0.40);
+  --on-accent:         #1a1107;
 
   /* Gold lift */
   --gold:              #e3bd6c;
@@ -335,8 +339,8 @@
   --sidebar-bg:           #060810;
   --sidebar-text:         #7c89ab;
   --sidebar-text-active:  #ffffff;
-  --sidebar-active-bg:    rgba(52, 217, 123, 0.16);
-  --sidebar-active-border:#34d97b;
+  --sidebar-active-bg:    rgba(227, 189, 108, 0.16);
+  --sidebar-active-border:#e3bd6c;
   --sidebar-logo:         #ffffff;
 
   /* Shadows — bolder alpha on dark, otherwise invisible */
@@ -372,12 +376,12 @@
     --text-faint:        #7c89ab;   /* WCAG AA — 5.28:1 on #0f1420 */
     --border:            rgba(255, 255, 255, 0.10);
     --border-strong:     rgba(255, 255, 255, 0.18);
-    --accent:            #34d97b;
-    --accent-hover:      #4ee08c;
-    --accent-soft:       rgba(52, 217, 123, 0.14);
-    --accent-glow:       rgba(52, 217, 123, 0.30);
-    --accent-ring:       rgba(52, 217, 123, 0.40);
-    --on-accent:         #002612;
+    --accent:            #e3bd6c;
+    --accent-hover:      #d4ab48;
+    --accent-soft:       rgba(227, 189, 108, 0.14);
+    --accent-glow:       rgba(227, 189, 108, 0.30);
+    --accent-ring:       rgba(227, 189, 108, 0.40);
+    --on-accent:         #1a1107;
     --sidebar-bg:        #060810;
     --shadow-md:    0 4px 8px rgba(0, 0, 0, 0.45),
                     0 2px 4px rgba(0, 0, 0, 0.30);
