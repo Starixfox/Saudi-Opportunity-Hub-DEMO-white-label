@@ -2605,11 +2605,12 @@ main {
 .section-label { color: #006C35; }
 
 /* ── IS KPI CARDS ────────────────────────────── */
+/* .saudi/.gcc/.global variants were never applied in the DOM (grep
+   confirms zero usage); their ::before bar-color rules and the matching
+   .kpi-icon.saudi bg rule were removed. The base border-color override
+   stays — it tweaks the light-theme card border to a slightly cooler
+   #dde3ed than var(--border). */
 .kpi-card { border-color: #dde3ed; }
-.kpi-card.saudi::before { background: #006C35; }
-.kpi-card.gcc::before   { background: #C9A66B; }
-.kpi-card.global::before { background: #4a90d9; }
-.kpi-icon.saudi { background: rgba(0,108,53,0.08); }
 
 /* ── IS PAGINATION ───────────────────────────── */
 .page-btn.active { background: #006C35; border-color: #006C35; }

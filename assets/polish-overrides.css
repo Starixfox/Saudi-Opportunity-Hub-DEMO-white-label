@@ -1599,13 +1599,33 @@ html[data-theme="dark"] .about-card,
 html[data-theme="dark"] .about-meta-item,
 html[data-theme="dark"] .ob-checklist,
 html[data-theme="dark"] .about-wl-section {
-  background: rgba(255, 255, 255, 0.08) !important;
+  /* Layered background: a subtle diagonal white gradient on top of the
+     base rgba(0.08) tint, on top of whatever the planet bg paints behind.
+     The gradient gives every card its own built-in "light source from top-
+     left" so cards keep visual identity even when the video frame behind
+     them is uniformly dark (which is why the watchlist card on the right
+     of the two-col home layout used to look flatter than the new-this-
+     week card on the left). `background:` shorthand still resets bg-image,
+     so this also kills any legacy linear-gradient on .about-wl-section. */
+  background:
+    linear-gradient(135deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.00) 45%,
+      rgba(255, 255, 255, 0.03) 100%),
+    rgba(255, 255, 255, 0.08) !important;
   border: 1px solid rgba(255, 255, 255, 0.18) !important;
   -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
           backdrop-filter: blur(60px) saturate(180%) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
     0 20px 60px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Kill the .home-card-hdr divider line in dark mode. The glass surface
+   already separates the header from the list visually; the extra hairline
+   adds noise. (Same family of cleanup as the .home-opp-item dividers.) */
+html[data-theme="dark"] .home-card-hdr {
+  border-bottom: none !important;
 }
 
 /* ───────────────────────────────────────────────────────── Sidebar override
