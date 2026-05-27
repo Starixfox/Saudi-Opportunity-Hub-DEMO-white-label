@@ -1493,13 +1493,14 @@
    2) Arabic / English language switcher (RTL + translated UI)
    ============================================================ */
 
-/* ── 1. THEME — toggle button removed, platform is light-only ───────
-   The [data-theme="dark"] CSS tokens are retained for future use, but no UI
-   surfaces dark mode today. This IIFE remains (keeps the inline-script count
-   stable) and just pins data-theme="light" on load while clearing any prior
-   user preference left in localStorage. */
+/* ── 1. THEME — pinned to dark for the polish-pass dark-glass reskin ──
+   The SPA now matches the login page aesthetic (frosted-glass cards on
+   a deep emerald gradient). Light-mode tokens stay defined in
+   legacy-app.css for a future toggle, but the platform ships dark today.
+   The override block in assets/polish-overrides.css layers glassmorphism
+   on top of the dark-mode token path. */
 (function () {
-  document.documentElement.setAttribute('data-theme', 'light');
+  document.documentElement.setAttribute('data-theme', 'dark');
   try {
     localStorage.removeItem('oh-theme');
     localStorage.removeItem('is-demo-theme');
