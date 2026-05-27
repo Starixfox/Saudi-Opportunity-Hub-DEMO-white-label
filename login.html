@@ -539,6 +539,15 @@
       padding: 6px 22px;
       display: flex;
       flex-direction: column;
+      align-items: center;
+      text-align: center;
+      /* Baseline cell width so all three feel evenly weighted regardless
+         of label length. Arabic "فرصة" / "مناطق" are much shorter than
+         "OPPORTUNITIES" / "REGIONS", so without this each cell shrunk
+         to content and the dividers visually sat too close to the
+         shorter labels. min-width: 88px is the width of the longest AR
+         value (1,496) plus comfortable side padding. */
+      min-width: 88px;
       gap: 1px;
     }
     /* Hairline divider on every pill after the first. border-inline-start
