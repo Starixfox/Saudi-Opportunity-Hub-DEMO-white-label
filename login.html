@@ -1226,15 +1226,15 @@
 
       <div class="brand-stats">
         <div class="stat-pill">
-          <strong>1,074</strong>
+          <strong id="brand-stat-opps" data-fallback="1,074">—</strong>
           <span data-en="Opportunities" data-ar="فرصة">Opportunities</span>
         </div>
         <div class="stat-pill">
-          <strong>15</strong>
+          <strong id="brand-stat-sectors" data-fallback="15">—</strong>
           <span data-en="Sectors" data-ar="قطاعًا">Sectors</span>
         </div>
         <div class="stat-pill">
-          <strong>3</strong>
+          <strong id="brand-stat-regions" data-fallback="3">—</strong>
           <span data-en="Regions" data-ar="مناطق">Regions</span>
         </div>
       </div>
@@ -1619,6 +1619,101 @@
   const SUPABASE_URL = 'https://dshrbbnjahjcwxzvzygh.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzaHJiYm5qYWhqY3d4enZ6eWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE3OTgsImV4cCI6MjA5NDA1Nzc5OH0.OpUGgfL91m7STsZpE6fnX281KN_Ge8oytR-2lM-3qTo';
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  /* ──────────────────────────────────────────────────────────────
+     LIVE BRAND STATS
+     The three pills on the brand panel (opportunities / sectors /
+     regions) used to be hard-coded. They now read directly from the
+     Supabase dataset on page load. Anon RLS already permits select
+     on the public opportunities view, so no auth round-trip needed.
+     Each stat has a data-fallback="…" attribute on its <strong> so
+     if the request fails (offline, RLS misconfigured, etc) we fall
+     back to a sensible recent number rather than showing the
+     em-dash placeholder forever.
+  ────────────────────────────────────────────────────────────── */
+  (function loadBrandStats() {
+    const opps    = document.getElementById('brand-stat-opps');
+    const sectors = document.getElementById('brand-stat-sectors');
+    const regions = document.getElementById('brand-stat-regions');
+    if (!opps || !sectors || !regions) return;
+
+    // en-US so the number always reads as "1,558" regardless of the
+    // visitor's browser locale (some browsers default to "1.558" which
+    // would clash with the placeholder format the brand panel uses).
+    const fmt = (n) => Number(n).toLocaleString('en-US');
+    const fallback = (el) => {
+      const fb = el.getAttribute('data-fallback');
+      // Only restore the fallback if the live fetch hasn't already
+      // populated a real number (any non-em-dash content wins).
+      if (fb && el.textContent === '—') el.textContent = fb;
+    };
+
+    // Total opportunities — HEAD + Prefer count=exact gives just the
+    // row count, no body payload.
+    supabase
+      .from('opportunities')
+      .select('*', { count: 'exact', head: true })
+      .then(function (res) {
+        if (res && typeof res.count === 'number') {
+          opps.textContent = fmt(res.count);
+        } else {
+          fallback(opps);
+        }
+      })
+      .catch(function () { fallback(opps); });
+
+    // Distinct sectors — pull just the sectors column, dedupe client-side.
+    // Each opportunity has sectors[] (array). We flatten + Set.
+    supabase
+      .from('opportunities')
+      .select('sectors')
+      .then(function (res) {
+        if (res && Array.isArray(res.data)) {
+          const all = new Set();
+          for (const row of res.data) {
+            const s = row && row.sectors;
+            if (Array.isArray(s)) s.forEach((x) => x && all.add(String(x).toLowerCase().trim()));
+            else if (s) all.add(String(s).toLowerCase().trim());
+          }
+          if (all.size > 0) sectors.textContent = fmt(all.size);
+          else fallback(sectors);
+        } else {
+          fallback(sectors);
+        }
+      })
+      .catch(function () { fallback(sectors); });
+
+    // Distinct region scopes — Saudi (SA-…) / GCC (GCC-…) / Global (GL-…)
+    // map from the opportunity id prefix. Count the distinct prefixes
+    // present in the dataset.
+    supabase
+      .from('opportunities')
+      .select('id')
+      .then(function (res) {
+        if (res && Array.isArray(res.data)) {
+          const scopes = new Set();
+          for (const row of res.data) {
+            const id = row && row.id;
+            if (typeof id !== 'string') continue;
+            if (id.startsWith('SA-'))  scopes.add('SA');
+            else if (id.startsWith('GCC-')) scopes.add('GCC');
+            else if (id.startsWith('GL-'))  scopes.add('GL');
+          }
+          if (scopes.size > 0) regions.textContent = fmt(scopes.size);
+          else fallback(regions);
+        } else {
+          fallback(regions);
+        }
+      })
+      .catch(function () { fallback(regions); });
+
+    // Belt-and-suspenders: if any pill is still on the em-dash 6 s
+    // later (slow network, blocked request), drop in the fallback so
+    // the brand panel never looks broken.
+    setTimeout(function () {
+      [opps, sectors, regions].forEach(fallback);
+    }, 6000);
+  })();
 
   /* ──────────────────────────────────────────────────────────────
      STATE
