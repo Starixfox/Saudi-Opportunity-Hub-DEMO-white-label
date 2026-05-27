@@ -189,8 +189,14 @@
     }
 
     /* Stats row */
+    /* RTL: let natural row flow run right-to-left so the cells visually
+       reverse (pill #0 → right, pill #2 → left) AND border-inline-start
+       (which is on the right edge in RTL) lands cleanly between adjacent
+       cells. The earlier row-reverse override left the cells in LTR
+       visual order while border-inline-start still pointed at right
+       edges, so the dividers ended up at the wrong cell boundaries. */
     [dir="rtl"] .brand-stats {
-      flex-direction: row-reverse;
+      flex-direction: row;
     }
 
     /* Vision bar */
