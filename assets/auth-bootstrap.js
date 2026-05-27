@@ -76,15 +76,35 @@ function checkSuperAdmin(uid) {
    Public: applyTheme() is callable anywhere (URL ?theme=xxx is a
    legitimate demo feature). The *management UI* is owner-gated.
    ════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════
+   GOLD-ONLY PALETTE (User: "all themes should be changed to gold so no
+   other theme colors anymore.")
+
+   Every tenant theme below shares the same accent palette: calligraphy
+   gold (#C9A66B = color-gold-500) for light mode, lifted gold (#e3bd6c
+   = color-gold-300) for dark mode so it reads above WCAG AA on the dark
+   surface tokens. The tenant LABELS, LOGOS, and NAMES stay tenant-
+   specific — only the colour token unifies.
+
+   These hex values match the canonical gold ramp in tokens.css:34-43.
+   ═══════════════════════════════════════════════════════════════════════ */
+var GOLD_ACCENT = {
+  accent:           '#C9A66B',
+  accentHover:      '#a88947',
+  accentLight:      'rgba(201,166,107,0.10)',
+  accentGlow:       'rgba(201,166,107,0.25)',
+  accentDim:        'rgba(201,166,107,0.08)',
+  darkAccent:       '#e3bd6c',
+  darkAccentHover:  '#d4ab48',
+  darkAccentLight:  'rgba(227,189,108,0.14)',
+  darkAccentGlow:   'rgba(227,189,108,0.30)',
+  darkAccentDim:    'rgba(227,189,108,0.10)'
+};
+
 window.OH_THEMES = {
-  'default': {
+  'default': Object.assign({}, GOLD_ACCENT, {
     label: 'Saudi Opportunity Hub (Default)',
     labelAr: 'منصة الفرص السعودية',
-    accent: '#006C35',
-    accentHover: '#005228',
-    accentLight: 'rgba(0,108,53,0.10)',
-    accentGlow: 'rgba(0,108,53,0.25)',
-    accentDim: 'rgba(0,108,53,0.08)',
     tagline: 'Aligned with Vision 2030',
     taglineAr: 'متوافق مع رؤية 2030',
     navName: 'Opportunity Hub',
@@ -92,15 +112,10 @@ window.OH_THEMES = {
     logo: null,
     logoDark: null,
     logoHeight: 28
-  },
-  'misa': {
+  }),
+  'misa': Object.assign({}, GOLD_ACCENT, {
     label: 'MISA — Ministry of Investment',
     labelAr: 'هيئة الاستثمار — وزارة الاستثمار',
-    accent: '#1B4F8A',
-    accentHover: '#163F6E',
-    accentLight: 'rgba(27,79,138,0.10)',
-    accentGlow: 'rgba(27,79,138,0.25)',
-    accentDim: 'rgba(27,79,138,0.08)',
     tagline: 'Ministry of Investment — Saudi Arabia',
     taglineAr: 'وزارة الاستثمار — المملكة العربية السعودية',
     navName: 'MISA Intelligence',
@@ -108,15 +123,10 @@ window.OH_THEMES = {
     logo: 'https://misa.gov.sa/app/uploads/2023/11/logo.png',
     logoDark: 'https://misa.gov.sa/app/uploads/2023/11/logo.png',
     logoHeight: 32
-  },
-  'monshaat': {
+  }),
+  'monshaat': Object.assign({}, GOLD_ACCENT, {
     label: "Monsha'at — SME Authority",
     labelAr: 'منشآت — الهيئة العامة للمنشآت',
-    accent: '#C25A06',
-    accentHover: '#9E4804',
-    accentLight: 'rgba(194,90,6,0.10)',
-    accentGlow: 'rgba(194,90,6,0.25)',
-    accentDim: 'rgba(194,90,6,0.08)',
     tagline: "Saudi SME & Entrepreneurship Authority",
     taglineAr: 'الهيئة العامة للمنشآت الصغيرة والمتوسطة',
     navName: "Monsha'at Hub",
@@ -124,15 +134,10 @@ window.OH_THEMES = {
     logo: 'https://upload.wikimedia.org/wikipedia/commons/2/27/Small_and_Medium_Enterprises_General_Authority_Logo.svg',
     logoDark: 'https://upload.wikimedia.org/wikipedia/commons/2/27/Small_and_Medium_Enterprises_General_Authority_Logo.svg',
     logoHeight: 30
-  },
-  'adio': {
+  }),
+  'adio': Object.assign({}, GOLD_ACCENT, {
     label: 'ADIO — Abu Dhabi Investment Office',
     labelAr: 'مكتب أبوظبي للاستثمار',
-    accent: '#006C96',
-    accentHover: '#005577',
-    accentLight: 'rgba(0,108,150,0.10)',
-    accentGlow: 'rgba(0,108,150,0.25)',
-    accentDim: 'rgba(0,108,150,0.08)',
     tagline: 'Abu Dhabi Investment Office',
     taglineAr: 'مكتب أبوظبي للاستثمار',
     navName: 'ADIO Intelligence',
@@ -140,15 +145,10 @@ window.OH_THEMES = {
     logo: 'https://www.investwithabudhabi.com/images/default-source/logos/logo-new-light535748fa25b44e1e838390e8f149d21d.svg',
     logoDark: 'https://www.investwithabudhabi.com/images/default-source/logos/logo-dark55d48f3d417f414a910936cc42cb8022.svg',
     logoHeight: 28
-  },
-  'neom': {
+  }),
+  'neom': Object.assign({}, GOLD_ACCENT, {
     label: 'NEOM — The Line Investment Zone',
     labelAr: 'نيوم — منطقة الاستثمار',
-    accent: '#00B4D8',
-    accentHover: '#0096B4',
-    accentLight: 'rgba(0,180,216,0.10)',
-    accentGlow: 'rgba(0,180,216,0.25)',
-    accentDim: 'rgba(0,180,216,0.08)',
     tagline: 'Building the future. NEOM.',
     taglineAr: 'نبني المستقبل. نيوم.',
     navName: 'NEOM Opportunity Hub',
@@ -156,15 +156,10 @@ window.OH_THEMES = {
     logo: 'https://upload.wikimedia.org/wikipedia/commons/1/13/NEOM_Text_Logo.svg',
     logoDark: 'https://upload.wikimedia.org/wikipedia/commons/1/13/NEOM_Text_Logo.svg',
     logoHeight: 22
-  },
-  'sdb': {
+  }),
+  'sdb': Object.assign({}, GOLD_ACCENT, {
     label: 'Saudi Development Bank',
     labelAr: 'بنك التنمية السعودي',
-    accent: '#7B2D8B',
-    accentHover: '#61226E',
-    accentLight: 'rgba(123,45,139,0.10)',
-    accentGlow: 'rgba(123,45,139,0.25)',
-    accentDim: 'rgba(123,45,139,0.08)',
     tagline: 'Financing the Future of Saudi Arabia',
     taglineAr: 'تمويل مستقبل المملكة',
     navName: 'SDB Intelligence',
@@ -172,24 +167,10 @@ window.OH_THEMES = {
     logo: 'https://www.sdb.gov.sa/SiteFiles/images/logo.svg',
     logoDark: 'https://www.sdb.gov.sa/SiteFiles/images/logo.svg',
     logoHeight: 30
-  },
-  'swift-solve': {
+  }),
+  'swift-solve': Object.assign({}, GOLD_ACCENT, {
     label: 'Swift Solve',
     labelAr: 'سويفت سولف',
-    /* Light-mode primary: deep navy lifted from the brand mark */
-    accent: '#0E2A56',
-    accentHover: '#091F40',
-    accentLight: 'rgba(14,42,86,0.10)',
-    accentGlow: 'rgba(14,42,86,0.25)',
-    accentDim: 'rgba(14,42,86,0.08)',
-    /* Dark-mode primary: lifted from the chevron highlight — pure navy
-       is unreadable against the dark surface tokens, so swap to the
-       bright royal blue that's visible on dark backgrounds. */
-    darkAccent: '#4A90E2',
-    darkAccentHover: '#3578C5',
-    darkAccentLight: 'rgba(74,144,226,0.14)',
-    darkAccentGlow: 'rgba(74,144,226,0.30)',
-    darkAccentDim: 'rgba(74,144,226,0.10)',
     tagline: 'Investment Intelligence Platform',
     taglineAr: 'منصة ذكاء الاستثمار',
     navName: 'Swift Solve',
@@ -197,7 +178,7 @@ window.OH_THEMES = {
     /* Drop the real brand asset at assets/logo-swift-solve.png and the
        sidebar + theme-manager card pick it up automatically. While the
        file is missing, the existing onerror handlers fall back to the
-       navy swatch + text, so the theme still looks on-brand. */
+       gold swatch + text, so the theme still looks on-brand. */
     logo: 'assets/logo-swift-solve.png',
     logoDark: 'assets/logo-swift-solve.png',
     logoHeight: 30,
@@ -206,7 +187,7 @@ window.OH_THEMES = {
        because their logo files already contain their wordmark. */
     showName: true,
     pageTitle: 'Swift Solve — Investment Intelligence Platform'
-  }
+  })
 };
 
 window.__ohActiveTheme = 'default';
