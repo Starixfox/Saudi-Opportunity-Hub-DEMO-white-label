@@ -1545,34 +1545,15 @@ html[data-theme="dark"] .oh-enh3-step {
 }
 
 /* ───────────────────────────────────────────────────────── Sidebar override
-   Sidebar gets a fully-transparent bg (NO rgba white tint) so the video
-   shows clean behind it. legacy-app.css ships THREE different
-   .app-sidebar background rules — `background: var(--surface)`,
-   `background: var(--sidebar-bg)` (= opaque #060810 in dark), plus the
-   mobile-open state. None of them have !important, so this single
-   !important block beats all of them on cascade.
-
-   The 60 px backdrop-filter still applies — the planet video gets
-   beautifully smeared as it passes behind the sidebar, but the
-   sidebar contributes zero whiteness of its own. */
+   User reports the sidebar doesn't show the video behind it. The earlier
+   rgba(255, 255, 255, 0.04) was apparently still too opaque. Drop the bg
+   even further AND mark !important so legacy-app.css (which paints the
+   sidebar with `background: var(--surface)`) can't win the cascade. */
 html[data-theme="dark"] .app-sidebar {
-  background-color: transparent !important;
-  background-image: none !important;
+  background: rgba(255, 255, 255, 0.02) !important;
   border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
   -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
           backdrop-filter: blur(60px) saturate(180%) !important;
-}
-
-/* Home-stat accent strip (::before) — User asked for every card to look
-   identical to the welcome-back card. That card has no top accent, but
-   the .home-stat tiles each carry a 3 px cyan/gold strip via ::before.
-   Hide it in dark mode so the row reads as a uniform set of glass tiles. */
-html[data-theme="dark"] .home-stat::before,
-html[data-theme="dark"] .home-stat:hover::before,
-html[data-theme="dark"] .home-stat:first-child::before,
-html[data-theme="dark"] .home-stat--green::before,
-html[data-theme="dark"] .home-stat--gold::before {
-  display: none !important;
 }
 
 /* ─────────────────────────────────────────────────── Backdrop-filter sweep
