@@ -1030,12 +1030,24 @@ html[data-theme="dark"] .view {
   .app-shell {
     height: 100dvh;
     min-height: 0;
+    /* Collapse the topbar grid row on mobile — the topbar pill is
+       position: fixed (floats above content), so reserving a 56 px
+       grid row above .app-content just clips content at .app-content's
+       top edge and prevents it from scrolling BEHIND the pill. With
+       the row removed, .app-content extends to viewport top and
+       content can scroll under the pill with blur showing through. */
+    grid-template-rows: 1fr;
+    grid-template-areas: "content";
   }
   .app-content {
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     min-height: 0;
+    /* Inset content visually below the floating topbar pill.
+       Pill = 12 px top + ~48 px tall = ~60 px from viewport top;
+       add 16 px breathing room. */
+    padding-top: calc(76px + env(safe-area-inset-top, 0px)) !important;
   }
   /* Footer doesn't belong on the phone — it's a desktop brand footer.
      Hidden so the scroll container can fill the viewport. */
