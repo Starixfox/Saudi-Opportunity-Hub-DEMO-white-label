@@ -1031,10 +1031,19 @@ html[data-theme="dark"] .view {
     );
   }
   html[data-theme="dark"] .app-bottom-tabs {
-    background: rgba(255, 255, 255, 0.04) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.10) !important;
-    -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
-            backdrop-filter: blur(60px) saturate(180%) !important;
+    /* User: "no i didnt want it to get blured, the objects really have to
+       dissapear behind it, and the background needs to be clearly visible."
+       The mask on .app-content above already makes content invisible in
+       this region. The bar itself contributes ZERO paint — no bg, no
+       blur, no border, no shadow — so the planet video reads through
+       at full clarity. The tab icons / labels are children of the bar
+       and stay visible (they paint at z-index above the transparent
+       surface). */
+    background: transparent !important;
+    background-image: none !important;
+    border-top: 0 !important;
+    -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
     box-shadow: none !important;
   }
 }
