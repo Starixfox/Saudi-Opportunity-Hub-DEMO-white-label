@@ -1629,31 +1629,25 @@ html[data-theme="dark"] .home-card-hdr {
 }
 
 /* ───────────────────────────────────────────────────────── Sidebar override
-   User: "it needs to be full clear glass nor like the cards" — meaning
-   fully transparent (no white tint, no gradient, NOT the card recipe)
-   but still readable.
+   User: "use the same glass as [the topbar pill] uses for the side bar."
+   The topbar pill (.app-topbar at line 1018) uses the recipe below —
+   rgba(0.05) white base (lighter than the cards' rgba(0.08)), no
+   gradient overlay, rgba(0.14) border, blur(60px) saturate(180%), plus
+   an inset top highlight. Sidebar now matches that recipe exactly.
 
-   The challenge: .oh-bg-overlay (index.html inline style) paints a
-   25-48% black gradient on the entire viewport at z-index: -1. A fully-
-   transparent sidebar with no compensation reads darker than the cards
-   because the cards' rgba(0.08) base tint brightens past the overlay.
-
-   Solution: leave the bg fully transparent (no white wash, no gradient),
-   but add `brightness(1.4)` to the backdrop-filter chain. The browser's
-   backdrop filter brightens the planet video by 1.4× BEFORE the user
-   sees it through the sidebar, cancelling out the overlay's darkening
-   without painting any whiteness on the sidebar itself.
+   No drop shadow (sidebar is full-height; the topbar pill's
+   0 12px 32px shadow would float below the viewport meaninglessly).
 
    !important × all because legacy-app.css ships three competing
    .app-sidebar background rules (var(--surface) at 4496,
    var(--sidebar-bg) at 6728, plus .mobile-open). */
 html[data-theme="dark"] .app-sidebar {
-  background-color: transparent !important;
+  background: rgba(255, 255, 255, 0.05) !important;
   background-image: none !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
-  -webkit-backdrop-filter: blur(60px) saturate(180%) brightness(1.4) !important;
-          backdrop-filter: blur(60px) saturate(180%) brightness(1.4) !important;
-  box-shadow: none !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.14) !important;
+  -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
+          backdrop-filter: blur(60px) saturate(180%) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
 }
 
 /* ─────────────────────────────────────────────────── Backdrop-filter sweep
