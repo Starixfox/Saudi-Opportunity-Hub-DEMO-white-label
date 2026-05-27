@@ -132,6 +132,110 @@
      whatever white-label theme is active. ─── -->
 <link rel="stylesheet" href="assets/polish-overrides.css">
 
+<!-- ─── Shared dark-glass component library extracted from login.html.
+     Loaded AFTER polish-overrides so .oh-* classes (and the gold-leaning
+     accent overrides below) win the cascade. ─── -->
+<link rel="stylesheet" href="assets/components.css">
+
+<!-- SPA-specific gold-accent layer — bridges polish-overrides (which paints
+     emphasis in --accent, i.e. the tenant green) with the login aesthetic
+     (which uses calligraphy gold #C9A66B for two-tone headlines and small
+     uppercase labels). Scoped to data-theme=dark so light-mode is unaffected. -->
+<style>
+  /* Two-tone headline matching login.html's "Every Saudi grant, / in one place."
+     pattern: keep the greeting white, send only the username (or the trailing
+     emphasis) to gold. Match the actual SPA markup: <span id="homeUsername">
+     for the user name, plus generic `em` for any future emphasis. */
+  html[data-theme="dark"] .home-title #homeUsername,
+  html[data-theme="dark"] .home-title em { color: var(--color-gold-500) !important; }
+
+  /* Time-of-day greeting badge: gold pill on translucent gold wash. */
+  html[data-theme="dark"] .home-greeting-badge {
+    color: var(--color-gold-500);
+    border-color: rgba(201, 166, 107, 0.30);
+    background: rgba(201, 166, 107, 0.10);
+  }
+
+  /* Small-cap micro-labels share the login brand-panel tracking. */
+  html[data-theme="dark"] .home-stat-lbl,
+  html[data-theme="dark"] .kpi-label,
+  html[data-theme="dark"] .home-card-badge,
+  html[data-theme="dark"] .filter-label {
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+  }
+
+  /* Section eyebrows go gold to echo the login brand panel. */
+  html[data-theme="dark"] .oh4-section-eyebrow,
+  html[data-theme="dark"] .section-eyebrow,
+  html[data-theme="dark"] .view-eyebrow,
+  html[data-theme="dark"] .home-stat--gold .home-stat-lbl { color: var(--color-gold-500); }
+
+  /* ────────────── Sidebar brand: OH gold mark + 'Saudi Vision 2030' sub ──
+     applyTheme() in auth-bootstrap.js paints navLogo.style.background = accent
+     for tenant logos. The default-theme path leaves background as inherit,
+     so we own the styling here: the brand container becomes a transparent
+     stack with the OH gold mark on the left and a two-line text cluster
+     (name + uppercase Saudi Vision 2030 micro-label) on the right.
+
+     The brand-dot stays in the DOM (applyTheme uses it as the swap target
+     when a tenant logo loads), but we render it as the gold OH mark. */
+  html[data-theme="dark"] .app-sidebar-brand {
+    background: transparent !important;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+  }
+  html[data-theme="dark"] .app-sidebar-brand .brand-dot {
+    width: 36px;
+    height: 36px;
+    background: rgba(201, 166, 107, 0.20);
+    border: 1.5px solid rgba(201, 166, 107, 0.50);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+  }
+  html[data-theme="dark"] .app-sidebar-brand .brand-dot::after {
+    content: 'OH';
+    font-family: var(--font-display, 'Space Grotesk', sans-serif);
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--color-gold-500);
+    letter-spacing: -0.4px;
+    line-height: 1;
+  }
+  html[data-theme="dark"] .app-sidebar-brand > span[data-ar] {
+    font-family: var(--font-display, 'Space Grotesk', sans-serif);
+    font-weight: 700;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.95);
+    line-height: 1.1;
+    display: flex;
+    flex-direction: column;
+  }
+  html[data-theme="dark"] .app-sidebar-brand > span[data-ar]::after {
+    content: 'Saudi Vision 2030';
+    display: block;
+    margin-top: 2px;
+    font-family: var(--font-sans, 'Inter', sans-serif);
+    font-size: 9.5px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.50);
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+  }
+  [dir="rtl"] html[data-theme="dark"] .app-sidebar-brand > span[data-ar]::after {
+    content: 'رؤية السعودية 2030';
+    font-family: var(--font-arabic, 'IBM Plex Sans Arabic', sans-serif);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+</style>
+
 </head>
 <body>
 
