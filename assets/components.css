@@ -1,0 +1,1085 @@
+/* ============================================================================
+   Saudi Opportunity Hub — Shared Dark-Glass Component Library
+   ----------------------------------------------------------------------------
+   Source of truth: login.html. These classes mirror the login page's visual
+   language so every page in the platform reads as a single product:
+
+     · Full-page atmospheric backdrop  (no flat colour, ever)
+     · Frosted-glass cards             (rgba white + subtle border + blur)
+     · Dark-glass form inputs          (transparent bg, white border, white text)
+     · White-on-glass primary CTA      (the Sign In button)
+     · Gold accent for emphasis        (#C9A66B / --color-gold-500)
+     · Stat pills with hairline dividers (the login brand-panel pattern)
+     · Slim top bar with OH brand + EN/AR pill (matches login's chrome)
+
+   All classes are prefixed `.oh-` to avoid colliding with legacy page-local
+   classes (.card, .btn, .form-input) still living inside contact.html /
+   reset-password.html / api.html. New code should use the `.oh-` classes.
+
+   Tokens come from assets/tokens.css — this file does not redeclare any
+   --color-*, --font-*, --space-* primitives. It just composes them.
+
+   Loaded order: tokens.css → styles.css → components.css → polish-overrides.css
+============================================================================ */
+
+/* ---------------------------------------------------------------------------
+   1. ATMOSPHERIC BACKDROP
+   ----------------------------------------------------------------------------
+   Apply `.oh-atmospheric` to <body>. Three layered fixed elements paint a
+   deep dark gradient with a subtle off-centre spotlight — same vibe as the
+   login video, statically. No download, no autoplay, no battery cost.
+--------------------------------------------------------------------------- */
+
+body.oh-atmospheric {
+  background: #08090d;          /* fallback for old browsers */
+  min-height: 100vh;
+  min-height: 100dvh;
+  color: rgba(255, 255, 255, 0.92);
+  position: relative;
+}
+
+/* Base flat layer — sits behind everything. */
+body.oh-atmospheric::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 20%, rgba(201, 166, 107, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 20% 80%, rgba(0, 108, 53, 0.06) 0%, transparent 60%),
+    linear-gradient(135deg, #0c1118 0%, #0a0d14 40%, #060810 100%);
+}
+
+/* Noise + scrim layer — adds a subtle grain so the dark doesn't feel like
+   a flat plastic surface. Pure CSS noise via SVG turbulence, tiled.
+   The scrim on top keeps body text legible on any spotlight area. */
+body.oh-atmospheric::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.18 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 240px 240px;
+  opacity: 0.45;
+  mix-blend-mode: overlay;
+}
+
+/* Honour reduced-transparency / reduced-motion: drop the noise pass. */
+@media (prefers-reduced-transparency: reduce) {
+  body.oh-atmospheric::after { display: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   2. TOP BAR — slim chrome strip with brand + lang toggle
+   ----------------------------------------------------------------------------
+   Used on auxiliary pages (404, contact, reset-password, api) that don't have
+   the full app shell. Matches login's brand-logo + lang-toggle pairing.
+
+   Structure:
+     <header class="oh-topbar">
+       <a class="oh-brand" href="login.html">
+         <span class="oh-brand-mark">OH</span>
+         <div class="oh-brand-text">
+           <span class="oh-brand-name">Opportunity Hub</span>
+           <span class="oh-brand-sub">Saudi Vision 2030</span>
+         </div>
+       </a>
+       <button class="oh-lang-toggle">...</button>
+     </header>
+--------------------------------------------------------------------------- */
+
+.oh-topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 32px;
+  pointer-events: none;          /* let the page underneath get clicks */
+}
+.oh-topbar > * { pointer-events: auto; }
+
+@media (max-width: 640px) {
+  .oh-topbar { padding: 18px 20px; }
+}
+
+/* Brand cluster (logo + name + subtitle) */
+.oh-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
+[dir="rtl"] .oh-brand {
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.oh-brand-mark {
+  width: 40px;
+  height: 40px;
+  background: rgba(201, 166, 107, 0.20);
+  border: 1.5px solid rgba(201, 166, 107, 0.50);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--color-gold-500);   /* #C9A66B */
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+
+.oh-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.oh-brand-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: -0.2px;
+}
+
+.oh-brand-sub {
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.50);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
+[dir="rtl"] .oh-brand-sub {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[dir="rtl"] .oh-brand-name,
+[dir="rtl"] .oh-brand-sub {
+  font-family: var(--font-arabic);
+}
+
+@media (max-width: 480px) {
+  .oh-brand-sub { display: none; }
+}
+
+/* Language toggle pill */
+.oh-lang-toggle {
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.2px;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color     var(--duration-fast) var(--ease-out);
+  -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(12px);
+}
+
+.oh-lang-toggle:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+.oh-lang-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.30);
+}
+
+[dir="rtl"] .oh-lang-toggle {
+  font-family: var(--font-arabic);
+  letter-spacing: 0;
+}
+
+.oh-lang-globe {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   3. PAGE CENTERING — main content sits below the absolute topbar
+   ----------------------------------------------------------------------------
+   `.oh-page-center` is a full-viewport flex container that vertically and
+   horizontally centres a single .oh-glass-card. Top padding clears the
+   topbar; bottom padding gives breathing room on short viewports.
+--------------------------------------------------------------------------- */
+
+.oh-page-center {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 96px 24px 48px;
+}
+
+@media (max-width: 640px) {
+  .oh-page-center { padding: 84px 16px 32px; align-items: flex-start; }
+}
+
+/* `.oh-page-wrap` for documentation-style scrolling pages (api.html). */
+.oh-page-wrap {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 104px 24px 64px;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+@media (max-width: 640px) {
+  .oh-page-wrap { padding: 88px 16px 48px; }
+}
+
+/* ---------------------------------------------------------------------------
+   4. GLASS CARD
+   ----------------------------------------------------------------------------
+   The frosted-glass panel that matches login.html .auth-box exactly:
+     · rgba(255,255,255,0.10) bg
+     · 1px rgba(255,255,255,0.20) border
+     · backdrop-filter: blur(50px) saturate(180%)
+     · 18px radius
+     · Inner top highlight + heavy depth shadow
+
+   Modifiers:
+     .oh-glass-card--sm  — tighter padding, smaller max-width
+     .oh-glass-card--lg  — roomier padding for marketing surfaces
+     .oh-glass-card--flat — no backdrop blur (perf-sensitive contexts)
+--------------------------------------------------------------------------- */
+
+.oh-glass-card {
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  border-radius: 18px;
+  padding: 40px 36px;
+  color: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 20px 60px rgba(0, 0, 0, 0.45);
+  -webkit-backdrop-filter: blur(50px) saturate(180%);
+          backdrop-filter: blur(50px) saturate(180%);
+  position: relative;
+  isolation: isolate;
+}
+
+.oh-glass-card--sm { padding: 32px 28px; }
+.oh-glass-card--lg { padding: 48px 44px; }
+
+.oh-glass-card--flat {
+  -webkit-backdrop-filter: none;
+          backdrop-filter: none;
+  background: rgba(20, 25, 38, 0.85);
+}
+
+@media (max-width: 640px) {
+  .oh-glass-card { padding: 28px 22px; border-radius: 14px; }
+}
+
+/* Card content patterns — header (icon + title + subtitle), used by every
+   centered card page. */
+.oh-card-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(201, 166, 107, 0.16);
+  border: 1px solid rgba(201, 166, 107, 0.30);
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  color: var(--color-gold-500);
+}
+
+.oh-card-icon svg { stroke: currentColor; }
+
+.oh-card-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.oh-card-title-accent { color: var(--color-gold-500); }
+
+.oh-card-subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 28px;
+  line-height: 1.55;
+}
+
+[dir="rtl"] .oh-card-title,
+[dir="rtl"] .oh-card-subtitle { font-family: var(--font-arabic); letter-spacing: 0; }
+
+/* ---------------------------------------------------------------------------
+   5. FORM CONTROLS
+   ----------------------------------------------------------------------------
+   Dark-glass form fields. The user brief asked for "dark background, subtle
+   border, same padding and border-radius as login form fields" — so this
+   gives bordered glass inputs (not login's underline-only variant, which
+   only works on the auth panel).
+--------------------------------------------------------------------------- */
+
+.oh-form-group { margin-bottom: 18px; }
+
+.oh-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .oh-form-row { grid-template-columns: 1fr; }
+}
+
+.oh-form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 6px;
+  letter-spacing: 0.1px;
+}
+
+[dir="rtl"] .oh-form-label {
+  font-family: var(--font-arabic);
+  text-align: right;
+  letter-spacing: 0;
+}
+
+.oh-form-input,
+.oh-form-textarea,
+.oh-form-select {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  font-family: var(--font-sans);
+  font-size: 14.5px;
+  line-height: 1.4;
+  color: #ffffff;
+  outline: none;
+  appearance: none;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+[dir="rtl"] .oh-form-input,
+[dir="rtl"] .oh-form-textarea,
+[dir="rtl"] .oh-form-select {
+  font-family: var(--font-arabic);
+  text-align: right;
+}
+
+.oh-form-input::placeholder,
+.oh-form-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.oh-form-input:hover,
+.oh-form-textarea:hover,
+.oh-form-select:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.oh-form-input:focus,
+.oh-form-textarea:focus,
+.oh-form-select:focus {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(201, 166, 107, 0.55);
+  box-shadow: 0 0 0 3px rgba(201, 166, 107, 0.16);
+}
+
+.oh-form-input.is-invalid,
+.oh-form-textarea.is-invalid,
+.oh-form-select.is-invalid {
+  border-color: rgba(239, 83, 80, 0.65);
+  box-shadow: 0 0 0 3px rgba(239, 83, 80, 0.16);
+}
+
+.oh-form-textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+/* Custom dropdown chevron — white on dark, replaces native arrow */
+.oh-form-select {
+  cursor: pointer;
+  padding-right: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-opacity='0.6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px 12px;
+}
+
+[dir="rtl"] .oh-form-select {
+  padding-right: 14px;
+  padding-left: 38px;
+  background-position: left 12px center;
+}
+
+/* Select option styling — browser uses the OS dropdown; pin a dark bg so
+   the menu doesn't render white in dark contexts where browsers support it. */
+.oh-form-select option {
+  background: #141928;
+  color: #ffffff;
+}
+
+/* Autofill: Chrome's default yellow box would clash with the glass. */
+.oh-form-input:-webkit-autofill,
+.oh-form-input:-webkit-autofill:hover,
+.oh-form-input:-webkit-autofill:focus,
+.oh-form-textarea:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.06) inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff;
+  transition: background-color 9999s 0s;
+}
+
+/* Input wrapper for password-toggle icon */
+.oh-input-wrap {
+  position: relative;
+}
+.oh-input-wrap .oh-form-input {
+  padding-right: 44px;
+}
+[dir="rtl"] .oh-input-wrap .oh-form-input {
+  padding-right: 14px;
+  padding-left: 44px;
+}
+
+.oh-toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.55);
+  display: flex;
+  align-items: center;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+.oh-toggle-password:hover { color: #ffffff; }
+
+[dir="rtl"] .oh-toggle-password {
+  right: auto;
+  left: 12px;
+}
+
+/* Field-level error text */
+.oh-field-error {
+  font-size: 12px;
+  color: #ef9090;
+  margin-top: 6px;
+  display: none;
+}
+.oh-field-error.is-visible { display: block; }
+
+[dir="rtl"] .oh-field-error {
+  font-family: var(--font-arabic);
+  text-align: right;
+}
+
+/* ---------------------------------------------------------------------------
+   6. BUTTONS — glass primary + ghost
+   ----------------------------------------------------------------------------
+   `.oh-btn` is the base. `.oh-btn--primary` is the white-on-glass CTA from
+   login. `.oh-btn--gold` is the gold variant the user asked about.
+   `.oh-btn--ghost` is the outlined glass button.
+--------------------------------------------------------------------------- */
+
+.oh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: auto;
+  padding: 14px 22px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.05px;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color     var(--duration-fast) var(--ease-out),
+    color            var(--duration-fast) var(--ease-out),
+    transform        var(--duration-fast) var(--ease-out),
+    box-shadow       var(--duration-base) var(--ease-out);
+}
+
+[dir="rtl"] .oh-btn { font-family: var(--font-arabic); letter-spacing: 0; }
+
+.oh-btn--block { width: 100%; }
+
+.oh-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.45);
+}
+.oh-btn:active { transform: translateY(0); }
+.oh-btn:disabled,
+.oh-btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Primary — the login Sign In CTA. Pure white, dark-green ink, heavy lift. */
+.oh-btn--primary {
+  background: #ffffff;
+  color: #003c1d;                /* deepest green for max contrast */
+  font-weight: 700;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.20),
+    0 12px 28px rgba(0, 0, 0, 0.25);
+}
+.oh-btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.22),
+    0 18px 36px rgba(0, 0, 0, 0.30);
+}
+
+/* Gold variant — secondary high-emphasis CTA (use sparingly). */
+.oh-btn--gold {
+  background: var(--color-gold-500);
+  color: #1a1206;
+  font-weight: 700;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.25),
+    0 12px 28px rgba(201, 166, 107, 0.25);
+}
+.oh-btn--gold:hover {
+  background: var(--color-gold-400);
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.28),
+    0 18px 36px rgba(201, 166, 107, 0.32);
+}
+
+/* Ghost — outlined glass for secondary actions. */
+.oh-btn--ghost {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.92);
+}
+.oh-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.32);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Inline spinner inside a primary button — preserves the existing
+   .btn-spinner / .is-loading API used by contact + reset forms. */
+.oh-btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0, 60, 29, 0.30);
+  border-top-color: #003c1d;
+  border-radius: 50%;
+  animation: oh-spin 0.65s linear infinite;
+  display: none;
+}
+.oh-btn--gold .oh-btn-spinner {
+  border-color: rgba(26, 18, 6, 0.30);
+  border-top-color: #1a1206;
+}
+.oh-btn--ghost .oh-btn-spinner {
+  border-color: rgba(255, 255, 255, 0.30);
+  border-top-color: #ffffff;
+}
+.oh-btn.is-loading .oh-btn-spinner { display: block; }
+.oh-btn.is-loading .oh-btn-text    { opacity: 0; position: absolute; }
+
+@keyframes oh-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .oh-btn-spinner { animation: none; }
+  .oh-btn:hover { transform: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   7. MESSAGE BOX — inline error / success bar above forms
+--------------------------------------------------------------------------- */
+
+.oh-msg {
+  display: none;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+}
+
+.oh-msg.is-error {
+  display: flex;
+  background: rgba(239, 83, 80, 0.10);
+  border-color: rgba(239, 83, 80, 0.30);
+  color: #ffb4b1;
+}
+
+.oh-msg.is-success {
+  display: flex;
+  background: rgba(52, 217, 123, 0.10);
+  border-color: rgba(52, 217, 123, 0.30);
+  color: #80efb1;
+}
+
+.oh-msg-icon { flex-shrink: 0; margin-top: 1px; }
+
+[dir="rtl"] .oh-msg {
+  flex-direction: row-reverse;
+  text-align: right;
+  font-family: var(--font-arabic);
+}
+
+/* ---------------------------------------------------------------------------
+   8. STAT PILLS — the brand-panel pattern from login
+   ----------------------------------------------------------------------------
+   <div class="oh-stats">
+     <div class="oh-stat"><strong>1,074</strong><span>Opportunities</span></div>
+     <div class="oh-stat"><strong>15</strong><span>Sectors</span></div>
+     <div class="oh-stat"><strong>3</strong><span>Regions</span></div>
+   </div>
+--------------------------------------------------------------------------- */
+
+.oh-stats {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+  flex-wrap: nowrap;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 6px 4px;
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+          backdrop-filter: blur(20px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    0 8px 24px rgba(0, 0, 0, 0.20);
+}
+
+/* Keep natural row flow in RTL so border-inline-start lands between cells. */
+[dir="rtl"] .oh-stats { flex-direction: row; }
+
+.oh-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 6px 22px;
+  min-width: 88px;
+  gap: 1px;
+}
+
+.oh-stat:not(:first-child) {
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.oh-stat strong {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  color: #ffffff;
+  letter-spacing: -0.4px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+[dir="rtl"] .oh-stat strong {
+  font-family: var(--font-arabic);
+  letter-spacing: 0;
+}
+
+.oh-stat span {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.50);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+[dir="rtl"] .oh-stat span {
+  font-family: var(--font-arabic);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   9. TAB TOGGLE — pill-style switcher (Sign In / Create Account pattern)
+--------------------------------------------------------------------------- */
+
+.oh-tabs {
+  display: flex;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 24px;
+  gap: 4px;
+}
+
+.oh-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color            var(--duration-fast) var(--ease-out);
+}
+
+[dir="rtl"] .oh-tab { font-family: var(--font-arabic); }
+
+.oh-tab.is-active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.20);
+}
+
+.oh-tab:hover:not(.is-active) { color: rgba(255, 255, 255, 0.85); }
+
+.oh-tab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+/* ---------------------------------------------------------------------------
+   10. BADGES — pill-style chips for categories and metadata
+--------------------------------------------------------------------------- */
+
+.oh-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  line-height: 1.4;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+}
+
+[dir="rtl"] .oh-badge { font-family: var(--font-arabic); letter-spacing: 0; }
+
+.oh-badge--gold {
+  background: rgba(201, 166, 107, 0.16);
+  border-color: rgba(201, 166, 107, 0.30);
+  color: var(--color-gold-500);
+}
+.oh-badge--green {
+  background: rgba(52, 217, 123, 0.12);
+  border-color: rgba(52, 217, 123, 0.30);
+  color: #80efb1;
+}
+.oh-badge--amber {
+  background: rgba(245, 200, 66, 0.14);
+  border-color: rgba(245, 200, 66, 0.32);
+  color: #f5c842;
+}
+.oh-badge--blue {
+  background: rgba(79, 156, 249, 0.14);
+  border-color: rgba(79, 156, 249, 0.32);
+  color: #93c5fd;
+}
+.oh-badge--red {
+  background: rgba(239, 83, 80, 0.12);
+  border-color: rgba(239, 83, 80, 0.30);
+  color: #ffb4b1;
+}
+
+/* Uppercase label utility — matches the brand-panel pattern. */
+.oh-eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-gold-500);
+}
+[dir="rtl"] .oh-eyebrow {
+  font-family: var(--font-arabic);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ---------------------------------------------------------------------------
+   11. LINKS, DIVIDERS, SMALL HELPERS
+--------------------------------------------------------------------------- */
+
+/* !important is required: polish-overrides.css ships a high-specificity
+   `html[data-theme="dark"] a:not(.btn)...` rule that paints every link
+   accent-green, and we need .oh-link to stay gold across the platform.
+   Same reason applies to .oh-info-value a below. */
+.oh-link {
+  color: var(--color-gold-500) !important;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+.oh-link:hover { color: var(--color-gold-400, #d4ab48) !important; text-decoration: underline; }
+
+[dir="rtl"] .oh-link { font-family: var(--font-arabic); }
+
+/* Inline ghost link — used for "Back to Sign In" style nav. */
+.oh-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 22px;
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.60);
+  text-decoration: none;
+  justify-content: center;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+.oh-back-link:hover { color: #ffffff; }
+
+[dir="rtl"] .oh-back-link {
+  flex-direction: row-reverse;
+  font-family: var(--font-arabic);
+}
+
+/* OR-divider — used between form + OAuth row, or any visual rule. */
+.oh-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0;
+  color: rgba(255, 255, 255, 0.50);
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+[dir="rtl"] .oh-divider {
+  font-family: var(--font-arabic);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.oh-divider::before,
+.oh-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* Hairline rule */
+.oh-rule {
+  border: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.10);
+  margin: 24px 0;
+}
+
+/* ---------------------------------------------------------------------------
+   12. INFO STRIP — used by contact.html to surface email + response time
+--------------------------------------------------------------------------- */
+
+.oh-info-strip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.oh-info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+[dir="rtl"] .oh-info-item { flex-direction: row-reverse; text-align: right; }
+
+.oh-info-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(201, 166, 107, 0.14);
+  border: 1px solid rgba(201, 166, 107, 0.26);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-gold-500);
+}
+
+.oh-info-label {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.50);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+[dir="rtl"] .oh-info-label {
+  font-family: var(--font-arabic);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.oh-info-value {
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 500;
+}
+[dir="rtl"] .oh-info-value { font-family: var(--font-arabic); }
+
+.oh-info-value a {
+  color: var(--color-gold-500) !important;   /* see .oh-link note */
+  text-decoration: none;
+}
+.oh-info-value a:hover { text-decoration: underline; }
+
+/* ---------------------------------------------------------------------------
+   13. SUCCESS STATE — replaces a form after a successful submit
+--------------------------------------------------------------------------- */
+
+.oh-success {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.oh-success-icon {
+  width: 64px;
+  height: 64px;
+  background: rgba(52, 217, 123, 0.14);
+  border: 1px solid rgba(52, 217, 123, 0.32);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  color: #80efb1;
+}
+
+.oh-success h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+[dir="rtl"] .oh-success h2 { font-family: var(--font-arabic); }
+
+.oh-success p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 24px;
+  line-height: 1.6;
+  max-width: 36ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+[dir="rtl"] .oh-success p { font-family: var(--font-arabic); }
+
+/* ---------------------------------------------------------------------------
+   14. PASSWORD STRENGTH METER (reset-password.html)
+--------------------------------------------------------------------------- */
+
+.oh-strength-wrap { margin-top: 10px; }
+
+.oh-strength-bars {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+[dir="rtl"] .oh-strength-bars { flex-direction: row-reverse; }
+
+.oh-strength-seg {
+  flex: 1;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.10);
+  transition: background var(--duration-base) var(--ease-out);
+}
+.oh-strength-seg.is-weak   { background: #ef5350; }
+.oh-strength-seg.is-fair   { background: #f59e0b; }
+.oh-strength-seg.is-good   { background: #f5c842; }
+.oh-strength-seg.is-strong { background: #34d97b; }
+
+.oh-strength-label {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.55);
+}
+[dir="rtl"] .oh-strength-label { font-family: var(--font-arabic); }
+
+/* ---------------------------------------------------------------------------
+   15. SCROLLBAR — dark-glass aware scrollbar styling for the api docs page
+--------------------------------------------------------------------------- */
+
+body.oh-atmospheric { scrollbar-color: rgba(255,255,255,0.20) transparent; }
+body.oh-atmospheric ::-webkit-scrollbar { width: 10px; height: 10px; }
+body.oh-atmospheric ::-webkit-scrollbar-track { background: transparent; }
+body.oh-atmospheric ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+body.oh-atmospheric ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.24);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}

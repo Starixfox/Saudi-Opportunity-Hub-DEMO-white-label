@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" data-theme="light">
+<html lang="en" dir="ltr" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -40,370 +40,91 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- ─── Polish pass: consolidated design tokens + foundation styles ─── -->
+  <!-- ─── tokens → foundation → polish (legacy SPA overrides) → components ───
+       components.css loads LAST so its dark-glass classes (.oh-btn, .oh-link,
+       .oh-info-value a) win the cascade over polish-overrides' broad
+       a:not(.btn) rule. SPA pages don't include components.css, so their
+       cascade is unaffected. -->
   <link rel="stylesheet" href="assets/tokens.css" />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="stylesheet" href="assets/polish-overrides.css" />
+  <link rel="stylesheet" href="assets/components.css" />
 
   <style>
-    :root {
-      --green:       #006C35;
-      --green-hover: #005229;
-      --green-light: #e8f5ed;
-      --gold:        #C9A66B;
-      --bg:          #fdf8f2;
-      --surface:     #ffffff;
-      --surface-2:   #f8f6f2;
-      --border:      #e2ddd5;
-      --text:        #1a1a1a;
-      --text-muted:  #6b6560;
-      --text-faint:  #a89f95;
-      --error-bg:    #fef2f2;
-      --error-border:#fca5a5;
-      --error-text:  #991b1b;
-      --success-bg:  #f0fdf4;
-      --success-text:#166534;
-      --radius-sm:   8px;
-      --font-display:'Space Grotesk', 'Inter', system-ui, sans-serif;
-      --font-body:   'Inter', system-ui, sans-serif;
-      --font-arabic: 'IBM Plex Sans Arabic', 'Noto Kufi Arabic', system-ui, sans-serif;
-    }
+    /* Page-local styles — global design system lives in assets/components.css.
+       Only contact-page-specific overrides go here. */
+    *, *::before, *::after { box-sizing: border-box; }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    /* Constrain the contact card and align with the topbar's centered layout. */
+    .contact-card { width: 100%; max-width: 480px; }
 
-    body {
-      font-family: var(--font-body);
-      font-size: 15px;
-      line-height: 1.6;
-      color: var(--text);
-      background: var(--bg);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 32px 20px;
-    }
-
-    /* ── RTL ── */
-    [dir="rtl"] body,
-    [dir="rtl"] .form-label,
-    [dir="rtl"] .form-input,
-    [dir="rtl"] .form-textarea,
-    [dir="rtl"] .form-select,
-    [dir="rtl"] .btn-submit,
-    [dir="rtl"] .field-error,
-    [dir="rtl"] #msg-box,
-    [dir="rtl"] .back-link,
-    [dir="rtl"] .card-subtitle,
-    [dir="rtl"] .card-title,
-    [dir="rtl"] .info-label,
-    [dir="rtl"] .info-value { font-family: var(--font-arabic); }
-    [dir="rtl"] .form-label,
-    [dir="rtl"] .field-error { text-align: right; }
-    [dir="rtl"] .form-input,
-    [dir="rtl"] .form-textarea,
-    [dir="rtl"] .form-select { text-align: right; }
-    [dir="rtl"] .back-link  { flex-direction: row-reverse; }
-    [dir="rtl"] .info-item  { flex-direction: row-reverse; text-align: right; }
-
-    /* ── Card ── */
-    .card {
-      background: var(--surface);
-      border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0,0,0,.07), 0 1px 4px rgba(0,0,0,.04);
-      padding: 44px 40px;
-      width: 100%;
-      max-width: 480px;
-      position: relative;
-    }
-
-    /* ── Logo ── */
-    .card-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 28px;
-      text-decoration: none;
-    }
-    .logo-mark {
-      width: 36px; height: 36px;
-      background: var(--green-light);
-      border: 1.5px solid rgba(0,108,53,.25);
-      border-radius: 9px;
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--font-display);
-      font-weight: 700; font-size: 15px;
-      color: var(--green);
-      flex-shrink: 0;
-    }
-    .logo-name {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 15px;
-      color: var(--text);
-    }
-
-    /* ── Header ── */
-    .card-icon {
-      width: 48px; height: 48px;
-      background: var(--green-light);
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 16px;
-    }
-    .card-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 24px;
-      letter-spacing: -0.5px;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-    .card-subtitle {
-      font-size: 14px;
-      color: var(--text-muted);
-      margin-bottom: 28px;
-      line-height: 1.55;
-    }
-
-    /* ── Info strip ── */
-    .info-strip {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 14px 16px;
-      margin-bottom: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .info-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .info-icon {
-      width: 30px; height: 30px;
-      background: var(--green-light);
-      border-radius: 7px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-    .info-label {
-      font-size: 11px;
-      color: var(--text-faint);
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      line-height: 1;
-      margin-bottom: 2px;
-    }
-    [dir="rtl"] .info-label { text-transform: none; letter-spacing: 0; }
-    .info-value {
-      font-size: 13.5px;
-      color: var(--text);
-      font-weight: 500;
-    }
-    .info-value a {
-      color: var(--green);
-      text-decoration: none;
-    }
-    .info-value a:hover { text-decoration: underline; }
-
-    /* ── Form ── */
-    .form-group { margin-bottom: 18px; }
-    .form-label {
-      display: block;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-    .form-input,
-    .form-textarea,
-    .form-select {
-      width: 100%;
-      padding: 11px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-family: var(--font-body);
-      font-size: 14.5px;
-      color: var(--text);
-      background: var(--surface);
-      outline: none;
-      transition: border-color .15s, box-shadow .15s;
-      appearance: none;
-    }
-    [dir="rtl"] .form-input,
-    [dir="rtl"] .form-textarea,
-    [dir="rtl"] .form-select { font-family: var(--font-arabic); }
-    .form-input::placeholder,
-    .form-textarea::placeholder { color: var(--text-faint); }
-    .form-input:hover,
-    .form-textarea:hover,
-    .form-select:hover  { border-color: #c5bfb7; }
-    .form-input:focus,
-    .form-textarea:focus,
-    .form-select:focus  { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,108,53,.12); }
-    .form-input.is-invalid,
-    .form-textarea.is-invalid { border-color: #f87171; box-shadow: 0 0 0 3px rgba(239,68,68,.10); }
-    .form-textarea { resize: vertical; min-height: 110px; }
-    .form-select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6560' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
-    [dir="rtl"] .form-select { background-position: left 12px center; padding-right: 14px; padding-left: 36px; }
-
-    .field-error {
-      font-size: 12px; color: #dc2626;
-      margin-top: 5px; display: none;
-    }
-    .field-error.is-visible { display: block; }
-
-    /* ── Message box ── */
-    #msg-box {
-      display: none;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 12px 14px;
-      border-radius: var(--radius-sm);
-      font-size: 13.5px;
-      line-height: 1.5;
-      margin-bottom: 20px;
-      border: 1px solid transparent;
-    }
-    #msg-box.is-error   { display: flex; background: var(--error-bg);   border-color: var(--error-border); color: var(--error-text); }
-    #msg-box.is-success { display: flex; background: var(--success-bg); border-color: #86efac;             color: var(--success-text); }
-    .msg-icon { flex-shrink: 0; margin-top: 1px; }
-
-    /* ── Submit ── */
-    .btn-submit {
-      width: 100%;
-      padding: 13px 20px;
-      background: var(--green);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-family: var(--font-body);
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .18s, transform .12s, box-shadow .18s;
-      display: flex; align-items: center; justify-content: center;
-      gap: 8px;
-      position: relative; overflow: hidden;
-    }
-    [dir="rtl"] .btn-submit { font-family: var(--font-arabic); letter-spacing: 0; }
-    .btn-submit:hover  { background: var(--green-hover); box-shadow: 0 4px 16px rgba(0,108,53,.25); transform: translateY(-1px); }
-    .btn-submit:active { transform: translateY(0); box-shadow: none; }
-    .btn-submit:disabled { opacity: .65; cursor: not-allowed; transform: none; }
-    .btn-spinner {
-      width: 16px; height: 16px;
-      border: 2px solid rgba(255,255,255,.35);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin .65s linear infinite;
-      display: none;
-    }
-    .btn-submit.is-loading .btn-spinner { display: block; }
-    .btn-submit.is-loading .btn-text    { opacity: 0; position: absolute; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Back link ── */
-    .back-link {
-      display: flex; align-items: center; gap: 6px;
-      margin-top: 22px;
-      font-size: 13.5px; color: var(--text-muted);
-      text-decoration: none; justify-content: center;
-      transition: color .15s;
-    }
-    .back-link:hover { color: var(--green); }
-
-    /* ── Lang toggle ── */
-    .lang-toggle {
-      position: absolute; top: 18px; right: 18px;
-      background: var(--surface-2); border: 1.5px solid var(--border);
-      border-radius: 999px; padding: 5px 13px;
-      font-size: 12.5px; font-weight: 600; color: var(--text-muted);
-      cursor: pointer; display: flex; align-items: center; gap: 6px;
-      transition: background .15s, border-color .15s, color .15s;
-      font-family: var(--font-body);
-    }
-    .lang-toggle:hover { background: var(--green-light); border-color: var(--green); color: var(--green); }
-    [dir="rtl"] .lang-toggle { right: auto; left: 18px; font-family: var(--font-arabic); }
-
-    /* ── Success state ── */
-    #success-state { display: none; text-align: center; padding: 8px 0; }
-    .success-icon {
-      width: 56px; height: 56px; background: var(--green-light);
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 16px;
-    }
-    #success-state h2 {
-      font-family: var(--font-display); font-weight: 700; font-size: 22px;
-      color: var(--text); margin-bottom: 8px;
-    }
-    [dir="rtl"] #success-state h2 { font-family: var(--font-arabic); }
-    #success-state p {
-      font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6;
-    }
-    [dir="rtl"] #success-state p { font-family: var(--font-arabic); }
-
-    @media (max-width: 480px) {
-      .card { padding: 32px 20px; }
-    }
+    /* Success state is hidden by default; JS flips display:block on submit. */
+    #success-state { display: none; }
   </style>
 </head>
-<body>
+<body class="oh-atmospheric">
 
-<div class="card">
-
-  <!-- Language toggle -->
-  <button class="lang-toggle" id="lang-toggle" type="button">
-    <span>🌐</span>
+<!-- ══ TOPBAR — OH brand + language toggle ══ -->
+<header class="oh-topbar">
+  <a href="login.html" class="oh-brand">
+    <span class="oh-brand-mark">OH</span>
+    <span class="oh-brand-text">
+      <span class="oh-brand-name" data-en="Opportunity Hub" data-ar="منصة الفرص">Opportunity Hub</span>
+      <span class="oh-brand-sub" data-en="Saudi Vision 2030" data-ar="رؤية السعودية 2030">Saudi Vision 2030</span>
+    </span>
+  </a>
+  <button class="oh-lang-toggle" id="lang-toggle" type="button" aria-label="Switch language">
+    <svg class="oh-lang-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
     <span id="lang-label">العربية</span>
   </button>
+</header>
 
-  <!-- Logo -->
-  <a href="login.html" class="card-logo">
-    <div class="logo-mark">OH</div>
-    <span class="logo-name" data-en="Opportunity Hub" data-ar="منصة الفرص">Opportunity Hub</span>
-  </a>
+<!-- ══ MAIN ══ -->
+<main class="oh-page-center">
+<div class="oh-glass-card contact-card">
 
   <!-- Icon + heading -->
-  <div class="card-icon">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#006C35" stroke-width="2" aria-hidden="true">
+  <div class="oh-card-icon" aria-hidden="true">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
     </svg>
   </div>
-  <h1 class="card-title" data-en="Contact Support" data-ar="تواصل مع الدعم">Contact Support</h1>
-  <p class="card-subtitle" data-en="Suggest a programme to add, flag a data correction, or ask about partnership. We respond within one business day." data-ar="اقترح برنامجًا للإضافة، أو أبلغ عن تصحيح للبيانات، أو اسأل عن شراكة. نرد خلال يوم عمل واحد.">Suggest a programme to add, flag a data correction, or ask about partnership. We respond within one business day.</p>
+  <h1 class="oh-card-title">
+    <span data-en="Contact " data-ar="تواصل مع ">Contact </span><span class="oh-card-title-accent" data-en="Support" data-ar="الدعم">Support</span>
+  </h1>
+  <p class="oh-card-subtitle" data-en="Suggest a programme to add, flag a data correction, or ask about partnership. We respond within one business day." data-ar="اقترح برنامجًا للإضافة، أو أبلغ عن تصحيح للبيانات، أو اسأل عن شراكة. نرد خلال يوم عمل واحد.">Suggest a programme to add, flag a data correction, or ask about partnership. We respond within one business day.</p>
 
   <!-- Contact info strip -->
-  <div class="info-strip">
-    <div class="info-item">
-      <div class="info-icon">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#006C35" stroke-width="2" aria-hidden="true">
+  <div class="oh-info-strip">
+    <div class="oh-info-item">
+      <div class="oh-info-icon" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
         </svg>
       </div>
       <div>
-        <div class="info-label" data-en="Email" data-ar="البريد الإلكتروني">Email</div>
-        <div class="info-value"><a href="mailto:jblancoapodaca@gmail.com">jblancoapodaca@gmail.com</a></div>
+        <div class="oh-info-label" data-en="Email" data-ar="البريد الإلكتروني">Email</div>
+        <div class="oh-info-value"><a href="mailto:jblancoapodaca@gmail.com">jblancoapodaca@gmail.com</a></div>
       </div>
     </div>
-    <div class="info-item">
-      <div class="info-icon">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#006C35" stroke-width="2" aria-hidden="true">
+    <div class="oh-info-item">
+      <div class="oh-info-icon" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
         </svg>
       </div>
       <div>
-        <div class="info-label" data-en="Response time" data-ar="وقت الاستجابة">Response time</div>
-        <div class="info-value" data-en="Within 24 hours" data-ar="خلال 24 ساعة">Within 24 hours</div>
+        <div class="oh-info-label" data-en="Response time" data-ar="وقت الاستجابة">Response time</div>
+        <div class="oh-info-value" data-en="Within 24 hours" data-ar="خلال 24 ساعة">Within 24 hours</div>
       </div>
     </div>
   </div>
 
   <!-- Message box -->
-  <div id="msg-box" role="alert" aria-live="polite">
-    <svg class="msg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+  <div id="msg-box" class="oh-msg" role="alert" aria-live="polite">
+    <svg class="oh-msg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
       <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
     </svg>
     <span id="msg-text"></span>
@@ -429,27 +150,27 @@
       />
     </div>
 
-    <div class="form-group">
-      <label class="form-label" for="contact-name" data-en="Your name" data-ar="اسمك">Your name</label>
-      <input class="form-input" type="text" id="contact-name" name="name"
+    <div class="oh-form-group">
+      <label class="oh-form-label" for="contact-name" data-en="Your name" data-ar="اسمك">Your name</label>
+      <input class="oh-form-input" type="text" id="contact-name" name="name"
         placeholder="Sarah Al-Rashid"
         data-ph-en="Sarah Al-Rashid" data-ph-ar="سارة الراشد"
         autocomplete="name" />
-      <div class="field-error" id="name-error" data-en="Please enter your name." data-ar="يرجى إدخال اسمك.">Please enter your name.</div>
+      <div class="oh-field-error" id="name-error" data-en="Please enter your name." data-ar="يرجى إدخال اسمك.">Please enter your name.</div>
     </div>
 
-    <div class="form-group">
-      <label class="form-label" for="contact-email" data-en="Email address" data-ar="البريد الإلكتروني">Email address</label>
-      <input class="form-input" type="email" id="contact-email" name="email"
+    <div class="oh-form-group">
+      <label class="oh-form-label" for="contact-email" data-en="Email address" data-ar="البريد الإلكتروني">Email address</label>
+      <input class="oh-form-input" type="email" id="contact-email" name="email"
         placeholder="sarah@example.com"
         data-ph-en="sarah@example.com" data-ph-ar="sarah@example.com"
         autocomplete="email" required />
-      <div class="field-error" id="email-error" data-en="Please enter a valid email address." data-ar="يرجى إدخال بريد إلكتروني صحيح.">Please enter a valid email address.</div>
+      <div class="oh-field-error" id="email-error" data-en="Please enter a valid email address." data-ar="يرجى إدخال بريد إلكتروني صحيح.">Please enter a valid email address.</div>
     </div>
 
-    <div class="form-group">
-      <label class="form-label" for="contact-topic" data-en="Topic" data-ar="الموضوع">Topic</label>
-      <select class="form-select" id="contact-topic" name="topic">
+    <div class="oh-form-group">
+      <label class="oh-form-label" for="contact-topic" data-en="Topic" data-ar="الموضوع">Topic</label>
+      <select class="oh-form-select" id="contact-topic" name="topic">
         <option value="" data-en="Select a topic…" data-ar="اختر موضوعًا…">Select a topic…</option>
         <option value="login" data-en="Login or account issue" data-ar="مشكلة تسجيل الدخول أو الحساب">Login or account issue</option>
         <option value="data" data-en="Data or opportunity listing" data-ar="بيانات أو قائمة فرص">Data or opportunity listing</option>
@@ -458,39 +179,39 @@
       </select>
     </div>
 
-    <div class="form-group">
-      <label class="form-label" for="contact-message" data-en="Message" data-ar="الرسالة">Message</label>
-      <textarea class="form-textarea" id="contact-message" name="message"
+    <div class="oh-form-group">
+      <label class="oh-form-label" for="contact-message" data-en="Message" data-ar="الرسالة">Message</label>
+      <textarea class="oh-form-textarea" id="contact-message" name="message"
         placeholder="Describe your issue or question…"
         data-ph-en="Describe your issue or question…"
         data-ph-ar="اشرح مشكلتك أو سؤالك…"
         required></textarea>
-      <div class="field-error" id="message-error" data-en="Please enter a message." data-ar="يرجى إدخال رسالة.">Please enter a message.</div>
+      <div class="oh-field-error" id="message-error" data-en="Please enter a message." data-ar="يرجى إدخال رسالة.">Please enter a message.</div>
     </div>
 
-    <button type="submit" class="btn-submit" id="submit-btn">
-      <div class="btn-spinner" aria-hidden="true"></div>
-      <span class="btn-text" id="submit-label" data-en="Send message" data-ar="إرسال الرسالة">Send message</span>
+    <button type="submit" class="oh-btn oh-btn--primary oh-btn--block" id="submit-btn">
+      <div class="oh-btn-spinner" aria-hidden="true"></div>
+      <span class="oh-btn-text" id="submit-label" data-en="Send message" data-ar="إرسال الرسالة">Send message</span>
     </button>
 
   </form>
 
   <!-- Success state -->
-  <div id="success-state">
-    <div class="success-icon">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#006C35" stroke-width="2.5" aria-hidden="true">
+  <div id="success-state" class="oh-success">
+    <div class="oh-success-icon" aria-hidden="true">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <polyline points="20 6 9 17 4 12"/>
       </svg>
     </div>
     <h2 data-en="Message sent." data-ar="تم إرسال الرسالة.">Message sent.</h2>
     <p data-en="We'll reply within one business day." data-ar="سنرد خلال يوم عمل واحد.">We'll reply within one business day.</p>
-    <a href="login.html" class="btn-submit" style="text-decoration:none;">
+    <a href="login.html" class="oh-btn oh-btn--ghost oh-btn--block">
       <span data-en="Back to Sign In" data-ar="العودة لتسجيل الدخول">Back to Sign In</span>
     </a>
   </div>
 
   <!-- Back link -->
-  <a href="login.html" class="back-link" id="back-link">
+  <a href="login.html" class="oh-back-link" id="back-link">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
       <polyline points="15 18 9 12 15 6"/>
     </svg>
@@ -498,6 +219,7 @@
   </a>
 
 </div>
+</main>
 
 <script>
 (function () {
@@ -553,10 +275,14 @@
   const honeypot     = document.getElementById('contact-website');
 
   function showMsg(text, type) {
-    msgBox.className = type === 'error' ? 'is-error' : 'is-success';
+    msgBox.classList.remove('is-error', 'is-success');
+    msgBox.classList.add(type === 'error' ? 'is-error' : 'is-success');
     msgText.textContent = text;
   }
-  function clearMsg() { msgBox.className = ''; msgText.textContent = ''; }
+  function clearMsg() {
+    msgBox.classList.remove('is-error', 'is-success');
+    msgText.textContent = '';
+  }
 
   function showFieldError(inputEl, errEl) {
     inputEl.classList.add('is-invalid');

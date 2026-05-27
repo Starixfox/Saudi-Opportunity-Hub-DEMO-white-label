@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" data-theme="light">
+<html lang="en" dir="ltr" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,104 +11,129 @@
   <meta name="description" content="The page you were looking for could not be found in the Saudi Opportunity Hub.">
   <meta name="theme-color" content="#006C35">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23006C35'/><path d='M32 14a18 18 0 1 0 18 18 18 18 0 0 0-18-18zm0 6a12 12 0 1 1-12 12 12 12 0 0 1 12-12z' fill='%23fdf8f2'/><circle cx='32' cy='32' r='4' fill='%23C9A66B'/></svg>">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- ─── Polish pass: consolidated design tokens + foundation styles ─── -->
+  <!-- Shared design system: tokens → foundation → components (404 has no
+       polish-overrides dependency, so the order is simpler here). -->
   <link rel="stylesheet" href="assets/tokens.css">
   <link rel="stylesheet" href="assets/styles.css">
-  <link rel="stylesheet" href="assets/polish-overrides.css">
+  <link rel="stylesheet" href="assets/components.css">
+
   <style>
-    :root {
-      --green: #006C35;
-      --green-hover: #005229;
-      --gold: #C9A66B;
-      --bg: #fdf8f2;
-      --surface: #ffffff;
-      --border: #e2ddd5;
-      --text: #1a1a1a;
-      --text-muted: #6b6560;
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      line-height: 1.55;
-    }
-    .wrap {
-      max-width: 560px;
-      width: 100%;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 40px 36px;
-      text-align: center;
-      box-shadow: 0 12px 40px rgba(0,0,0,.06);
-    }
-    .badge {
+    /* 404-page-local — the rest comes from components.css */
+    .nf-card { width: 100%; max-width: 520px; text-align: center; }
+
+    .nf-eyebrow {
       display: inline-block;
-      font: 700 12px/1 'Inter', system-ui, sans-serif;
-      letter-spacing: .12em;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--green);
-      background: #e8f5ed;
-      padding: 6px 12px;
-      border-radius: 999px;
+      color: var(--color-gold-500);
       margin-bottom: 18px;
     }
-    h1 {
-      font: 700 clamp(2rem, 2vw + 1.5rem, 3rem)/1.1 'Space Grotesk', 'Inter', sans-serif;
-      margin-bottom: 14px;
-      letter-spacing: -0.01em;
-    }
-    p { color: var(--text-muted); margin-bottom: 26px; }
-    .code {
-      font: 700 6rem/1 'Space Grotesk', 'Inter', monospace;
-      color: var(--green);
+    [dir="rtl"] .nf-eyebrow { letter-spacing: 0; text-transform: none; font-family: var(--font-arabic); }
+
+    .nf-code {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(5rem, 14vw, 7rem);
+      line-height: 1;
       letter-spacing: -0.04em;
-      margin-bottom: 4px;
+      color: #ffffff;
+      margin-bottom: 14px;
+      font-variant-numeric: tabular-nums;
     }
-    .actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-    a.btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 11px 20px;
-      border-radius: 10px;
-      font: 600 14px/1 'Inter', system-ui, sans-serif;
-      text-decoration: none;
-      transition: background .15s, transform .15s;
+    .nf-code .nf-accent { color: var(--color-gold-500); }
+
+    .nf-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(1.5rem, 1.0rem + 1.6vw, 2.125rem);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      margin-bottom: 12px;
     }
-    a.btn--primary { background: var(--green); color: #fff; }
-    a.btn--primary:hover { background: var(--green-hover); }
-    a.btn--ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
-    a.btn--ghost:hover { background: #f3efe7; }
-    a.btn:active { transform: translateY(1px); }
-    .accent { color: var(--gold); }
-    @media (prefers-color-scheme: dark) {
-      :root { --bg: #0f1419; --surface: #1a1f25; --border: #2a3138; --text: #e6e6e6; --text-muted: #9ca3af; }
-      .badge { background: rgba(0, 108, 53, .15); }
-      a.btn--ghost:hover { background: rgba(255,255,255,.04); }
+    [dir="rtl"] .nf-title { font-family: var(--font-arabic); letter-spacing: 0; }
+
+    .nf-sub {
+      font-size: 14.5px;
+      color: rgba(255, 255, 255, 0.65);
+      line-height: 1.6;
+      max-width: 42ch;
+      margin: 0 auto 28px;
     }
+    [dir="rtl"] .nf-sub { font-family: var(--font-arabic); }
+
+    .nf-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
   </style>
 </head>
-<body>
-  <main class="wrap" role="main">
-    <span class="badge">Saudi Opportunity Hub</span>
-    <div class="code">4<span class="accent">0</span>4</div>
-    <h1>Page not found</h1>
-    <p>We couldn't find that page. Head back to the dashboard, or sign in to search every open grant and tender.</p>
-    <div class="actions">
-      <a class="btn btn--primary" href="/index.html">Go to dashboard</a>
-      <a class="btn btn--ghost" href="/login.html">Sign in</a>
+<body class="oh-atmospheric">
+
+<!-- ══ TOPBAR — OH brand + language toggle ══ -->
+<header class="oh-topbar">
+  <a href="login.html" class="oh-brand">
+    <span class="oh-brand-mark">OH</span>
+    <span class="oh-brand-text">
+      <span class="oh-brand-name" data-en="Opportunity Hub" data-ar="منصة الفرص">Opportunity Hub</span>
+      <span class="oh-brand-sub" data-en="Saudi Vision 2030" data-ar="رؤية السعودية 2030">Saudi Vision 2030</span>
+    </span>
+  </a>
+  <button class="oh-lang-toggle" id="lang-toggle" type="button" aria-label="Switch language">
+    <svg class="oh-lang-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+    <span id="lang-label">العربية</span>
+  </button>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main class="oh-page-center" role="main">
+  <div class="oh-glass-card nf-card">
+    <span class="nf-eyebrow" data-en="Saudi Opportunity Hub" data-ar="منصة الفرص السعودية">Saudi Opportunity Hub</span>
+    <div class="nf-code" aria-hidden="true">4<span class="nf-accent">0</span>4</div>
+    <h1 class="nf-title" data-en="Page not found" data-ar="الصفحة غير موجودة">Page not found</h1>
+    <p class="nf-sub" data-en="We couldn't find that page. Head back to the dashboard, or sign in to search every open grant and tender." data-ar="لم نتمكن من العثور على هذه الصفحة. عد إلى لوحة التحكم، أو سجل الدخول للبحث في كل منحة ومناقصة مفتوحة.">We couldn't find that page. Head back to the dashboard, or sign in to search every open grant and tender.</p>
+    <div class="nf-actions">
+      <a class="oh-btn oh-btn--primary" href="index.html">
+        <span data-en="Go to dashboard" data-ar="الذهاب إلى لوحة التحكم">Go to dashboard</span>
+      </a>
+      <a class="oh-btn oh-btn--ghost" href="login.html">
+        <span data-en="Sign in" data-ar="تسجيل الدخول">Sign in</span>
+      </a>
     </div>
-  </main>
+  </div>
+</main>
+
+<script>
+(function () {
+  /* Language toggle — same contract as login / contact: persisted under
+     'oh-login-lang', flips dir, lang, and swaps data-en/data-ar text. */
+  var stored = localStorage.getItem('oh-login-lang') || 'en';
+
+  function applyLang(lang) {
+    var isAr = lang === 'ar';
+    document.documentElement.setAttribute('dir',  isAr ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', isAr ? 'ar'  : 'en');
+    document.getElementById('lang-label').textContent = isAr ? 'English' : 'العربية';
+    document.querySelectorAll('[data-en][data-ar]').forEach(function (el) {
+      el.textContent = isAr ? el.dataset.ar : el.dataset.en;
+    });
+    localStorage.setItem('oh-login-lang', lang);
+  }
+
+  document.getElementById('lang-toggle').addEventListener('click', function () {
+    var cur = document.documentElement.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+    applyLang(cur === 'en' ? 'ar' : 'en');
+  });
+
+  if (stored === 'ar') applyLang('ar');
+})();
+</script>
+
 </body>
 </html>

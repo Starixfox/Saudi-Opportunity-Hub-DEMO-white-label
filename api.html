@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" dir="ltr" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,9 +16,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- ─── Polish pass: consolidated design tokens (single source of truth) ─── -->
+  <!-- tokens → foundation → polish → components (components last so the
+       dark-glass classes win over polish-overrides' broad a:not(.btn) rule). -->
   <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/styles.css" />
   <link rel="stylesheet" href="assets/polish-overrides.css" />
+  <link rel="stylesheet" href="assets/components.css" />
 
   <style>
     /* ── TOKENS ──────────────────────────────────── */
@@ -66,28 +69,30 @@
       --method-get-bg:    #dcfce7;
     }
 
-    /* Dark theme */
+    /* Dark theme — pinned. Surfaces are translucent glass so the
+       .oh-atmospheric body backdrop reads through. Code blocks stay
+       opaque-ish for readability. */
     [data-theme="dark"] {
-      --bg:               #0a0d14;
-      --bg-deep:          #060810;
-      --surface:          #111827;
-      --surface-2:        #0e1523;
-      --surface-3:        #141d2e;
-      --border:           #1e2840;
-      --divider:          #1a2236;
+      --bg:               transparent;          /* body bg handled by .oh-atmospheric */
+      --bg-deep:          rgba(0, 0, 0, 0.40);
+      --surface:          rgba(255, 255, 255, 0.06);
+      --surface-2:        rgba(255, 255, 255, 0.04);
+      --surface-3:        rgba(255, 255, 255, 0.08);
+      --border:           rgba(255, 255, 255, 0.14);
+      --divider:          rgba(255, 255, 255, 0.08);
       --text:             #e8eaf2;
-      --text-muted:       #7c89ab;
-      --text-faint:       #3f4a68;
-      --green:            #00a651;
-      --green-hover:      #00c460;
-      --green-dim:        #00361a;
-      --green-glow:       rgba(0,166,81,0.15);
-      --gold:             #f5a623;
-      --gold-dim:         #3d2800;
-      --code-bg:          #080c14;
+      --text-muted:       #9da6bf;
+      --text-faint:       #7c89ab;
+      --green:            #34d97b;             /* lifted to match platform dark theme */
+      --green-hover:      #4ee08c;
+      --green-dim:        rgba(52, 217, 123, 0.14);
+      --green-glow:       rgba(52, 217, 123, 0.30);
+      --gold:             #C9A66B;              /* aligned with platform gold */
+      --gold-dim:         rgba(201, 166, 107, 0.16);
+      --code-bg:          rgba(6, 9, 16, 0.70);
       --code-text:        #c9d1e0;
-      --method-get:       #4ade80;
-      --method-get-bg:    rgba(74,222,128,0.1);
+      --method-get:       #80efb1;
+      --method-get-bg:    rgba(52, 217, 123, 0.14);
     }
 
     /* ── RESET ───────────────────────────────────── */
@@ -107,67 +112,83 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
+      background: rgba(10, 13, 20, 0.55);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+              backdrop-filter: blur(20px) saturate(160%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 var(--space-8);
-      height: 60px;
+      height: 64px;
       gap: var(--space-4);
     }
     .nav-logo {
       display: flex;
       align-items: center;
-      gap: var(--space-3);
+      gap: 12px;
       text-decoration: none;
       font-family: var(--font-display);
       font-weight: 700;
       font-size: var(--text-base);
-      color: var(--text);
+      color: rgba(255, 255, 255, 0.95);
     }
-    .nav-logo svg { flex-shrink: 0; }
-    .nav-logo span { color: var(--green); }
+    .nav-logo .nav-logo-mark {
+      width: 36px;
+      height: 36px;
+      background: rgba(201, 166, 107, 0.20);
+      border: 1.5px solid rgba(201, 166, 107, 0.50);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 15px;
+      color: #C9A66B;
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+    }
+    .nav-logo-text { display: flex; flex-direction: column; line-height: 1.1; }
+    .nav-logo-name { font-size: 15px; color: rgba(255, 255, 255, 0.95); letter-spacing: -0.2px; }
+    .nav-logo-sub  { font-size: 10px; font-weight: 400; color: rgba(255, 255, 255, 0.50); letter-spacing: 0.6px; text-transform: uppercase; margin-top: 1px; }
+    @media (max-width: 540px) { .nav-logo-sub { display: none; } }
+
     .nav-links-bar {
       display: flex;
       align-items: center;
       gap: var(--space-6);
       list-style: none;
     }
+    /* !important: polish-overrides.css ships a high-specificity
+       `html[data-theme="dark"] a:not(.btn)…` rule painting every <a>
+       accent-green. Force the nav links back to the marketing-page palette
+       (muted white default, white on hover, gold for active). */
     .nav-links-bar a {
       font-size: var(--text-sm);
       font-weight: 500;
-      color: var(--text-muted);
+      color: rgba(255, 255, 255, 0.65) !important;
       text-decoration: none;
       transition: color 0.15s;
     }
-    .nav-links-bar a:hover,
-    .nav-links-bar a.active { color: var(--green); }
+    .nav-links-bar a:hover { color: #ffffff !important; }
+    .nav-links-bar a.active { color: var(--gold) !important; }
     .btn-nav {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 7px 16px;
-      background: var(--green);
-      color: #fff;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #ffffff;
       border-radius: var(--radius-full);
       font-size: var(--text-sm);
       font-weight: 600;
       text-decoration: none;
-      transition: background 0.2s;
+      -webkit-backdrop-filter: blur(12px);
+              backdrop-filter: blur(12px);
+      transition: background 0.2s, border-color 0.2s;
     }
-    .btn-nav:hover { background: var(--green-hover); }
-    .theme-btn {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 5px 8px;
-      cursor: pointer;
-      color: var(--text-muted);
-      font-size: 1rem;
-      transition: border-color 0.15s;
-    }
-    .theme-btn:hover { border-color: var(--green); color: var(--green); }
+    .btn-nav:hover { background: rgba(255, 255, 255, 0.16); border-color: rgba(255, 255, 255, 0.32); }
     @media (max-width: 680px) {
       .nav-links-bar { display: none; }
       .navbar { padding: 0 var(--space-4); }
@@ -204,11 +225,12 @@
       font-family: var(--font-display);
       font-size: clamp(1.75rem, 3vw + 1rem, 2.75rem);
       font-weight: 700;
-      color: var(--text);
+      color: #ffffff;
       line-height: 1.15;
       margin-bottom: var(--space-4);
+      letter-spacing: -0.02em;
     }
-    .api-hero h1 .accent { color: var(--green); }
+    .api-hero h1 .accent { color: var(--gold); }
     .api-hero p {
       font-size: var(--text-lg);
       color: var(--text-muted);
@@ -247,32 +269,38 @@
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--green);
+      color: var(--gold);
       margin-bottom: var(--space-3);
     }
     .api-section > h2 {
       font-family: var(--font-display);
       font-size: var(--text-xl);
       font-weight: 700;
-      color: var(--text);
+      color: #ffffff;
       margin-bottom: var(--space-6);
+      letter-spacing: -0.01em;
     }
 
     /* ── ENDPOINT CARD ───────────────────────────── */
     .endpoint-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: var(--radius-xl);
       overflow: hidden;
       margin-bottom: var(--space-6);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+              backdrop-filter: blur(20px) saturate(140%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 12px 32px rgba(0, 0, 0, 0.30);
     }
     .endpoint-header {
       display: flex;
       align-items: center;
       gap: var(--space-3);
       padding: var(--space-4) var(--space-6);
-      background: var(--surface-2);
-      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       cursor: pointer;
       user-select: none;
     }
@@ -435,13 +463,16 @@
 
     /* ── INFO BOX ────────────────────────────────── */
     .info-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--green);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-left: 3px solid var(--gold);
       border-radius: var(--radius-lg);
       padding: var(--space-6);
       margin-bottom: var(--space-6);
+      -webkit-backdrop-filter: blur(16px);
+              backdrop-filter: blur(16px);
     }
+    [dir="rtl"] .info-box { border-left: 1px solid rgba(255,255,255,0.10); border-right: 3px solid var(--gold); }
     .info-box h3 {
       font-family: var(--font-display);
       font-size: var(--text-base);
@@ -460,65 +491,85 @@
       margin-bottom: var(--space-6);
     }
     .limit-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.10);
       border-radius: var(--radius-lg);
       padding: var(--space-4) var(--space-5);
+      -webkit-backdrop-filter: blur(14px);
+              backdrop-filter: blur(14px);
     }
     .limit-tier {
       font-size: var(--text-xs);
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--green);
+      color: var(--gold);
       margin-bottom: var(--space-2);
     }
     .limit-value {
       font-family: var(--font-display);
       font-size: var(--text-xl);
       font-weight: 700;
-      color: var(--text);
+      color: #ffffff;
       line-height: 1;
       margin-bottom: 4px;
+      font-variant-numeric: tabular-nums;
     }
-    .limit-desc { font-size: var(--text-xs); color: var(--text-muted); }
+    .limit-desc { font-size: var(--text-xs); color: rgba(255,255,255,0.55); }
 
     /* ── CTA ─────────────────────────────────────── */
     .cta-box {
-      background: linear-gradient(135deg, var(--green-dim) 0%, var(--surface) 100%);
-      border: 1px solid var(--green);
+      background:
+        linear-gradient(135deg, rgba(201, 166, 107, 0.10) 0%, rgba(255, 255, 255, 0.04) 100%);
+      border: 1px solid rgba(201, 166, 107, 0.30);
       border-radius: var(--radius-xl);
       padding: var(--space-10) var(--space-8);
       text-align: center;
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+              backdrop-filter: blur(20px) saturate(160%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 16px 40px rgba(0, 0, 0, 0.32);
     }
     .cta-box h2 {
       font-family: var(--font-display);
       font-size: var(--text-xl);
       font-weight: 700;
-      color: var(--text);
+      color: #ffffff;
       margin-bottom: var(--space-3);
+      letter-spacing: -0.01em;
     }
-    .cta-box p { font-size: var(--text-base); color: var(--text-muted); margin-bottom: var(--space-6); max-width: 480px; margin-left: auto; margin-right: auto; }
+    .cta-box p { font-size: var(--text-base); color: rgba(255,255,255,0.65); margin-bottom: var(--space-6); max-width: 480px; margin-left: auto; margin-right: auto; }
     .btn-cta {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       padding: 12px 28px;
-      background: var(--green);
-      color: #fff;
+      background: #ffffff;
+      color: #003c1d;
       border-radius: var(--radius-full);
       font-size: var(--text-base);
-      font-weight: 600;
+      font-weight: 700;
       text-decoration: none;
-      transition: background 0.2s, transform 0.15s;
+      box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.20),
+        0 12px 28px rgba(0, 0, 0, 0.25);
+      transition: transform 0.15s, box-shadow 0.2s;
     }
-    .btn-cta:hover { background: var(--green-hover); transform: translateY(-1px); }
+    .btn-cta:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.22),
+        0 18px 36px rgba(0, 0, 0, 0.30);
+    }
 
     /* ── FOOTER ──────────────────────────────────── */
     .site-footer {
-      background: var(--surface);
-      border-top: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.30);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
       padding: var(--space-8) var(--space-8);
+      -webkit-backdrop-filter: blur(16px);
+              backdrop-filter: blur(16px);
     }
     .footer-inner {
       max-width: 900px;
@@ -569,35 +620,36 @@
     }
   </style>
 </head>
-<body>
+<body class="oh-atmospheric">
 
 <!-- ═══════════════════════════════════════════
-     NAVBAR
+     NAVBAR — full-width sticky bar with platform brand mark
 ═══════════════════════════════════════════ -->
 <nav class="navbar" role="navigation" aria-label="Main navigation">
   <a href="index.html" class="nav-logo" aria-label="Saudi Opportunity Hub Home">
-    <svg width="28" height="28" viewBox="0 0 36 36" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="18" cy="18" r="17" stroke="#00a651" stroke-width="1.5" opacity="0.4"/>
-      <ellipse cx="18" cy="18" rx="17" ry="6.5" stroke="#00a651" stroke-width="1.5" opacity="0.7" transform="rotate(-25 18 18)"/>
-      <circle cx="18" cy="18" r="3.5" fill="#00a651"/>
-      <circle cx="28.5" cy="10" r="1.8" fill="#00a651" opacity="0.8"/>
-    </svg>
-    <span><span>Saudi</span> Opportunity Hub</span>
+    <span class="nav-logo-mark" aria-hidden="true">OH</span>
+    <span class="nav-logo-text">
+      <span class="nav-logo-name" data-en="Opportunity Hub" data-ar="منصة الفرص">Opportunity Hub</span>
+      <span class="nav-logo-sub"  data-en="Saudi Vision 2030" data-ar="رؤية السعودية 2030">Saudi Vision 2030</span>
+    </span>
   </a>
 
   <ul class="nav-links-bar" role="list">
-    <li><a href="index.html">Overview</a></li>
-    <li><a href="index.html#opportunities">Opportunities</a></li>
-    <li><a href="api.html" class="active">API Access</a></li>
-    <li><a href="contact.html">Contact</a></li>
+    <li><a href="index.html" data-en="Overview" data-ar="نظرة عامة">Overview</a></li>
+    <li><a href="index.html#opportunities" data-en="Opportunities" data-ar="الفرص">Opportunities</a></li>
+    <li><a href="api.html" class="active" data-en="API Access" data-ar="واجهة برمجية">API Access</a></li>
+    <li><a href="contact.html" data-en="Contact" data-ar="تواصل">Contact</a></li>
   </ul>
 
   <div style="display:flex;align-items:center;gap:var(--space-3);">
-    <button class="theme-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
-      <span id="themeIcon">🌙</span>
+    <button class="oh-lang-toggle" id="lang-toggle" type="button" aria-label="Switch language">
+      <svg class="oh-lang-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+      <span id="lang-label">العربية</span>
     </button>
     <a href="contact.html" class="btn-nav">
-      Request Access
+      <span data-en="Request Access" data-ar="طلب وصول">Request Access</span>
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </a>
   </div>
@@ -914,21 +966,34 @@
 </footer>
 
 <script>
-/* Theme toggle */
+/* Language toggle — shared contract with login / contact / 404 / reset.
+   Persisted under 'oh-login-lang' so the choice carries across pages.
+   The platform is pinned to data-theme="dark" — no theme toggle here. */
 (function () {
   var html = document.documentElement;
-  var btn  = document.getElementById('themeToggle');
-  var icon = document.getElementById('themeIcon');
-  var stored = localStorage.getItem('is-demo-lang-theme') || 'light';
-  html.setAttribute('data-theme', stored);
-  icon.textContent = stored === 'dark' ? '☀️' : '🌙';
 
-  btn.addEventListener('click', function () {
-    var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
-    icon.textContent = next === 'dark' ? '☀️' : '🌙';
-    localStorage.setItem('is-demo-lang-theme', next);
-  });
+  function applyLang(lang) {
+    var isAr = lang === 'ar';
+    html.setAttribute('dir',  isAr ? 'rtl' : 'ltr');
+    html.setAttribute('lang', isAr ? 'ar'  : 'en');
+    var label = document.getElementById('lang-label');
+    if (label) label.textContent = isAr ? 'English' : 'العربية';
+    document.querySelectorAll('[data-en][data-ar]').forEach(function (el) {
+      el.textContent = isAr ? el.dataset.ar : el.dataset.en;
+    });
+    localStorage.setItem('oh-login-lang', lang);
+  }
+
+  var stored = localStorage.getItem('oh-login-lang') || 'en';
+  if (stored === 'ar') applyLang('ar');
+
+  var toggle = document.getElementById('lang-toggle');
+  if (toggle) {
+    toggle.addEventListener('click', function () {
+      var cur = html.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      applyLang(cur === 'en' ? 'ar' : 'en');
+    });
+  }
 })();
 </script>
 

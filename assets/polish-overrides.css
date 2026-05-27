@@ -1216,10 +1216,13 @@ html[data-theme="dark"] h4 { color: rgba(255, 255, 255, 0.96); }
 html[data-theme="dark"] p,
 html[data-theme="dark"] span,
 html[data-theme="dark"] div { /* selective — only inherit on unstyled descendants */ }
-html[data-theme="dark"] a:not(.btn):not(.app-nav-item):not(.brand-logo) {
+/* Exclude every button-shaped link (.btn legacy, .oh-btn / .btn-cta from
+   the shared component library, the SPA brand-logo, plus the new dark-glass
+   nav and back-link primitives) so they keep their button surface colours. */
+html[data-theme="dark"] a:not(.btn):not(.app-nav-item):not(.brand-logo):not(.oh-btn):not(.btn-cta):not(.oh-brand):not(.oh-back-link):not(.nav-logo):not(.footer-logo) {
   color: var(--accent);
 }
-html[data-theme="dark"] a:not(.btn):not(.app-nav-item):not(.brand-logo):hover {
+html[data-theme="dark"] a:not(.btn):not(.app-nav-item):not(.brand-logo):not(.oh-btn):not(.btn-cta):not(.oh-brand):not(.oh-back-link):not(.nav-logo):not(.footer-logo):hover {
   color: var(--accent-hover, var(--accent));
 }
 
