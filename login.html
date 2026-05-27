@@ -1648,11 +1648,14 @@
       if (fb && el.textContent === '—') el.textContent = fb;
     };
 
-    // Total opportunities — HEAD + Prefer count=exact gives just the
-    // row count, no body payload.
+    // Total opportunities — match the SPA dashboard KPI which excludes
+    // archived rows (see index.html:loadKPIs, `.neq('status','archived')`).
+    // Without this filter the login pill reads ~100 higher than every
+    // counter inside the app.
     supabase
       .from('opportunities')
       .select('*', { count: 'exact', head: true })
+      .neq('status', 'archived')
       .then(function (res) {
         if (res && typeof res.count === 'number') {
           opps.textContent = fmt(res.count);
@@ -1662,33 +1665,22 @@
       })
       .catch(function () { fallback(opps); });
 
-    // Distinct sectors — pull just the sectors column, dedupe client-side.
-    // Each opportunity has sectors[] (array). We flatten + Set.
-    supabase
-      .from('opportunities')
-      .select('sectors')
-      .then(function (res) {
-        if (res && Array.isArray(res.data)) {
-          const all = new Set();
-          for (const row of res.data) {
-            const s = row && row.sectors;
-            if (Array.isArray(s)) s.forEach((x) => x && all.add(String(x).toLowerCase().trim()));
-            else if (s) all.add(String(s).toLowerCase().trim());
-          }
-          if (all.size > 0) sectors.textContent = fmt(all.size);
-          else fallback(sectors);
-        } else {
-          fallback(sectors);
-        }
-      })
-      .catch(function () { fallback(sectors); });
+    // Sectors — the SPA's "Sectors Tracked" KPI counts CANONICAL_SECTORS
+    // (see index.html:1908). The dataset has ~28 raw distinct strings
+    // because of legacy free-form text, but the platform always shows
+    // 17 (the canonical roster). Hardcoded here to match — when the
+    // canonical list changes in index.html, bump this value too.
+    // TODO: extract CANONICAL_SECTORS into assets/sectors.js so both
+    // pages import the same source of truth.
+    sectors.textContent = fmt(17);
 
     // Distinct region scopes — Saudi (SA-…) / GCC (GCC-…) / Global (GL-…)
-    // map from the opportunity id prefix. Count the distinct prefixes
-    // present in the dataset.
+    // mapped from the opportunity id prefix. Count distinct scopes present
+    // in non-archived data (same filter as the opps count for consistency).
     supabase
       .from('opportunities')
       .select('id')
+      .neq('status', 'archived')
       .then(function (res) {
         if (res && Array.isArray(res.data)) {
           const scopes = new Set();
