@@ -1590,52 +1590,83 @@
 
 <!-- ══════════════════════════════════════════
      LOADING SCREEN (shown on redirect to main app)
+     Matches the SPA's dark-glass language: a dim scrim over the
+     existing login video, with the brand mark + spinner + label
+     wrapped in the canonical glass card recipe (rgba 0.08 base +
+     diagonal gradient + 1 px rgba 0.18 border + blur 60 px + inset
+     top highlight + drop shadow). Same surface as .home-card.
 ══════════════════════════════════════════ -->
 <div id="loading-screen" aria-hidden="true" style="
   display: none;
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: linear-gradient(160deg, #012d18 0%, #C9A66B 45%, #014d26 70%, #1a0e00 100%);
+  background: rgba(5, 18, 8, 0.72);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+          backdrop-filter: blur(12px) saturate(140%);
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 24px;
+  gap: 0;
   opacity: 0;
   transition: opacity 0.25s ease;
 ">
-  <!-- Logo mark -->
+  <!-- Glass card — canonical .home-card recipe -->
   <div style="
-    width: 56px; height: 56px;
-    background: rgba(201,166,107,.15);
-    border: 1.5px solid rgba(201,166,107,.45);
-    border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  " role="img" aria-label="Opportunity Hub">
-    <span style="
-      width: 34px; height: 34px; display: block;
-      background: #C9A66B;
-      -webkit-mask: url('assets/logo-oh-mark.svg') center/contain no-repeat;
-              mask: url('assets/logo-oh-mark.svg') center/contain no-repeat;
-    "></span>
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 48px 56px;
+    border-radius: 24px;
+    background:
+      linear-gradient(135deg,
+        rgba(255, 255, 255, 0.06) 0%,
+        rgba(255, 255, 255, 0.00) 45%,
+        rgba(255, 255, 255, 0.03) 100%),
+      rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    -webkit-backdrop-filter: blur(60px) saturate(180%);
+            backdrop-filter: blur(60px) saturate(180%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      0 20px 60px rgba(0, 0, 0, 0.45);
+  ">
+    <!-- Logo mark -->
+    <div style="
+      width: 56px; height: 56px;
+      background: rgba(201,166,107,.15);
+      border: 1.5px solid rgba(201,166,107,.45);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    " role="img" aria-label="Opportunity Hub">
+      <span style="
+        width: 34px; height: 34px; display: block;
+        background: #C9A66B;
+        -webkit-mask: url('assets/logo-oh-mark.svg') center/contain no-repeat;
+                mask: url('assets/logo-oh-mark.svg') center/contain no-repeat;
+      "></span>
+    </div>
+    <!-- Spinner — white track + gold rotating arc -->
+    <div style="
+      width: 32px; height: 32px;
+      border: 2.5px solid rgba(255,255,255,.15);
+      border-top-color: #C9A66B;
+      border-radius: 50%;
+      animation: ls-spin 0.7s linear infinite;
+    "></div>
+    <!-- Label -->
+    <p id="loading-label" style="
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 13px;
+      color: rgba(255,255,255,.72);
+      letter-spacing: 0.3px;
+      margin: 0;
+      text-align: center;
+    ">Loading Opportunity Hub…</p>
   </div>
-  <!-- Spinner -->
-  <div style="
-    width: 32px; height: 32px;
-    border: 2.5px solid rgba(255,255,255,.15);
-    border-top-color: #C9A66B;
-    border-radius: 50%;
-    animation: ls-spin 0.7s linear infinite;
-  "></div>
-  <!-- Label -->
-  <p id="loading-label" style="
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 13px;
-    color: rgba(255,255,255,.5);
-    letter-spacing: 0.3px;
-    margin: 0;
-  ">Loading Opportunity Hub…</p>
 </div>
 
 <style>
