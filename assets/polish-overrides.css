@@ -916,20 +916,51 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
    token paths activate; this block layers the glassmorphism on top.
 ============================================================================ */
 
-/* ─────────────────────────────────────────────────────── App shell + body */
+/* ─────────────────────────────────────────────────────── App shell + body
+   The SPA's body needs a DRAMATIC layered backdrop for the glass cards
+   to read as glass. Without atmospheric variation behind the card,
+   "white-tint on dark" just looks like a flat dark tile on a flat dark
+   background. So body gets a four-layer composition:
+     · Constellation circles SVG (mashrabiya-adjacent, same family as
+       the login form panel's bg)
+     · Warm gold radial in the upper-right
+     · Cool emerald radial in the lower-left
+     · Deep emerald → midnight → black linear base
+   .app-shell is forced to transparent so all of this shows through. */
 
-html[data-theme="dark"] body,
 html[data-theme="dark"] {
-  background:
-    radial-gradient(ellipse 80% 60% at 30% 10%, rgba(255, 255, 255, 0.04), transparent 60%),
-    linear-gradient(220deg, #0e2a1c 0%, #082015 40%, #051208 100%);
-  background-attachment: fixed;
-  color: rgba(255, 255, 255, 0.92);
+  background-color: #051208;
   color-scheme: dark;
 }
 
-html[data-theme="dark"] .app-shell {
-  background: transparent;
+html[data-theme="dark"] body {
+  background-color: #051208;
+  background-image:
+    /* Layer 1: scattered circles (constellation marks) */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1200' preserveAspectRatio='xMidYMid slice'><g fill='none' stroke='%23ffffff' stroke-opacity='0.10' stroke-width='1.4'><circle cx='1400' cy='160' r='420'/><circle cx='-60' cy='720' r='340'/><circle cx='900' cy='1140' r='240'/><circle cx='220' cy='280' r='90'/><circle cx='1280' cy='820' r='130'/></g></svg>"),
+    /* Layer 2: warm gold haze upper-right */
+    radial-gradient(circle at 90% 12%, rgba(201, 166, 107, 0.12) 0%, transparent 55%),
+    /* Layer 3: cool emerald hint lower-left */
+    radial-gradient(circle at 15% 90%, rgba(0, 108, 53, 0.14) 0%, transparent 55%),
+    /* Layer 4: deep emerald → midnight → black base */
+    linear-gradient(220deg, #0e2a1c 0%, #082015 40%, #051208 100%);
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment: fixed, fixed, fixed, fixed;
+  color: rgba(255, 255, 255, 0.92);
+  min-height: 100dvh;
+}
+
+/* Critical: every SPA-level wrapper that legacy-app.css painted with
+   --bg / --bg-base needs to be transparent so the body's layered
+   backdrop shows through. Otherwise the glass cards float on a flat
+   --bg-base wash and there's nothing to "frost" through them. */
+html[data-theme="dark"] .app-shell,
+html[data-theme="dark"] .app-main,
+html[data-theme="dark"] .app-content,
+html[data-theme="dark"] .home-wrap,
+html[data-theme="dark"] .view {
+  background: transparent !important;
 }
 
 /* ─────────────────────────────────────────────────────── Top navigation */
