@@ -476,6 +476,32 @@
       max-width: 360px;
     }
 
+    /* ────────────────────────────────────────────────────────────
+       BRAND TAGLINE ROTATOR
+       Tagline + description cycle through a small set of messages
+       every 6 seconds. .is-fading drops opacity + a tiny upward
+       drift; JS swaps the text content at the bottom of the fade
+       and the rise-in completes the transition.
+    ──────────────────────────────────────────────────────────── */
+    .brand-tagline,
+    .brand-desc {
+      transition:
+        opacity 520ms cubic-bezier(0.22, 1, 0.36, 1),
+        transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: opacity, transform;
+    }
+    .brand-tagline.is-fading,
+    .brand-desc.is-fading {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .brand-tagline,
+      .brand-desc {
+        transition: none;
+      }
+    }
+
     /* Stat pills */
     .brand-stats {
       display: flex;
@@ -1709,6 +1735,116 @@
     setTimeout(function () {
       [opps, sectors, regions].forEach(fallback);
     }, 6000);
+  })();
+
+  /* ──────────────────────────────────────────────────────────────
+     BRAND TAGLINE ROTATOR
+     Cycles the headline + description through a curated set of
+     messages every 6 seconds. Both elements cross-fade together
+     (opacity + a tiny upward drift via the .is-fading CSS class).
+     Pauses while the tab is hidden so background tabs don't burn
+     CPU; respects prefers-reduced-motion by skipping the fade and
+     just swapping content. Updates data-en / data-ar attributes
+     each rotation so the existing language-toggle pipeline keeps
+     working — toggling to Arabic mid-rotation flips the visible
+     text to the AR version of the current message.
+  ────────────────────────────────────────────────────────────── */
+  (function brandTaglineRotator() {
+    const tagline = document.querySelector('.brand-tagline');
+    const lead    = tagline && tagline.querySelector('span');
+    const em      = tagline && tagline.querySelector('em');
+    const desc    = document.querySelector('.brand-desc');
+    if (!tagline || !lead || !em || !desc) return;
+
+    /* The roster. Every message stays in BRAND.md voice:
+         · specific over evocative
+         · no "unlock / empower / transform"
+         · Arabic reads as Arabic, not translation */
+    const messages = [
+      {
+        leadEn: 'Every Saudi grant,',
+        leadAr: 'كل منحة سعودية،',
+        emEn:   'in one place.',
+        emAr:   'في مكان واحد.',
+        descEn: 'Grants, tenders, accelerators, and investment programmes across 15 sectors. Verified weekly.',
+        descAr: 'المنح والمناقصات والمسرّعات وبرامج الاستثمار عبر ١٥ قطاعًا. يتم التحقق منها أسبوعيًا.'
+      },
+      {
+        leadEn: 'Tracked by hand.',
+        leadAr: 'متابعة يدوية.',
+        emEn:   'No stale links.',
+        emAr:   'بلا روابط قديمة.',
+        descEn: 'Every programme reviewed by a person, sourced from the official channel, dated on the day we last verified it.',
+        descAr: 'كل برنامج يراجعه إنسان، ومصدره القناة الرسمية، ومؤرّخ بآخر يوم تحققنا منه.'
+      },
+      {
+        leadEn: 'From Vision 2030',
+        leadAr: 'من رؤية 2030',
+        emEn:   'to your shortlist.',
+        emAr:   'إلى قائمتك القصيرة.',
+        descEn: 'Filter by sector, region, deadline. Save what fits. Skip what doesn’t. No noise.',
+        descAr: 'صفّ حسب القطاع والمنطقة والموعد النهائي. احفظ ما يناسبك. تجاوز ما لا يناسبك.'
+      },
+      {
+        leadEn: 'Built bilingual.',
+        leadAr: 'مصمّمة ثنائية اللغة.',
+        emEn:   'Built to be read.',
+        emAr:   'مصمّمة للقراءة.',
+        descEn: 'English and Arabic, by default. Original sources cited. RTL and LTR layouts both first-class.',
+        descAr: 'بالإنجليزية والعربية، افتراضيًا. المصادر الأصلية موثّقة. التخطيطان من اليمين إلى اليسار ومن اليسار إلى اليمين بنفس المستوى.'
+      }
+    ];
+
+    const FADE_MS = 520;       // matches the CSS transition duration
+    const HOLD_MS = 6000;      // each message visible for ~6 s
+    let idx = 0;
+
+    function applyMessage(m) {
+      // Read the current language from the document attributes (set by
+      // switchLang via html.setAttribute('lang', ...)). Reading the
+      // outer-scope `currentLang` directly here threw a strict-mode
+      // ReferenceError because the rotator IIFE runs before the
+      // `let currentLang = …` declaration further down in the script
+      // (Temporal Dead Zone). The document attribute is set during
+      // page boot by switchLang(), so this is always defined.
+      const isAr = document.documentElement.getAttribute('lang') === 'ar';
+      lead.setAttribute('data-en', m.leadEn);
+      lead.setAttribute('data-ar', m.leadAr);
+      em.setAttribute('data-en',   m.emEn);
+      em.setAttribute('data-ar',   m.emAr);
+      desc.setAttribute('data-en', m.descEn);
+      desc.setAttribute('data-ar', m.descAr);
+      lead.textContent = isAr ? m.leadAr : m.leadEn;
+      em.textContent   = isAr ? m.emAr   : m.emEn;
+      desc.textContent = isAr ? m.descAr : m.descEn;
+    }
+
+    function rotate() {
+      // If the tab is hidden, skip this tick — saves CPU and prevents
+      // a back-to-back fade burst when the user returns.
+      if (document.hidden) return;
+      // Respect reduced-motion: no fade, just swap.
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduced) {
+        idx = (idx + 1) % messages.length;
+        applyMessage(messages[idx]);
+        return;
+      }
+      tagline.classList.add('is-fading');
+      desc.classList.add('is-fading');
+      setTimeout(function () {
+        idx = (idx + 1) % messages.length;
+        applyMessage(messages[idx]);
+        tagline.classList.remove('is-fading');
+        desc.classList.remove('is-fading');
+      }, FADE_MS);
+    }
+
+    // Prime: replace the static HTML with the rotator's first message
+    // so the data-en/data-ar attrs are owned by the same source.
+    applyMessage(messages[0]);
+
+    setInterval(rotate, HOLD_MS);
   })();
 
   /* ──────────────────────────────────────────────────────────────
