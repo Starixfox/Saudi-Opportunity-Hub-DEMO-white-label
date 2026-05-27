@@ -981,8 +981,8 @@ html[data-theme="dark"] .view {
 html[data-theme="dark"] .app-topbar {
   background: rgba(255, 255, 255, 0.04);
   border-bottom: 1px solid rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
@@ -1024,8 +1024,8 @@ html[data-theme="dark"] .app-tb-user:hover {
 html[data-theme="dark"] .app-sidebar {
   background: rgba(255, 255, 255, 0.04);
   border-right: 1px solid rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(50px) saturate(180%);
-  -webkit-backdrop-filter: blur(50px) saturate(180%);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
   box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.04);
 }
 [dir="rtl"] html[data-theme="dark"] .app-sidebar {
@@ -1057,8 +1057,8 @@ html[data-theme="dark"] .home-greeting {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
     0 20px 60px rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(50px) saturate(180%);
-  -webkit-backdrop-filter: blur(50px) saturate(180%);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
 }
 html[data-theme="dark"] .home-greeting-badge {
   background: rgba(255, 255, 255, 0.10);
@@ -1094,8 +1094,8 @@ html[data-theme="dark"] .home-qa-btn--primary:hover {
 html[data-theme="dark"] .home-stat {
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.10),
     0 12px 32px rgba(0, 0, 0, 0.30);
@@ -1114,8 +1114,8 @@ html[data-theme="dark"] .home-stat-lbl { color: rgba(255, 255, 255, 0.60); }
 html[data-theme="dark"] .home-card {
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.10),
     0 12px 32px rgba(0, 0, 0, 0.30);
@@ -1131,8 +1131,8 @@ html[data-theme="dark"] .kpi-card,
 html[data-theme="dark"] .chart-card {
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.10),
     0 12px 32px rgba(0, 0, 0, 0.30);
@@ -1146,8 +1146,8 @@ html[data-theme="dark"] .kpi-hint  { color: rgba(255, 255, 255, 0.50); }
 html[data-theme="dark"] .opp-card {
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
   color: rgba(255, 255, 255, 0.92);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
@@ -1171,8 +1171,8 @@ html[data-theme="dark"] .opp-card-stats { color: rgba(255, 255, 255, 0.65); }
 html[data-theme="dark"] .filter-bar {
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
 }
 html[data-theme="dark"] .filter-input,
 html[data-theme="dark"] .filter-select {
@@ -1198,8 +1198,8 @@ html[data-theme="dark"] #wsPanel,
 html[data-theme="dark"] #wsPanel.active {
   background: rgba(10, 26, 18, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
   color: rgba(255, 255, 255, 0.92);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
 }
@@ -1209,8 +1209,8 @@ html[data-theme="dark"] #panel,
 html[data-theme="dark"] .opp-detail-panel {
   background: rgba(10, 26, 18, 0.85);
   border-left: 1px solid rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
   color: rgba(255, 255, 255, 0.92);
   box-shadow: -16px 0 60px rgba(0, 0, 0, 0.55);
 }
@@ -1230,10 +1230,10 @@ html[data-theme="dark"] .sector-card,
 html[data-theme="dark"] .saved-card,
 html[data-theme="dark"] .about-grid > *,
 html[data-theme="dark"] .about-wl-item {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
   color: rgba(255, 255, 255, 0.92);
 }
 
@@ -1377,8 +1377,8 @@ html[data-theme="dark"] .liv2-chart-card,
 html[data-theme="dark"] .liv2-insight-strip {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-          backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+          backdrop-filter: blur(60px) saturate(180%);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.30);
 }
 html[data-theme="dark"] .liv2-kpi__value { color: #ffffff; }
@@ -1393,8 +1393,8 @@ html[data-theme="dark"] .insight-block,
 html[data-theme="dark"] .market-stat {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.10);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-          backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+          backdrop-filter: blur(60px) saturate(180%);
 }
 html[data-theme="dark"] .insight-card-title,
 html[data-theme="dark"] .insight-block__title,
@@ -1408,8 +1408,8 @@ html[data-theme="dark"] .ws-bar,
 html[data-theme="dark"] .recently-added-widget {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.10);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-          backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+          backdrop-filter: blur(60px) saturate(180%);
 }
 html[data-theme="dark"] .widget-header {
   background: rgba(255, 255, 255, 0.03);
@@ -1422,8 +1422,8 @@ html[data-theme="dark"] .widget-badge { color: rgba(255, 255, 255, 0.92); }
 html[data-theme="dark"] .la-card {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.10);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-          backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+          backdrop-filter: blur(60px) saturate(180%);
 }
 html[data-theme="dark"] .la-card-title  { color: rgba(255, 255, 255, 0.95); }
 html[data-theme="dark"] .la-card-desc,
@@ -1435,8 +1435,8 @@ html[data-theme="dark"] .feedback-card,
 html[data-theme="dark"] .who-strip {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.10);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-          backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+          backdrop-filter: blur(60px) saturate(180%);
 }
 html[data-theme="dark"] .audience-role,
 html[data-theme="dark"] .feedback-banner-text,
@@ -1503,8 +1503,8 @@ html[data-theme="dark"] .sh-footer-brand-credit { color: rgba(255, 255, 255, 0.5
 html[data-theme="dark"] .oh-tm-card {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-          backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+          backdrop-filter: blur(60px) saturate(180%);
 }
 html[data-theme="dark"] .oh-tm-card--active {
   background: rgba(255, 255, 255, 0.10);
@@ -1559,16 +1559,16 @@ html[data-theme="dark"] .freshness-badge,
 html[data-theme="dark"] .dfp-inner {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.10);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-          backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+          backdrop-filter: blur(60px) saturate(180%);
 }
 
 /* Table wrapper + its scroll surfaces (Opportunities list view) */
 html[data-theme="dark"] .table-wrapper {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.10);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-          backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+          backdrop-filter: blur(60px) saturate(180%);
 }
 
 /* Onboarding enhancement panels (oh-enh* — settings flow + folders UI) */
@@ -1580,8 +1580,8 @@ html[data-theme="dark"] [class*=" oh-enh"] {
 html[data-theme="dark"] .oh-enh-card,
 html[data-theme="dark"] .oh-enh2-modal,
 html[data-theme="dark"] .oh-enh3-step {
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-          backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+          backdrop-filter: blur(60px) saturate(180%);
 }
 
 /* Watchlist / saved-search items in #wsPanel */
@@ -1590,8 +1590,8 @@ html[data-theme="dark"] .ws-item-folder,
 html[data-theme="dark"] .ws-item-folder-dropdown {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.10);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-          backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+          backdrop-filter: blur(60px) saturate(180%);
 }
 html[data-theme="dark"] .wl-saved-meta-tag {
   background: rgba(255, 255, 255, 0.08);
