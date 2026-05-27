@@ -944,6 +944,26 @@ html[data-theme="dark"] body {
   min-height: 100dvh;
 }
 
+/* ─────────────────────────────────────────────────────── Token redefine
+   Legacy-app.css defines `--surface*` tokens as opaque slate colours
+   (#0f1420 / #141928 / #1a2035) for the dark theme. Dozens of classes
+   across the SPA paint themselves with `background: var(--surface)`,
+   so without these tokens being translucent every one of those classes
+   reads as a solid card on top of the video background.
+
+   Redefining the tokens here at higher specificity (html[data-theme=dark]
+   vs legacy's [data-theme=dark]) turns every var(--surface) call site
+   into a glass surface in one stroke — no class-by-class enumeration.
+
+   --surface-elevated stays a touch more opaque so popovers / tooltips
+   still stand out from the rest of the chrome. */
+html[data-theme="dark"] {
+  --surface:           rgba(255, 255, 255, 0.06);
+  --surface-2:         rgba(255, 255, 255, 0.04);
+  --surface-3:         rgba(255, 255, 255, 0.08);
+  --surface-elevated:  rgba(20, 25, 40, 0.88);
+}
+
 /* Critical: every SPA-level wrapper that legacy-app.css painted with
    --bg / --bg-base needs to be transparent so the body's layered
    backdrop shows through. Otherwise the glass cards float on a flat
@@ -1504,4 +1524,129 @@ html[data-theme="dark"] .about-grid > *,
 html[data-theme="dark"] .about-wl-item {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.14);
+}
+
+/* ─────────────────────────────────────────────────── Backdrop-filter sweep
+   Token redefinition above turned every var(--surface) call site
+   translucent. But translucent ≠ frosted — without backdrop-filter the
+   bg just shows through unblurred. This sweep adds the blur to every
+   card-shaped class in the SPA so they all read as proper glass.
+
+   Each block uses the same blur idiom (16-18px + saturate 140%); only
+   the border + box-shadow vary slightly so hovers still have rhythm. */
+
+/* Marketing-page surfaces (rare in the SPA but a few legacy uses remain) */
+html[data-theme="dark"] .hiw-step,
+html[data-theme="dark"] .feedback-banner,
+html[data-theme="dark"] .freshness-badge,
+html[data-theme="dark"] .dfp-inner {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+          backdrop-filter: blur(16px) saturate(140%);
+}
+
+/* Table wrapper + its scroll surfaces (Opportunities list view) */
+html[data-theme="dark"] .table-wrapper {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+          backdrop-filter: blur(18px) saturate(140%);
+}
+
+/* Onboarding enhancement panels (oh-enh* — settings flow + folders UI) */
+html[data-theme="dark"] [class^="oh-enh"],
+html[data-theme="dark"] [class*=" oh-enh"] {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.10);
+}
+html[data-theme="dark"] .oh-enh-card,
+html[data-theme="dark"] .oh-enh2-modal,
+html[data-theme="dark"] .oh-enh3-step {
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+          backdrop-filter: blur(18px) saturate(140%);
+}
+
+/* Watchlist / saved-search items in #wsPanel */
+html[data-theme="dark"] .wl-saved-item,
+html[data-theme="dark"] .ws-item-folder,
+html[data-theme="dark"] .ws-item-folder-dropdown {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+          backdrop-filter: blur(16px) saturate(140%);
+}
+html[data-theme="dark"] .wl-saved-meta-tag {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Generic buttons that used to be `background: var(--surface)`
+   (.btn-secondary, .reset-btn, .profile-chip etc.) — token redefine
+   already makes them translucent, but they look better with a faint
+   blur so they don't disappear into the bg on hover. */
+html[data-theme="dark"] .btn-secondary,
+html[data-theme="dark"] .reset-btn,
+html[data-theme="dark"] .profile-chip,
+html[data-theme="dark"] .page-btn {
+  -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(12px);
+}
+
+/* Compare tray + compare modal (bottom drawer when comparing opps) */
+html[data-theme="dark"] .compare-tray,
+html[data-theme="dark"] .compare-modal {
+  background: rgba(10, 18, 28, 0.92);
+  border-color: rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+          backdrop-filter: blur(20px) saturate(160%);
+}
+
+/* Empty-state cards (no results, no watchlist, etc.) */
+html[data-theme="dark"] .empty-state,
+html[data-theme="dark"] .ws-empty-state,
+html[data-theme="dark"] .ob-empty {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* Sub-sections inside the detail panel (mashrabiya pseudo-children) */
+html[data-theme="dark"] .panel-link-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.92);
+}
+html[data-theme="dark"] .panel-link-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+/* Form fields inside settings + onboarding modals
+   (in addition to the generic input rule below, give them the glass
+   surface tokens that the rest of the chrome uses) */
+html[data-theme="dark"] .form-input,
+html[data-theme="dark"] .form-textarea,
+html[data-theme="dark"] .form-select {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+html[data-theme="dark"] .form-input:focus,
+html[data-theme="dark"] .form-textarea:focus,
+html[data-theme="dark"] .form-select:focus {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.30);
+}
+
+/* Bookmark/notification dropdown panels (top-bar bell + bookmarks) */
+html[data-theme="dark"] .bookmarks-panel,
+html[data-theme="dark"] .notifications-panel,
+html[data-theme="dark"] .ob-overlay > .ob-modal {
+  background: rgba(10, 26, 18, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+          backdrop-filter: blur(30px) saturate(160%);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
 }
