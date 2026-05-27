@@ -540,18 +540,15 @@
       display: flex;
       flex-direction: column;
       gap: 1px;
-      position: relative;
     }
-    /* Hairline divider between stats — sits on the right edge of every
-       pill except the last. Mirrors automatically in RTL. */
-    .stat-pill + .stat-pill::before {
-      content: '';
-      position: absolute;
-      inset-inline-start: 0;
-      top: 18%;
-      bottom: 18%;
-      width: 1px;
-      background: rgba(255, 255, 255, 0.14);
+    /* Hairline divider on every pill after the first. border-inline-start
+       is logical-direction aware: it sits on the LEFT in LTR (between
+       prev-pill and this-pill, visually) and on the RIGHT in RTL (same
+       visual relationship — between prev-pill and this-pill in the
+       right-to-left flow). More reliable than the previous absolute-
+       positioned ::before pseudo, which was getting clipped in RTL. */
+    .stat-pill:not(:first-child) {
+      border-inline-start: 1px solid rgba(255, 255, 255, 0.18);
     }
 
     .stat-pill strong {
