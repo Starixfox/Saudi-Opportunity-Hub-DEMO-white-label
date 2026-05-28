@@ -1160,13 +1160,16 @@ html[data-theme="dark"] .results-bar {
    centered since there's no sidebar to dodge. */
 
 html[data-theme="dark"] .app-topbar {
-  /* Take out of grid + float as a centered island */
+  /* Take out of grid + float as a centered island.
+     User: "stay in the middle ... without the side bar calculated in."
+     Centre on the TRUE viewport (left: 50%), not the content column —
+     the sidebar is no longer factored into the offset. */
   position: fixed !important;
   top: 12px;
-  left: calc(50% + 110px);   /* +110 = half of 220 px sidebar = recentre */
+  left: 50%;
   transform: translateX(-50%);
   width: auto;
-  max-width: calc(100vw - 220px - 48px);
+  max-width: calc(100vw - 48px);
   height: auto;
   min-height: 48px;
   /* Pill shape + canonical card glass — matches the .home-card recipe
@@ -1208,15 +1211,39 @@ html[data-theme="dark"] .app-topbar {
   }
 }
 
-/* RTL mirror — sidebar is on the right in RTL, so recentre the other
-   way (-110 px instead of +110). */
+/* RTL: still dead-centre on the viewport (no sidebar offset either way). */
 [dir="rtl"] html[data-theme="dark"] .app-topbar {
-  left: calc(50% - 110px);
+  left: 50%;
 }
-@media (max-width: 720px) {
-  [dir="rtl"] html[data-theme="dark"] .app-topbar {
-    left: 50%;
-  }
+
+/* ─────────────────────────────────── Topbar page-title overflow guard
+   User: on small screens "the name of that page on the top bar kinda
+   goes under the other icons." The pill is flex with justify-content:
+   space-between; the title block didn't shrink, so its text slid under
+   the .app-topbar-actions cluster. Make the title flex-shrink and the
+   crumb text ellipsis-truncate, while the action icons stay fixed —
+   so they can never overlap, the title just shortens to "…". */
+html[data-theme="dark"] .app-topbar-title {
+  min-width: 0;
+  flex: 0 1 auto;
+  overflow: hidden;
+}
+html[data-theme="dark"] .app-topbar-actions {
+  flex-shrink: 0;
+}
+html[data-theme="dark"] .app-topbar-title > .app-topbar-menu-btn,
+html[data-theme="dark"] .app-topbar-title > [data-lucide] {
+  flex-shrink: 0;
+}
+html[data-theme="dark"] .app-topbar-crumb {
+  min-width: 0;
+  overflow: hidden;
+}
+html[data-theme="dark"] .app-topbar-crumb-current {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 html[data-theme="dark"] .app-tb-stat {
