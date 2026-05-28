@@ -196,14 +196,12 @@ window.OH_THEMES = {
     taglineAr: 'نستثمر في الفرص منذ عام 1945',
     navName: 'Abdul Latif Jameel',
     navNameAr: 'عبداللطيف جميل',
-    /* Official ALJ lockup (grey wordmark + blue pentagon mark). The asset
-       has a white background and already contains the wordmark, so
-       showName is false (no duplicate text) and the brand area renders it
-       on a white chip — see the .app-sidebar-brand override in
-       polish-overrides.css. */
+    /* Official ALJ lockup (grey wordmark + blue pentagon mark), background
+       knocked out to transparent so it sits directly on the gold brand
+       pill. Already contains the wordmark, so showName is false. */
     logo: 'assets/logo-abdul-latif-jameel.png',
     logoDark: 'assets/logo-abdul-latif-jameel.png',
-    logoHeight: 26,
+    logoHeight: 36,
     showName: false,
     pageTitle: 'Abdul Latif Jameel — Opportunity Intelligence'
   })
