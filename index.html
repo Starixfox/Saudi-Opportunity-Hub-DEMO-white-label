@@ -130,7 +130,7 @@
      Targets the home dashboard greeting + KPI tiles + quick-action chips
      + sidebar + opportunity cards. Uses var(--accent) so it adapts to
      whatever white-label theme is active. ─── -->
-<link rel="stylesheet" href="assets/polish-overrides.css?v=mask-edge-64">
+<link rel="stylesheet" href="assets/polish-overrides.css?v=route-scroll-top">
 
 <!-- ─── Shared dark-glass component library extracted from login.html.
      Loaded AFTER polish-overrides so .oh-* classes (and the gold-leaning
@@ -138,7 +138,7 @@
      and polish-overrides is bumped whenever the SPA's atmospheric layer
      changes, so users on a stale cache pick up the new bg + body rules
      without waiting for the browser's max-age to expire. ─── -->
-<link rel="stylesheet" href="assets/components.css?v=mask-edge-64">
+<link rel="stylesheet" href="assets/components.css?v=route-scroll-top">
 
 <!-- SPA-specific gold-accent layer — bridges polish-overrides (which paints
      emphasis in --accent, i.e. the tenant green) with the login aesthetic
@@ -1962,7 +1962,14 @@
       window.WS.applyTab(window.__wsActiveTab || 'watchlist');
     }
     lucide.createIcons();
+    /* Scroll to top on every route change.
+       Desktop: the page (window) scrolls, so window.scrollTo handles it.
+       Mobile (<=767px): polish-overrides.css locks body and makes
+       .app-content the scroll container, so window.scrollTo is a no-op
+       there — we also reset .app-content's scrollTop directly. */
     try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch (e) { window.scrollTo(0, 0); }
+    var ac = document.querySelector('.app-content');
+    if (ac) ac.scrollTop = 0;
   }
 
   function setRoute(view, replace) {
