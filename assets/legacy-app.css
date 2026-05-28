@@ -4231,7 +4231,7 @@ body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
 }
 .ob-btn-primary {
   flex: 1; padding: 13px 20px;
-  background: var(--accent); color: #fff;
+  background: var(--accent); color: #1f1700;
   border: none; border-radius: 10px;
   font-size: 14px; font-weight: 700;
   cursor: pointer;
@@ -4332,7 +4332,7 @@ body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
 .ob-tour-prev:hover { color: var(--text); }
 .ob-tour-next {
   flex: 1; padding: 8px 14px; border-radius: 8px;
-  background: var(--accent); color: #fff;
+  background: var(--accent); color: #1f1700;
   border: none; font-size: 13px; font-weight: 700;
   cursor: pointer; transition: background 0.15s;
 }
@@ -4460,7 +4460,7 @@ body[dir="rtl"] .ob-cl-go { margin-left: 0; margin-right: auto; }
 .ob-empty-body  { font-size: 12.5px; color: var(--text-muted); line-height: 1.5; max-width: 220px; }
 .ob-empty-action {
   margin-top: 6px; padding: 8px 18px; border-radius: 8px;
-  background: var(--accent); color: #fff; border: none;
+  background: var(--accent); color: #1f1700; border: none;
   font-size: 12px; font-weight: 700; cursor: pointer;
   transition: background 0.15s;
 }
@@ -7316,15 +7316,18 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
   align-items: center;
   gap: 0.375rem;
   background: var(--accent);
-  color: #ffffff;
+  /* Dark text — the accent is gold (light) in every theme, so white
+     text was invisible on it. #1f1700 (near-black warm) reads cleanly
+     on gold in both light and dark mode. */
+  color: #1f1700;
   padding: 0.625rem 1.25rem;
   border-radius: 8px;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
   transition: background 0.15s ease;
 }
-.about-wl-cta:hover { background: var(--accent-hover); color: #ffffff; }
+.about-wl-cta:hover { background: var(--accent-hover); color: #1f1700; }
 @media (max-width: 600px) {
   .about-wl-grid { grid-template-columns: 1fr; }
   .about-wl-section { padding: 1.25rem; }
