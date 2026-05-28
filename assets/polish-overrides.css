@@ -942,7 +942,7 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
 :root.vt-lang::view-transition-group(vt-topbar),
 :root.vt-lang::view-transition-group(vt-content),
 :root.vt-lang::view-transition-group(vt-bottombar) {
-  animation-duration: 1500ms;
+  animation-duration: 2000ms;
   animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
 }
 
