@@ -1081,26 +1081,35 @@ html[data-theme="dark"] .view {
             backdrop-filter: none !important;
     box-shadow: none !important;
   }
-  /* User: "on phone this bar scrolls with it but it shoiuldnt it
-     should stay in place." The .results-bar uses position: sticky which
-     silently fails inside .app-content because the parent now carries
-     a mask-image AND overflow-x: hidden (both can break sticky in
-     descendants depending on the browser). Switching to position:
-     fixed on mobile so the bar pins to the viewport directly,
-     positioned just below the topbar pill. */
-  .results-bar {
-    position: fixed !important;
-    top: calc(76px + env(safe-area-inset-top, 0px)) !important;
-    left: 0 !important;
-    right: 0 !important;
-    margin: 0 !important;
-    z-index: 105 !important;
-  }
-  /* Reserve vertical space at the top of the opportunities view so
-     the now-fixed results-bar doesn't sit on top of the content. */
-  .opp-view-wrap {
-    padding-top: 64px;
-  }
+}
+
+/* ───────────────────────────────────────────── Opportunities results bar
+   User: "on phone it should stick to its original space so just like
+   all the cards and other things and its should be glass like like the
+   other things."
+   Treat the results-bar like every other card: drop the sticky
+   pinning so it scrolls naturally with content (its "original space"
+   in the document flow), and paint it with the canonical glass
+   recipe — same rgba(0.08) + diagonal gradient + rgba(0.18) border +
+   blur(60px) saturate(180%) + inset top highlight + drop shadow as
+   .home-card / .kpi-card. Applies to both desktop and mobile.
+   ───────────────────────────────────────────────────────────────── */
+html[data-theme="dark"] .results-bar {
+  position: static !important;
+  margin: 0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(135deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.00) 45%,
+      rgba(255, 255, 255, 0.03) 100%),
+    rgba(255, 255, 255, 0.08) !important;
+  -webkit-backdrop-filter: blur(60px) saturate(180%) !important;
+          backdrop-filter: blur(60px) saturate(180%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 20px 60px rgba(0, 0, 0, 0.45) !important;
 }
 
 /* ─────────────────────────────────────────────────────── Top navigation
