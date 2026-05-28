@@ -1635,27 +1635,30 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.14),
       0 20px 60px rgba(0, 0, 0, 0.45);
   ">
-    <!-- Logo mark -->
+    <!-- Logo mark — uses the dark-mode lifted gold (#e3bd6c) so it
+         reads as warm yellow against the pure-black scrim. The base
+         palette gold (#C9A66B) reads olive without a warm reference
+         in the surrounding bg, which is what felt "green" before. -->
     <div style="
       width: 56px; height: 56px;
-      background: rgba(201,166,107,.15);
-      border: 1.5px solid rgba(201,166,107,.45);
+      background: rgba(227, 189, 108, 0.15);
+      border: 1.5px solid rgba(227, 189, 108, 0.50);
       border-radius: 14px;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     " role="img" aria-label="Opportunity Hub">
       <span style="
         width: 34px; height: 34px; display: block;
-        background: #C9A66B;
+        background: #e3bd6c;
         -webkit-mask: url('assets/logo-oh-mark.svg') center/contain no-repeat;
                 mask: url('assets/logo-oh-mark.svg') center/contain no-repeat;
       "></span>
     </div>
-    <!-- Spinner — white track + gold rotating arc -->
+    <!-- Spinner — white track + lifted-gold rotating arc -->
     <div style="
       width: 32px; height: 32px;
-      border: 2.5px solid rgba(255,255,255,.15);
-      border-top-color: #C9A66B;
+      border: 2.5px solid rgba(255, 255, 255, 0.15);
+      border-top-color: #e3bd6c;
       border-radius: 50%;
       animation: ls-spin 0.7s linear infinite;
     "></div>
