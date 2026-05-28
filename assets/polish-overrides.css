@@ -1526,6 +1526,20 @@ html[data-theme="dark"] select {
   border: 1px solid rgba(255, 255, 255, 0.14);
   color: #ffffff;
 }
+/* Native <option> popups can't be translucent — they render against the
+   OS's default (white) surface, so the white option text was invisible
+   until the browser's blue hover highlight appeared. Give every option a
+   SOLID dark surface + light text so the list is readable at rest. */
+html[data-theme="dark"] select option,
+html[data-theme="dark"] select optgroup {
+  background-color: #0f1420;
+  color: #e8eaf2;
+}
+html[data-theme="dark"] select option:checked,
+html[data-theme="dark"] select option:hover {
+  background-color: #1c2740;
+  color: #ffffff;
+}
 html[data-theme="dark"] input::placeholder,
 html[data-theme="dark"] textarea::placeholder {
   color: rgba(255, 255, 255, 0.65);
