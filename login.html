@@ -1601,18 +1601,11 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
-  /* Solid dark base — same #051208 as the SPA's html bg in dark mode.
-     The previous 0.72 alpha let the login video bleed through and
-     made the loading screen look bright green/gold (the video's
-     hottest frames). With a solid scrim the screen reads as proper
-     dark-mode chrome and the glass card pops cleanly. The subtle
-     gold radial glow centres warmth on the card without lighting up
-     the whole viewport. */
-  background:
-    radial-gradient(ellipse at center,
-      rgba(201, 166, 107, 0.06) 0%,
-      transparent 55%),
-    #051208;
+  /* User: "just change the entire background of that loading screen to
+     black." Solid #000 — no gradient, no radial glow, no video bleed.
+     The glass card centred on top still reads cleanly against pure
+     black thanks to its rgba(0.08) base + inset top highlight. */
+  background: #000000;
   flex-direction: column;
   align-items: center;
   justify-content: center;
