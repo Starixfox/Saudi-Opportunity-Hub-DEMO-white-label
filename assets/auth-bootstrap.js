@@ -101,25 +101,6 @@ var GOLD_ACCENT = {
   darkAccentDim:    'rgba(227,189,108,0.10)'
 };
 
-/* ═══════════════════════════════════════════════════════════════════════
-   ABDUL LATIF JAMEEL — brand blue (from the company's pentagon mark).
-   Light-mode #1B75BB ≈ the ALJ corporate blue; dark mode lifts to
-   #4FA3E8 so the accent stays bright/legible on the dark surface tokens
-   (a mid blue goes muddy on dark). The grey wordmark is just text, not
-   an accent, so it isn't tokenised here. This is the one tenant that
-   keeps its own colour instead of the shared gold. */
-var ALJ_BLUE = {
-  accent:           '#1B75BB',
-  accentHover:      '#145C94',
-  accentLight:      'rgba(27,117,187,0.10)',
-  accentGlow:       'rgba(27,117,187,0.25)',
-  accentDim:        'rgba(27,117,187,0.08)',
-  darkAccent:       '#4FA3E8',
-  darkAccentHover:  '#6FB6EE',
-  darkAccentLight:  'rgba(79,163,232,0.14)',
-  darkAccentGlow:   'rgba(79,163,232,0.30)',
-  darkAccentDim:    'rgba(79,163,232,0.10)'
-};
 
 window.OH_THEMES = {
   'default': Object.assign({}, GOLD_ACCENT, {
@@ -208,7 +189,7 @@ window.OH_THEMES = {
     showName: true,
     pageTitle: 'Swift Solve — Investment Intelligence Platform'
   }),
-  'abdul-latif-jameel': Object.assign({}, ALJ_BLUE, {
+  'abdul-latif-jameel': Object.assign({}, GOLD_ACCENT, {
     label: 'Abdul Latif Jameel',
     labelAr: 'عبداللطيف جميل',
     tagline: 'Investing in opportunity since 1945',
