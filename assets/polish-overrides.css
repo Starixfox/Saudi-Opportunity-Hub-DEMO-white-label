@@ -1217,16 +1217,17 @@ html[data-theme="dark"] .app-topbar {
 }
 
 /* ─────────────────────────────────── Topbar page-title overflow guard
-   User: on small screens "the name of that page on the top bar kinda
-   goes under the other icons." The pill is flex with justify-content:
-   space-between; the title block didn't shrink, so its text slid under
-   the .app-topbar-actions cluster. Make the title flex-shrink and the
-   crumb text ellipsis-truncate, while the action icons stay fixed —
-   so they can never overlap, the title just shortens to "…". */
+   User: "it should still show the FULL name of the page" — never cut.
+   So the title NEVER shrinks and NEVER truncates (no ellipsis). Room is
+   made instead by collapsing the bulky action controls on narrow screens
+   (the media queries below). Both title and actions are flex-shrink:0 and
+   so the full name is always shown and the icons never sit on top of it.
+   (No flex-wrap — on a width:auto fixed pill it collapses the width and
+   wraps prematurely; the collapse media queries below free enough room
+   to keep everything on one line.) */
 html[data-theme="dark"] .app-topbar-title {
+  flex: 0 0 auto;            /* never shrink, never truncate */
   min-width: 0;
-  flex: 0 1 auto;
-  overflow: hidden;
 }
 html[data-theme="dark"] .app-topbar-actions {
   flex-shrink: 0;
@@ -1235,15 +1236,10 @@ html[data-theme="dark"] .app-topbar-title > .app-topbar-menu-btn,
 html[data-theme="dark"] .app-topbar-title > [data-lucide] {
   flex-shrink: 0;
 }
-html[data-theme="dark"] .app-topbar-crumb {
-  min-width: 0;
-  overflow: hidden;
-}
 html[data-theme="dark"] .app-topbar-crumb-current {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: nowrap;       /* one line, but NOT clipped — full name */
+  overflow: visible;
+  text-overflow: clip;
 }
 
 /* Progressive action-cluster collapse so the page TITLE stays fully
