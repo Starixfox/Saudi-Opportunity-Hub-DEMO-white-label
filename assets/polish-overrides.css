@@ -186,6 +186,26 @@
   color: var(--text-muted);
 }
 
+/* ─────────────────────────────────── Abdul Latif Jameel brand pill
+   The ALJ logo ships on a WHITE background (grey wordmark + blue mark),
+   so for that tenant the sidebar brand area is white instead of the
+   gold/accent pill — the white-bg logo then sits seamlessly on it.
+   applyTheme() sets data-oh-theme on <html>; the double-attribute
+   selector ([data-theme][data-oh-theme]) out-specifies the gold pin in
+   index.html, and JS sets navLogo.style.background = accent inline,
+   which !important overrides here. */
+html[data-theme="dark"][data-oh-theme="abdul-latif-jameel"] .app-sidebar-brand,
+html[data-oh-theme="abdul-latif-jameel"] .app-sidebar-brand {
+  background: #ffffff !important;
+  background-image: none !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(0, 0, 0, 0.25) !important;
+}
+html[data-oh-theme="abdul-latif-jameel"] .app-sidebar-brand #ohThemeLogoImg {
+  margin: 0 auto;
+}
+
 /* ──────────────────────────────────────────────────────── TOPBAR STATS */
 
 .app-tb-stat {

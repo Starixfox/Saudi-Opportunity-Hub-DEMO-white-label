@@ -215,14 +215,15 @@ window.OH_THEMES = {
     taglineAr: 'نستثمر في الفرص منذ عام 1945',
     navName: 'Abdul Latif Jameel',
     navNameAr: 'عبداللطيف جميل',
-    /* No logo file shipped yet — falls back to the wordmark + brand mark
-       rendered in the ALJ blue (the brand-pill + name show automatically).
-       To use the real asset, drop it at assets/logo-abdul-latif-jameel.png
-       and point logo/logoDark at it (see swift-solve above). */
-    logo: null,
-    logoDark: null,
-    logoHeight: 30,
-    showName: true,
+    /* Official ALJ lockup (grey wordmark + blue pentagon mark). The asset
+       has a white background and already contains the wordmark, so
+       showName is false (no duplicate text) and the brand area renders it
+       on a white chip — see the .app-sidebar-brand override in
+       polish-overrides.css. */
+    logo: 'assets/logo-abdul-latif-jameel.png',
+    logoDark: 'assets/logo-abdul-latif-jameel.png',
+    logoHeight: 26,
+    showName: false,
     pageTitle: 'Abdul Latif Jameel — Opportunity Intelligence'
   })
 };
@@ -341,6 +342,9 @@ window.applyTheme = function (key) {
   }
 
   window.__ohActiveTheme = key;
+  /* Expose the active theme key on <html> so per-tenant CSS can target it
+     (e.g. a white brand-pill for logos that ship on a white background). */
+  r.setAttribute('data-oh-theme', key);
   try { localStorage.setItem('oh_theme', key); } catch(e) {}
 
   /* Refresh the admin theme manager UI if open */
