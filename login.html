@@ -1598,13 +1598,24 @@
 ══════════════════════════════════════════ -->
 <div id="loading-screen" aria-hidden="true" style="
   display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  /* User: "just change the entire background of that loading screen to
-     black." Solid #000 — no gradient, no radial glow, no video bleed.
-     The glass card centred on top still reads cleanly against pure
-     black thanks to its rgba(0.08) base + inset top highlight. */
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  z-index: 2147483647;
+  /* User: 'the loading screen should be on the entire page, not just
+     the side.' Earlier the screen seemed to render only over the form
+     column — most likely a parent grid / view-transition snapshot was
+     interfering. Pinning the dimensions explicitly to viewport units
+     + max z-index (the int32 max, above anything else on the page)
+     forces it to be a true full-screen overlay regardless of layout
+     ancestors. */
   background: #000000;
   flex-direction: column;
   align-items: center;
