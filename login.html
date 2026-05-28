@@ -1721,6 +1721,21 @@
     var label  = document.getElementById('loading-label');
     var isAr   = currentLang === 'ar';
     if (label) label.textContent = isAr ? 'جارٍ تحميل منصة الفرص\u2026' : 'Loading Opportunity Hub\u2026';
+    /* polish-overrides.css declares `@view-transition { navigation: auto; }`
+       which enables CROSS-DOCUMENT view transitions for same-origin navs.
+       During that transition the browser snapshots each element with a
+       view-transition-name INDEPENDENTLY (.auth-brand -> "brand-panel",
+       .auth-form-panel -> "form-panel") and paints those named snapshots
+       in the VT pseudo-element layer, ABOVE all normal content regardless
+       of how high we push the loading screen's z-index. Result: the
+       loading screen ended up showing only in the gap between the two
+       named columns. Clearing the names here so the named snapshots
+       collapse into the root snapshot - the loading screen then actually
+       covers the full viewport during the login -> app navigation. */
+    document.querySelectorAll('.auth-brand, .auth-form-panel').forEach(function (el) {
+      el.style.viewTransitionName = 'none';
+    });
+
     // Show the overlay
     screen.style.display = 'flex';
     // Fade in on next frame
