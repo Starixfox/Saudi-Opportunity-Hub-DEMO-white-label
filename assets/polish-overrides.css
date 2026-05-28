@@ -916,9 +916,22 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
   animation-timing-function: cubic-bezier(0.16, 1, 0.30, 1);
 }
 
+/* Language flip (LTR↔RTL) — the JS toggle adds `vt-lang` on <html> for
+   the duration of the transition so the whole-layout swap gets the
+   login page's slower, more deliberate ease-out-quint timing. Scoped
+   to .vt-lang so it does NOT slow down the fast 280ms hash-route page
+   navigations above, which share the same root pseudo-elements. */
+:root.vt-lang::view-transition-old(root),
+:root.vt-lang::view-transition-new(root) {
+  animation-duration: 900ms;
+  animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root),
-  ::view-transition-new(root) {
+  ::view-transition-new(root),
+  :root.vt-lang::view-transition-old(root),
+  :root.vt-lang::view-transition-new(root) {
     animation-duration: 0ms !important;
   }
 }
