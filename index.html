@@ -130,7 +130,7 @@
      Targets the home dashboard greeting + KPI tiles + quick-action chips
      + sidebar + opportunity cards. Uses var(--accent) so it adapts to
      whatever white-label theme is active. ─── -->
-<link rel="stylesheet" href="assets/polish-overrides.css?v=lang-vt-2000">
+<link rel="stylesheet" href="assets/polish-overrides.css?v=radar-2color">
 
 <!-- ─── Shared dark-glass component library extracted from login.html.
      Loaded AFTER polish-overrides so .oh-* classes (and the gold-leaning
@@ -138,7 +138,7 @@
      and polish-overrides is bumped whenever the SPA's atmospheric layer
      changes, so users on a stale cache pick up the new bg + body rules
      without waiting for the browser's max-age to expire. ─── -->
-<link rel="stylesheet" href="assets/components.css?v=lang-vt-2000">
+<link rel="stylesheet" href="assets/components.css?v=radar-2color">
 
 <!-- SPA-specific gold-accent layer — bridges polish-overrides (which paints
      emphasis in --accent, i.e. the tenant green) with the login aesthetic
@@ -14360,18 +14360,23 @@
         labels: top.map(_radarLabel),
         datasets: [
           {
+            /* "All" = gold (brand). The superset, outer ring. */
             label: T('All','الكل'),
             data: top.map(function (k) { return counts[k] || 0; }),
-            backgroundColor: 'rgba(201, 166, 107, 0.18)',
-            borderColor: '#C9A66B', borderWidth: 2,
-            pointBackgroundColor: '#C9A66B', pointRadius: 3
+            backgroundColor: 'rgba(227, 189, 108, 0.16)',
+            borderColor: '#e3bd6c', borderWidth: 2,
+            pointBackgroundColor: '#e3bd6c', pointRadius: 3
           },
           {
+            /* "Open" = cream/white. The subset, sits inside "All". Kept
+               on-brand (gold + cream) but a clearly different colour so
+               the two series are distinguishable — they used to both be
+               gold and were impossible to tell apart. */
             label: T('Open','مفتوحة'),
             data: top.map(function (k) { return openCounts[k] || 0; }),
-            backgroundColor: 'rgba(201,166,107,0.18)',
-            borderColor: '#C9A66B', borderWidth: 2,
-            pointBackgroundColor: '#C9A66B', pointRadius: 3
+            backgroundColor: 'rgba(255, 255, 255, 0.10)',
+            borderColor: '#ffffff', borderWidth: 2,
+            pointBackgroundColor: '#ffffff', pointRadius: 3
           }
         ]
       },
