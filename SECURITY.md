@@ -6,7 +6,7 @@
 
 ## Reporting a vulnerability
 
-**Email**: <jblancoapodaca@gmail.com>
+**Email**: <j.guzman@midnightspaceconsultancy.com>
 
 Please don't open public issues for security findings. Use email so
 we can coordinate disclosure responsibly.

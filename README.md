@@ -220,7 +220,7 @@ by traditional search:
 
 ## Reporting issues / contributing
 
-Use the in-app **Feedback** form (About view) to suggest additions, corrections, or partnerships. Internal reviewers can email <jblancoapodaca@gmail.com>.
+Use the in-app **Feedback** form (About view) to suggest additions, corrections, or partnerships. Internal reviewers can email <j.guzman@midnightspaceconsultancy.com>.
 
 ## License
 
