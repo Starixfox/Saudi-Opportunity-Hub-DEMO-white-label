@@ -920,9 +920,28 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
    the duration of the transition so the whole-layout swap gets the
    login page's slower, more deliberate ease-out-quint timing. Scoped
    to .vt-lang so it does NOT slow down the fast 280ms hash-route page
-   navigations above, which share the same root pseudo-elements. */
+   navigations above, which share the same root pseudo-elements.
+
+   A plain root cross-fade between two near-identical screenshots is
+   nearly invisible (the layout just mirrors). Login feels dramatic
+   because it gives its two panels a view-transition-name, so the
+   browser SLIDES them between columns instead of cross-fading. We do
+   the same here: name the SPA's major regions ONLY while .vt-lang is
+   set, so on the dir flip the sidebar slides from one side to the
+   other, the topbar pill and content glide across, and it reads as a
+   real motion — matching login. Names are scoped to .vt-lang so they
+   never apply during ordinary page navigation. */
+:root.vt-lang .app-sidebar      { view-transition-name: vt-sidebar; }
+:root.vt-lang .app-topbar       { view-transition-name: vt-topbar; }
+:root.vt-lang .app-content      { view-transition-name: vt-content; }
+:root.vt-lang .app-bottom-tabs  { view-transition-name: vt-bottombar; }
+
 :root.vt-lang::view-transition-old(root),
-:root.vt-lang::view-transition-new(root) {
+:root.vt-lang::view-transition-new(root),
+:root.vt-lang::view-transition-group(vt-sidebar),
+:root.vt-lang::view-transition-group(vt-topbar),
+:root.vt-lang::view-transition-group(vt-content),
+:root.vt-lang::view-transition-group(vt-bottombar) {
   animation-duration: 900ms;
   animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
 }
@@ -931,7 +950,8 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
   ::view-transition-old(root),
   ::view-transition-new(root),
   :root.vt-lang::view-transition-old(root),
-  :root.vt-lang::view-transition-new(root) {
+  :root.vt-lang::view-transition-new(root),
+  :root.vt-lang::view-transition-group(*) {
     animation-duration: 0ms !important;
   }
 }
