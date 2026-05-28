@@ -130,7 +130,7 @@
      Targets the home dashboard greeting + KPI tiles + quick-action chips
      + sidebar + opportunity cards. Uses var(--accent) so it adapts to
      whatever white-label theme is active. ─── -->
-<link rel="stylesheet" href="assets/polish-overrides.css?v=results-glass">
+<link rel="stylesheet" href="assets/polish-overrides.css?v=gold-brand">
 
 <!-- ─── Shared dark-glass component library extracted from login.html.
      Loaded AFTER polish-overrides so .oh-* classes (and the gold-leaning
@@ -138,7 +138,7 @@
      and polish-overrides is bumped whenever the SPA's atmospheric layer
      changes, so users on a stale cache pick up the new bg + body rules
      without waiting for the browser's max-age to expire. ─── -->
-<link rel="stylesheet" href="assets/components.css?v=results-glass">
+<link rel="stylesheet" href="assets/components.css?v=gold-brand">
 
 <!-- SPA-specific gold-accent layer — bridges polish-overrides (which paints
      emphasis in --accent, i.e. the tenant green) with the login aesthetic
@@ -184,17 +184,26 @@
      The brand-dot stays in the DOM (applyTheme uses it as the swap target
      when a tenant logo loads), but we render it as the gold OH mark. */
   html[data-theme="dark"] .app-sidebar-brand {
-    background: transparent !important;
+    /* Solid gold brand pill at the top of the sidebar. Uses var(--gold)
+       (= #e3bd6c, the dark-mode lifted gold) so it stays gold across
+       every theme. */
+    background: var(--gold, #e3bd6c) !important;
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 14px 16px;
+    padding: 12px 14px;
+    margin: 6px 8px 12px;
+    border-radius: 12px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.24),
+      0 4px 12px rgba(0, 0, 0, 0.25);
   }
   html[data-theme="dark"] .app-sidebar-brand .brand-dot {
     width: 36px;
     height: 36px;
-    background: rgba(201, 166, 107, 0.20);
-    border: 1.5px solid rgba(201, 166, 107, 0.50);
+    /* White-tinted so the mark stays visible inside the gold pill. */
+    background: rgba(255, 255, 255, 0.18);
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
     border-radius: 9px;
     display: flex;
     align-items: center;
