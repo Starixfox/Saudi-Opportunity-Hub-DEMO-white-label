@@ -130,7 +130,7 @@
      Targets the home dashboard greeting + KPI tiles + quick-action chips
      + sidebar + opportunity cards. Uses var(--accent) so it adapts to
      whatever white-label theme is active. ─── -->
-<link rel="stylesheet" href="assets/polish-overrides.css?v=gold-btn-text">
+<link rel="stylesheet" href="assets/polish-overrides.css?v=gold-btn-sweep">
 
 <!-- ─── Shared dark-glass component library extracted from login.html.
      Loaded AFTER polish-overrides so .oh-* classes (and the gold-leaning
@@ -138,7 +138,7 @@
      and polish-overrides is bumped whenever the SPA's atmospheric layer
      changes, so users on a stale cache pick up the new bg + body rules
      without waiting for the browser's max-age to expire. ─── -->
-<link rel="stylesheet" href="assets/components.css?v=gold-btn-text">
+<link rel="stylesheet" href="assets/components.css?v=gold-btn-sweep">
 
 <!-- SPA-specific gold-accent layer — bridges polish-overrides (which paints
      emphasis in --accent, i.e. the tenant green) with the login aesthetic
@@ -5143,7 +5143,7 @@
     if (el)   el.innerHTML = '<span style="color:#ff6b6b">Failed to load — <button data-action="reload" style="color:#ff6b6b;text-decoration:underline;background:none;border:none;cursor:pointer;font-size:inherit">Retry</button></span>';
     if (body) body.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-muted)">' +
       '<p style="font-size:15px;margin-bottom:12px">Could not load opportunities from the database.</p>' +
-      '<button data-action="reload" style="padding:10px 20px;background:var(--green);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">Retry</button></div>';
+      '<button data-action="reload" style="padding:10px 20px;background:var(--green);color:#1f1700;border:none;border-radius:8px;cursor:pointer;font-weight:600">Retry</button></div>';
   }
 })();
 </script>
@@ -6695,8 +6695,8 @@
       /* SAVED — solid gold fill, clearly different from unsaved */
       .card-bookmark-btn.opp-card-bookmark-edge.bookmarked {
         background: #C9A66B !important;
-        border-color: rgba(255,255,255,0.70) !important;
-        color: #ffffff !important;
+        border-color: rgba(31,23,0,0.35) !important;
+        color: #1f1700 !important;
         box-shadow: 0 2px 10px rgba(201,166,107,0.55);
       }
       .card-bookmark-btn.opp-card-bookmark-edge.bookmarked svg {
@@ -6760,8 +6760,8 @@
         }
         .card-bookmark-btn.opp-card-bookmark-edge.bookmarked {
           background: #C9A66B !important;
-          border-color: rgba(255,255,255,0.65) !important;
-          color: #fff !important;
+          border-color: rgba(31,23,0,0.32) !important;
+          color: #1f1700 !important;
         }
         .card-bookmark-btn.opp-card-bookmark-edge.bookmarked svg {
           stroke: #ffffff !important;
@@ -6853,8 +6853,8 @@
       }
       /* --- ACTIVE/SELECTED: filled, green accent, elevated --- */
       .view-btn.active {
-        background: #C9A66B;             /* brand green fill */
-        color: #ffffff;
+        background: #C9A66B;             /* gold brand fill */
+        color: #1f1700;
         border-color: #a88947;
         box-shadow: 0 1px 4px rgba(201, 166, 107, .30);
         cursor: default;

@@ -799,7 +799,7 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
   align-items: center;
   gap: 8px;
   background: var(--accent);
-  color: var(--on-accent, #fff);
+  color: #1f1700;
   padding: 12px 22px;
   border-radius: 10px;
   border: none;
