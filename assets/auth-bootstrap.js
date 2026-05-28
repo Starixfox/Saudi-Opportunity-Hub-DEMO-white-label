@@ -7,7 +7,7 @@
    Contents (in order):
      - Supabase auth session check + redirect-to-login gate
      - Super-admin (owner UID) elevation flag
-     - window.OH_THEMES registry (7 white-label tenants)
+     - window.OH_THEMES registry (8 white-label tenants)
      - applyTheme() function (overrides --accent and friends per tenant)
      - Document-attribute observer for live theme switching
 
@@ -101,6 +101,26 @@ var GOLD_ACCENT = {
   darkAccentDim:    'rgba(227,189,108,0.10)'
 };
 
+/* ═══════════════════════════════════════════════════════════════════════
+   ABDUL LATIF JAMEEL — brand blue (from the company's pentagon mark).
+   Light-mode #1B75BB ≈ the ALJ corporate blue; dark mode lifts to
+   #4FA3E8 so the accent stays bright/legible on the dark surface tokens
+   (a mid blue goes muddy on dark). The grey wordmark is just text, not
+   an accent, so it isn't tokenised here. This is the one tenant that
+   keeps its own colour instead of the shared gold. */
+var ALJ_BLUE = {
+  accent:           '#1B75BB',
+  accentHover:      '#145C94',
+  accentLight:      'rgba(27,117,187,0.10)',
+  accentGlow:       'rgba(27,117,187,0.25)',
+  accentDim:        'rgba(27,117,187,0.08)',
+  darkAccent:       '#4FA3E8',
+  darkAccentHover:  '#6FB6EE',
+  darkAccentLight:  'rgba(79,163,232,0.14)',
+  darkAccentGlow:   'rgba(79,163,232,0.30)',
+  darkAccentDim:    'rgba(79,163,232,0.10)'
+};
+
 window.OH_THEMES = {
   'default': Object.assign({}, GOLD_ACCENT, {
     label: 'Saudi Opportunity Hub (Default)',
@@ -187,6 +207,23 @@ window.OH_THEMES = {
        because their logo files already contain their wordmark. */
     showName: true,
     pageTitle: 'Swift Solve — Investment Intelligence Platform'
+  }),
+  'abdul-latif-jameel': Object.assign({}, ALJ_BLUE, {
+    label: 'Abdul Latif Jameel',
+    labelAr: 'عبداللطيف جميل',
+    tagline: 'Investing in opportunity since 1945',
+    taglineAr: 'نستثمر في الفرص منذ عام 1945',
+    navName: 'Abdul Latif Jameel',
+    navNameAr: 'عبداللطيف جميل',
+    /* No logo file shipped yet — falls back to the wordmark + brand mark
+       rendered in the ALJ blue (the brand-pill + name show automatically).
+       To use the real asset, drop it at assets/logo-abdul-latif-jameel.png
+       and point logo/logoDark at it (see swift-solve above). */
+    logo: null,
+    logoDark: null,
+    logoHeight: 30,
+    showName: true,
+    pageTitle: 'Abdul Latif Jameel — Opportunity Intelligence'
   })
 };
 
