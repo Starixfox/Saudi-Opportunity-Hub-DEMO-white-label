@@ -1246,6 +1246,34 @@ html[data-theme="dark"] .app-topbar-crumb-current {
   white-space: nowrap;
 }
 
+/* Progressive action-cluster collapse so the page TITLE stays fully
+   visible as the viewport narrows (user: "it still gets compressed
+   when the screen gets smaller"). Rather than shrink the title, we
+   shed the bulkiest, least-essential controls first — they free far
+   more room than the short page name needs, so the title no longer
+   has to truncate.
+
+   ≤960px — drop the workspace stat badges (watchlist / saved-search /
+   "new" counts). They're the widest cluster and remain reachable from
+   the home dashboard + the workspace panel.
+   ≤620px  — collapse the language button to its globe icon (hide the
+   "English"/"العربية" label) and tighten its padding. */
+@media (max-width: 960px) {
+  html[data-theme="dark"] .app-topbar .app-topbar-ws,
+  html[data-theme="dark"] .app-topbar .app-topbar-ws + .app-topbar-divider {
+    display: none !important;
+  }
+}
+@media (max-width: 620px) {
+  html[data-theme="dark"] .app-topbar #appLangLabel {
+    display: none !important;
+  }
+  html[data-theme="dark"] .app-topbar .app-tb-lang-btn {
+    padding-left: 9px !important;
+    padding-right: 9px !important;
+  }
+}
+
 html[data-theme="dark"] .app-tb-stat {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.14);
