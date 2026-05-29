@@ -6655,8 +6655,9 @@
       .opp-card-action-btn.opp-card-save-btn.bookmarked svg { fill: currentColor; }
       /* Compare-active state — teal accent matching the compare tray button. */
       .opp-card-action-btn.opp-card-compare-btn.is-active { background: rgba(53,213,197,.18); border-color: rgba(53,213,197,.55); color: #35d5c5; }
-      /* Compact (.occ-actions row) variant — slightly tighter. */
-      .occ-actions .opp-card-action-btn { padding: 6px 10px; font-size: 11px; gap: 5px; }
+      /* Compact (.occ-actions row) action buttons — comfortable tap size. */
+      .occ-actions .opp-card-action-btn { padding: 7px 12px; font-size: 12px; gap: 6px; min-height: 32px; }
+      .occ-actions .opp-card-action-btn svg { width: 13px; height: 13px; }
       .opp-card-link { width: auto; white-space: nowrap; background: #35d5c5; border-radius: 999px; box-shadow: 0 6px 16px rgba(47,213,199,.16); padding: 8px 14px; font-size: 12px; }
       .opp-card-sponsor { margin-top: 8px; color: rgba(255,255,255,.66); font-size: 11px; }
       .pagination { gap: 4px; margin-top: 14px; }
@@ -7283,8 +7284,12 @@
       .opp-select-btn.selected svg { display: block; }
       /* RTL: flip compare select button to the left side so it doesn't overlap bookmark */
       body[dir="rtl"] .opp-select-btn { right: auto; left: 14px; }
-      /* Bookmark button inside compact .occ-actions must be static (not absolute) */
-      .occ-actions .card-bookmark-btn { position: static; width: 28px; height: 28px; flex-shrink: 0; }
+      /* The Save pill inside compact .occ-actions carries .card-bookmark-btn so
+         WS.syncBookmarkButtons() can flip its state. The legacy .card-bookmark-btn
+         rule makes it an absolute 30x30 icon square; here it must be a STATIC,
+         auto-sized pill like the Compare button beside it — not a fixed 28x28 box,
+         which cramped the bookmark icon + "Save" label into a too-small square. */
+      .occ-actions .card-bookmark-btn { position: static; width: auto; height: auto; flex-shrink: 0; }
       /* RTL: ensure occ-actions gap doesn't cause overflow; secondary aligns to start in RTL */
       body[dir="rtl"] .occ-secondary { align-items: flex-start; }
       body[dir="rtl"] .occ-chips { justify-content: flex-start; }
