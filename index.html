@@ -2951,7 +2951,19 @@
     var unEl = document.getElementById('wsUserName');
     var wlVal = wlEl ? (wlEl.textContent || '0').trim() : '0';
     var srVal = srEl ? (srEl.textContent || '0').trim() : '0';
-    var nwVal = nwEl ? (nwEl.textContent || '0').trim() : '0';
+    /* "New this week" pill MUST equal the home "Added this week" card.
+       This used to copy the wsUpdatesCount ghost bridge, but that bridge is
+       only refreshed by updateWsBar(), which usually last ran against a
+       PARTIAL page during the cursor-walk load and is never refreshed on
+       oh:data-complete (the intended call site there is an empty stub). So
+       this 5s poll kept stamping a stale partial count onto the pill while
+       the home card held the correct full-dataset count, and the two
+       disagreed intermittently. Mirror the card's rendered value directly so
+       they can never diverge; fall back to the bridge only until the card
+       has rendered a number. */
+    var cardEl  = document.getElementById('homeNewVal');
+    var cardTxt = cardEl ? (cardEl.textContent || '').trim() : '';
+    var nwVal = /[0-9]/.test(cardTxt) ? cardTxt : (nwEl ? (nwEl.textContent || '0').trim() : '0');
     var unVal = unEl ? (unEl.textContent || '').trim() : '';
     /* Also try WS.getWatchlist directly for watchlist count */
     if (wlVal === '0' && window.WS && window.WS.getWatchlist) {
