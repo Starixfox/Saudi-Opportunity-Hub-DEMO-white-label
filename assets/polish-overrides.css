@@ -1145,17 +1145,17 @@ html[data-theme="dark"] .results-bar {
     0 20px 60px rgba(0, 0, 0, 0.45) !important;
 }
 
-/* ─────────────────────────────────────────── Notifications dropdown (glass)
-   The notifications popover painted only a flat var(--surface) =
-   rgba(255,255,255,0.06) wash with NO backdrop blur, so next to the frosted
-   cards it read as washed-out / too transparent. Bring it onto the canonical
-   card glass recipe — same rgba(0.08) base + diagonal gradient + rgba(0.18)
-   border + blur(60px) saturate(180%) + inset highlight + drop shadow as
-   .home-card / .kpi-card / .results-bar. Dark theme only; light theme already
-   paints --surface as solid #fff. Specificity (html[data-theme=dark] .x)
-   beats the legacy .notif-dropdown rule, so no !important needed.
-   User: "the notification card has to be the same as the other normal cards
-   so not too transparent." */
+/* ──────────────────────────────────────── Notifications dropdown (solid card)
+   The notifications popover is NOT a content card — it floats ABOVE the busy
+   home content (the gold "Welcome back" headline, quick-action chips, stats).
+   The canonical 8%-white card glass works for .home-greeting because that card
+   sits over the relatively uniform background VIDEO; over bright UI it lets the
+   content bleed straight through, so the panel read as "too glass-like / too
+   transparent." Keep the card's sheen + border + blur + shadow, but layer them
+   over an OPAQUE navy base (matches the dark --surface #0f1420) so the panel
+   reads as a solid card like the welcome card does — readable regardless of
+   what scrolls behind it. Dark theme only (light --surface is already solid).
+   User: "its still too glass like, it needs to be like the welcome back card." */
 html[data-theme="dark"] .notif-dropdown {
   border: 1px solid rgba(255, 255, 255, 0.18);
   background:
@@ -1163,7 +1163,7 @@ html[data-theme="dark"] .notif-dropdown {
       rgba(255, 255, 255, 0.06) 0%,
       rgba(255, 255, 255, 0.00) 45%,
       rgba(255, 255, 255, 0.03) 100%),
-    rgba(255, 255, 255, 0.08);
+    rgba(15, 20, 32, 0.96);
   -webkit-backdrop-filter: blur(60px) saturate(180%);
           backdrop-filter: blur(60px) saturate(180%);
   box-shadow:
