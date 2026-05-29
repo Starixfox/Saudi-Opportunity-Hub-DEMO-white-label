@@ -2313,10 +2313,18 @@
         window._supabase.auth.getUser().then(function(res) {
           var user = res && res.data && res.data.user;
           if (!user) return;
-          /* Prefer first_name (set by login.html signUp), then full_name/name,
-             then a clean email prefix (strip +tag, then take chars before any dot). */
+          /* Precedence MUST match updateWsBar()/applyName() — prefs.displayName
+             FIRST, then first_name (set by login.html signUp), full_name/name,
+             then a clean email prefix (strip +tag, then take chars before any
+             dot). If this resolver omits displayName (as it used to), the
+             greeting and the topbar settle on different sources and the name
+             visibly flips between the display name and the auth name. Re-read
+             prefs here because they load async and may have arrived only after
+             the synchronous steps 1-2 above ran. */
+          var p  = window.__userPrefs;
           var md = user.user_metadata || {};
-          var name = md.first_name
+          var name = (p && p.displayName)
+                  || md.first_name
                   || md.full_name
                   || md.name
                   || (function() {
