@@ -16,7 +16,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <!-- Session guard: redirect to login if not authenticated -->
 <!-- ─── Polish pass: head bootstrap externalised. Synchronous load so the auth-redirect still fires before render (see assets/auth-bootstrap.js header). ─── -->
-<script src="assets/auth-bootstrap.js?v=alj-logo2"></script>
+<script src="assets/auth-bootstrap.js?v=audit-fixes"></script>
 
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Saudi Opportunity Hub","url":"https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/","description":"Grants, tenders, accelerators, investment programs, and fellowships across 20+ sectors in Saudi Arabia, the GCC, and internationally."}</script>
 
@@ -104,18 +104,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- ─── Polish pass: consolidated design tokens (single source of truth) ─── -->
-<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/tokens.css?v=audit-fixes">
 
 <!-- Per-opportunity JSON-LD emitter — exposes window.OpportunitySchema.
      Wired into openPanel() / closePanel() below so each opportunity the
      user opens gets schema.org/Grant (or GovernmentService etc.) markup
      visible to AI crawlers and search engines. -->
-<script defer src="assets/opportunity-schema.js"></script>
+<script defer src="assets/opportunity-schema.js?v=audit-fixes"></script>
 
 <!-- Delegated click handler — routes data-action / data-arg attributes
      to WS.openPanel / WS.openSettings / setRoute. Replaces 17 inline
      onclick="…" attributes for CSP-tightening and audit hygiene. -->
-<script defer src="assets/polish-delegated-actions.js"></script>
+<script defer src="assets/polish-delegated-actions.js?v=audit-fixes"></script>
 
 <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4" crossorigin="anonymous"></script>
 <!-- Lucide: synchronous load, explicit UMD path. Icons are painted at the
@@ -124,13 +124,13 @@
 <!-- jsPDF: pre-loaded so PDF exports do not rely on dynamic injection -->
 <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" integrity="sha384-en/ztfPSRkGfME4KIm05joYXynqzUgbsG5nMrj/xEFAHXkeZfO3yMK8QQ+mP7p1/" crossorigin="anonymous"></script>
 <!-- ─── Extracted from inline <style>; original block was 8,608 lines (Phase 2 follow-up) ─── -->
-<link rel="stylesheet" href="assets/legacy-app.css">
+<link rel="stylesheet" href="assets/legacy-app.css?v=audit-fixes">
 
 <!-- ─── Polish overrides — loaded LAST so visual upgrades win the cascade.
      Targets the home dashboard greeting + KPI tiles + quick-action chips
      + sidebar + opportunity cards. Uses var(--accent) so it adapts to
      whatever white-label theme is active. ─── -->
-<link rel="stylesheet" href="assets/polish-overrides.css?v=alj-logo2">
+<link rel="stylesheet" href="assets/polish-overrides.css?v=audit-fixes">
 
 <!-- ─── Shared dark-glass component library extracted from login.html.
      Loaded AFTER polish-overrides so .oh-* classes (and the gold-leaning
@@ -138,7 +138,7 @@
      and polish-overrides is bumped whenever the SPA's atmospheric layer
      changes, so users on a stale cache pick up the new bg + body rules
      without waiting for the browser's max-age to expire. ─── -->
-<link rel="stylesheet" href="assets/components.css?v=alj-logo2">
+<link rel="stylesheet" href="assets/components.css?v=audit-fixes">
 
 <!-- SPA-specific gold-accent layer — bridges polish-overrides (which paints
      emphasis in --accent, i.e. the tenant green) with the login aesthetic
@@ -421,7 +421,7 @@
         <div class="notif-dropdown" id="notifDropdown" role="dialog" aria-label="Notifications">
           <div class="notif-dropdown-header">
             <span data-en="Notifications" data-ar="الإشعارات">Notifications</span>
-            <button class="notif-clear-btn" id="notifClearBtn" data-en="Mark all read" data-ar="تحديد الكل كمقروء">Mark all read</button>
+            <button type="button" class="notif-clear-btn" id="notifClearBtn" data-en="Mark all read" data-ar="تحديد الكل كمقروء">Mark all read</button>
           </div>
           <ul class="notif-list" id="notifList"></ul>
         </div>
@@ -981,7 +981,7 @@
 
     <div class="results-bar" id="resultsBar" aria-live="polite" aria-atomic="true">
       <span id="resultsCount">Loading&hellip;</span>
-      <button class="save-search-btn" id="saveSearchBtn" title="Save current filters as a saved search">
+      <button type="button" class="save-search-btn" id="saveSearchBtn" title="Save current filters as a saved search">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         <span data-ar="حفظ البحث">Save Search</span>
       </button>
@@ -1485,7 +1485,7 @@
 <aside class="ws-panel" id="wsPanel" aria-label="My Workspace" role="dialog" tabindex="-1">
   <div class="ws-panel-header">
     <span class="ws-panel-title" data-en="My Workspace" data-ar="مساحتي">My Workspace</span>
-    <button class="ws-panel-close" id="wsPanelClose" aria-label="Close workspace panel">&times;</button>
+    <button type="button" class="ws-panel-close" id="wsPanelClose" aria-label="Close workspace panel">&times;</button>
   </div>
   <div class="ws-panel-tabs">
     <button class="ws-panel-tab" data-wstab="folders" data-en="📂 Folders" data-ar="📂 المجلدات">📂 Folders</button>
@@ -1505,7 +1505,7 @@
   <div class="settings-modal" role="dialog" aria-label="Workspace Settings" aria-modal="true">
     <div class="settings-modal-header">
       <span class="settings-modal-title" data-en="Workspace Settings" data-ar="إعدادات مساحة العمل">Workspace Settings</span>
-      <button class="settings-modal-close" id="settingsModalClose" aria-label="Close settings">&times;</button>
+      <button type="button" class="settings-modal-close" id="settingsModalClose" aria-label="Close settings">&times;</button>
     </div>
 
     <div class="settings-section">
@@ -1696,8 +1696,8 @@
   <div class="compare-tray__header">
     <span class="compare-tray__count"><span id="compareCount">0</span> <span id="compareTrayLabel">selected for comparison</span></span>
     <div class="compare-tray__actions">
-      <button class="compare-tray__compare-btn" id="compareOpenBtn" disabled>Compare</button>
-      <button class="compare-tray__clear" id="compareClearBtn">Clear all</button>
+      <button type="button" class="compare-tray__compare-btn" id="compareOpenBtn" disabled>Compare</button>
+      <button type="button" class="compare-tray__clear" id="compareClearBtn">Clear all</button>
     </div>
   </div>
   <div class="compare-tray__slots" id="compareTraySlots"></div>
@@ -1708,7 +1708,7 @@
   <div class="compare-modal__inner">
     <div class="compare-modal__header">
       <h2 id="compareModalTitle">Compare Opportunities</h2>
-      <button class="compare-modal__close" id="compareModalClose" aria-label="Close">✕</button>
+      <button type="button" class="compare-modal__close" id="compareModalClose" aria-label="Close">✕</button>
     </div>
     <div class="compare-modal__body" id="compareModalBody"></div>
   </div>
@@ -1819,11 +1819,11 @@
 
     <!-- ── Actions ── -->
     <div class="ob-modal-actions">
-      <button class="ob-btn-primary" id="obStartTourBtn">
+      <button type="button" class="ob-btn-primary" id="obStartTourBtn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
         <span id="obStartTourLabel">Take a quick tour</span>
       </button>
-      <button class="ob-btn-skip" id="obSkipTourBtn">Skip for now</button>
+      <button type="button" class="ob-btn-skip" id="obSkipTourBtn">Skip for now</button>
     </div>
 
     </div><!-- /#obStep1Panel -->
@@ -5077,7 +5077,6 @@
     window.opportunitiesData = all.slice();
     window._ohDataFired = true; /* flag so late initHome() callers don't wait for an already-fired event */
     document.dispatchEvent(new CustomEvent('oh:data-ready', { detail: { count: all.length, partial: true } }));
-    console.log('[OH] First page loaded (' + all.length + ' rows), streaming remainder via cursor…');
 
     /* Count probe runs in parallel with the rest — purely diagnostic. */
     const totalCountPromise = fetchTotalCount();
@@ -5102,7 +5101,6 @@
       all = all.concat(next);
       window.opportunitiesData = all.slice();
       pageGuard++;
-      console.log('[OH] Cursor walk: +' + next.length + ' rows (total ' + all.length + ')');
       if (next.length < PAGE) break;                    // partial page = end of table
     }
     if (pageGuard >= PAGE_GUARD_MAX) {
@@ -5113,8 +5111,6 @@
     const totalCount = await totalCountPromise;
     if (totalCount != null && all.length < totalCount) {
       console.error('[OH] Loader stopped short: ' + all.length + ' of ' + totalCount + ' rows. KPIs and counts will be incomplete.');
-    } else {
-      console.log('[OH] All ' + all.length + ' opportunities loaded' + (totalCount != null ? ' (db count: ' + totalCount + ')' : ''));
     }
 
     /* ── Final signal with complete dataset ─────────── */
@@ -6493,8 +6489,8 @@
       return;
     }
     var cols = ['id', 'title', 'sponsor_institution', 'type', 'status',
-                'eligibility_region', 'sectors', 'profiles', 'deadline',
-                'last_verified', 'updated_at', 'url'];
+                'eligibility_region', 'sectors', 'profiles', 'deadline_date',
+                'last_verified', 'url'];
     var header = cols.join(',');
     var body = rows.map(function(r) {
       return cols.map(function(c) { return _csvCell(r[c]); }).join(',');
@@ -11113,7 +11109,7 @@
       var folder = fr && fr.data;
       var displayName = (ar && folder && folder.name_ar) ? folder.name_ar : ((folder && folder.name) || fallbackName);
 
-      supa.from('folder_items').select('opp_id, added_at').eq('folder_id', folderId).order('added_at', { ascending: false }).then(function (ir) {
+      return supa.from('folder_items').select('opp_id, added_at').eq('folder_id', folderId).order('added_at', { ascending: false }).then(function (ir) {
         var items = (ir && ir.data) || [];
         var go = function (oppRows) {
           var rowsHTML = oppRows.length ? oppRows.map(function (o) {
@@ -11172,7 +11168,7 @@
         };
 
         if (!items.length) { go([]); return; }
-        supa.from('opportunities')
+        return supa.from('opportunities')
           .select('id, title, type, sectors, deadline_date, status, funding_amount, funding_type, application_link, description_short, sponsor_institution')
           .in('id', items.map(function (i) { return i.opp_id; }))
           .then(function (or_) {
@@ -11181,6 +11177,12 @@
             go(items.map(function (i) { return oppMap[i.opp_id]; }).filter(Boolean));
           });
       });
+    }).catch(function () {
+      body.textContent = '';
+      var errEl = document.createElement('div');
+      errEl.style.cssText = 'padding:2rem;text-align:center;color:var(--text-muted)';
+      errEl.textContent = ar ? 'تعذّر تحميل المجلد' : 'Could not load folder';
+      body.appendChild(errEl);
     });
   }
 
@@ -13402,8 +13404,8 @@
     }
 
     /* Share button removed — replaced by Save + Compare buttons in the
-       card render templates. copyShareLink() below is still used by deep-link
-       routing in other modules so it stays. */
+       card render templates. (The old copyShareLink/fallbackCopy helpers
+       were unused — no call sites — and have been removed.) */
 
     row.dataset.ohEnhanced = '1';
   }
@@ -13435,25 +13437,6 @@
     if (window.WS && window.WS.showToast) window.WS.showToast(msg);
     else if (typeof window.showToast === 'function') window.showToast(msg);
     else alert(msg);
-  }
-  function copyShareLink(id) {
-    var url = location.origin + location.pathname + '#opp=' + encodeURIComponent(id);
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(
-        function(){ toast(T('Link copied to clipboard ✓','تم نسخ الرابط ✓')); },
-        function(){ fallbackCopy(url); }
-      );
-    } else { fallbackCopy(url); }
-  }
-  function fallbackCopy(text) {
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand('copy'); toast(T('Link copied ✓','تم النسخ ✓')); }
-    catch (_) { toast(T('Could not copy. ','تعذر النسخ. ') + text); }
-    finally { document.body.removeChild(ta); }
   }
 
   /* Deep link: opening with #opp=ID navigates to opportunities + opens panel */

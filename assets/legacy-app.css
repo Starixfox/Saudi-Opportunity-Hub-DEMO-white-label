@@ -5328,10 +5328,7 @@ html[dir="rtl"] .app-tb-lang-btn { direction: ltr; }
 /* ============================================================
    MERGED FROM <style id="block-line-6051">
    ============================================================ */
-@keyframes ob-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.85); }
-}
+/* (removed unused @keyframes ob-pulse — nothing referenced it) */
 
 /* ============================================================
    MERGED FROM <style id="block-line-13189">

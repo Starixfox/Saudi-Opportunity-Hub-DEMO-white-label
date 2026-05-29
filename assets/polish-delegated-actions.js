@@ -18,7 +18,7 @@
                                               "sectors"|"saved"|"about"
      data-action="new-this-week"
      data-action="reload"            page reload (used by error retry buttons)
-     data-action="reset-filters"     triggers a click on #resetBtn
+     data-action="reset-filters"     triggers a click on #resetFilters
      data-action="toggle-bookmark"   forwards to WS.toggleBookmark(trigger)
      data-action="la-compare"        forwards to window._laCompare(trigger)
 ============================================================================ */
@@ -53,7 +53,7 @@
         window.location.reload();
         break;
       case 'reset-filters': {
-        var reset = document.getElementById('resetBtn');
+        var reset = document.getElementById('resetFilters');
         if (reset) reset.click();
         break;
       }

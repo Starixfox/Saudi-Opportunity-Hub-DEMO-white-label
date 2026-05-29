@@ -20,4 +20,14 @@ CREATE POLICY "Only admins can set user themes"
       WHERE up.user_id = auth.uid() AND up.role = 'admin'
     )
   )
-  WITH CHECK (true);
+  -- WITH CHECK mirrors USING (was `true`, which let an admin write ANY
+  -- row/value unrestricted). The role column itself is additionally
+  -- protected by the protect_role_column() trigger in the security-
+  -- hardening migration, but keeping this self-consistent means the
+  -- file is never insecure even if replayed in isolation.
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM user_prefs up
+      WHERE up.user_id = auth.uid() AND up.role = 'admin'
+    )
+  );
