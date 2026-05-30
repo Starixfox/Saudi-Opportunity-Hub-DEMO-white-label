@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#C9A66B" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="description" content="Privacy Policy for the Saudi Opportunity Hub — what data we collect, how we use it, and your rights under the Saudi Personal Data Protection Law (PDPL)." />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com; font-src https://fonts.gstatic.com https://api.fontshare.com https://cdn.fontshare.com; img-src 'self' data:; connect-src 'self'; base-uri 'self';" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23006C35'/><path d='M32 14a18 18 0 1 0 18 18 18 18 0 0 0-18-18zm0 6a12 12 0 1 1-12 12 12 12 0 0 1 12-12z' fill='%23fdf8f2'/><circle cx='32' cy='32' r='4' fill='%23C9A66B'/></svg>" />
+  <title>Privacy Policy — Opportunity Hub</title>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Privacy Policy — Opportunity Hub",
+    "inLanguage": ["en", "ar"],
+    "isPartOf": { "@type": "WebSite", "name": "Saudi Opportunity Hub" },
+    "publisher": { "@type": "Organization", "name": "Midnight Space Consultancy" }
+  }
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- tokens → foundation → polish → components (components LAST, per contact.html) -->
+  <link rel="stylesheet" href="assets/tokens.css?v=audit-fixes" />
+  <link rel="stylesheet" href="assets/styles.css?v=audit-fixes" />
+  <link rel="stylesheet" href="assets/polish-overrides.css?v=audit-fixes" />
+  <link rel="stylesheet" href="assets/components.css?v=audit-fixes" />
+
+  <style>
+    /* Page-local styles — long-form legal document layout on the shared
+       dark-glass system. Global classes live in assets/components.css. */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    .legal-wrap { max-width: 880px; }
+
+    .legal-header { margin-bottom: 22px; }
+    .legal-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(28px, 4vw, 40px);
+      line-height: 1.14;
+      letter-spacing: -0.5px;
+      color: #fff;
+      margin: 10px 0 12px;
+    }
+    .legal-title .accent { color: var(--color-gold-500); }
+    .legal-meta {
+      display: flex; flex-wrap: wrap; align-items: center;
+      gap: 6px 14px; font-size: 13px; color: rgba(255,255,255,0.70);
+    }
+    .legal-meta .dot { opacity: 0.45; }
+
+    .legal-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .legal-nav a {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 13px; border-radius: 999px;
+      font-size: 12.5px; font-weight: 600; text-decoration: none;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: rgba(255,255,255,0.85);
+      transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+    }
+    .legal-nav a:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.30); color:#fff; }
+    .legal-nav a.is-current {
+      background: rgba(201,166,107,0.16);
+      border-color: rgba(201,166,107,0.34);
+      color: var(--color-gold-500);
+      cursor: default;
+    }
+
+    .legal-doc h2 {
+      font-family: var(--font-display);
+      font-weight: 700; font-size: 18.5px; color: #fff;
+      margin: 30px 0 10px; scroll-margin-top: 90px;
+      display: flex; gap: 10px; align-items: baseline;
+    }
+    .legal-doc h2:first-of-type { margin-top: 2px; }
+    .legal-doc h2 .num { color: var(--color-gold-500); font-size: 13.5px; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+    .legal-doc h3 { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.95); margin: 18px 0 6px; }
+    .legal-doc p { color: var(--text-muted); font-size: 15px; line-height: 1.72; margin: 0 0 12px; }
+    .legal-doc ul { margin: 0 0 14px; padding-inline-start: 1.3em; }
+    .legal-doc li { color: var(--text-muted); font-size: 15px; line-height: 1.68; margin-bottom: 7px; }
+    .legal-doc strong { color: var(--text); font-weight: 600; }
+    .legal-doc a { color: var(--color-gold-500); text-decoration: none; }
+    .legal-doc a:hover { text-decoration: underline; }
+
+    .legal-callout {
+      border: 1px solid rgba(201,166,107,0.30);
+      background: rgba(201,166,107,0.08);
+      border-radius: 12px; padding: 14px 16px; margin: 4px 0 16px;
+      color: rgba(255,255,255,0.90); font-size: 14px; line-height: 1.66;
+    }
+    .legal-callout strong { color: var(--color-gold-500); }
+
+    .legal-langnote { font-size: 12.5px; color: rgba(255,255,255,0.58); margin-top: 20px; line-height: 1.6; }
+
+    /* English / Arabic block switch — driven by <html lang>. */
+    .legal-ar { display: none; }
+    html[lang="ar"] .legal-en { display: none; }
+    html[lang="ar"] .legal-ar { display: block; }
+
+    .legal-ar { font-family: var(--font-arabic); }
+    [dir="rtl"] .legal-title,
+    [dir="rtl"] .legal-meta,
+    [dir="rtl"] .legal-nav a { font-family: var(--font-arabic); }
+  </style>
+</head>
+<body class="oh-atmospheric">
+
+<!-- ══ TOPBAR ══ -->
+<header class="oh-topbar">
+  <a href="login.html" class="oh-brand">
+    <span class="oh-brand-mark">OH</span>
+    <span class="oh-brand-text">
+      <span class="oh-brand-name" data-en="Opportunity Hub" data-ar="منصة الفرص">Opportunity Hub</span>
+      <span class="oh-brand-sub" data-en="Saudi Vision 2030" data-ar="رؤية السعودية 2030">Saudi Vision 2030</span>
+    </span>
+  </a>
+  <button class="oh-lang-toggle" id="lang-toggle" type="button" aria-label="Switch language">
+    <svg class="oh-lang-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+    <span id="lang-label">العربية</span>
+  </button>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main class="oh-page-wrap legal-wrap">
+
+  <header class="legal-header">
+    <span class="oh-eyebrow" data-en="Legal" data-ar="قانوني">Legal</span>
+    <h1 class="legal-title">
+      <span data-en="Privacy " data-ar="">Privacy </span><span class="accent" data-en="Policy" data-ar="سياسة الخصوصية">Policy</span>
+    </h1>
+    <div class="legal-meta">
+      <span data-en="Last updated: 30 May 2026" data-ar="آخر تحديث: 30 مايو 2026">Last updated: 30 May 2026</span>
+      <span class="dot">·</span>
+      <span data-en="Saudi Opportunity Hub" data-ar="منصة الفرص السعودية">Saudi Opportunity Hub</span>
+    </div>
+    <nav class="legal-nav" aria-label="Legal documents">
+      <a href="terms.html" data-en="Terms of Service" data-ar="شروط الخدمة">Terms of Service</a>
+      <a href="privacy.html" class="is-current" aria-current="page" data-en="Privacy Policy" data-ar="سياسة الخصوصية">Privacy Policy</a>
+      <a href="contact.html" data-en="Contact" data-ar="تواصل معنا">Contact</a>
+    </nav>
+  </header>
+
+  <div class="oh-glass-card">
+
+    <!-- ════════════════ ENGLISH ════════════════ -->
+    <div class="legal-doc legal-en" lang="en">
+
+      <p>This Privacy Policy explains how the Saudi Opportunity Hub (the “Platform”) collects, uses, shares, and protects your personal data, and the rights you have over it. It is written to align with the <strong>Saudi Personal Data Protection Law (PDPL)</strong> and its implementing regulations.</p>
+
+      <h2><span class="num">1.</span><span>Who we are</span></h2>
+      <p>The Platform is operated by <strong>Midnight Space Consultancy</strong>, which acts as the data controller for personal data processed through the Platform. For any privacy request, contact us at <a href="mailto:j.guzman@midnightspaceconsultancy.com">j.guzman@midnightspaceconsultancy.com</a>.</p>
+
+      <h2><span class="num">2.</span><span>Information we collect</span></h2>
+      <h3>Account &amp; profile</h3>
+      <ul>
+        <li>Email address and password (passwords are handled by our authentication provider and are never stored by us in readable form);</li>
+        <li>Your name, display name, and organisation, where you choose to provide them;</li>
+        <li>If you sign in with a third-party provider (e.g. Google), the basic profile information that provider shares (such as name and email).</li>
+      </ul>
+      <h3>Your activity on the Platform</h3>
+      <ul>
+        <li>Watchlist items, saved searches, folders, and any notes you add;</li>
+        <li>Preferences such as language, theme, sector interests, and notification settings;</li>
+        <li>An activity log of certain in-app actions (such as saving an opportunity) used for security and to power your workspace.</li>
+      </ul>
+      <h3>Messages and technical data</h3>
+      <ul>
+        <li>The content of messages you send us through the contact form (name, email, topic, message);</li>
+        <li>Limited technical data needed to operate the service securely, and small items stored in your browser’s local storage (such as your language and theme choice and your session token).</li>
+      </ul>
+      <p>We do <strong>not</strong> sell your personal data, and we do not use third-party advertising or cross-site tracking cookies.</p>
+
+      <h2><span class="num">3.</span><span>How we use your information</span></h2>
+      <ul>
+        <li>To create and operate your account and provide the Platform’s features;</li>
+        <li>To save and sync your watchlist, searches, folders, and preferences;</li>
+        <li>To respond to your enquiries and provide support;</li>
+        <li>To keep the Platform secure, prevent abuse, and diagnose problems;</li>
+        <li>To comply with legal obligations.</li>
+      </ul>
+      <p>Our legal bases under the PDPL include your <strong>consent</strong> (which you may withdraw at any time), the <strong>performance of our agreement</strong> with you (providing the service you signed up for), and our <strong>legitimate interests</strong> in operating and securing the Platform, balanced against your rights.</p>
+
+      <h2><span class="num">4.</span><span>Cookies and local storage</span></h2>
+      <p>We use only the storage necessary to run the Platform — primarily a secure sign-in token and small preference values (language, theme) kept in your browser. We do not use advertising or analytics tracking cookies. If you use the optional in-page translation feature, your browser may interact with a third-party translation service, which may set its own cookies.</p>
+
+      <h2><span class="num">5.</span><span>Sharing and service providers</span></h2>
+      <p>We share personal data only with service providers (processors) that help us run the Platform, under appropriate confidentiality and data-processing terms:</p>
+      <ul>
+        <li><strong>Supabase</strong> — database hosting and user authentication;</li>
+        <li><strong>Formspree</strong> — delivery of contact-form messages;</li>
+        <li><strong>GitHub Pages</strong> — static website hosting;</li>
+        <li><strong>Google</strong> — optional in-page translation and, if you choose it, third-party sign-in.</li>
+      </ul>
+      <p>We may also disclose personal data where required by law, to enforce our Terms, or to protect the rights, safety, and security of the Platform and its users.</p>
+
+      <h2><span class="num">6.</span><span>International data transfers</span></h2>
+      <p>Some of our service providers store and process data on infrastructure located outside the Kingdom of Saudi Arabia (for example, our database is hosted in the European Union). Where personal data is transferred outside the Kingdom, we take steps to ensure an adequate level of protection consistent with the PDPL and the providers’ own safeguards.</p>
+
+      <h2><span class="num">7.</span><span>Data retention</span></h2>
+      <p>We keep your account and profile data for as long as your account is active. Activity and security logs are kept for a limited period appropriate to their purpose. When you close your account or ask us to delete your data, we delete or anonymise it within a reasonable period, except where we must retain it to comply with a legal obligation or resolve disputes.</p>
+
+      <h2><span class="num">8.</span><span>Security</span></h2>
+      <p>We use technical and organisational measures to protect your data, including encryption in transit (HTTPS), authenticated access, and database-level access controls. No method of transmission or storage is completely secure, but we work to protect your data and to address any incident promptly.</p>
+
+      <h2><span class="num">9.</span><span>Your rights</span></h2>
+      <p>Subject to applicable law, including the PDPL, you have the right to:</p>
+      <ul>
+        <li><strong>Be informed</strong> about how your personal data is processed;</li>
+        <li><strong>Access</strong> the personal data we hold about you;</li>
+        <li><strong>Request correction</strong> of inaccurate or incomplete data;</li>
+        <li><strong>Request deletion</strong> of your data where there is no lawful reason to keep it;</li>
+        <li><strong>Withdraw consent</strong> at any time, without affecting prior processing;</li>
+        <li><strong>Object to or restrict</strong> certain processing.</li>
+      </ul>
+      <p>To exercise any of these rights, email <a href="mailto:j.guzman@midnightspaceconsultancy.com">j.guzman@midnightspaceconsultancy.com</a>. You also have the right to lodge a complaint with the Saudi Data &amp; AI Authority (SDAIA), the competent supervisory authority.</p>
+
+      <h2><span class="num">10.</span><span>Children’s privacy</span></h2>
+      <p>The Platform is intended for professional users aged 18 and over. We do not knowingly collect personal data from children. If you believe a child has provided us with personal data, please contact us and we will delete it.</p>
+
+      <h2><span class="num">11.</span><span>Changes to this policy</span></h2>
+      <p>We may update this Privacy Policy from time to time. When we make material changes, we will revise the “Last updated” date above and, where appropriate, notify you. Please review this page periodically.</p>
+
+      <h2><span class="num">12.</span><span>Contact</span></h2>
+      <p>For any question about this Privacy Policy or your personal data, contact us at <a href="mailto:j.guzman@midnightspaceconsultancy.com">j.guzman@midnightspaceconsultancy.com</a> or via the <a href="contact.html">contact page</a>.</p>
+
+      <p class="legal-langnote">This Arabic translation is provided for convenience. In the event of any inconsistency between the Arabic and English versions, the English version prevails. This policy is a general template and not legal advice; please have it reviewed by a qualified professional before relying on it.</p>
+    </div>
+
+    <!-- ════════════════ العربية ════════════════ -->
+    <div class="legal-doc legal-ar" lang="ar" dir="rtl">
+
+      <p>توضّح سياسة الخصوصية هذه كيف تجمع منصة الفرص السعودية («المنصة») بياناتك الشخصية وتستخدمها وتشاركها وتحميها، والحقوق التي تتمتع بها بشأنها. وقد صيغت بما يتوافق مع <strong>نظام حماية البيانات الشخصية في المملكة العربية السعودية (PDPL)</strong> ولوائحه التنفيذية.</p>
+
+      <h2><span class="num">١.</span><span>من نحن</span></h2>
+      <p>تُشغّل المنصة من قبل <strong>Midnight Space Consultancy</strong>، التي تُعدّ جهة التحكم في البيانات الشخصية المعالَجة عبر المنصة. لأي طلب يتعلق بالخصوصية، تواصل معنا عبر <a href="mailto:j.guzman@midnightspaceconsultancy.com">j.guzman@midnightspaceconsultancy.com</a>.</p>
+
+      <h2><span class="num">٢.</span><span>المعلومات التي نجمعها</span></h2>
+      <h3>الحساب والملف الشخصي</h3>
+      <ul>
+        <li>عنوان البريد الإلكتروني وكلمة المرور (تُدار كلمات المرور من قبل مزوّد المصادقة لدينا ولا نخزّنها مطلقًا بصيغة قابلة للقراءة)؛</li>
+        <li>اسمك واسم العرض والجهة التي تنتمي إليها، عند اختيارك تقديمها؛</li>
+        <li>إذا سجّلت الدخول عبر مزوّد خارجي (مثل Google)، معلومات الملف الأساسية التي يشاركها ذلك المزوّد (كالاسم والبريد الإلكتروني).</li>
+      </ul>
+      <h3>نشاطك على المنصة</h3>
+      <ul>
+        <li>عناصر قائمة المتابعة وعمليات البحث المحفوظة والمجلدات وأي ملاحظات تضيفها؛</li>
+        <li>التفضيلات مثل اللغة والمظهر والاهتمامات القطاعية وإعدادات الإشعارات؛</li>
+        <li>سجل لبعض الإجراءات داخل التطبيق (مثل حفظ فرصة) يُستخدم لأغراض الأمان وتشغيل مساحة عملك.</li>
+      </ul>
+      <h3>الرسائل والبيانات التقنية</h3>
+      <ul>
+        <li>محتوى الرسائل التي ترسلها إلينا عبر نموذج التواصل (الاسم والبريد الإلكتروني والموضوع والرسالة)؛</li>
+        <li>بيانات تقنية محدودة لازمة لتشغيل الخدمة بأمان، وعناصر صغيرة تُخزَّن في ذاكرة متصفحك المحلية (مثل اختيارك للغة والمظهر ورمز جلستك).</li>
+      </ul>
+      <p>نحن <strong>لا</strong> نبيع بياناتك الشخصية، ولا نستخدم إعلانات الأطراف الخارجية أو ملفات تتبّع عبر المواقع.</p>
+
+      <h2><span class="num">٣.</span><span>كيف نستخدم معلوماتك</span></h2>
+      <ul>
+        <li>لإنشاء حسابك وتشغيله وتقديم ميزات المنصة؛</li>
+        <li>لحفظ ومزامنة قائمة متابعتك وعمليات بحثك ومجلداتك وتفضيلاتك؛</li>
+        <li>للرد على استفساراتك وتقديم الدعم؛</li>
+        <li>للحفاظ على أمان المنصة ومنع إساءة الاستخدام وتشخيص المشكلات؛</li>
+        <li>للامتثال للالتزامات القانونية.</li>
+      </ul>
+      <p>تشمل أسسنا النظامية بموجب نظام حماية البيانات الشخصية <strong>موافقتك</strong> (التي يمكنك سحبها في أي وقت)، و<strong>تنفيذ اتفاقنا</strong> معك (تقديم الخدمة التي اشتركت بها)، و<strong>مصالحنا المشروعة</strong> في تشغيل المنصة وتأمينها، بما يوازن حقوقك.</p>
+
+      <h2><span class="num">٤.</span><span>ملفات الارتباط والتخزين المحلي</span></h2>
+      <p>لا نستخدم سوى التخزين اللازم لتشغيل المنصة — وبشكل أساسي رمز تسجيل دخول آمن وقيم تفضيلات صغيرة (اللغة والمظهر) محفوظة في متصفحك. ولا نستخدم ملفات ارتباط للإعلانات أو لتتبّع التحليلات. وإذا استخدمت ميزة الترجمة الاختيارية داخل الصفحة، فقد يتفاعل متصفحك مع خدمة ترجمة تابعة لطرف ثالث قد تضع ملفات الارتباط الخاصة بها.</p>
+
+      <h2><span class="num">٥.</span><span>المشاركة ومزوّدو الخدمة</span></h2>
+      <p>لا نشارك البيانات الشخصية إلا مع مزوّدي خدمة (معالِجين) يساعدوننا في تشغيل المنصة، وفق شروط مناسبة للسرية ومعالجة البيانات:</p>
+      <ul>
+        <li><strong>Supabase</strong> — استضافة قاعدة البيانات ومصادقة المستخدمين؛</li>
+        <li><strong>Formspree</strong> — إيصال رسائل نموذج التواصل؛</li>
+        <li><strong>GitHub Pages</strong> — استضافة الموقع الثابت؛</li>
+        <li><strong>Google</strong> — الترجمة الاختيارية داخل الصفحة، وتسجيل الدخول عبر طرف ثالث إذا اخترته.</li>
+      </ul>
+      <p>وقد نفصح عن البيانات الشخصية أيضًا عند اقتضاء القانون لذلك، أو لإنفاذ شروطنا، أو لحماية حقوق المنصة ومستخدميها وسلامتهم وأمنهم.</p>
+
+      <h2><span class="num">٦.</span><span>عمليات النقل الدولية للبيانات</span></h2>
+      <p>يقوم بعض مزوّدي خدماتنا بتخزين البيانات ومعالجتها على بنية تحتية تقع خارج المملكة العربية السعودية (على سبيل المثال، تُستضاف قاعدة بياناتنا في الاتحاد الأوروبي). وعند نقل البيانات الشخصية خارج المملكة، نتخذ خطوات لضمان مستوى حماية ملائم بما يتوافق مع نظام حماية البيانات الشخصية ومع الضمانات الخاصة بالمزوّدين.</p>
+
+      <h2><span class="num">٧.</span><span>الاحتفاظ بالبيانات</span></h2>
+      <p>نحتفظ ببيانات حسابك وملفك الشخصي ما دام حسابك نشطًا. وتُحفظ سجلات النشاط والأمان لفترة محدودة تتناسب مع غرضها. وعند إغلاق حسابك أو طلبك حذف بياناتك، نحذفها أو نجعلها مجهولة المصدر خلال فترة معقولة، إلا حين يلزمنا الاحتفاظ بها للامتثال لالتزام قانوني أو لتسوية النزاعات.</p>
+
+      <h2><span class="num">٨.</span><span>الأمان</span></h2>
+      <p>نستخدم تدابير تقنية وتنظيمية لحماية بياناتك، بما في ذلك التشفير أثناء النقل (HTTPS) والوصول الموثّق وضوابط الوصول على مستوى قاعدة البيانات. ولا توجد وسيلة نقل أو تخزين آمنة بشكل كامل، لكننا نعمل على حماية بياناتك ومعالجة أي حادث بسرعة.</p>
+
+      <h2><span class="num">٩.</span><span>حقوقك</span></h2>
+      <p>مع مراعاة القانون الساري، بما في ذلك نظام حماية البيانات الشخصية، يحق لك:</p>
+      <ul>
+        <li><strong>أن تكون على علم</strong> بكيفية معالجة بياناتك الشخصية؛</li>
+        <li><strong>الوصول</strong> إلى البيانات الشخصية التي نحتفظ بها عنك؛</li>
+        <li><strong>طلب تصحيح</strong> البيانات غير الدقيقة أو الناقصة؛</li>
+        <li><strong>طلب حذف</strong> بياناتك حيثما لا يوجد سبب نظامي للاحتفاظ بها؛</li>
+        <li><strong>سحب الموافقة</strong> في أي وقت دون التأثير على المعالجة السابقة؛</li>
+        <li><strong>الاعتراض على معالجة معيّنة أو تقييدها.</strong></li>
+      </ul>
+      <p>لممارسة أي من هذه الحقوق، راسلنا على <a href="mailto:j.guzman@midnightspaceconsultancy.com">j.guzman@midnightspaceconsultancy.com</a>. كما يحق لك تقديم شكوى إلى الهيئة السعودية للبيانات والذكاء الاصطناعي (سدايا) بوصفها الجهة الإشرافية المختصة.</p>
+
+      <h2><span class="num">١٠.</span><span>خصوصية الأطفال</span></h2>
+      <p>المنصة مخصّصة للمستخدمين المهنيين بعمر 18 عامًا فأكثر. ولا نجمع عن قصد بيانات شخصية من الأطفال. وإذا كنت تعتقد أن طفلًا زوّدنا ببيانات شخصية، فيرجى التواصل معنا وسنحذفها.</p>
+
+      <h2><span class="num">١١.</span><span>التعديلات على هذه السياسة</span></h2>
+      <p>قد نحدّث سياسة الخصوصية هذه من حين لآخر. وعند إجراء تغييرات جوهرية، سنحدّث تاريخ «آخر تحديث» أعلاه ونُشعرك عند الاقتضاء. يُرجى مراجعة هذه الصفحة دوريًا.</p>
+
+      <h2><span class="num">١٢.</span><span>التواصل</span></h2>
+      <p>لأي سؤال حول سياسة الخصوصية هذه أو بياناتك الشخصية، تواصل معنا عبر <a href="mailto:j.guzman@midnightspaceconsultancy.com">j.guzman@midnightspaceconsultancy.com</a> أو من خلال <a href="contact.html">صفحة التواصل</a>.</p>
+
+      <p class="legal-langnote">هذه الترجمة العربية مقدّمة للتيسير، وفي حال وجود أي تعارض بين النسختين العربية والإنجليزية تُرجَّح النسخة الإنجليزية. وتُعدّ هذه السياسة نموذجًا عامًا ولا تُعتبر استشارة قانونية؛ يُرجى مراجعتها من قبل مختص مؤهل قبل الاعتماد عليها.</p>
+    </div>
+
+  </div>
+
+  <a href="login.html" class="oh-back-link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+    <span data-en="Back to Sign In" data-ar="العودة لتسجيل الدخول">Back to Sign In</span>
+  </a>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  /* Language toggle — shared pattern with contact.html / terms.html. */
+  var currentLang = localStorage.getItem('oh-login-lang') || 'en';
+
+  function switchLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('oh-login-lang', lang);
+    var isAr = lang === 'ar';
+    document.documentElement.setAttribute('dir',  isAr ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', isAr ? 'ar'  : 'en');
+    var label = document.getElementById('lang-label');
+    if (label) label.textContent = isAr ? 'English' : 'العربية';
+    document.querySelectorAll('[data-en][data-ar]').forEach(function (el) {
+      el.textContent = isAr ? el.dataset.ar : el.dataset.en;
+    });
+  }
+
+  document.getElementById('lang-toggle').addEventListener('click', function () {
+    switchLang(currentLang === 'en' ? 'ar' : 'en');
+  });
+
+  if (currentLang === 'ar') switchLang('ar');
+})();
+</script>
+
+</body>
+</html>
