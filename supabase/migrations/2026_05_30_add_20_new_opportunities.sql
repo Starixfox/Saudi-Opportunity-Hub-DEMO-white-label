@@ -66,8 +66,8 @@ WHERE NOT EXISTS (SELECT 1 FROM opportunities WHERE application_link = 'https://
 
 -- 13. SDB Business Franchise Financing (Private Sector – Saudi Arabia)
 INSERT INTO opportunities (id, title, sponsor_institution, country, sectors, type, status, funding_amount, deadline_date, application_link, description_short, last_verified, eligibility_region)
-SELECT gen_random_uuid()::text, 'Saudi Social Development Bank – Business Franchise Financing Program', 'Saudi Social Development Bank (SDB)', 'Saudi Arabia', ARRAY['Private Sector'], 'financing', 'open', 'Up to SAR 4,000,000', 'open', 'https://www.sdb.gov.sa/en/facilities/facilities-financing/business-franchise-program/', 'SDB financing up to SAR 4M for Saudi nationals to establish franchise businesses, with up to 8-year repayment, 7% admin fee, and fully digital application — no branch visit required.', '2026-05-17'::date, 'Saudi_only'
-WHERE NOT EXISTS (SELECT 1 FROM opportunities WHERE application_link = 'https://www.sdb.gov.sa/en/facilities/facilities-financing/business-franchise-program/');
+SELECT gen_random_uuid()::text, 'Saudi Social Development Bank – Business Franchise Financing Program', 'Saudi Social Development Bank (SDB)', 'Saudi Arabia', ARRAY['Private Sector'], 'financing', 'open', 'Up to SAR 4,000,000', 'open', 'https://www.sdb.gov.sa/en/facilities-financing/business-franchise-program', 'SDB financing up to SAR 4M for Saudi nationals to establish franchise businesses, with up to 8-year repayment, 7% admin fee, and fully digital application — no branch visit required.', '2026-05-17'::date, 'Saudi_only'
+WHERE NOT EXISTS (SELECT 1 FROM opportunities WHERE application_link = 'https://www.sdb.gov.sa/en/facilities-financing/business-franchise-program');
 
 -- 14. Masdar WiSER Pioneers Program (Energy – UAE/Global)
 INSERT INTO opportunities (id, title, sponsor_institution, country, sectors, type, status, funding_amount, deadline_date, application_link, description_short, last_verified, eligibility_region)
