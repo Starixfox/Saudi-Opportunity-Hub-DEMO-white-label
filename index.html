@@ -1655,23 +1655,8 @@
   <span id="wsToastMsg"></span>
 </div>
 
-<div class="panel-overlay" id="panelOverlay" role="presentation" aria-hidden="true"></div>
-
-<aside class="detail-panel" id="detailPanel" aria-label="Opportunity details" aria-hidden="true" role="dialog" tabindex="-1">
-  <div class="panel-header">
-    <h3 class="panel-title" id="panelTitle">Opportunity Details</h3>
-    <button class="panel-close" id="panelClose" aria-label="Close details panel">&#x2715;</button>
-  </div>
-  <div class="panel-badges" id="panelBadges" aria-label="Program badges"></div>
-  <div class="panel-trust-bar" id="panelTrustBar" aria-label="Record quality signals"></div>
-  <div class="panel-body">
-    <p class="panel-description" id="panelDesc"></p>
-    <div id="panelFields"></div>
-  </div>
-  <div class="panel-footer">
-    <a class="panel-link-btn" id="panelLink" href="#" target="_blank" rel="noopener noreferrer">Visit official page &rarr;</a>
-  </div>
-</aside>
+<!-- Opportunity detail side-panel removed (legacy). Clicking an opportunity now
+     jumps to its card in the grid via window.__goToOppCard(id). -->
 
 
 <script>
@@ -6671,6 +6656,10 @@
       .occ-actions .opp-card-action-btn svg { width: 13px; height: 13px; }
       .opp-card-link { width: auto; white-space: nowrap; background: #35d5c5; border-radius: 999px; box-shadow: 0 6px 16px rgba(47,213,199,.16); padding: 8px 14px; font-size: 12px; }
       .opp-card-sponsor { margin-top: 8px; color: rgba(255,255,255,.66); font-size: 11px; }
+      /* Flash ring when jumping to a specific card (Closing Soonest / deep links). */
+      @keyframes oh-card-jump { 0%{box-shadow:0 0 0 2px rgba(227,189,108,0);} 18%{box-shadow:0 0 0 2px rgba(227,189,108,.95), 0 0 26px 4px rgba(227,189,108,.5);} 100%{box-shadow:0 0 0 2px rgba(227,189,108,0);} }
+      .opp-card-jump { animation: oh-card-jump 2.3s ease-out; border-radius: 14px; scroll-margin-top: 90px; }
+      @media (prefers-reduced-motion: reduce) { .opp-card-jump { animation: none; outline: 2px solid rgba(227,189,108,.9); outline-offset: 2px; } }
       .pagination { gap: 4px; margin-top: 14px; }
       .page-btn { min-width: 30px; height: 30px; padding: 0 8px; font-size: 12px; border-radius: 8px; }
       .page-ellipsis { color: var(--text-faint); font-size: 12px; padding: 0 2px; line-height: 30px; }
@@ -8162,6 +8151,40 @@
     if (Array.isArray(window.opportunitiesData) || Array.isArray(window.allOpportunities)) {
       boot();
       window.__renderCards = renderCards;
+
+      /* Jump to (and highlight) the exact opportunity card in the grid. Used by
+         the Closing Soonest widget, watchlist, similar-opportunity tooltips, and
+         #opp deep links now that the detail side-panel is gone. Resets filters if
+         the card would be filtered out, pages to it, scrolls, and flashes a ring. */
+      window.__goToOppCard = function (id) {
+        if (id == null) return;
+        var sid = String(id);
+        if (typeof window.setRoute === 'function') window.setRoute('opportunities');
+        setTimeout(function () {
+          var inView = filteredData.some(function (r) { return String(r.id) === sid; });
+          if (!inView) {
+            var rb = document.getElementById('resetFilters');
+            if (rb) rb.click(); /* clears search + all filters, then re-renders */
+          }
+          setTimeout(function () {
+            var list = (sortedData && sortedData.length) ? sortedData : filteredData;
+            var idx = -1;
+            for (var i = 0; i < list.length; i++) { if (String(list[i].id) === sid) { idx = i; break; } }
+            if (idx < 0) return;
+            currentPage = Math.floor(idx / PER_PAGE) + 1;
+            renderCards();
+            setTimeout(function () {
+              var sel = (window.CSS && CSS.escape) ? CSS.escape(sid) : sid;
+              var el = document.querySelector('#oppsTableBody [data-id="' + sel + '"]');
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.classList.add('opp-card-jump');
+                setTimeout(function () { el.classList.remove('opp-card-jump'); }, 2400);
+              }
+            }, 140);
+          }, inView ? 0 : 280);
+        }, 220);
+      };
       window.t = t;
       populateDfp();
     }
@@ -8678,6 +8701,11 @@
   }
 
   function openPanel(item) {
+    /* Legacy detail side-panel removed — jump to the real card in the grid
+       instead. Every former trigger (cards, watchlist, deep links, similar-
+       opportunity tooltips, admin-logged opens) flows through here, so this one
+       redirect covers them all. The old panel-render code below is unreachable. */
+    if (item && item.id != null && typeof window.__goToOppCard === 'function') { window.__goToOppCard(item.id); return; }
     if (!panel || !item) return;
     var isAr = (window.__lang === 'ar');
 
@@ -13602,21 +13630,9 @@
     var iv = setInterval(function(){
       if (getData().length && window.WS) {
         clearInterval(iv);
-        if (typeof window.setRoute === 'function') window.setRoute('opportunities');
-        setTimeout(function(){
-          /* Open the detail panel directly from the dataset by id. The old path
-             clicked a rendered .opp-insights-btn[data-id], but the opportunities
-             table is paginated — if the target row wasn't on the current page
-             that button didn't exist and the click silently did nothing. Looking
-             the row up in the full dataset opens it regardless of which page is
-             showing. The rendered-button click stays as a fallback. */
-          var pool = (window.opportunitiesData && window.opportunitiesData.length) ? window.opportunitiesData : getData();
-          var opp = null;
-          for (var i = 0; i < pool.length; i++) { if (String(pool[i].id) === id) { opp = pool[i]; break; } }
-          if (opp && typeof window.__openDetailPanel === 'function') { window.__openDetailPanel(opp); return; }
-          var btn = document.querySelector('.opp-insights-btn[data-id="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
-          if (btn) btn.click();
-        }, 300);
+        /* Detail side-panel removed — jump to the actual card in the grid. */
+        if (typeof window.__goToOppCard === 'function') window.__goToOppCard(id);
+        else if (typeof window.setRoute === 'function') window.setRoute('opportunities');
       } else if (++tries > 40) clearInterval(iv);
     }, 250);
   }
@@ -13812,9 +13828,8 @@
       li.addEventListener('click', function () {
         var id = li.dataset.id;
         if (!id) return;
-        if (typeof window.setRoute === 'function') window.setRoute('opportunities');
-        location.hash = '#opp=' + encodeURIComponent(id);
-        setTimeout(handleDeepLink, 200);
+        if (typeof window.__goToOppCard === 'function') window.__goToOppCard(id);
+        else if (typeof window.setRoute === 'function') window.setRoute('opportunities');
       });
     });
   }
@@ -14373,10 +14388,8 @@
       a.addEventListener('click', function(){
         var id = a.dataset.id;
         if (!id) return;
-        if (typeof window.setRoute === 'function') window.setRoute('opportunities');
-        location.hash = '#opp=' + encodeURIComponent(id);
-        var btn = document.querySelector('.opp-insights-btn[data-id="' + id + '"]');
-        if (btn) btn.click();
+        if (typeof window.__goToOppCard === 'function') window.__goToOppCard(id);
+        else if (typeof window.setRoute === 'function') window.setRoute('opportunities');
         hideTooltip();
       });
     });
