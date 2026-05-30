@@ -720,38 +720,49 @@
     </div>
 
     <!-- ── CHART ROW ──────────────────────────────────────────── -->
+    <!-- HERO: Opportunity Constellation (sector × region) -->
+    <div class="liv2-chart-hero">
+      <div class="liv2-chart-card liv2-chart-card--hero">
+        <div class="liv2-chart-card__header">
+          <div class="liv2-chart-card__title" data-en="Opportunity Constellation" data-ar="كوكبة الفرص">Opportunity Constellation</div>
+          <div class="liv2-chart-card__sub" data-en="Where programmes concentrate — sector (rows) × region (columns). Bubble size = number of programmes." data-ar="أين تتركّز البرامج — القطاع (صفوف) × المنطقة (أعمدة). حجم الفقاعة = عدد البرامج.">Where programmes concentrate — sector (rows) × region (columns). Bubble size = number of programmes.</div>
+        </div>
+        <div class="liv2-chart-wrap liv2-chart-wrap--hero">
+          <canvas id="liv2ConstellationChart" aria-label="Opportunity constellation: programmes by sector and region"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHART ROW: sectors · types · status -->
     <div class="liv2-chart-row">
 
-      <!-- Funding by Sector (horizontal bar) -->
       <div class="liv2-chart-card">
         <div class="liv2-chart-card__header">
-          <div class="liv2-chart-card__title" data-en="Programmes with Disclosed Funding" data-ar="برامج بتمويل محدد">Programmes with Disclosed Funding</div>
-          <div class="liv2-chart-card__sub" data-en="Count per sector with known funding amounts" data-ar="عدد البرامج ذات مبالغ تمويل معلنة لكل قطاع">Count per sector with known funding amounts</div>
+          <div class="liv2-chart-card__title" data-en="Sectors in Bloom" data-ar="القطاعات">Sectors in Bloom</div>
+          <div class="liv2-chart-card__sub" data-en="Programmes per sector — top 10" data-ar="عدد البرامج لكل قطاع — أعلى 10">Programmes per sector — top 10</div>
+        </div>
+        <div class="liv2-chart-wrap liv2-chart-wrap--polar">
+          <canvas id="liv2SectorChart" aria-label="Opportunities by sector"></canvas>
+        </div>
+      </div>
+
+      <div class="liv2-chart-card">
+        <div class="liv2-chart-card__header">
+          <div class="liv2-chart-card__title" data-en="Programme Types" data-ar="أنواع البرامج">Programme Types</div>
+          <div class="liv2-chart-card__sub" data-en="Count by programme type" data-ar="العدد حسب نوع البرنامج">Count by programme type</div>
         </div>
         <div class="liv2-chart-wrap liv2-chart-wrap--bar">
-          <canvas id="liv2FundingChart" aria-label="Funding by sector chart"></canvas>
+          <canvas id="liv2TypeChart" aria-label="Opportunities by programme type"></canvas>
         </div>
       </div>
 
-      <!-- Opportunity Count by Sector (donut) -->
       <div class="liv2-chart-card">
         <div class="liv2-chart-card__header">
-          <div class="liv2-chart-card__title" data-en="Opportunities by Sector" data-ar="الفرص حسب القطاع">Opportunities by Sector</div>
-          <div class="liv2-chart-card__sub" data-en="Count of programmes per sector (top 8)" data-ar="عدد البرامج لكل قطاع (أعلى 8)">Count of programmes per sector (top 8)</div>
+          <div class="liv2-chart-card__title" data-en="Status" data-ar="الحالة">Status</div>
+          <div class="liv2-chart-card__sub" data-en="How much of the landscape is open now" data-ar="نسبة البرامج المفتوحة حالياً">How much of the landscape is open now</div>
         </div>
         <div class="liv2-chart-wrap liv2-chart-wrap--donut">
-          <canvas id="liv2SectorChart" aria-label="Opportunities by sector chart"></canvas>
-        </div>
-      </div>
-
-      <!-- Status Breakdown (donut) -->
-      <div class="liv2-chart-card">
-        <div class="liv2-chart-card__header">
-          <div class="liv2-chart-card__title" data-en="Status Breakdown" data-ar="توزيع الحالات">Status Breakdown</div>
-          <div class="liv2-chart-card__sub" data-en="Current programme status distribution" data-ar="توزيع حالات البرامج الحالية">Current programme status distribution</div>
-        </div>
-        <div class="liv2-chart-wrap liv2-chart-wrap--donut">
-          <canvas id="liv2StatusChart" aria-label="Status breakdown chart"></canvas>
+          <canvas id="liv2StatusChart" aria-label="Programme status breakdown"></canvas>
         </div>
       </div>
 
@@ -9410,13 +9421,99 @@
         : (ar ? '\u0639\u0628\u0631 \u062c\u0645\u064a\u0639 \u0627\u0644\u0628\u0631\u0627\u0645\u062c' : 'Across all programmes in the database');
     }
 
-    if (charts.sector) { charts.sector.destroy(); charts.sector=null; }
-    charts.sector = buildDonut('liv2SectorChart',
-      stKeys.map(function(k){ return statusLabelsMap[k]||k; }),
-      stKeys.map(function(k){ return statusMap[k]; }),
-      stKeys.map(function(k){ return statusColorMap[k]||'#9da6bf'; }),
-      textColor
-    );
+    /* ════ NEW ANALYTICS CHARTS — constellation · sectors · types · status ════
+       Replaces the old twin-donut layout. All four read from `filtered`, so
+       they honour the personalisation filter; the KPI row above stays global. */
+    function _hexA(hex,a){ var n=parseInt(hex.slice(1),16); return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')'; }
+    function _goldRamp(i,n){ var t=n<=1?0:i/(n-1); return 'hsl(40 56% '+Math.round((0.76-0.36*t)*100)+'%)'; }
+    function _vGrad(cx,area,c0,c1){ if(!area) return c1; var g=cx.createLinearGradient(area.left,0,area.right,0); g.addColorStop(0,c0); g.addColorStop(1,c1); return g; }
+    function _shortSec(s){ return String(s).split(/ [&(]/)[0].trim(); }
+    function regionBucket(r){ var s=String(r==null?'':r).toLowerCase(); if(!s) return null;
+      if(s.indexOf('mena')>=0) return 'MENA';
+      if(s.indexOf('gcc')>=0||s.indexOf('uae')>=0||s.indexOf('bahrain')>=0||s.indexOf('qatar')>=0||s.indexOf('kuwait')>=0||s.indexOf('oman')>=0) return 'GCC';
+      if(s.indexOf('global')>=0||s.indexOf('international')>=0||s.indexOf('world')>=0) return 'Global';
+      if(s.indexOf('saudi')>=0||s.indexOf('ksa')>=0) return 'Saudi';
+      return 'Global'; }
+    var _glow=function(color,blur){ return { id:'glow'+blur, beforeDatasetsDraw:function(c){ c.ctx.save(); c.ctx.shadowColor=color; c.ctx.shadowBlur=blur; }, afterDatasetsDraw:function(c){ c.ctx.restore(); } }; };
+    var _centre=function(big,small,sub){ return { id:'centre', afterDraw:function(c){ var a=c.chartArea; if(!a) return; var x=(a.left+a.right)/2, y=(a.top+a.bottom)/2, g=c.ctx; g.save(); g.textAlign='center'; g.textBaseline='middle'; g.fillStyle='#e3bd6c'; g.font='700 32px "Space Grotesk",sans-serif'; g.shadowColor='rgba(227,189,108,.45)'; g.shadowBlur=16; g.fillText(big,x,y-6); g.shadowBlur=0; g.fillStyle='rgba(255,255,255,.92)'; g.font='600 12px Inter,sans-serif'; g.fillText(small,x,y+15); g.fillStyle='rgba(255,255,255,.55)'; g.font='500 10px Inter,sans-serif'; g.fillText(sub,x,y+31); g.restore(); } }; };
+    var _barLabels={ id:'barLabels', afterDatasetsDraw:function(c){ var m=c.getDatasetMeta(0), ds=c.data.datasets[0], g=c.ctx; g.save(); g.font='700 11px Inter,sans-serif'; g.fillStyle='rgba(255,255,255,.9)'; g.textBaseline='middle'; g.textAlign='left'; m.data.forEach(function(b,i){ g.fillText(Number(ds.data[i]).toLocaleString(), b.x+8, b.y); }); g.restore(); } };
+
+    var _ns = window.__normalizeSectorKey || function(v){ return String(v||'').toLowerCase().replace(/[\s&\-]+/g,'_'); };
+    var REGIONS=['Saudi','GCC','MENA','Global'];
+    var REGION_AR={Saudi:'السعودية',GCC:'الخليج',MENA:'مينا',Global:'عالمي'};
+    var regionLabels=REGIONS.map(function(rg){ return ar?REGION_AR[rg]:rg; });
+
+    /* — Constellation: sector (rows) × region (cols), bubble size = count — */
+    var cross={};
+    filtered.forEach(function(r){ var rb=regionBucket(r.eligibility_region); if(!rb) return;
+      (r.sectors||[]).forEach(function(s){ var k=_ns(s); if(!k) return; if(!cross[k]) cross[k]={Saudi:0,GCC:0,MENA:0,Global:0}; cross[k][rb]++; }); });
+    var cTop=Object.keys(cross).map(function(k){ var c=cross[k]; return {k:k,t:c.Saudi+c.GCC+c.MENA+c.Global}; }).sort(function(a,b){ return b.t-a.t; }).slice(0,9);
+    var cKeys=cTop.map(function(o){ return o.k; });
+    var cLabels=cKeys.map(function(k){ return _shortSec(SNAMES[k]||k); });
+    var cPts=[], cMax=1;
+    cKeys.forEach(function(k,si){ REGIONS.forEach(function(rg,ri){ var v=cross[k][rg]||0; if(v>cMax)cMax=v; if(v>0) cPts.push({x:ri,y:si,r:7+Math.sqrt(v)*1.35,v:v}); }); });
+    var conC=document.getElementById('liv2ConstellationChart');
+    if(conC){ if(charts.constellation){ charts.constellation.destroy(); charts.constellation=null; }
+      charts.constellation=new Chart(conC.getContext('2d'),{ type:'bubble',
+        data:{datasets:[{ data:cPts,
+          backgroundColor:function(cx){ return _hexA('#e3bd6c',0.28+0.5*((cx.raw?cx.raw.v:0)/cMax)); },
+          borderColor:_hexA('#f6dca0',0.85), borderWidth:1, hoverBorderColor:'#fff' }]},
+        options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:6,right:16,bottom:2,left:4}},
+          plugins:{ legend:{display:false}, tooltip:{callbacks:{label:function(c){ return ' '+(cLabels[c.raw.y]||'')+' · '+(regionLabels[c.raw.x]||'')+': '+c.raw.v; }}} },
+          scales:{ x:{type:'linear',min:-0.5,max:3.5,afterBuildTicks:function(a){ a.ticks=[0,1,2,3].map(function(v){ return {value:v}; }); },
+                grid:{color:gridColor},border:{display:false},ticks:{color:textColor,font:{size:11.5,weight:'600'},callback:function(v){ return regionLabels[v]||''; }}},
+            y:{type:'linear',min:-0.5,max:Math.max(0.5,cKeys.length-0.5),reverse:true,afterBuildTicks:function(a){ a.ticks=cKeys.map(function(_,i){ return {value:i}; }); },
+                grid:{color:'rgba(255,255,255,0.045)'},border:{display:false},ticks:{color:textColor,font:{size:11},padding:6,callback:function(v){ return cLabels[v]||''; }}} } },
+        plugins:[_glow('rgba(227,189,108,0.5)',12)] }); }
+
+    /* — Sectors in Bloom (polar area) — */
+    var secCount={};
+    filtered.forEach(function(r){ (r.sectors||[]).forEach(function(s){ var k=_ns(s); if(k) secCount[k]=(secCount[k]||0)+1; }); });
+    var secTop=Object.keys(secCount).map(function(k){ return {k:k,v:secCount[k]}; }).sort(function(a,b){ return b.v-a.v; }).slice(0,10);
+    var secC=document.getElementById('liv2SectorChart');
+    if(secC){ if(charts.sectors){ charts.sectors.destroy(); charts.sectors=null; }
+      charts.sectors=new Chart(secC.getContext('2d'),{ type:'polarArea',
+        data:{ labels:secTop.map(function(o){ return SNAMES[o.k]||o.k; }),
+          datasets:[{ data:secTop.map(function(o){ return o.v; }),
+            backgroundColor:secTop.map(function(_,i){ return _goldRamp(i,secTop.length); }),
+            borderColor:_hexA('#f6dca0',0.55), borderWidth:1, hoverOffset:6 }]},
+        options:{ responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{position:'right',labels:{color:textColor,font:{size:10},boxWidth:9,padding:6}},
+            tooltip:{callbacks:{label:function(c){ return ' '+c.label+': '+(c.parsed.r!=null?c.parsed.r:c.parsed); }}} },
+          scales:{ r:{grid:{color:gridColor},angleLines:{color:gridColor},ticks:{display:false,backdropColor:'transparent'}} } },
+        plugins:[_glow('rgba(201,166,107,0.32)',9)] }); }
+
+    /* — Programme Types (gradient bars) — */
+    var typeC=document.getElementById('liv2TypeChart');
+    if(typeC){ if(charts.types){ charts.types.destroy(); charts.types=null; }
+      var tTop=typeEntries.slice(0,8);
+      charts.types=new Chart(typeC.getContext('2d'),{ type:'bar',
+        data:{ labels:tTop.map(function(e){ return e.label; }),
+          datasets:[{ data:tTop.map(function(e){ return e.value; }),
+            backgroundColor:function(cx){ return _vGrad(cx.chart.ctx,cx.chart.chartArea,_hexA('#8a6d33',0.55),'#e3bd6c'); },
+            borderColor:'#e3bd6c', borderWidth:1, borderRadius:7, borderSkipped:false, maxBarThickness:22 }]},
+        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, layout:{padding:{right:40}},
+          plugins:{ legend:{display:false}, tooltip:{callbacks:{label:function(c){ return ' '+c.parsed.x; }}} },
+          scales:{ x:{grid:{color:gridColor},border:{display:false},ticks:{color:textColor,font:{size:10.5},precision:0}},
+            y:{grid:{display:false},border:{display:false},ticks:{color:textColor,font:{size:11,weight:'600'}}} } },
+        plugins:[_barLabels] }); }
+
+    /* — Status (donut + glowing centre) — */
+    var _stTotal=stKeys.reduce(function(a,k){ return a+statusMap[k]; },0)||1;
+    var _stOpenPct=Math.round((statusMap['open']||0)/_stTotal*100);
+    var stC=document.getElementById('liv2StatusChart');
+    if(stC){ if(charts.status){ charts.status.destroy(); charts.status=null; }
+      charts.status=new Chart(stC.getContext('2d'),{ type:'doughnut',
+        data:{ labels:stKeys.map(function(k){ return statusLabelsMap[k]||k; }),
+          datasets:[{ data:stKeys.map(function(k){ return statusMap[k]; }),
+            backgroundColor:stKeys.map(function(k){ return _hexA(statusColorMap[k]||'#9da6bf',0.85); }),
+            borderColor:stKeys.map(function(k){ return statusColorMap[k]||'#9da6bf'; }),
+            borderWidth:1.5, hoverOffset:8, spacing:2 }]},
+        options:{ responsive:true, maintainAspectRatio:false, cutout:'70%',
+          plugins:{ legend:{position:'bottom',labels:{color:textColor,font:{size:10},boxWidth:9,padding:7,usePointStyle:true,pointStyle:'circle'}},
+            tooltip:{callbacks:{label:function(c){ return ' '+c.label+': '+c.parsed+' ('+Math.round(c.parsed/_stTotal*100)+'%)'; }}} }
+        },
+        plugins:[_centre(_stOpenPct+'%',(ar?'مفتوح الآن':'Open now'),_stTotal.toLocaleString()+(ar?' إجمالي':' total')),_glow('rgba(227,189,108,0.22)',7)] }); }
 
     /* —— CHART 3: Audience profile in filtered data (donut) —— */
     var profileCounts = {};
@@ -9436,13 +9533,9 @@
         : (ar ? '\u0645\u0646 \u062a\u0633\u062a\u0647\u062f\u0641\u0647 \u062c\u0645\u064a\u0639 \u0627\u0644\u0628\u0631\u0627\u0645\u062c' : 'Who all programmes in the database target');
     }
 
-    if (charts.status) { charts.status.destroy(); charts.status=null; }
-    charts.status = buildDonut('liv2StatusChart',
-      profKeys.map(function(k){ return PNAMES[k]||k; }),
-      profKeys.map(function(k){ return profileCounts[k]; }),
-      CHART_COLORS.slice(0, profKeys.length),
-      textColor
-    );
+    /* Audience donut retired — its slot is now the status donut above, and the
+       sector/type/region stories are told by the constellation + polar + bars.
+       profileCounts/profKeys remain computed for the insight strip below. */
 
     /* —— insight strip —— */
     var openPct  = filtered.length > 0 ? Math.round((filtered.filter(function(r){ return r.status==='open'; }).length / filtered.length)*100) : 0;

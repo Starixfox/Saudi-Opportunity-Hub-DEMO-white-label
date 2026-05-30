@@ -3118,7 +3118,7 @@ body[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
 /* Chart row */
 .liv2-chart-row {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--space-5);
   margin-bottom: var(--space-8);
   align-items: start;
@@ -3154,6 +3154,15 @@ body[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
 .liv2-chart-wrap--bar  { height: 260px; }
 .liv2-chart-wrap--donut { height: 220px; }
 .liv2-chart-wrap canvas { display: block; width: 100% !important; }
+/* New analytics layout: full-width constellation hero + an even 3-up row. */
+.liv2-chart-hero { margin-bottom: var(--space-5); }
+.liv2-chart-card--hero { width: 100%; }
+.liv2-chart-wrap--hero { height: 380px; }
+.liv2-chart-wrap--polar,
+.liv2-chart-wrap--bar,
+.liv2-chart-wrap--donut { height: 300px; }
+/* Legacy dashboard chart-grid retired in favour of the Analytics charts. */
+#view-dashboard .chart-grid { display: none; }
 
 /* Insight strip */
 .liv2-insight-strip {
