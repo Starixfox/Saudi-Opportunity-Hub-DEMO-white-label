@@ -724,8 +724,8 @@
     <div class="liv2-chart-hero">
       <div class="liv2-chart-card liv2-chart-card--hero">
         <div class="liv2-chart-card__header">
-          <div class="liv2-chart-card__title" data-en="Opportunity Constellation" data-ar="كوكبة الفرص">Opportunity Constellation</div>
-          <div class="liv2-chart-card__sub" data-en="Where programmes concentrate — sector (rows) × region (columns). Bubble size = number of programmes." data-ar="أين تتركّز البرامج — القطاع (صفوف) × المنطقة (أعمدة). حجم الفقاعة = عدد البرامج.">Where programmes concentrate — sector (rows) × region (columns). Bubble size = number of programmes.</div>
+          <div class="liv2-chart-card__title" data-en="Programmes by Sector &amp; Region" data-ar="البرامج حسب القطاع والمنطقة">Programmes by Sector &amp; Region</div>
+          <div class="liv2-chart-card__sub" data-en="Each sector split by where it's open — Saudi · GCC · MENA · Global." data-ar="كل قطاع موزّع حسب المنطقة — السعودية · الخليج · مينا · عالمي.">Each sector split by where it's open — Saudi · GCC · MENA · Global.</div>
         </div>
         <div class="liv2-chart-wrap liv2-chart-wrap--hero">
           <canvas id="liv2ConstellationChart" aria-label="Opportunity constellation: programmes by sector and region"></canvas>
@@ -738,8 +738,8 @@
 
       <div class="liv2-chart-card">
         <div class="liv2-chart-card__header">
-          <div class="liv2-chart-card__title" data-en="Sectors in Bloom" data-ar="القطاعات">Sectors in Bloom</div>
-          <div class="liv2-chart-card__sub" data-en="Programmes per sector — top 10" data-ar="عدد البرامج لكل قطاع — أعلى 10">Programmes per sector — top 10</div>
+          <div class="liv2-chart-card__title" data-en="Top Sectors" data-ar="أبرز القطاعات">Top Sectors</div>
+          <div class="liv2-chart-card__sub" data-en="Programmes per sector — a distinct colour each" data-ar="عدد البرامج لكل قطاع — بلون مميّز لكلٍّ منها">Programmes per sector — a distinct colour each</div>
         </div>
         <div class="liv2-chart-wrap liv2-chart-wrap--polar">
           <canvas id="liv2SectorChart" aria-label="Opportunities by sector"></canvas>
@@ -9440,6 +9440,8 @@
 
     var _ns = window.__normalizeSectorKey || function(v){ return String(v||'').toLowerCase().replace(/[\s&\-]+/g,'_'); };
     var REGIONS=['Saudi','GCC','MENA','Global'];
+    var REGION_COL={Saudi:'#10b981',GCC:'#C9A66B',MENA:'#8b5cf6',Global:'#06b6d4'};
+    var PAL=['#C9A66B','#8b5cf6','#06b6d4','#10b981','#f59e0b','#f97316','#ef4444','#ec4899','#84cc16','#22d3ee','#facc15','#60a5fa'];
     var REGION_AR={Saudi:'السعودية',GCC:'الخليج',MENA:'مينا',Global:'عالمي'};
     var regionLabels=REGIONS.map(function(rg){ return ar?REGION_AR[rg]:rg; });
 
@@ -9454,17 +9456,17 @@
     cKeys.forEach(function(k,si){ REGIONS.forEach(function(rg,ri){ var v=cross[k][rg]||0; if(v>cMax)cMax=v; if(v>0) cPts.push({x:ri,y:si,r:7+Math.sqrt(v)*1.35,v:v}); }); });
     var conC=document.getElementById('liv2ConstellationChart');
     if(conC){ if(charts.constellation){ charts.constellation.destroy(); charts.constellation=null; }
-      charts.constellation=new Chart(conC.getContext('2d'),{ type:'bubble',
-        data:{datasets:[{ data:cPts,
-          backgroundColor:function(cx){ return _hexA('#e3bd6c',0.28+0.5*((cx.raw?cx.raw.v:0)/cMax)); },
-          borderColor:_hexA('#f6dca0',0.85), borderWidth:1, hoverBorderColor:'#fff' }]},
-        options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:6,right:16,bottom:2,left:4}},
-          plugins:{ legend:{display:false}, tooltip:{callbacks:{label:function(c){ return ' '+(cLabels[c.raw.y]||'')+' · '+(regionLabels[c.raw.x]||'')+': '+c.raw.v; }}} },
-          scales:{ x:{type:'linear',min:-0.5,max:3.5,afterBuildTicks:function(a){ a.ticks=[0,1,2,3].map(function(v){ return {value:v}; }); },
-                grid:{color:gridColor},border:{display:false},ticks:{color:textColor,font:{size:11.5,weight:'600'},callback:function(v){ return regionLabels[v]||''; }}},
-            y:{type:'linear',min:-0.5,max:Math.max(0.5,cKeys.length-0.5),reverse:true,afterBuildTicks:function(a){ a.ticks=cKeys.map(function(_,i){ return {value:i}; }); },
-                grid:{color:'rgba(255,255,255,0.045)'},border:{display:false},ticks:{color:textColor,font:{size:11},padding:6,callback:function(v){ return cLabels[v]||''; }}} } },
-        plugins:[_glow('rgba(227,189,108,0.5)',12)] }); }
+      var cFull=cKeys.map(function(k){ return SNAMES[k]||k; });
+      charts.constellation=new Chart(conC.getContext('2d'),{ type:'bar',
+        data:{ labels:cFull, datasets:REGIONS.map(function(rg){ return {
+          label: ar?(REGION_AR[rg]||rg):rg,
+          data: cKeys.map(function(k){ return (cross[k]&&cross[k][rg])||0; }),
+          backgroundColor:_hexA(REGION_COL[rg],0.82), borderColor:REGION_COL[rg], borderWidth:0, borderRadius:3, borderSkipped:false }; }) },
+        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{position:'top',labels:{color:textColor,font:{size:11},boxWidth:11,padding:12,usePointStyle:true,pointStyle:'rectRounded'}},
+            tooltip:{callbacks:{label:function(c){ return ' '+c.dataset.label+': '+c.parsed.x; }}} },
+          scales:{ x:{stacked:true,grid:{color:gridColor},border:{display:false},ticks:{color:textColor,font:{size:10.5},precision:0}},
+            y:{stacked:true,grid:{display:false},border:{display:false},ticks:{color:textColor,font:{size:11.5,weight:'600'}}} } } }); }
 
     /* — Sectors in Bloom (polar area) — */
     var secCount={};
@@ -9472,16 +9474,17 @@
     var secTop=Object.keys(secCount).map(function(k){ return {k:k,v:secCount[k]}; }).sort(function(a,b){ return b.v-a.v; }).slice(0,10);
     var secC=document.getElementById('liv2SectorChart');
     if(secC){ if(charts.sectors){ charts.sectors.destroy(); charts.sectors=null; }
-      charts.sectors=new Chart(secC.getContext('2d'),{ type:'polarArea',
+      charts.sectors=new Chart(secC.getContext('2d'),{ type:'bar',
         data:{ labels:secTop.map(function(o){ return SNAMES[o.k]||o.k; }),
           datasets:[{ data:secTop.map(function(o){ return o.v; }),
-            backgroundColor:secTop.map(function(_,i){ return _goldRamp(i,secTop.length); }),
-            borderColor:_hexA('#f6dca0',0.55), borderWidth:1, hoverOffset:6 }]},
-        options:{ responsive:true, maintainAspectRatio:false,
-          plugins:{ legend:{position:'right',labels:{color:textColor,font:{size:10},boxWidth:9,padding:6}},
-            tooltip:{callbacks:{label:function(c){ return ' '+c.label+': '+(c.parsed.r!=null?c.parsed.r:c.parsed); }}} },
-          scales:{ r:{grid:{color:gridColor},angleLines:{color:gridColor},ticks:{display:false,backdropColor:'transparent'}} } },
-        plugins:[_glow('rgba(201,166,107,0.32)',9)] }); }
+            backgroundColor:secTop.map(function(_,i){ return _hexA(PAL[i%PAL.length],0.85); }),
+            borderColor:secTop.map(function(_,i){ return PAL[i%PAL.length]; }),
+            borderWidth:1, borderRadius:6, borderSkipped:false, maxBarThickness:20 }]},
+        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, layout:{padding:{right:40}},
+          plugins:{ legend:{display:false}, tooltip:{callbacks:{label:function(c){ return ' '+c.parsed.x; }}} },
+          scales:{ x:{grid:{color:gridColor},border:{display:false},ticks:{color:textColor,font:{size:10.5},precision:0}},
+            y:{grid:{display:false},border:{display:false},ticks:{color:textColor,font:{size:11,weight:'600'}}} } },
+        plugins:[_barLabels] }); }
 
     /* — Programme Types (gradient bars) — */
     var typeC=document.getElementById('liv2TypeChart');
@@ -9490,8 +9493,8 @@
       charts.types=new Chart(typeC.getContext('2d'),{ type:'bar',
         data:{ labels:tTop.map(function(e){ return e.label; }),
           datasets:[{ data:tTop.map(function(e){ return e.value; }),
-            backgroundColor:function(cx){ return _vGrad(cx.chart.ctx,cx.chart.chartArea,_hexA('#8a6d33',0.55),'#e3bd6c'); },
-            borderColor:'#e3bd6c', borderWidth:1, borderRadius:7, borderSkipped:false, maxBarThickness:22 }]},
+            backgroundColor:tTop.map(function(_,i){ return _hexA(PAL[(i+3)%PAL.length],0.85); }),
+            borderColor:tTop.map(function(_,i){ return PAL[(i+3)%PAL.length]; }), borderWidth:1, borderRadius:6, borderSkipped:false, maxBarThickness:20 }]},
         options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, layout:{padding:{right:40}},
           plugins:{ legend:{display:false}, tooltip:{callbacks:{label:function(c){ return ' '+c.parsed.x; }}} },
           scales:{ x:{grid:{color:gridColor},border:{display:false},ticks:{color:textColor,font:{size:10.5},precision:0}},

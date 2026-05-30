@@ -3157,7 +3157,7 @@ body[dir="rtl"] .active-chips-clear-all { margin-left: 0; margin-right: auto; }
 /* New analytics layout: full-width constellation hero + an even 3-up row. */
 .liv2-chart-hero { margin-bottom: var(--space-5); }
 .liv2-chart-card--hero { width: 100%; }
-.liv2-chart-wrap--hero { height: 380px; }
+.liv2-chart-wrap--hero { height: 400px; }
 .liv2-chart-wrap--polar,
 .liv2-chart-wrap--bar,
 .liv2-chart-wrap--donut { height: 300px; }
