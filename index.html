@@ -12717,6 +12717,37 @@
   }
   var tourEl     = { cutout: null, tooltip: null, next: null, prev: null, skip: null, stepLabel: null, title: null, body: null, dots: null };
 
+  /* ── Tour scroll-lock + re-anchor ──────────────────────────────────────
+     While the tour is active, block USER-initiated scrolling (wheel, touch,
+     and scroll keys) so the highlighted target can't move out from under the
+     card + arrow and the user can't wander off and get lost. The tour's OWN
+     programmatic scrollIntoView between steps still works — only user input
+     is blocked. Re-anchor the card/arrow on resize. */
+  var _tourRAF = null;
+  function _tourReanchor() {
+    if (_tourRAF) return;
+    _tourRAF = requestAnimationFrame(function () {
+      _tourRAF = null;
+      if (tourActive) positionTour(tourStep);
+    });
+  }
+  function _tourWheelBlock(e) {
+    if (tourEl.tooltip && tourEl.tooltip.contains(e.target)) return; /* allow the card's own scroll */
+    e.preventDefault();
+  }
+  function _tourKeyBlock(e) {
+    var t = e.target, tag = t && t.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON' || tag === 'A' || (t && t.isContentEditable)) return;
+    if ([32, 33, 34, 35, 36, 38, 40].indexOf(e.keyCode) >= 0) e.preventDefault(); /* space, pgup/dn, end, home, arrows */
+  }
+  function lockTourScroll(on) {
+    var m = on ? 'addEventListener' : 'removeEventListener';
+    window[m]('wheel',     _tourWheelBlock, { passive: false });
+    window[m]('touchmove', _tourWheelBlock, { passive: false });
+    window[m]('keydown',   _tourKeyBlock,   true);
+    window[m]('resize',    _tourReanchor);
+  }
+
   function positionTour(step) {
     var steps   = tourSteps();
     var current = steps[step];
@@ -12915,6 +12946,7 @@
   function endTour() {
     hideForcedTray();
     tourActive = false;
+    lockTourScroll(false);
     localStorage.setItem(KEY_OB_DONE, '1');
     var c = tourEl.cutout, tt = tourEl.tooltip;
     if (c)  { c.style.display = 'none'; }
@@ -12955,6 +12987,7 @@
     tourActive = true;
     tourStep   = 0;
     document.body.style.overflow = '';
+    lockTourScroll(true);
 
     /* Small delay after view switch so layout settles before measuring */
     setTimeout(function() { positionTour(0); }, 180);
