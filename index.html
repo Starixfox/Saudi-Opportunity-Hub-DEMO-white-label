@@ -13604,9 +13604,19 @@
         clearInterval(iv);
         if (typeof window.setRoute === 'function') window.setRoute('opportunities');
         setTimeout(function(){
+          /* Open the detail panel directly from the dataset by id. The old path
+             clicked a rendered .opp-insights-btn[data-id], but the opportunities
+             table is paginated — if the target row wasn't on the current page
+             that button didn't exist and the click silently did nothing. Looking
+             the row up in the full dataset opens it regardless of which page is
+             showing. The rendered-button click stays as a fallback. */
+          var pool = (window.opportunitiesData && window.opportunitiesData.length) ? window.opportunitiesData : getData();
+          var opp = null;
+          for (var i = 0; i < pool.length; i++) { if (String(pool[i].id) === id) { opp = pool[i]; break; } }
+          if (opp && typeof window.__openDetailPanel === 'function') { window.__openDetailPanel(opp); return; }
           var btn = document.querySelector('.opp-insights-btn[data-id="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
           if (btn) btn.click();
-        }, 600);
+        }, 300);
       } else if (++tries > 40) clearInterval(iv);
     }, 250);
   }
