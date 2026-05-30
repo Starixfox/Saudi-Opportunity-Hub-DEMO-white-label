@@ -4090,7 +4090,11 @@ body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
 
 /* ── Slide 1: Hero header ── */
 .ob-hero {
-  background: linear-gradient(145deg, #004d26 0%, var(--accent) 55%, #00954a 100%);
+  /* Dark emerald — keeps the Saudi-green identity but stays dark enough that the
+     white headline and gold "Intelligence Workspace" both read clearly. The old
+     gradient ran through var(--accent), which became GOLD after the rebrand and
+     washed out the gold heading sitting on top of it (gold-on-gold ~1.2:1). */
+  background: linear-gradient(150deg, #0d2e1f 0%, #103a28 48%, #07150f 100%);
   padding: 36px 32px 28px;
   position: relative;
   overflow: hidden;
@@ -4131,7 +4135,7 @@ body[dir="rtl"] .ws-toast { right: auto; left: var(--space-6); }
   color: #fff; margin: 0 0 10px;
   letter-spacing: -0.02em;
 }
-.ob-hero-title em { font-style: normal; color: #C9A66B; }
+.ob-hero-title em { font-style: normal; color: #e3bd6c; }
 .ob-hero-sub {
   font-size: 14px; line-height: 1.6;
   color: rgba(255,255,255,0.78);
