@@ -9463,8 +9463,15 @@
       if(s.indexOf('saudi')>=0||s.indexOf('ksa')>=0) return 'Saudi';
       return 'Global'; }
     var _glow=function(color,blur){ return { id:'glow'+blur, beforeDatasetsDraw:function(c){ c.ctx.save(); c.ctx.shadowColor=color; c.ctx.shadowBlur=blur; }, afterDatasetsDraw:function(c){ c.ctx.restore(); } }; };
-    var _centre=function(big,small,sub){ return { id:'centre', afterDraw:function(c){ var a=c.chartArea; if(!a) return; var x=(a.left+a.right)/2, y=(a.top+a.bottom)/2, g=c.ctx; g.save(); g.textAlign='center'; g.textBaseline='middle'; g.fillStyle='#e3bd6c'; g.font='700 32px "Space Grotesk",sans-serif'; g.shadowColor='rgba(227,189,108,.45)'; g.shadowBlur=16; g.fillText(big,x,y-6); g.shadowBlur=0; g.fillStyle='rgba(255,255,255,.92)'; g.font='600 12px Inter,sans-serif'; g.fillText(small,x,y+15); g.fillStyle='rgba(255,255,255,.55)'; g.font='500 10px Inter,sans-serif'; g.fillText(sub,x,y+31); g.restore(); } }; };
-    var _barLabels={ id:'barLabels', afterDatasetsDraw:function(c){ var m=c.getDatasetMeta(0), ds=c.data.datasets[0], g=c.ctx; g.save(); g.font='700 11px Inter,sans-serif'; g.fillStyle='rgba(255,255,255,.9)'; g.textBaseline='middle'; g.textAlign='left'; m.data.forEach(function(b,i){ g.fillText(Number(ds.data[i]).toLocaleString(), b.x+8, b.y); }); g.restore(); } };
+    var _centre=function(big,small,sub){ return { id:'centre', afterDraw:function(c){ var a=c.chartArea; if(!a) return; var x=(a.left+a.right)/2, y=(a.top+a.bottom)/2, g=c.ctx; g.save(); g.textAlign='center'; g.textBaseline='middle'; g.fillStyle='#ffffff'; g.font='700 30px "Space Grotesk",sans-serif'; g.fillText(big,x,y-6); g.fillStyle='rgba(255,255,255,.92)'; g.font='600 12px Inter,sans-serif'; g.fillText(small,x,y+15); g.fillStyle='rgba(255,255,255,.55)'; g.font='500 10px Inter,sans-serif'; g.fillText(sub,x,y+31); g.restore(); } }; };
+    var _barLabels={ id:'barLabels', afterDatasetsDraw:function(c){ var m=c.getDatasetMeta(0), ds=c.data.datasets[0], g=c.ctx; g.save(); g.font='600 11px Inter,sans-serif'; g.fillStyle='#8b95ad'; g.textBaseline='middle'; g.textAlign='left'; m.data.forEach(function(b,i){ g.fillText(Number(ds.data[i]).toLocaleString(), b.x+8, b.y); }); g.restore(); } };
+    /* shadcn-style chart polish: minimal axes (no border/tick lines), faint
+       dashed value gridlines, no category gridlines, clean rounded tooltip with
+       a colour swatch, circle-dot legend. Distinct per-category colours kept. */
+    function _valAx(){ return { grid:{ color:'rgba(255,255,255,0.07)', drawTicks:false, borderDash:[4,4] }, border:{ display:false }, ticks:{ color:'#8b95ad', font:{ size:11 }, padding:8, precision:0 } }; }
+    function _catAx(){ return { grid:{ display:false }, border:{ display:false }, ticks:{ color:textColor, font:{ size:11, weight:'600' }, padding:6 } }; }
+    var _tt={ padding:10, cornerRadius:8, boxPadding:5, usePointStyle:true, backgroundColor:'rgba(17,21,31,0.96)', borderColor:'rgba(255,255,255,0.12)', borderWidth:1, titleColor:'#fff', bodyColor:'#d6dcea', titleFont:{ size:12, weight:'600' }, bodyFont:{ size:12 } };
+    function _leg(pos){ return { position:pos, labels:{ color:textColor, font:{ size:11 }, boxWidth:8, boxHeight:8, padding:12, usePointStyle:true, pointStyle:'circle' } }; }
 
     var _ns = window.__normalizeSectorKey || function(v){ return String(v||'').toLowerCase().replace(/[\s&\-]+/g,'_'); };
     var REGIONS=['Saudi','GCC','MENA','Global'];
@@ -9489,12 +9496,11 @@
         data:{ labels:cFull, datasets:REGIONS.map(function(rg){ return {
           label: ar?(REGION_AR[rg]||rg):rg,
           data: cKeys.map(function(k){ return (cross[k]&&cross[k][rg])||0; }),
-          backgroundColor:_hexA(REGION_COL[rg],0.82), borderColor:REGION_COL[rg], borderWidth:0, borderRadius:3, borderSkipped:false }; }) },
+          backgroundColor:REGION_COL[rg], borderWidth:0, borderRadius:4, borderSkipped:false, barThickness:16 }; }) },
         options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
-          plugins:{ legend:{position:'top',labels:{color:textColor,font:{size:11},boxWidth:11,padding:12,usePointStyle:true,pointStyle:'rectRounded'}},
-            tooltip:{callbacks:{label:function(c){ return ' '+c.dataset.label+': '+c.parsed.x; }}} },
-          scales:{ x:{stacked:true,grid:{color:gridColor},border:{display:false},ticks:{color:textColor,font:{size:10.5},precision:0}},
-            y:{stacked:true,grid:{display:false},border:{display:false},ticks:{color:textColor,font:{size:11.5,weight:'600'}}} } } }); }
+          plugins:{ legend:_leg('top'),
+            tooltip:Object.assign({},_tt,{callbacks:{label:function(c){ return ' '+c.dataset.label+': '+c.parsed.x; }}}) },
+          scales:{ x:Object.assign({stacked:true},_valAx()), y:Object.assign({stacked:true},_catAx()) } } }); }
 
     /* — Sectors in Bloom (polar area) — */
     var secCount={};
@@ -9505,13 +9511,11 @@
       charts.sectors=new Chart(secC.getContext('2d'),{ type:'bar',
         data:{ labels:secTop.map(function(o){ return SNAMES[o.k]||o.k; }),
           datasets:[{ data:secTop.map(function(o){ return o.v; }),
-            backgroundColor:secTop.map(function(_,i){ return _hexA(PAL[i%PAL.length],0.85); }),
-            borderColor:secTop.map(function(_,i){ return PAL[i%PAL.length]; }),
-            borderWidth:1, borderRadius:6, borderSkipped:false, maxBarThickness:20 }]},
+            backgroundColor:secTop.map(function(_,i){ return PAL[i%PAL.length]; }),
+            borderWidth:0, borderRadius:4, borderSkipped:false, barThickness:14 }]},
         options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, layout:{padding:{right:40}},
-          plugins:{ legend:{display:false}, tooltip:{callbacks:{label:function(c){ return ' '+c.parsed.x; }}} },
-          scales:{ x:{grid:{color:gridColor},border:{display:false},ticks:{color:textColor,font:{size:10.5},precision:0}},
-            y:{grid:{display:false},border:{display:false},ticks:{color:textColor,font:{size:11,weight:'600'}}} } },
+          plugins:{ legend:{display:false}, tooltip:Object.assign({},_tt,{callbacks:{label:function(c){ return ' '+c.parsed.x; }}}) },
+          scales:{ x:_valAx(), y:_catAx() } },
         plugins:[_barLabels] }); }
 
     /* — Programme Types (gradient bars) — */
@@ -9521,12 +9525,10 @@
       charts.types=new Chart(typeC.getContext('2d'),{ type:'bar',
         data:{ labels:tTop.map(function(e){ return e.label; }),
           datasets:[{ data:tTop.map(function(e){ return e.value; }),
-            backgroundColor:tTop.map(function(_,i){ return _hexA(PAL[(i+3)%PAL.length],0.85); }),
-            borderColor:tTop.map(function(_,i){ return PAL[(i+3)%PAL.length]; }), borderWidth:1, borderRadius:6, borderSkipped:false, maxBarThickness:20 }]},
+            backgroundColor:tTop.map(function(_,i){ return PAL[(i+1)%PAL.length]; }), borderWidth:0, borderRadius:4, borderSkipped:false, barThickness:14 }]},
         options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, layout:{padding:{right:40}},
-          plugins:{ legend:{display:false}, tooltip:{callbacks:{label:function(c){ return ' '+c.parsed.x; }}} },
-          scales:{ x:{grid:{color:gridColor},border:{display:false},ticks:{color:textColor,font:{size:10.5},precision:0}},
-            y:{grid:{display:false},border:{display:false},ticks:{color:textColor,font:{size:11,weight:'600'}}} } },
+          plugins:{ legend:{display:false}, tooltip:Object.assign({},_tt,{callbacks:{label:function(c){ return ' '+c.parsed.x; }}}) },
+          scales:{ x:_valAx(), y:_catAx() } },
         plugins:[_barLabels] }); }
 
     /* — Status (donut + glowing centre) — */
@@ -9537,14 +9539,13 @@
       charts.status=new Chart(stC.getContext('2d'),{ type:'doughnut',
         data:{ labels:stKeys.map(function(k){ return statusLabelsMap[k]||k; }),
           datasets:[{ data:stKeys.map(function(k){ return statusMap[k]; }),
-            backgroundColor:stKeys.map(function(k){ return _hexA(statusColorMap[k]||'#9da6bf',0.85); }),
-            borderColor:stKeys.map(function(k){ return statusColorMap[k]||'#9da6bf'; }),
-            borderWidth:1.5, hoverOffset:8, spacing:2 }]},
-        options:{ responsive:true, maintainAspectRatio:false, cutout:'70%',
-          plugins:{ legend:{position:'bottom',labels:{color:textColor,font:{size:10},boxWidth:9,padding:7,usePointStyle:true,pointStyle:'circle'}},
-            tooltip:{callbacks:{label:function(c){ return ' '+c.label+': '+c.parsed+' ('+Math.round(c.parsed/_stTotal*100)+'%)'; }}} }
+            backgroundColor:stKeys.map(function(k){ return statusColorMap[k]||'#9da6bf'; }),
+            borderColor:'rgba(10,13,20,0.9)', borderWidth:2, hoverOffset:6, spacing:1 }]},
+        options:{ responsive:true, maintainAspectRatio:false, cutout:'68%',
+          plugins:{ legend:_leg('bottom'),
+            tooltip:Object.assign({},_tt,{callbacks:{label:function(c){ return ' '+c.label+': '+c.parsed+' ('+Math.round(c.parsed/_stTotal*100)+'%)'; }}}) }
         },
-        plugins:[_centre(_stOpenPct+'%',(ar?'مفتوح الآن':'Open now'),_stTotal.toLocaleString()+(ar?' إجمالي':' total')),_glow('rgba(227,189,108,0.22)',7)] }); }
+        plugins:[_centre(_stOpenPct+'%',(ar?'مفتوح الآن':'Open now'),_stTotal.toLocaleString()+(ar?' إجمالي':' total'))] }); }
 
     /* —— CHART 3: Audience profile in filtered data (donut) —— */
     var profileCounts = {};
