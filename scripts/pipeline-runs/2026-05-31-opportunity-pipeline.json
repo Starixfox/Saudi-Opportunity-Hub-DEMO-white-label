@@ -1,0 +1,130 @@
+{
+  "run_date": "2026-05-31",
+  "pipeline": "4-agent opportunity intelligence pipeline",
+  "supabase_project": "dshrbbnjahjcwxzvzygh",
+  "candidates_proposed": 20,
+  "verification_agents": {
+    "agent2_url_liveness": { "pass": 19, "fail": 1 },
+    "agent3_opportunity_validity": { "pass": 18, "fail": 2 },
+    "agent4_data_accuracy": { "pass": 13, "fail": 7 }
+  },
+  "triple_verified_pass": 12,
+  "inserted": 12,
+  "skipped_dedup": 0,
+  "eliminated": [
+    {
+      "title": "Sunbolah Agricultural & Food Sector Startup Accelerator 2026",
+      "url": "https://entrepreneurship.mewa.gov.sa/en/tracks/sunbolah/accelerator",
+      "reason": "Agent2: ECONNREFUSED (bad URL path). Agent3: deadline May 12, 2026 already passed."
+    },
+    {
+      "title": "HRDF Tamheer Graduate Development Program for Establishments",
+      "url": "https://www.hrdf.org.sa/en/products-and-services/programs/establishments/training/graduate-development/",
+      "reason": "Agent4: wrong sector (Education vs Private Sector); misleading funding description."
+    },
+    {
+      "title": "NEOM Level Up Gaming Accelerator",
+      "url": "https://neomlevelup.game/",
+      "reason": "Agent4: wrong sector (Tourism & Quality of Life vs ICT/Innovation & Entrepreneurship)."
+    },
+    {
+      "title": "NTDP Lend Tech – Venture Debt for Tech Startups",
+      "url": "https://ntdp.gov.sa/lend-tech",
+      "reason": "Agent4: incorrect title (LendTech is not Venture Debt); fabricated $150M+ funding figure belongs to separate NTDP Venture Debt initiative."
+    },
+    {
+      "title": "Saudi Green Initiative – Investment and Partnership Programs",
+      "url": "https://www.sgi.gov.sa/",
+      "reason": "Agent4: non-existent sponsor institution ('Saudi Green Initiative Secretariat'); SGI is governed by royal ministerial committees."
+    },
+    {
+      "title": "IsDB Lives and Livelihoods Fund – Financing Application Guide",
+      "url": "https://www.isdb.org/llf/publications/llf-financing-application-process",
+      "reason": "Agent4: wrong sector (Humanitarian vs development finance — health, agriculture, infrastructure)."
+    },
+    {
+      "title": "Misk Foundation & Gates Foundation – Challenge for Change Grant Program",
+      "url": "https://www.gatesfoundation.org/our-work/places/middle-east/misk-challenge-for-change",
+      "reason": "Agent3: application window closed March 23, 2026. Agent4: funding misrepresented (SAR 1M per track, not SAR 3M to one project)."
+    },
+    {
+      "title": "Saudi Fund for Development – Development Finance Loans",
+      "url": "https://sfd.gov.sa/en",
+      "reason": "Agent4: wrong sector (Humanitarian vs development finance/financial services — bilateral sovereign lending institution)."
+    }
+  ],
+  "inserted_opportunities": [
+    {
+      "title": "NTDP TechCrew – Tech Talent Salary Subsidy Initiative",
+      "url": "https://ntdp.gov.sa/techcrew",
+      "sector": "ICT",
+      "country": "Saudi Arabia"
+    },
+    {
+      "title": "SAMA Fintech Regulatory Sandbox",
+      "url": "https://www.sama.gov.sa/en-US/-SandBox/Pages/default.aspx",
+      "sector": "Financial Services",
+      "country": "Saudi Arabia"
+    },
+    {
+      "title": "National Development Fund – Tourism Development Fund Portfolio",
+      "url": "https://ndf.gov.sa/en/fund/tdf/",
+      "sector": "Tourism & Quality of Life",
+      "country": "Saudi Arabia"
+    },
+    {
+      "title": "ADIO Innovation Programme – Abu Dhabi Investment Incentives",
+      "url": "https://www.investwithabudhabi.com/adio-at-a-glance/overview",
+      "sector": "Innovation & Entrepreneurship",
+      "country": "UAE"
+    },
+    {
+      "title": "Royal Commission for Jubail & Yanbu – Industrial Investment Portal",
+      "url": "https://invest.rcjy.gov.sa",
+      "sector": "Industrial & Manufacturing",
+      "country": "Saudi Arabia"
+    },
+    {
+      "title": "National Development Fund – Real Estate Development Fund Housing Support",
+      "url": "https://ndf.gov.sa/en/fund/redf/",
+      "sector": "Real Estate",
+      "country": "Saudi Arabia"
+    },
+    {
+      "title": "DIFC Dubai AI Licence – Subsidized License for AI Startups",
+      "url": "https://landing.difc.ae/ai-licence-offer",
+      "sector": "ICT",
+      "country": "UAE"
+    },
+    {
+      "title": "MCIT CODE Innovation Platform – Programs for Tech Startups",
+      "url": "https://code.mcit.gov.sa/en",
+      "sector": "ICT",
+      "country": "Saudi Arabia"
+    },
+    {
+      "title": "Social Development Bank Saudi Arabia – Financing Programs",
+      "url": "https://www.sdb.gov.sa/en",
+      "sector": "Financial Services",
+      "country": "Saudi Arabia"
+    },
+    {
+      "title": "HRDF Programs for Establishments – Workforce Development Support",
+      "url": "https://www.hrdf.org.sa/en/products-and-services/programs/establishments/",
+      "sector": "Private Sector",
+      "country": "Saudi Arabia"
+    },
+    {
+      "title": "Kafalah SME Financing Guarantee Program",
+      "url": "https://kafalah.gov.sa/en",
+      "sector": "Financial Services",
+      "country": "Saudi Arabia"
+    },
+    {
+      "title": "NTDP Venture Debt Initiative for High-Growth Tech Startups",
+      "url": "https://ntdp.gov.sa/en/initiative/venture-debt",
+      "sector": "ICT",
+      "country": "Saudi Arabia"
+    }
+  ]
+}
