@@ -2,7 +2,7 @@
   "id": "/Saudi-Opportunity-Hub-DEMO-white-label/",
   "name": "Saudi Opportunity Hub",
   "short_name": "Opportunity Hub",
-  "description": "Grants, tenders, accelerators, fellowships, and investment programmes across Saudi Arabia, the GCC, and globally. Aligned with Vision 2030.",
+  "description": "Grants, accelerators, fellowships, R&D, financing, and investment programmes — plus tenders — across Saudi Arabia, the GCC, and globally. Aligned with Vision 2030.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -43,7 +43,7 @@
     {
       "name": "Opportunities",
       "short_name": "Opportunities",
-      "description": "Browse every open grant, tender, accelerator, and fellowship.",
+      "description": "Browse every open grant, accelerator, fellowship, and tender.",
       "url": "./index.html#opportunities",
       "icons": [
         {
