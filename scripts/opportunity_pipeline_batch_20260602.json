@@ -1,0 +1,302 @@
+[
+  {
+    "title": "MEWA Sahabah Water Sector Entrepreneurship Accelerator",
+    "sponsor_institution": "Ministry of Environment, Water and Agriculture (MEWA)",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "Environment Services"
+    ],
+    "type": "Accelerator",
+    "status": "recurring",
+    "funding_amount": null,
+    "deadline_date": "recurring",
+    "application_link": "https://entrepreneurship.mewa.gov.sa/en/programs/1",
+    "description_short": "MEWA's Sahabah accelerator supports water-sector startups and SMEs through mentorship, resources, and access to Ministry networks to advance sustainable water entrepreneurship in the Kingdom.",
+    "eligibility_region": "Saudi Arabia"
+  },
+  {
+    "title": "Inspire-U Innovation Grant Program (up to SAR 100,000)",
+    "sponsor_institution": "STC Group",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "ICT"
+    ],
+    "type": "Grant",
+    "status": "recurring",
+    "funding_amount": 100000,
+    "deadline_date": "recurring",
+    "application_link": "https://code.mcit.gov.sa/en/Innovation-Lab/inspire-u",
+    "description_short": "InspireU by STC Group provides non-refundable seed grants of up to SAR 100,000 for Saudi digital innovators and entrepreneurs to develop and pilot ICT solutions, accessible via the CODE/MCIT Innovation Lab portal.",
+    "eligibility_region": "Saudi Arabia"
+  },
+  {
+    "title": "National Infrastructure Fund (NIF) \u2013 Project Financing",
+    "sponsor_institution": "National Infrastructure Fund (NIF) / National Development Fund (NDF)",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "Transport & Logistics"
+    ],
+    "type": "Loan",
+    "status": "open",
+    "funding_amount": null,
+    "deadline_date": "open",
+    "application_link": "https://www.infra.gov.sa/",
+    "description_short": "The National Infrastructure Fund provides long-term financing to Saudi and international investors for large-scale infrastructure projects aligned with Vision 2030 including roads, utilities, and logistics.",
+    "eligibility_region": "Saudi Arabia"
+  },
+  {
+    "title": "Ministry of Transport \u2013 PPP Investment Opportunities",
+    "sponsor_institution": "Ministry of Transport and Logistic Services (MOT)",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "Transport & Logistics"
+    ],
+    "type": "Investment",
+    "status": "open",
+    "funding_amount": null,
+    "deadline_date": "open",
+    "application_link": "https://mot.gov.sa/en/investments",
+    "description_short": "Saudi Arabia's Ministry of Transport offers public-private partnership investment opportunities across roads, rail, aviation, and maritime sectors as part of the National Transport and Logistics Strategy.",
+    "eligibility_region": "Global"
+  },
+  {
+    "title": "Arab Culture Fund (AFAC) \u2013 Cultural Grants up to USD 50,000",
+    "sponsor_institution": "Arab Fund for Arts and Culture (AFAC)",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "Tourism & Quality of Life"
+    ],
+    "type": "Grant",
+    "status": "recurring",
+    "funding_amount": 50000,
+    "deadline_date": "recurring",
+    "application_link": "https://www.arabculturefund.org/Programs/",
+    "description_short": "AFAC offers annual grants up to USD 50,000 for Arab artists, filmmakers, writers, and cultural organizations including those based in Saudi Arabia to fund creative and cultural projects.",
+    "eligibility_region": "Arab World"
+  },
+  {
+    "title": "Gulf Investment Corporation (GIC) \u2013 GCC Private Equity & Infrastructure",
+    "sponsor_institution": "Gulf Investment Corporation (GIC)",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "Financial Services"
+    ],
+    "type": "Investment",
+    "status": "open",
+    "funding_amount": null,
+    "deadline_date": "open",
+    "application_link": "https://gic.com.kw/",
+    "description_short": "GIC, owned by the six GCC governments including Saudi Arabia, invests in private equity, infrastructure, and fixed income across the Gulf with a mandate to support regional economic development.",
+    "eligibility_region": "GCC"
+  },
+  {
+    "title": "Masdar Clean Energy Investment Platform",
+    "sponsor_institution": "Masdar (Abu Dhabi Future Energy Company)",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "Energy"
+    ],
+    "type": "Investment",
+    "status": "open",
+    "funding_amount": null,
+    "deadline_date": "open",
+    "application_link": "https://masdar.ae/",
+    "description_short": "Masdar partners with governments and developers to co-invest in renewable energy projects across the region; Saudi entities can apply to co-develop solar, wind, and clean energy assets.",
+    "eligibility_region": "Global"
+  },
+  {
+    "title": "KAUST Integrative Activities \u2013 Research Translation Fund (up to USD 1M)",
+    "sponsor_institution": "King Abdullah University of Science and Technology (KAUST)",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "Innovation & Entrepreneurship"
+    ],
+    "type": "Grant",
+    "status": "recurring",
+    "funding_amount": 1000000,
+    "deadline_date": "recurring",
+    "application_link": "https://osr.kaust.edu.sa/Pages/IA_integrativeactivities.aspx",
+    "description_short": "KAUST's Integrative Activities program offers research translation grants up to USD 1M for collaborative projects that bridge academic research and commercial applications in science and technology.",
+    "eligibility_region": "Saudi Arabia"
+  },
+  {
+    "title": "National Development Fund (NDF) \u2013 Infrastructure Financing",
+    "sponsor_institution": "National Development Fund (NDF)",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "Transport & Logistics"
+    ],
+    "type": "Loan",
+    "status": "open",
+    "funding_amount": null,
+    "deadline_date": "open",
+    "application_link": "https://ndf.gov.sa/en/infrastructure/",
+    "description_short": "The National Development Fund coordinates financing of industrial and infrastructure projects in Saudi Arabia through its subsidiary funds to accelerate Vision 2030 economic diversification goals.",
+    "eligibility_region": "Saudi Arabia"
+  },
+  {
+    "title": "National Center for Privatization (NCP) \u2013 PPP Investor Portal",
+    "sponsor_institution": "National Center for Privatization (NCP)",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "Private Sector"
+    ],
+    "type": "Investment",
+    "status": "open",
+    "funding_amount": null,
+    "deadline_date": "open",
+    "application_link": "https://investors.ncp.gov.sa/",
+    "description_short": "Saudi Arabia's NCP Investor Portal lists USD 213B in privatization and PPP opportunities across healthcare, education, utilities, transport, and municipalities open to local and international investors.",
+    "eligibility_region": "Global"
+  },
+  {
+    "title": "Wa'ed Ventures \u2013 Aramco Venture Capital Program",
+    "sponsor_institution": "Wa'ed (Saudi Aramco Entrepreneurship Center)",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "Innovation & Entrepreneurship"
+    ],
+    "type": "Equity",
+    "status": "open",
+    "funding_amount": 10000000,
+    "deadline_date": "open",
+    "application_link": "https://waed.com/en/venture-capital",
+    "description_short": "Wa'ed Ventures, backed by Saudi Aramco, provides equity investment up to USD 10M in innovative Saudi startups and technology companies that contribute to economic diversification and the energy sector.",
+    "eligibility_region": "Saudi Arabia"
+  },
+  {
+    "title": "Industrial Sector Support Initiative (ISSI) \u2013 Ministry of Industry",
+    "sponsor_institution": "Ministry of Industry and Mineral Resources (MIM)",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "Industrial & Manufacturing"
+    ],
+    "type": "Grant",
+    "status": "open",
+    "funding_amount": null,
+    "deadline_date": "open",
+    "application_link": "https://mim.gov.sa/en/initiatives/31160/",
+    "description_short": "Saudi Arabia's Ministry of Industry Industrial Sector Support Initiative offers financial incentives, land access, and operational support for new and expanding manufacturing facilities in the Kingdom.",
+    "eligibility_region": "Saudi Arabia"
+  },
+  {
+    "title": "Ma'aden \u2013 Mining Exploration & Investment Partnerships",
+    "sponsor_institution": "Saudi Arabian Mining Company (Ma'aden)",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "Mining & Metals"
+    ],
+    "type": "Investment",
+    "status": "open",
+    "funding_amount": null,
+    "deadline_date": "open",
+    "application_link": "https://www.maaden.com.sa/en/business/exploration",
+    "description_short": "Ma'aden invites global mining companies and investors to partner in exploration and development of Saudi Arabia's vast mineral resources including gold, phosphate, bauxite, and industrial minerals.",
+    "eligibility_region": "Global"
+  },
+  {
+    "title": "Future Minerals Forum \u2013 Mining Investor Matchmaking Program",
+    "sponsor_institution": "Future Minerals Forum (Ministry of Industry and Mineral Resources)",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "Mining & Metals"
+    ],
+    "type": "Investment",
+    "status": "recurring",
+    "funding_amount": null,
+    "deadline_date": "recurring",
+    "application_link": "https://www.futuremineralsforum.com/matchmaking-partnership-program/",
+    "description_short": "The annual Future Minerals Forum in Riyadh runs a formal matchmaking program connecting mining investors with Saudi and global mineral project developers and government stakeholders.",
+    "eligibility_region": "Global"
+  },
+  {
+    "title": "NTDP Relocate Initiative \u2013 Up to SAR 5M (USD 1.4M) Support for Tech HQ Relocation",
+    "sponsor_institution": "National Technology Development Program (NTDP) / MCIT",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "ICT"
+    ],
+    "type": "Grant",
+    "status": "open",
+    "funding_amount": 1400000,
+    "deadline_date": "open",
+    "application_link": "https://ntdp.gov.sa/en/initiative/Relocate",
+    "description_short": "NTDP's Relocate initiative offers international technology companies up to SAR 5.2M (~USD 1.4M) in incentives to establish their regional headquarters in Saudi Arabia and grow their local footprint.",
+    "eligibility_region": "Global"
+  },
+  {
+    "title": "NTDP TechCrew \u2013 Salary Subsidy Program for Tech Talent",
+    "sponsor_institution": "National Technology Development Program (NTDP) / MCIT",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "ICT"
+    ],
+    "type": "Grant",
+    "status": "open",
+    "funding_amount": null,
+    "deadline_date": "open",
+    "application_link": "https://ntdp.gov.sa/en/initiative/TechCrew",
+    "description_short": "NTDP TechCrew subsidizes salaries for Saudi nationals hired in technology roles at qualifying companies, drawing from a SAR 300M fund to support growth of the local tech workforce.",
+    "eligibility_region": "Saudi Arabia"
+  },
+  {
+    "title": "NTDP VentureDebt \u2013 Debt Financing for Tech Startups",
+    "sponsor_institution": "National Technology Development Program (NTDP) / MCIT",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "ICT"
+    ],
+    "type": "Loan",
+    "status": "open",
+    "funding_amount": null,
+    "deadline_date": "open",
+    "application_link": "https://ntdp.gov.sa/en/initiative/VentureDebt",
+    "description_short": "NTDP VentureDebt provides non-dilutive debt financing through a SAR 600M+ fund for Saudi technology startups that need growth capital without giving up equity.",
+    "eligibility_region": "Saudi Arabia"
+  },
+  {
+    "title": "Social Development Bank \u2013 IT Sector Financing",
+    "sponsor_institution": "Social Development Bank (SDB)",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "ICT"
+    ],
+    "type": "Loan",
+    "status": "open",
+    "funding_amount": null,
+    "deadline_date": "open",
+    "application_link": "https://www.sdb.gov.sa/en/financing-initiatives/information-technology/",
+    "description_short": "The Social Development Bank (SDB) of Saudi Arabia offers dedicated financing solutions for Saudi SMEs and startups in the information technology sector including digital infrastructure and software businesses.",
+    "eligibility_region": "Saudi Arabia"
+  },
+  {
+    "title": "CODE Innovation Labs \u2013 Digital Entrepreneurship Incubation Network",
+    "sponsor_institution": "CODE (Center of Digital Entrepreneurship) / MCIT",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "Innovation & Entrepreneurship"
+    ],
+    "type": "Incubator",
+    "status": "open",
+    "funding_amount": null,
+    "deadline_date": "open",
+    "application_link": "https://code.mcit.gov.sa/en/Code-Page/innovation-labs",
+    "description_short": "CODE's Innovation Labs network spans Saudi Arabia providing co-working space, mentorship, seed funding access, and government connections to early-stage digital entrepreneurs and tech startups.",
+    "eligibility_region": "Saudi Arabia"
+  },
+  {
+    "title": "Saudi Water Authority (SWA) \u2013 Water Sector Investment Programs",
+    "sponsor_institution": "Saudi Water Authority (SWA)",
+    "country": "Saudi Arabia",
+    "sectors": [
+      "Environment Services"
+    ],
+    "type": "Investment",
+    "status": "recurring",
+    "funding_amount": null,
+    "deadline_date": "recurring",
+    "application_link": "https://www.swa.gov.sa/en/investment-chances",
+    "description_short": "SWA runs multiple investment and privatization programs for Saudi Arabia's water and wastewater sector open to public and private investors including desalination, treatment, and distribution projects.",
+    "eligibility_region": "Global"
+  }
+]
