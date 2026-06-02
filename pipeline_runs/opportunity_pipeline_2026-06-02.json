@@ -1,0 +1,171 @@
+{
+  "pipeline_run": {
+    "date": "2026-06-02",
+    "supabase_project": "dshrbbnjahjcwxzvzygh",
+    "table": "opportunities",
+    "branch": "claude/ecstatic-sagan-PCALI"
+  },
+  "agent_summary": {
+    "agent1_candidates": 20,
+    "agent2_liveness": {
+      "pass": 20,
+      "notes": "17 returned HTTP 403 (bot protection, server live); 3 returned certificate-not-yet-valid (arabhopemakers.com, ent.accelerator.sa, theawardsarabworld.com) — SSL misconfiguration, not dead URLs"
+    },
+    "agent3_validity": {
+      "pass": 19,
+      "fail": 1,
+      "failed_candidates": [
+        "Youth Social Entrepreneurs Award (YSEA) – Mentor Arabia — no confirmed active 2026 cycle"
+      ]
+    },
+    "agent4_data_corrections": [
+      "Arab Hope Makers Initiative: status open→closed (6th edition concluded Feb 15, 2026)",
+      "AI Hackathon for People with Disabilities 2026: status open→closed, deadline 2026-10-13→2026-05-31 (registration closed May 31)",
+      "Mohammed Bin Rashid Al Maktoum Knowledge Award 2026: deadline closed→2026-03-31",
+      "ESCWA Fellowship for Young Arab Professionals 2026: deadline closed→2026-04-30",
+      "THE Awards Arab World 2026: deadline closed→2026-05-14",
+      "Arab Intelligence and Creativity Award (AICA): status recurring→closed, deadline recurring→2026-02-15",
+      "Orange Social Venture Prize (OSVP) 2026: deadline closed→2026-05-17",
+      "Blue Ocean Student Entrepreneur Competition 2026: deadline closed→2026-02-22",
+      "ACSS Small Grants Program (SGP) – Cycle 9: deadline closed→2026-03-12",
+      "Middle East Youth Summit (MEYS) 2026: deadline closed→2026-02-15",
+      "ESCWA Digital Arabic Content Award 2025–2026: deadline closed→2026-02-25"
+    ]
+  },
+  "inserted": 19,
+  "records": [
+    {
+      "title": "Falling Walls Lab Jeddah 2026",
+      "application_link": "https://apply.falling-walls.com/lab/apply/jeddah/",
+      "status": "open",
+      "deadline_date": "2026-09-01",
+      "sectors": ["Innovation & Entrepreneurship"]
+    },
+    {
+      "title": "Global Student Entrepreneur Awards (GSEA) 2026",
+      "application_link": "https://eonetwork.org/gsea",
+      "status": "recurring",
+      "deadline_date": "recurring",
+      "sectors": ["Innovation & Entrepreneurship"]
+    },
+    {
+      "title": "WFP Relief & Resilience Innovation Challenge",
+      "application_link": "https://innovation.wfp.org/relief-and-resilience",
+      "status": "open",
+      "deadline_date": "open",
+      "sectors": ["Humanitarian"]
+    },
+    {
+      "title": "Arab Hope Makers Initiative",
+      "application_link": "https://arabhopemakers.com/en/",
+      "status": "closed",
+      "deadline_date": "closed",
+      "sectors": ["Humanitarian"]
+    },
+    {
+      "title": "GEA Entertainment Activities Accelerator – 3rd Edition",
+      "application_link": "https://ent.accelerator.sa/",
+      "status": "open",
+      "deadline_date": "open",
+      "sectors": ["Tourism & Quality of Life"]
+    },
+    {
+      "title": "Lenabtaker Youth Entrepreneurship Competition – 7th Edition",
+      "application_link": "https://lenabtaker.com/en/lenabtaker_competition",
+      "status": "recurring",
+      "deadline_date": "recurring",
+      "sectors": ["Innovation & Entrepreneurship"]
+    },
+    {
+      "title": "WFP Humanitarian Innovation Accelerator Programme",
+      "application_link": "https://innovation.wfp.org/humanitarian-innovation-accelerator-programme",
+      "status": "open",
+      "deadline_date": "open",
+      "sectors": ["Humanitarian"]
+    },
+    {
+      "title": "AI Hackathon for People with Disabilities 2026",
+      "application_link": "https://hackathon.kscdr.org/en/",
+      "status": "closed",
+      "deadline_date": "2026-05-31",
+      "sectors": ["Healthcare & Life Sciences"]
+    },
+    {
+      "title": "Mohammed Bin Rashid Al Maktoum Knowledge Award 2026",
+      "application_link": "https://mbrf.ae/knowledgeaward/",
+      "status": "closed",
+      "deadline_date": "2026-03-31",
+      "sectors": ["Education"]
+    },
+    {
+      "title": "ESCWA Fellowship for Young Arab Professionals 2026",
+      "application_link": "https://www.unescwa.org/events/escwa-fellowship-programme-young-arab-professionals",
+      "status": "closed",
+      "deadline_date": "2026-04-30",
+      "sectors": ["Private Sector"]
+    },
+    {
+      "title": "Arab Entrepreneurship Award – eTrade for All",
+      "application_link": "https://etradeforall.org/events/arab-entrepreneurship-award",
+      "status": "recurring",
+      "deadline_date": "recurring",
+      "sectors": ["Innovation & Entrepreneurship"]
+    },
+    {
+      "title": "THE Awards Arab World 2026",
+      "application_link": "https://theawardsarabworld.com/",
+      "status": "closed",
+      "deadline_date": "2026-05-14",
+      "sectors": ["Education"]
+    },
+    {
+      "title": "Arab Intelligence and Creativity Award (AICA)",
+      "application_link": "https://aica.sa/en/",
+      "status": "closed",
+      "deadline_date": "2026-02-15",
+      "sectors": ["ICT"]
+    },
+    {
+      "title": "Orange Social Venture Prize (OSVP) in Africa and the Middle East 2026",
+      "application_link": "https://orange.com/en/whats-up/young-entrepreneurs-africa-and-middle-east-apply-2026-osvp",
+      "status": "closed",
+      "deadline_date": "2026-05-17",
+      "sectors": ["Innovation & Entrepreneurship"]
+    },
+    {
+      "title": "Blue Ocean Student Entrepreneur Competition 2026",
+      "application_link": "https://blueoceancompetition.org/register/",
+      "status": "closed",
+      "deadline_date": "2026-02-22",
+      "sectors": ["Innovation & Entrepreneurship"]
+    },
+    {
+      "title": "ACSS Early Career Fellows Program (ECFP) – Cycle 12",
+      "application_link": "https://theacss.org/about-grants-fellowships/ecfp-cycle-12-call-for-applications-2/",
+      "status": "closed",
+      "deadline_date": "closed",
+      "sectors": ["Education"]
+    },
+    {
+      "title": "ACSS Small Grants Program (SGP) – Cycle 9",
+      "application_link": "https://theacss.org/sgp-cycle-9-call-for-applications/",
+      "status": "closed",
+      "deadline_date": "2026-03-12",
+      "sectors": ["Education"]
+    },
+    {
+      "title": "Middle East Youth Summit (MEYS) – Makkah, Saudi Arabia 2026",
+      "application_link": "https://middleeastyouthsummit.com/",
+      "status": "closed",
+      "deadline_date": "2026-02-15",
+      "sectors": ["Innovation & Entrepreneurship"]
+    },
+    {
+      "title": "ESCWA Digital Arabic Content Award 2025–2026",
+      "application_link": "https://www.unescwa.org/events/escwa-digital-arabic-content-award-2025-2026",
+      "status": "closed",
+      "deadline_date": "2026-02-25",
+      "sectors": ["ICT"]
+    }
+  ]
+}
