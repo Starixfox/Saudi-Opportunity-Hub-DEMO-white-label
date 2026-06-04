@@ -259,3 +259,68 @@ FROM public.opportunities
 WHERE review_notes LIKE 'RESEARCH 2026-05-19:%'
 ORDER BY id;
 ```
+
+---
+
+# 4-Agent Opportunity Intelligence Pipeline — New Opportunity Ingestion
+
+Date: 2026-06-04
+Project: Saudi Opportunity Hub
+Database: Supabase `dshrbbnjahjcwxzvzygh`
+
+Goal: Discover exactly 20 NEW investment opportunities not already in the database (2,744 existing rows), run three independent verification agents in parallel, then insert all PASS opportunities.
+
+## Pipeline Summary
+
+| Stage | Count |
+|---|---:|
+| Candidates proposed (Agent 1) | 20 |
+| Agent 2 PASS (URL liveness) | 20 / 20 |
+| Agent 3 PASS (opportunity validity) | 15 / 20 |
+| Agent 4 PASS (data accuracy) | 18 / 20 (1 with correction) |
+| **Final PASS (all 3 agents)** | **15** |
+| Inserted into Supabase | **15** |
+| DB total after | **2,779** |
+
+## FAIL Reasons (5 candidates excluded)
+
+| # | Title | Failing Agent | Reason |
+|---|---|---|---|
+| 10 | Impulse Global ConTech | A3 | Global webinar series, not a primary-source investment/grant program |
+| 16 | Ghadan 21 Programme | A3 + A4 | Concluded 2019–2021 programme, no longer accepting applications |
+| 17 | Ghadan 21 Investing in Business | A3 + A4 | Sub-page of same concluded programme |
+| 18 | NCA Pioneers Grants (news article) | A3 | URL is a news article, not a program/application page |
+| 19 | KFAS Policy Research Grants 2025 | A3 | Deadline was April 15, 2025 — already expired |
+
+## Correction Applied (Agent 4)
+
+- **Hub71** (#4): Funding corrected from "Up to USD 500,000" → "Up to AED 750,000 (approx. USD 204,000)" per Hub71's 2025 program revision.
+
+## 15 Inserted Opportunities
+
+| Title | Country | Sector | Type |
+|---|---|---|---|
+| NTDP Relocate Initiative – Deep-Tech Company Relocation Grant | Saudi Arabia | ICT | Grant |
+| Tameed Industrial SME Working Capital (PO) Financing | Saudi Arabia | Industrial & Manufacturing | Financing |
+| Saudi Technology Ventures (STV) AI & Deep Tech VC Fund | Saudi Arabia | ICT | Venture Capital |
+| Hub71 Abu Dhabi Startup Incentive Program | UAE | Innovation & Entrepreneurship | Accelerator |
+| Wabel Water Technology Incubator – SWIC | Saudi Arabia | Environment Services | Incubator |
+| KFUPM RDIA Research Grant – Call for Pre-Proposals | Saudi Arabia | Innovation & Entrepreneurship | Research Grant |
+| Qatar Science & Technology Park (QSTP) Innovation Programs | Qatar | Innovation & Entrepreneurship | Incubator |
+| Abu Dhabi Investment Office (ADIO) Innovation Programme | UAE | Innovation & Entrepreneurship | Grant |
+| NEOM Innovation Challenge | Saudi Arabia | Innovation & Entrepreneurship | Innovation Challenge |
+| in5 Innovation Centers Dubai – Startup Incubation Program | UAE | Innovation & Entrepreneurship | Incubator |
+| UAE National Incubator Network (NIN) – Startup Programs | UAE | Innovation & Entrepreneurship | Incubator |
+| Dubai Science Park – Life Sciences & Biotech Free Zone | UAE | Pharma & Biotech | Free Zone |
+| in5 Science Incubator – Early-Stage Healthcare & Life Sciences Startups | UAE | Healthcare & Life Sciences | Incubator |
+| National Cybersecurity Authority (NCA) R&D and Innovation Program | Saudi Arabia | ICT | Research Grant |
+| Tamkeen Bahrain – Start Your Business Programme | Bahrain | Innovation & Entrepreneurship | Co-matching Grant |
+
+## Rules Applied
+
+- No investsaudi.sa domain opportunities included
+- All sectors from the 17-value allowed list, stored as single-element text arrays
+- All deadline_date values set to `open` (rolling/no fixed deadline programs)
+- All status values set to `open`
+- Each INSERT guarded with `WHERE NOT EXISTS (SELECT 1 FROM opportunities WHERE application_link = '...')`
+- `last_verified = '2026-05-17'::date` on all inserted rows
