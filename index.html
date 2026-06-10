@@ -5505,7 +5505,7 @@
         if (canonSectors.length) {
           sectorHtml = '<div class="la-card-sectors">' +
             canonSectors.map(function(c){
-              return '<span class="la-sector-chip">' + c + '</span>';
+              return '<span class="la-sector-chip">' + esc(c) + '</span>';
             }).join('') +
           '</div>';
         }
@@ -7708,8 +7708,11 @@
 
   function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
   function highlightTerm(text, term) {
-    if (!term || !text) return text || '';
-    var safe = String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    // Escape FIRST, unconditionally. The old `if (!term) return text` branch
+    // passed raw DB text straight to innerHTML whenever the search box was
+    // empty (the default state) — a stored-XSS hole for title/description.
+    var safe = String(text == null ? '' : text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    if (!term) return safe;
     try {
       var re = new RegExp('(' + escapeRegex(term) + ')', 'gi');
       return safe.replace(re, '<mark class="hl">$1</mark>');
@@ -7867,7 +7870,7 @@
 
     if (slotsEl) {
       slotsEl.innerHTML = compareItems.map(function(item) {
-        return '<div class="compare-slot"><span class="compare-slot__title" title="' + (item.title||'') + '">' + t(item.title||'Untitled') + '</span><button class="compare-slot__remove" data-remove-id="' + (item.id||'') + '" aria-label="Remove">✕</button></div>';
+        return '<div class="compare-slot"><span class="compare-slot__title" title="' + esc(item.title||'') + '">' + esc(t(item.title||'Untitled')) + '</span><button class="compare-slot__remove" data-remove-id="' + esc(item.id||'') + '" aria-label="Remove">✕</button></div>';
       }).join('');
       slotsEl.querySelectorAll('.compare-slot__remove').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -7916,7 +7919,7 @@
     body.innerHTML = compareItems.map(function(item) {
       var regionVal = item.country || pretty(item.eligibility_region) || t('Global');
       return '<div class="compare-item">' +
-        '<div class="compare-item__title">' + lv(item.title || t('Untitled')) + '</div>' +
+        '<div class="compare-item__title">' + esc(lv(item.title || t('Untitled'))) + '</div>' +
         [
           [t('Type'),                  tv(item.type||'')],
           [t('Status'),                tv(item.status||'')],
@@ -7927,7 +7930,7 @@
           [t('Audience'),              (item.profiles||[]).map(tv).join('\u060c ')||'\u2014'],
           [t('Sectors'),               (item.sectors||[]).map(tv).join('\u060c ')||'\u2014']
         ].map(function(r) {
-          return '<div class="compare-item__row"><span class="compare-item__key">' + r[0] + '</span><span class="compare-item__val">' + r[1] + '</span></div>';
+          return '<div class="compare-item__row"><span class="compare-item__key">' + esc(r[0]) + '</span><span class="compare-item__val">' + esc(r[1]) + '</span></div>';
         }).join('') +
       '</div>';
     }).join('');
