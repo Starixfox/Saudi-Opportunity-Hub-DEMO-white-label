@@ -2174,7 +2174,24 @@
     'manufacturing & industrial': 'Manufacturing & Industrial',
     'healthcare & life sciences': 'Healthcare & Life Sciences',
     'transport & logistics': 'Transport & Logistics',
-    'financial services': 'Financial Services', 'financial_services': 'Financial Services'
+    'financial services': 'Financial Services', 'financial_services': 'Financial Services',
+    /* ── Combo / multi-word variants that were leaking through as separate
+       buckets (2026-06 taxonomy cleanup → fold into the canonical 17, and
+       normalized in the DB the same day). Two judgement calls per the data:
+       "Technology & Innovation" rows are accelerators/startup programmes →
+       Innovation; "Social Impact & Inclusion" rows are development/community
+       programmes → Humanitarian. */
+    'technology & innovation': 'Innovation & Entrepreneurship',
+    'social impact & inclusion': 'Humanitarian',
+    'energy & utilities': 'Energy',
+    'creative industries': 'Tourism',
+    'creative arts & culture': 'Tourism',
+    'media & entertainment': 'Tourism',
+    'tourism & hospitality': 'Tourism',
+    'financial services & fintech': 'Financial Services',
+    'water & environment': 'Environment',
+    'food & agriculture': 'Agriculture',
+    'real estate & construction': 'Real Estate'
   };
 
   /* Display-name → SHORT bucket key. Lets __normalizeSectorKey produce the
