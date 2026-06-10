@@ -232,7 +232,7 @@ You must run every candidate opportunity through 3 strict verification layers be
 ---
 
 ## PLATFORM CONTEXT
-- Existing database: 1,074+ opportunities already in Supabase (titles listed in the user message)
+- Existing database: 4,000+ opportunities already in Supabase (titles listed in the user message)
 - Sectors covered: Innovation, ICT, Financial, Industrial, Healthcare, Environment, Energy, Real Estate, Education, Transport, Pharma, Chemicals, Agriculture, Tourism, Mining, Media
 - Target audience: Startups, SMEs, investors, researchers, government entities in Saudi Arabia and GCC
 - Types accepted: grants, tenders, accelerators, investment programs, fellowships, ecosystem initiatives
