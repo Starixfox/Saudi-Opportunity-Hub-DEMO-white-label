@@ -67,7 +67,7 @@
   <!-- ─── Polish pass: consolidated design tokens + foundation styles ─── -->
   <link rel="stylesheet" href="assets/tokens.css?v=audit-fixes" />
   <link rel="stylesheet" href="assets/styles.css?v=audit-fixes" />
-  <link rel="stylesheet" href="assets/polish-overrides.css?v=audit-fixes" />
+  <link rel="stylesheet" href="assets/polish-overrides.css?v=guest-1" />
 
   <style>
     /* ─────────────────────────────────────────────────────────────
@@ -818,6 +818,18 @@
       background: rgba(255, 255, 255, 0.12);
       border-color: rgba(255, 255, 255, 0.20);
     }
+    /* Guest ghost button on the dark glass panel — same treatment as the
+       SSO pair's dark variant, one step quieter (no fill until hover). */
+    .auth-form-panel .btn-guest {
+      color: rgba(255, 255, 255, 0.72);
+      border-color: rgba(255, 255, 255, 0.18);
+      background: transparent;
+    }
+    .auth-form-panel .btn-guest:hover {
+      color: var(--gold);
+      border-color: rgba(201, 166, 107, 0.55);
+      background: rgba(201, 166, 107, 0.08);
+    }
 
     /* Footer line */
     .auth-form-panel .auth-footer {
@@ -1234,6 +1246,42 @@
       box-shadow: 0 2px 8px rgba(0,0,0,.06);
     }
 
+    /* Guest entry — deliberately the quietest action on the panel:
+       a full-width ghost button (transparent body, hairline border,
+       muted label) so it reads clearly below the filled submit and
+       the outlined SSO pair in the visual hierarchy. Hover warms the
+       label/border to the brand gold without adding surface weight. */
+    .btn-guest {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color .15s, border-color .15s, background .15s;
+    }
+    .btn-guest:hover {
+      color: var(--green);
+      border-color: var(--green);
+      background: var(--gold-light);
+    }
+    .btn-guest:focus-visible {
+      outline: 2px solid var(--green);
+      outline-offset: 2px;
+    }
+    [dir="rtl"] .btn-guest {
+      font-family: var(--font-arabic);
+    }
+
     /* Footer */
     .auth-footer {
       margin-top: 28px;
@@ -1576,6 +1624,16 @@
         </button>
       </div>
 
+      <!-- Guest access — sales-demo entry point. Sets the sessionStorage
+           flag that auth-bootstrap.js recognises as a guest session; no
+           Supabase auth call is made and nothing is written to the
+           database. Guests browse the column-restricted
+           public.opportunities_guest view (see supabase/migrations/
+           2026_06_11_guest_mode_restricted_read.sql). -->
+      <button class="btn-guest" id="btn-guest" type="button">
+        <span data-en="Continue as Guest →" data-ar="المتابعة كضيف">Continue as Guest →</span>
+      </button>
+
       <!-- Footer -->
       <div class="auth-footer">
         <span data-en="Private demo" data-ar="نسخة تجريبية خاصة">Private demo</span>
@@ -1802,9 +1860,14 @@
     // archived rows (see index.html:loadKPIs, `.neq('status','archived')`).
     // Without this filter the login pill reads ~100 higher than every
     // counter inside the app.
+    // Reads the guest view, not the base table: this page runs as the
+    // anon role (no session yet), which lost all base-table access in
+    // the 2026-06-11 guest-mode lockdown. The view already excludes
+    // archived rows; the .neq is kept as a no-op for parity with the
+    // SPA loader's filter.
     supabase
-      .from('opportunities')
-      .select('*', { count: 'exact', head: true })
+      .from('opportunities_guest')
+      .select('id', { count: 'exact', head: true })
       .neq('status', 'archived')
       .then(function (res) {
         if (res && typeof res.count === 'number') {
@@ -1827,8 +1890,9 @@
     // Distinct region scopes — Saudi (SA-…) / GCC (GCC-…) / Global (GL-…)
     // mapped from the opportunity id prefix. Count distinct scopes present
     // in non-archived data (same filter as the opps count for consistency).
+    // Same anon-role constraint as the count above → guest view.
     supabase
-      .from('opportunities')
+      .from('opportunities_guest')
       .select('id')
       .neq('status', 'archived')
       .then(function (res) {
@@ -2484,6 +2548,26 @@
     if (!OH_OAUTH.microsoft) return;
     handleOAuth('azure');
   });
+
+  /* ──────────────────────────────────────────────────────────────
+     GUEST ENTRY
+     Deliberately NO Supabase call here: guests stay unauthenticated
+     so they run as the `anon` Postgres role, whose only read path is
+     the column-restricted opportunities_guest view — that privilege
+     boundary is the enforcement, not the UI. (Supabase anonymous
+     sign-in was rejected: the on_auth_user_created trigger would
+     write auth.users + profiles rows per visit, and anonymous users
+     share the `authenticated` role with real members, which would
+     erase the column-level separation.)
+     sessionStorage scope = the preview ends when the tab closes.
+  ────────────────────────────────────────────────────────────── */
+  var btnGuest = document.getElementById('btn-guest');
+  if (btnGuest) {
+    btnGuest.addEventListener('click', function () {
+      try { sessionStorage.setItem('oh_guest', '1'); } catch (e) {}
+      goToApp();
+    });
+  }
 
   /* ──────────────────────────────────────────────────────────────
      INLINE VALIDATION (real-time, on blur)

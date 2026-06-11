@@ -1,5 +1,5 @@
 /* ============================================================================
-   Saudi Opportunity Hub — polish overrides
+   Saudi Opportunity Hub â€” polish overrides
    ----------------------------------------------------------------------------
    Loaded AFTER legacy-app.css so these rules win the cascade. Targets the
    surfaces the user actually sees behind auth: home dashboard greeting,
@@ -10,7 +10,7 @@
    SDB purple, Swift Solve navy) drives the colour without code changes.
 ============================================================================ */
 
-/* ─────────────────────────────────────────────────────────── HOME — HERO */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ HOME â€” HERO */
 
 /* Turn the bare greeting block into a real hero with restrained
    mashrabiya pattern behind the title. The pattern fades to nothing
@@ -74,7 +74,7 @@
   line-height: 1.5;
 }
 
-/* ─────────────────────────────────────────────────── HOME — QUICK ACTIONS */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ HOME â€” QUICK ACTIONS */
 
 .home-quick-actions {
   gap: 10px;
@@ -125,7 +125,7 @@
 
 .home-qa-btn [data-lucide] { width: 15px; height: 15px; }
 
-/* ───────────────────────────────────────────────────── HOME — KPI TILES */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ HOME â€” KPI TILES */
 
 .home-stats-row {
   display: grid;
@@ -186,7 +186,7 @@
   color: var(--text-muted);
 }
 
-/* ──────────────────────────────────────────────────────── TOPBAR STATS */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ TOPBAR STATS */
 
 .app-tb-stat {
   transition:
@@ -200,7 +200,7 @@
   color: var(--accent);
 }
 
-/* ──────────────────────────────────────────────────────── SIDEBAR ITEM */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ SIDEBAR ITEM */
 
 .app-nav-item {
   transition:
@@ -220,7 +220,7 @@
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
-/* ─────────────────────────────────────────────────── OPPORTUNITY CARDS */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ OPPORTUNITY CARDS */
 
 .opp-card {
   transition:
@@ -277,7 +277,7 @@
     0 2px 4px rgba(0, 0, 0, 0.30);
 }
 
-/* ──────────────────────────────────────────────────── REDUCED MOTION */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ REDUCED MOTION */
 
 @media (prefers-reduced-motion: reduce) {
   .home-qa-btn, .home-qa-btn:hover,
@@ -289,7 +289,7 @@
   }
 }
 
-/* ──────────────────────────────────────────────────── RTL ADJUSTMENTS */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ RTL ADJUSTMENTS */
 
 [dir="rtl"] .home-greeting::before {
   mask-image: radial-gradient(ellipse 70% 80% at 20% 30%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0) 100%);
@@ -303,13 +303,13 @@
 }
 
 /* ============================================================================
-   PUBLIC PAGES — same polish vocabulary applied to login, contact, api, 404,
+   PUBLIC PAGES â€” same polish vocabulary applied to login, contact, api, 404,
    reset-password. Each page's own inline <style> still defines its base
    layout; these overrides add the hero motif, hover lifts, and refined
    focus rings the SPA dashboard just got.
 ============================================================================ */
 
-/* ─────────────────────────────────────────── shared utility: mashrabiya */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ shared utility: mashrabiya */
 
 /* Applied to any card-hero by adding class="has-mashrabiya". Pages that
    want the pattern just add the class on the wrapping container. */
@@ -338,7 +338,7 @@
   -webkit-mask-image: radial-gradient(ellipse 75% 80% at 20% 25%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.45) 60%, rgba(0,0,0,0) 100%);
 }
 
-/* ───────────────────────────────────────────── contact.html · card hero */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ contact.html Â· card hero */
 
 /* The contact form card gets the mashrabiya treatment in the header band
    plus a slight hover lift and a stronger shadow that matches the home
@@ -388,7 +388,7 @@ main > .card::before {
   max-width: 52ch;
 }
 
-/* contact + reset-password form polish — refined focus ring + transitions */
+/* contact + reset-password form polish â€” refined focus ring + transitions */
 .form-input,
 .form-select,
 .form-textarea {
@@ -404,7 +404,7 @@ main > .card::before {
   box-shadow: 0 0 0 3px var(--accent-glow, rgba(201, 166, 107, 0.20));
 }
 
-/* Submit button polish — lifts on hover with accent-coloured glow */
+/* Submit button polish â€” lifts on hover with accent-coloured glow */
 .btn-submit {
   position: relative;
   transition:
@@ -429,7 +429,7 @@ main > .card::before {
     0 4px 12px var(--accent-glow, rgba(201, 166, 107, 0.20));
 }
 
-/* ───────────────────────────────────────────────── api.html · hero + cards */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ api.html Â· hero + cards */
 
 .api-hero {
   position: relative;
@@ -494,7 +494,7 @@ main > .card::before {
   box-shadow: 0 6px 20px rgba(15, 23, 42, 0.10);
 }
 
-/* ─────────────────────────────────────────────────── 404.html · hero card */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ 404.html Â· hero card */
 
 main.wrap,
 .wrap {
@@ -533,7 +533,7 @@ main.wrap::before,
   font-variant-numeric: tabular-nums;
 }
 
-/* 404 buttons — same hover lift idiom */
+/* 404 buttons â€” same hover lift idiom */
 a.btn--primary,
 a.btn--ghost {
   transition:
@@ -560,7 +560,7 @@ a.btn--ghost:hover {
   color: var(--accent, var(--green));
 }
 
-/* ────────────────────────────────────────── login.html · form polish only */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ login.html Â· form polish only */
 
 /* The login brand panel already has its own mashrabiya from an earlier
    commit. These rules touch the auth-form side: tab indicators, button. */
@@ -594,7 +594,7 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
 }
 
-/* ──────────────────────────────────────── reduced-motion on public pages */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ reduced-motion on public pages */
 
 @media (prefers-reduced-motion: reduce) {
   body > .card, main > .card,
@@ -610,12 +610,12 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
 }
 
 /* ============================================================================
-   SPA — additional views (Analytics, Opportunities listing, Sectors, About,
+   SPA â€” additional views (Analytics, Opportunities listing, Sectors, About,
    Saved). Same polish vocabulary as the home dashboard: hover lifts, accent
    accents on hover, refined typography, accent-glow focus rings.
 ============================================================================ */
 
-/* ───────────────────────────────────────────────── ANALYTICS — KPI CARDS */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ANALYTICS â€” KPI CARDS */
 
 .kpi-grid {
   gap: 14px;
@@ -672,7 +672,7 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
   margin-top: 4px;
 }
 
-/* ───────────────────────────────────────────────── ANALYTICS — CHART CARDS */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ANALYTICS â€” CHART CARDS */
 
 .chart-card {
   border-radius: var(--radius-xl);
@@ -691,7 +691,7 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
   gap: 16px;
 }
 
-/* ─────────────────────────────────────── OPPORTUNITIES — FILTER SIDEBAR */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ OPPORTUNITIES â€” FILTER SIDEBAR */
 
 .filter-bar {
   padding: 18px 20px;
@@ -722,7 +722,7 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
   box-shadow: 0 0 0 3px var(--accent-glow, rgba(201, 166, 107, 0.20));
 }
 
-/* ─────────────────────────────────────── OPPORTUNITIES — LISTING CARDS */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ OPPORTUNITIES â€” LISTING CARDS */
 
 .opp-card-title {
   font-family: var(--font-display);
@@ -792,7 +792,7 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
   font-variant-numeric: tabular-nums;
 }
 
-/* ─────────────────────────────────────────────── ABOUT / WHITE-LABEL VIEW */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ABOUT / WHITE-LABEL VIEW */
 
 .about-cta {
   display: inline-flex;
@@ -857,7 +857,7 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
     0 4px 8px rgba(15, 23, 42, 0.04);
 }
 
-/* ───────────────────────────────────────────────────────── SAVED VIEW */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ SAVED VIEW */
 
 .saved-empty {
   text-align: center;
@@ -880,7 +880,7 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
     0 4px 12px var(--accent-glow, rgba(201, 166, 107, 0.20));
 }
 
-/* ────────────────────────────────────────── reduced-motion · SPA views */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ reduced-motion Â· SPA views */
 
 @media (prefers-reduced-motion: reduce) {
   .kpi-card, .kpi-card:hover, .kpi-card::before,
@@ -901,7 +901,7 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
    ----------------------------------------------------------------------------
    Modern browsers (Chrome 111+, Edge 111+, Safari 18+) support smooth page-to-
    page transitions via the View Transitions API. We opt-in here for the SPA
-   hash-route changes — no JS required if browsers support cross-document
+   hash-route changes â€” no JS required if browsers support cross-document
    transitions; for older Chrome the @starting-style fallback provides a
    plain fade. Browsers that don't recognise the property simply ignore it.
 ============================================================================ */
@@ -916,7 +916,7 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
   animation-timing-function: cubic-bezier(0.16, 1, 0.30, 1);
 }
 
-/* Language flip (LTR↔RTL) — the JS toggle adds `vt-lang` on <html> for
+/* Language flip (LTRâ†”RTL) â€” the JS toggle adds `vt-lang` on <html> for
    the duration of the transition so the whole-layout swap gets the
    login page's slower, more deliberate ease-out-quint timing. Scoped
    to .vt-lang so it does NOT slow down the fast 280ms hash-route page
@@ -929,7 +929,7 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
    the same here: name the SPA's major regions ONLY while .vt-lang is
    set, so on the dir flip the sidebar slides from one side to the
    other, the topbar pill and content glide across, and it reads as a
-   real motion — matching login. Names are scoped to .vt-lang so they
+   real motion â€” matching login. Names are scoped to .vt-lang so they
    never apply during ordinary page navigation. */
 :root.vt-lang .app-sidebar      { view-transition-name: vt-sidebar; }
 :root.vt-lang .app-topbar       { view-transition-name: vt-topbar; }
@@ -960,24 +960,24 @@ button[type="submit"]:not(.btn-cta):not(.btn--primary) {
    SPA DARK-GLASS RESKIN
    ----------------------------------------------------------------------------
    Applies the login page's aesthetic to the authenticated SPA:
-     · Deep emerald → midnight → black gradient body background
-     · Frosted-glass treatment (backdrop-filter blur) on every card-like
-       surface — topbar, sidebar, KPI tiles, opportunity cards, modals,
+     Â· Deep emerald â†’ midnight â†’ black gradient body background
+     Â· Frosted-glass treatment (backdrop-filter blur) on every card-like
+       surface â€” topbar, sidebar, KPI tiles, opportunity cards, modals,
        workspace panel, settings dialog
-     · White-tinted text on dark surfaces (varying opacity for hierarchy)
-     · Underline-style form inputs (matches login.html)
-     · Per-theme accent (NEOM cyan, MISA navy, Monsha'at orange, etc.)
-       stays intact via window.applyTheme() — it just pops against the
+     Â· White-tinted text on dark surfaces (varying opacity for hierarchy)
+     Â· Underline-style form inputs (matches login.html)
+     Â· Per-theme accent (NEOM cyan, MISA navy, Monsha'at orange, etc.)
+       stays intact via window.applyTheme() â€” it just pops against the
        dark glass instead of the previous cream/white background
 
    index.html now boots with `data-theme="dark"` so the existing dark-mode
    token paths activate; this block layers the glassmorphism on top.
 ============================================================================ */
 
-/* ─────────────────────────────────────────────────────── App shell + body
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ App shell + body
    The SPA paints its atmosphere via a fixed background <img> at
    z-index: -2 (see index.html). Body must stay transparent so the image
-   shows through — an opaque body bg paints ABOVE the z-index: -2 image
+   shows through â€” an opaque body bg paints ABOVE the z-index: -2 image
    in the same stacking context and would hide it entirely.
 
    The dark fallback colour lives on <html> instead: it paints first,
@@ -1002,7 +1002,7 @@ html[data-theme="dark"] body {
   min-height: 100dvh;
 }
 
-/* ─────────────────────────────────────────────────────── Token redefine
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Token redefine
    Legacy-app.css defines `--surface*` tokens as opaque slate colours
    (#0f1420 / #141928 / #1a2035) for the dark theme. Dozens of classes
    across the SPA paint themselves with `background: var(--surface)`,
@@ -1011,7 +1011,7 @@ html[data-theme="dark"] body {
 
    Redefining the tokens here at higher specificity (html[data-theme=dark]
    vs legacy's [data-theme=dark]) turns every var(--surface) call site
-   into a glass surface in one stroke — no class-by-class enumeration.
+   into a glass surface in one stroke â€” no class-by-class enumeration.
 
    --surface-elevated stays a touch more opaque so popovers / tooltips
    still stand out from the rest of the chrome. */
@@ -1034,13 +1034,13 @@ html[data-theme="dark"] .view {
   background: transparent !important;
 }
 
-/* ─────────────────────────────────────────────── Mobile bottom tab bar
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Mobile bottom tab bar
    User: "all the pixels that scroll under the bottom bar should also
    scroll under the video... nothing is in between them" + "it still
    doesnt work, maybe there is still dead cold."
 
    ROOT CAUSE found: the previous mask on .app-content didn't work
-   because .app-content is NOT the scroll container on mobile — the
+   because .app-content is NOT the scroll container on mobile â€” the
    body is. CSS masks anchor to the element's own box, so the mask
    edge sat at the bottom of .app-content's tall box (way below the
    viewport when scrolled), not at the bar's top edge.
@@ -1049,7 +1049,7 @@ html[data-theme="dark"] .view {
    (overflow-y: auto, height locked to its grid row) so the mask
    gradient's `calc(100% - 70px)` resolves to viewport bottom minus
    bar height. Body is locked from scrolling so only .app-content
-   moves. The footer is hidden on mobile — it's a 4-column brand
+   moves. The footer is hidden on mobile â€” it's a 4-column brand
    footer that doesn't fit on a phone anyway, and the mobile bottom
    bar is the navigation primitive.
 
@@ -1063,7 +1063,7 @@ html[data-theme="dark"] .view {
   .app-shell {
     height: 100dvh;
     min-height: 0;
-    /* Collapse the topbar grid row on mobile — the topbar pill is
+    /* Collapse the topbar grid row on mobile â€” the topbar pill is
        position: fixed (floats above content), so reserving a 56 px
        grid row above .app-content just clips content at .app-content's
        top edge and prevents it from scrolling BEHIND the pill. With
@@ -1082,7 +1082,7 @@ html[data-theme="dark"] .view {
        add 16 px breathing room. */
     padding-top: calc(76px + env(safe-area-inset-top, 0px)) !important;
   }
-  /* Footer doesn't belong on the phone — it's a desktop brand footer.
+  /* Footer doesn't belong on the phone â€” it's a desktop brand footer.
      Hidden so the scroll container can fill the viewport. */
   .sh-footer {
     display: none !important;
@@ -1090,7 +1090,7 @@ html[data-theme="dark"] .view {
   /* Mask the bar's overlay zone so content scrolling into it stops
      rendering. The background <video> is position: fixed (z-index -2)
      and NOT a descendant of .app-content, so the mask doesn't touch
-     it — it stays fully visible behind the bar. */
+     it â€” it stays fully visible behind the bar. */
   html[data-theme="dark"] .app-content {
     -webkit-mask-image: linear-gradient(
       to bottom,
@@ -1116,17 +1116,17 @@ html[data-theme="dark"] .view {
   }
 }
 
-/* ───────────────────────────────────────────── Opportunities results bar
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Opportunities results bar
    User: "on phone it should stick to its original space so just like
    all the cards and other things and its should be glass like like the
    other things."
    Treat the results-bar like every other card: drop the sticky
    pinning so it scrolls naturally with content (its "original space"
    in the document flow), and paint it with the canonical glass
-   recipe — same rgba(0.08) + diagonal gradient + rgba(0.18) border +
+   recipe â€” same rgba(0.08) + diagonal gradient + rgba(0.18) border +
    blur(60px) saturate(180%) + inset top highlight + drop shadow as
    .home-card / .kpi-card. Applies to both desktop and mobile.
-   ───────────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 html[data-theme="dark"] .results-bar {
   position: static !important;
   margin: 0 !important;
@@ -1145,11 +1145,11 @@ html[data-theme="dark"] .results-bar {
     0 20px 60px rgba(0, 0, 0, 0.45) !important;
 }
 
-/* ──────────────────────────────────────── Notifications dropdown (solid card)
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Notifications dropdown (solid card)
    The notifications popover floats ABOVE the busy home content (the gold
    "Welcome back" headline, quick-action chips, stats). Any translucency or
    backdrop blur lets that content bleed through and reads as glassy, so this
-   panel is intentionally FULLY OPAQUE — a flat dark fill, no see-through, no
+   panel is intentionally FULLY OPAQUE â€” a flat dark fill, no see-through, no
    frost. Border + a 1px top-edge highlight + drop shadow still give it card
    depth. Dark theme only (light --surface is already solid #fff).
    User: "change it so its not transparent at all." */
@@ -1163,35 +1163,48 @@ html[data-theme="dark"] .notif-dropdown {
     0 20px 60px rgba(0, 0, 0, 0.45);
 }
 
-/* ─────────────────────────────────────────────────────── Top navigation
-   Reshaped as a centered floating "Dynamic Island" pill — instead of
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Top navigation
+   Reshaped as a centered floating "Dynamic Island" pill â€” instead of
    spanning the full content column, the topbar is taken out of the
    grid (position: fixed) and centered horizontally with a pill-shaped
    glass surface.
 
    The grid still reserves the 56 px topbar row (grid-template-rows in
-   legacy-app.css), so .app-content starts ~56 px down the page —
+   legacy-app.css), so .app-content starts ~56 px down the page â€”
    that's the breathing room above the island.
 
    In RTL the topbar still centers (no flip needed). On narrow
-   viewports (≤ 720 px) the sidebar collapses; the island just stays
+   viewports (â‰¤ 720 px) the sidebar collapses; the island just stays
    centered since there's no sidebar to dodge. */
 
 html[data-theme="dark"] .app-topbar {
   /* Take out of grid + float as a centered island.
      User: "stay in the middle ... without the side bar calculated in."
-     Centre on the TRUE viewport (left: 50%), not the content column —
-     the sidebar is no longer factored into the offset. */
+     Centre on the TRUE viewport, not the content column â€” the sidebar is
+     not factored into the offset.
+
+     Centring technique: anchor BOTH edges (left:0; right:0) and centre with
+     auto margins, sizing to content via width:fit-content. The previous
+     `left:50% + translateX(-50%)` made the pill's shrink-to-fit width resolve
+     against only (viewport âˆ’ left) = HALF the viewport. Whenever half the
+     viewport was narrower than the content, the pill collapsed toward its
+     min-content width and the trailing control (the logout button) spilled
+     past the rounded right edge â€” visible as soon as the window was narrowed
+     (e.g. ~960â€“1110px with the stat badges still showing). fit-content between
+     two anchored edges sizes the pill to its FULL content (up to max-width)
+     while staying centred, so the controls never overflow. */
   position: fixed !important;
   top: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: auto;
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  width: -moz-fit-content;
+  width: fit-content;
   max-width: calc(100vw - 48px);
   height: auto;
   min-height: 48px;
-  /* Pill shape + canonical card glass — matches the .home-card recipe
-     exactly: rgba(0.08) base + 135° diagonal gradient + rgba(0.18)
+  /* Pill shape + canonical card glass â€” matches the .home-card recipe
+     exactly: rgba(0.08) base + 135Â° diagonal gradient + rgba(0.18)
      border + blur(60px) saturate(180%) + inset top highlight + drop
      shadow. Just shaped as a pill (border-radius: 999px) instead of
      a card. */
@@ -1223,24 +1236,28 @@ html[data-theme="dark"] .app-topbar {
    full viewport instead of accounting for the 220 px sidebar offset. */
 @media (max-width: 720px) {
   html[data-theme="dark"] .app-topbar {
-    left: 50%;
+    left: 0;
+    right: 0;
     max-width: calc(100vw - 24px);
     top: 8px;
   }
 }
 
-/* RTL: still dead-centre on the viewport (no sidebar offset either way). */
+/* RTL: still dead-centre on the viewport (no sidebar offset either way).
+   With left:0/right:0 + auto margins the centring is already symmetric and
+   direction-agnostic; this just guards against any RTL rule flipping an edge. */
 [dir="rtl"] html[data-theme="dark"] .app-topbar {
-  left: 50%;
+  left: 0;
+  right: 0;
 }
 
-/* ─────────────────────────────────── Topbar page-title overflow guard
-   User: "it should still show the FULL name of the page" — never cut.
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Topbar page-title overflow guard
+   User: "it should still show the FULL name of the page" â€” never cut.
    So the title NEVER shrinks and NEVER truncates (no ellipsis). Room is
    made instead by collapsing the bulky action controls on narrow screens
    (the media queries below). Both title and actions are flex-shrink:0 and
    so the full name is always shown and the icons never sit on top of it.
-   (No flex-wrap — on a width:auto fixed pill it collapses the width and
+   (No flex-wrap â€” on a fit-content fixed pill it collapses the width and
    wraps prematurely; the collapse media queries below free enough room
    to keep everything on one line.) */
 html[data-theme="dark"] .app-topbar-title {
@@ -1255,7 +1272,7 @@ html[data-theme="dark"] .app-topbar-title > [data-lucide] {
   flex-shrink: 0;
 }
 html[data-theme="dark"] .app-topbar-crumb-current {
-  white-space: nowrap;       /* one line, but NOT clipped — full name */
+  white-space: nowrap;       /* one line, but NOT clipped â€” full name */
   overflow: visible;
   text-overflow: clip;
 }
@@ -1263,15 +1280,15 @@ html[data-theme="dark"] .app-topbar-crumb-current {
 /* Progressive action-cluster collapse so the page TITLE stays fully
    visible as the viewport narrows (user: "it still gets compressed
    when the screen gets smaller"). Rather than shrink the title, we
-   shed the bulkiest, least-essential controls first — they free far
+   shed the bulkiest, least-essential controls first â€” they free far
    more room than the short page name needs, so the title no longer
    has to truncate.
 
-   ≤960px — drop the workspace stat badges (watchlist / saved-search /
+   â‰¤960px â€” drop the workspace stat badges (watchlist / saved-search /
    "new" counts). They're the widest cluster and remain reachable from
    the home dashboard + the workspace panel.
-   ≤620px  — collapse the language button to its globe icon (hide the
-   "English"/"العربية" label) and tighten its padding. */
+   â‰¤620px  â€” collapse the language button to its globe icon (hide the
+   "English"/"Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©" label) and tighten its padding. */
 @media (max-width: 960px) {
   html[data-theme="dark"] .app-topbar .app-topbar-ws,
   html[data-theme="dark"] .app-topbar .app-topbar-ws + .app-topbar-divider {
@@ -1286,6 +1303,19 @@ html[data-theme="dark"] .app-topbar-crumb-current {
     padding-left: 9px !important;
     padding-right: 9px !important;
   }
+}
+/* â‰¤420px â€” the smallest phones. Tighten the pill's internal padding + gaps
+   so the full control set (with the longest real page title, "Opportunities")
+   still fits inside the rounded shape. Keeps every control visible and the
+   page title un-truncated; just removes slack so nothing reaches the edge. */
+@media (max-width: 420px) {
+  html[data-theme="dark"] .app-topbar {
+    padding-left: 8px;
+    padding-right: 8px;
+    gap: 6px;
+  }
+  html[data-theme="dark"] .app-topbar-title { gap: 6px; }
+  html[data-theme="dark"] .app-topbar-actions { gap: 2px; }
 }
 
 html[data-theme="dark"] .app-tb-stat {
@@ -1317,7 +1347,7 @@ html[data-theme="dark"] .app-tb-user:hover {
   border-color: rgba(255, 255, 255, 0.22);
 }
 
-/* ─────────────────────────────────────────────────────── Sidebar
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Sidebar
    See the consolidated sidebar rule near the bottom of this file.
    Kept the RTL flip-side here because it doesn't fight the main rule. */
 [dir="rtl"] html[data-theme="dark"] .app-sidebar {
@@ -1337,7 +1367,7 @@ html[data-theme="dark"] .app-nav-item.active {
   color: #ffffff;
 }
 
-/* ──────────────────────────────────────────────────── Home dashboard */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Home dashboard */
 
 /* Override the previous home-greeting card colours to match the new
    dark-glass language. The mashrabiya pseudo from the earlier round
@@ -1353,7 +1383,7 @@ html[data-theme="dark"] .home-title { color: #ffffff; }
 html[data-theme="dark"] .home-title span { color: var(--accent); }
 html[data-theme="dark"] .home-sub { color: rgba(255, 255, 255, 0.80); }
 
-/* Quick-action chips — glass on dark */
+/* Quick-action chips â€” glass on dark */
 html[data-theme="dark"] .home-qa-btn {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -1391,14 +1421,14 @@ html[data-theme="dark"] .home-card-hdr {
 }
 html[data-theme="dark"] .home-card-badge { color: rgba(255, 255, 255, 0.75); }
 
-/* ──────────────────────────────────────────────── Dashboard KPIs + charts */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Dashboard KPIs + charts */
 
 /* .kpi-card + .chart-card bg/border/blur live in the consolidated card recipe. */
 html[data-theme="dark"] .kpi-value { color: #ffffff; }
 html[data-theme="dark"] .kpi-label { color: rgba(255, 255, 255, 0.80); }
 html[data-theme="dark"] .kpi-hint  { color: rgba(255, 255, 255, 0.70); }
 
-/* ──────────────────────────────────────────────────── Opportunity cards */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Opportunity cards */
 
 /* .opp-card bg/border/blur/shadow live in the consolidated card recipe.
    Only the text-on-dark color stays here. */
@@ -1418,7 +1448,7 @@ html[data-theme="dark"] .opp-card-sponsor,
 html[data-theme="dark"] .opp-card-meta,
 html[data-theme="dark"] .opp-card-stats { color: rgba(255, 255, 255, 0.80); }
 
-/* ─────────────────────────────────────────────────────── Filter bar */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Filter bar */
 
 /* .filter-bar bg/border/blur live in the consolidated card recipe. */
 html[data-theme="dark"] .filter-input,
@@ -1436,7 +1466,7 @@ html[data-theme="dark"] .filter-select:focus {
 }
 html[data-theme="dark"] .filter-label { color: rgba(255, 255, 255, 0.85); }
 
-/* ─────────────────────────────────────────────────────── Modals + panels */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Modals + panels */
 
 html[data-theme="dark"] .modal,
 html[data-theme="dark"] .ob-modal,
@@ -1471,7 +1501,7 @@ html[data-theme="dark"] .panel-overlay {
   -webkit-backdrop-filter: blur(6px);
 }
 
-/* ─────────────────────────────────────────────────── Sector + about cards */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Sector + about cards */
 
 /* .sector-card / .saved-card / .about-grid > * / .about-wl-item
    bg/border/blur live in the consolidated card recipe. */
@@ -1482,7 +1512,7 @@ html[data-theme="dark"] .about-wl-item {
   color: rgba(255, 255, 255, 0.92);
 }
 
-/* ──────────────────────────────────────────────────── Generic text + links */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Generic text + links */
 
 html[data-theme="dark"] h1,
 html[data-theme="dark"] h2,
@@ -1490,7 +1520,7 @@ html[data-theme="dark"] h3,
 html[data-theme="dark"] h4 { color: rgba(255, 255, 255, 0.96); }
 html[data-theme="dark"] p,
 html[data-theme="dark"] span,
-html[data-theme="dark"] div { /* selective — only inherit on unstyled descendants */ }
+html[data-theme="dark"] div { /* selective â€” only inherit on unstyled descendants */ }
 /* Exclude every button-shaped link (.btn legacy, .oh-btn / .btn-cta from
    the shared component library, the SPA brand-logo, plus the new dark-glass
    nav and back-link primitives) so they keep their button surface colours. */
@@ -1503,10 +1533,10 @@ html[data-theme="dark"] a:not(.btn):not(.app-nav-item):not(.brand-logo):not(.oh-
 
 /* The "Request a demo deployment" CTA is an <a>, so the global link rule
    above was painting its text var(--accent) = gold, on its own gold
-   background → invisible. Excluded it above; here we give it the white
+   background â†’ invisible. Excluded it above; here we give it the white
    text the user asked for, on a deepened gold gradient so the white is
    actually legible (white on bright gold is only ~1.3:1; on this
-   #a88947→#5e4b23 bronze it's ~5-7:1). */
+   #a88947â†’#5e4b23 bronze it's ~5-7:1). */
 html[data-theme="dark"] a.about-wl-cta,
 html[data-theme="dark"] a.about-wl-cta:hover {
   background: linear-gradient(135deg, #a88947 0%, #5e4b23 100%) !important;
@@ -1514,13 +1544,13 @@ html[data-theme="dark"] a.about-wl-cta:hover {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
-/* ─────────────────────────────────────────────── Onboarding tour tooltip
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Onboarding tour tooltip
    User: "the cards on the tour are too transparent so make them like the
    other cards." The .ob-tour-tooltip used `background: var(--surface)`
    (= rgba 0.06 in dark mode) with NO backdrop-filter, so it read as a
    faint translucent panel with the page showing straight through. Give
-   it the canonical card recipe — rgba(0.08) + diagonal gradient +
-   rgba(0.18) border + blur(60px) saturate(180%) + inset highlight — so
+   it the canonical card recipe â€” rgba(0.08) + diagonal gradient +
+   rgba(0.18) border + blur(60px) saturate(180%) + inset highlight â€” so
    it frosts the backdrop and reads as a solid glass card like the rest.
    Slightly heavier drop shadow (0.55) since it floats over the dimmed
    tour backdrop. */
@@ -1539,7 +1569,7 @@ html[data-theme="dark"] .ob-tour-tooltip {
     0 20px 60px rgba(0, 0, 0, 0.55) !important;
 }
 
-/* ────────────────────────────────────────────────────── Buttons (general) */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Buttons (general) */
 
 html[data-theme="dark"] .btn-primary,
 html[data-theme="dark"] button.primary {
@@ -1565,14 +1595,14 @@ html[data-theme="dark"] button.secondary:hover {
   border-color: rgba(255, 255, 255, 0.28);
 }
 
-/* ──────────────────────────────────────────────────── Dividers + borders */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Dividers + borders */
 
 html[data-theme="dark"] hr,
 html[data-theme="dark"] .divider {
   border-color: rgba(255, 255, 255, 0.08);
 }
 
-/* ──────────────────────────────────────────────────── Status pills */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Status pills */
 
 html[data-theme="dark"] .opp-card-chip,
 html[data-theme="dark"] .opp-status-pill {
@@ -1581,7 +1611,7 @@ html[data-theme="dark"] .opp-status-pill {
   color: rgba(255, 255, 255, 0.85);
 }
 
-/* ──────────────────────────────────────────────────── Form fields (generic) */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Form fields (generic) */
 
 html[data-theme="dark"] input[type="text"],
 html[data-theme="dark"] input[type="email"],
@@ -1595,7 +1625,7 @@ html[data-theme="dark"] select {
   border: 1px solid rgba(255, 255, 255, 0.14);
   color: #ffffff;
 }
-/* Native <option> popups can't be translucent — they render against the
+/* Native <option> popups can't be translucent â€” they render against the
    OS's default (white) surface, so the white option text was invisible
    until the browser's blue hover highlight appeared. Give every option a
    SOLID dark surface + light text so the list is readable at rest. */
@@ -1637,8 +1667,8 @@ html[data-theme="dark"] *::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.18);
 }
 
-/* ─────────────────────────────────────────────────────── Page-fade-in
-   Override legacy-app.css's `page-fade-in` keyframes — those animate
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Page-fade-in
+   Override legacy-app.css's `page-fade-in` keyframes â€” those animate
    both opacity AND transform: translateY. The transform promotes body
    to a stacking context AND makes body the containing block for
    position: fixed descendants, which hid the background <video> element
@@ -1656,7 +1686,7 @@ html[data-theme="dark"] body.page-entering {
 }
 
 /* ============================================================================
-   GLASS EVERYWHERE — surfaces the earlier rules missed
+   GLASS EVERYWHERE â€” surfaces the earlier rules missed
    ----------------------------------------------------------------------------
    The blocks above paint the headline cards (home-greeting, kpi-card,
    opp-card, modal, panel, sector/saved/about) as glass. Below covers
@@ -1668,7 +1698,7 @@ html[data-theme="dark"] body.page-entering {
    backdrop blur so the planet bg can read through every container.
 ============================================================================ */
 
-/* Analytics view — bg/border/blur live in the consolidated card recipe.
+/* Analytics view â€” bg/border/blur live in the consolidated card recipe.
    Text colors stay here. */
 html[data-theme="dark"] .liv2-kpi__value { color: #ffffff; }
 html[data-theme="dark"] .liv2-kpi__label,
@@ -1676,7 +1706,7 @@ html[data-theme="dark"] .liv2-chart-card__sub,
 html[data-theme="dark"] .liv2-insight-text { color: rgba(255, 255, 255, 0.80); }
 html[data-theme="dark"] .liv2-chart-card__title { color: rgba(255, 255, 255, 0.95); }
 
-/* Insight cards — bg/border/blur in the consolidated card recipe.
+/* Insight cards â€” bg/border/blur in the consolidated card recipe.
    Text colors stay here. */
 html[data-theme="dark"] .insight-card-title,
 html[data-theme="dark"] .insight-block__title,
@@ -1685,7 +1715,7 @@ html[data-theme="dark"] .insight-card-sub,
 html[data-theme="dark"] .market-stat__label,
 html[data-theme="dark"] .market-footnote { color: rgba(255, 255, 255, 0.78); }
 
-/* Workspace bar + recently-added widget — bg/border/blur in the
+/* Workspace bar + recently-added widget â€” bg/border/blur in the
    consolidated card recipe. Inner header divider stays here. */
 html[data-theme="dark"] .widget-header {
   background: rgba(255, 255, 255, 0.03);
@@ -1699,7 +1729,7 @@ html[data-theme="dark"] .la-card-title  { color: rgba(255, 255, 255, 0.95); }
 html[data-theme="dark"] .la-card-desc,
 html[data-theme="dark"] .la-card-meta   { color: rgba(255, 255, 255, 0.80); }
 
-/* Audience / feedback / who cards — bg in canonical recipe. */
+/* Audience / feedback / who cards â€” bg in canonical recipe. */
 html[data-theme="dark"] .audience-role,
 html[data-theme="dark"] .feedback-banner-text,
 html[data-theme="dark"] .who-role { color: rgba(255, 255, 255, 0.95); }
@@ -1760,7 +1790,7 @@ html[data-theme="dark"] .sh-footer-cta { color: rgba(255, 255, 255, 0.92); }
 html[data-theme="dark"] .sh-footer-bottom-links a,
 html[data-theme="dark"] .sh-footer-brand-credit { color: rgba(255, 255, 255, 0.72); }
 
-/* Theme manager cards — bg/border/blur in the canonical recipe. */
+/* Theme manager cards â€” bg/border/blur in the canonical recipe. */
 html[data-theme="dark"] .oh-tm-card--active {
   background: rgba(255, 255, 255, 0.10);
   border-color: rgba(255, 255, 255, 0.30);
@@ -1769,7 +1799,7 @@ html[data-theme="dark"] .oh-tm-card--active {
 /* List rows that live INSIDE a glass parent (.home-card for home-opp-item,
    the notifications dropdown for notif-item). They must NOT have their own
    bg/border/blur (would stack glass-on-glass and look opaque) and don't
-   need per-row divider lines — the glass surface already separates rows.
+   need per-row divider lines â€” the glass surface already separates rows.
    Hover gets a subtle white tint instead of the solid var(--surface-2). */
 html[data-theme="dark"] .home-opp-item,
 html[data-theme="dark"] .notif-item {
@@ -1784,7 +1814,7 @@ html[data-theme="dark"] .notif-item:hover {
   background: rgba(255, 255, 255, 0.06) !important;
 }
 /* Unread notifications keep an accent tint so the user can still see they're
-   unread — but a much subtler glow than the solid var(--green-dim) the
+   unread â€” but a much subtler glow than the solid var(--green-dim) the
    legacy rule paints. */
 html[data-theme="dark"] .notif-item.unread {
   background: var(--accent-soft) !important;
@@ -1793,7 +1823,7 @@ html[data-theme="dark"] .notif-item.unread:hover {
   background: var(--accent-glow) !important;
 }
 
-/* Settings modal sub-surfaces — settings-row dividers, chip groups */
+/* Settings modal sub-surfaces â€” settings-row dividers, chip groups */
 html[data-theme="dark"] .settings-row {
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
@@ -1806,12 +1836,12 @@ html[data-theme="dark"] .settings-select {
   color: rgba(255, 255, 255, 0.95);
 }
 
-/* Bump the existing glass surfaces slightly — the previous values
+/* Bump the existing glass surfaces slightly â€” the previous values
    (rgba 0.04 bg, rgba 0.10 border) were tuned for a flat dark backdrop.
    Against the planet image they need a touch more presence to read as
    defined cards rather than smudges. */
-/* ═══════════════════════════════════════════════════════════════════════
-   CANONICAL CARD RECIPE — every card in the SPA uses the exact same
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   CANONICAL CARD RECIPE â€” every card in the SPA uses the exact same
    glass styling as the .home-greeting (which itself matches login's
    .auth-box). One source of truth, no per-class drift.
 
@@ -1824,7 +1854,7 @@ html[data-theme="dark"] .settings-select {
 
    This rule is the LAST card-styling rule in the file, so it wins
    cascade against every earlier per-class declaration.
-   ═══════════════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 html[data-theme="dark"] .home-greeting,
 html[data-theme="dark"] .home-stat,
 html[data-theme="dark"] .home-card,
@@ -1905,15 +1935,15 @@ html[data-theme="dark"] .home-card-hdr {
   border-bottom: none !important;
 }
 
-/* ───────────────────────────────────────────────────────── Sidebar override
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Sidebar override
    User: "make the side bar less see through and more like the other cards"
    Switched from the topbar-pill recipe (rgba 0.05, no gradient) to the
-   canonical card recipe — same rgba(0.08) base + diagonal gradient +
+   canonical card recipe â€” same rgba(0.08) base + diagonal gradient +
    rgba(0.18) border + blur(60px) saturate(180%) as every .home-card /
    .kpi-card / .home-stat. No drop shadow (sidebar is full-height; the
    canonical's 0 20px 60px shadow would just hang below the viewport).
 
-   !important × all because legacy-app.css ships three competing
+   !important Ã— all because legacy-app.css ships three competing
    .app-sidebar background rules (var(--surface) at 4496,
    var(--sidebar-bg) at 6728, plus .mobile-open). */
 html[data-theme="dark"] .app-sidebar {
@@ -1932,7 +1962,7 @@ html[data-theme="dark"] .app-sidebar {
 /* Brand / logo area at the top of the sidebar.
    User: "the part where the logo is needs to be gold"
    Paint the entire brand area as a solid gold pill so the logo / tenant
-   wordmark always reads as the brand anchor — the only saturated chip
+   wordmark always reads as the brand anchor â€” the only saturated chip
    in the otherwise glass sidebar.
 
    !important is needed because index.html ships
@@ -1960,7 +1990,7 @@ html[data-theme="dark"] .app-sidebar-brand > span[data-ar]::after {
   color: rgba(255, 255, 255, 0.78) !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.30);
 }
-/* Brand-dot pill (the small "OH" mark / tenant logo container) — needs
+/* Brand-dot pill (the small "OH" mark / tenant logo container) â€” needs
    a white-tinted surface now that it sits on the gold brand pill instead
    of glass. */
 html[data-theme="dark"] .app-sidebar-brand .brand-dot {
@@ -1971,9 +2001,9 @@ html[data-theme="dark"] .app-sidebar-brand .brand-dot::after {
   color: #ffffff !important;
 }
 
-/* ─────────────────────────────────────────────────── Backdrop-filter sweep
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Backdrop-filter sweep
    Token redefinition above turned every var(--surface) call site
-   translucent. But translucent ≠ frosted — without backdrop-filter the
+   translucent. But translucent â‰  frosted â€” without backdrop-filter the
    bg just shows through unblurred. This sweep adds the blur to every
    card-shaped class in the SPA so they all read as proper glass.
 
@@ -1992,7 +2022,7 @@ html[data-theme="dark"] .wl-saved-meta-tag {
 }
 
 /* Generic buttons that used to be `background: var(--surface)`
-   (.btn-secondary, .reset-btn, .profile-chip etc.) — token redefine
+   (.btn-secondary, .reset-btn, .profile-chip etc.) â€” token redefine
    already makes them translucent, but they look better with a faint
    blur so they don't disappear into the bg on hover. */
 html[data-theme="dark"] .btn-secondary,
@@ -2058,4 +2088,301 @@ html[data-theme="dark"] .ob-overlay > .ob-modal {
   -webkit-backdrop-filter: blur(30px) saturate(160%);
           backdrop-filter: blur(30px) saturate(160%);
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   GUEST MODE (sales-demo preview) â€” banner, upgrade modal, inline
+   lock affordances. Activated by body.oh-guest / .oh-guest-banner-on
+   (set by assets/guest-mode.js when auth-bootstrap flags a guest).
+   Uses the canonical dark-glass recipe + var(--accent) gold so every
+   white-label tenant theme inherits automatically.
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+
+:root { --oh-guest-banner-h: 38px; }
+
+/* â”€â”€ Slim preview banner (fixed above the app shell) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.oh-guest-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1400; /* above the floating topbar pill, below the modal */
+  height: var(--oh-guest-banner-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 14px;
+  background: linear-gradient(135deg, rgba(14, 17, 22, 0.94), rgba(22, 26, 33, 0.94));
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+          backdrop-filter: blur(24px) saturate(160%);
+  border-bottom: 1px solid rgba(227, 189, 108, 0.35);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+.oh-guest-banner-lock {
+  display: inline-flex;
+  color: var(--accent, #e3bd6c);
+  flex-shrink: 0;
+}
+.oh-guest-banner-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.oh-guest-banner-cta {
+  flex-shrink: 0;
+  padding: 3px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(227, 189, 108, 0.55);
+  background: rgba(227, 189, 108, 0.12);
+  color: var(--accent, #e3bd6c);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.oh-guest-banner-cta:hover {
+  background: var(--accent, #e3bd6c);
+  color: #1f1700;
+}
+.oh-guest-banner-x {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.oh-guest-banner-x:hover { color: #fff; background: rgba(255,255,255,0.10); }
+
+/* Shell offsets while the banner is visible. The shell grid keeps its
+   own geometry; we shift the whole thing down and re-anchor the two
+   sticky/fixed chrome pieces. */
+body.oh-guest-banner-on .app-shell { margin-top: var(--oh-guest-banner-h); }
+body.oh-guest-banner-on .app-sidebar {
+  top: var(--oh-guest-banner-h);
+  height: calc(100vh - var(--oh-guest-banner-h));
+  height: calc(100dvh - var(--oh-guest-banner-h));
+}
+body.oh-guest-banner-on .app-topbar { top: var(--oh-guest-banner-h); }
+/* Dark mode: the topbar is a floating fixed pill at top:12px â€” push it
+   below the banner. */
+html[data-theme="dark"] body.oh-guest-banner-on .app-topbar {
+  top: calc(12px + var(--oh-guest-banner-h));
+}
+@media (max-width: 767px) {
+  /* Body is scroll-locked on mobile (only .app-content scrolls), so the
+     shell must shrink by the banner height instead of overflowing. */
+  body.oh-guest-banner-on .app-shell {
+    height: calc(100dvh - var(--oh-guest-banner-h));
+  }
+  .oh-guest-banner-text { font-size: 11.5px; }
+}
+
+/* â”€â”€ Inline lock affordances (cards, compare table) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.guest-lock-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--accent, #C9A66B);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  font-style: italic;
+  cursor: pointer;
+  text-align: start;
+  opacity: 0.92;
+  transition: opacity .15s;
+}
+.guest-lock-inline:hover { opacity: 1; text-decoration: underline; }
+.guest-lock-inline svg { flex-shrink: 0; }
+.guest-lock-inline--stat {
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 600;
+}
+.opp-card-desc--guest { margin: 0 0 10px; }
+
+/* Locked link/apply buttons reuse the member button geometry
+   (.panel-link-btn / .occ-apply-btn / .oh-enh-ct-apply classes are
+   already on the elements) â€” these rules only reset <button> chrome
+   and recolor to the locked gold treatment. */
+.opp-card-link--guest,
+.occ-apply-btn--guest,
+.oh-enh-ct-apply--guest {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px dashed rgba(201, 166, 107, 0.55);
+  color: var(--accent, #C9A66B);
+  cursor: pointer;
+  font-family: inherit;
+}
+.opp-card-link--guest:hover,
+.occ-apply-btn--guest:hover,
+.oh-enh-ct-apply--guest:hover {
+  background: rgba(201, 166, 107, 0.10);
+  border-style: solid;
+}
+
+/* â”€â”€ Upgrade modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.oh-guest-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(8, 10, 14, 0.62);
+  -webkit-backdrop-filter: blur(6px);
+          backdrop-filter: blur(6px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .2s ease;
+}
+.oh-guest-modal-overlay.open { opacity: 1; visibility: visible; }
+body.oh-guest-modal-open { overflow: hidden; }
+
+.oh-guest-modal {
+  position: relative;
+  width: min(440px, 100%);
+  padding: 32px 30px 26px;
+  border-radius: 18px;
+  /* Canonical dark-glass card recipe (matches .home-card / login). */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+          backdrop-filter: blur(60px) saturate(180%);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.92);
+  text-align: center;
+  transform: translateY(6px);
+  transition: transform .2s ease;
+}
+.oh-guest-modal-overlay.open .oh-guest-modal { transform: translateY(0); }
+
+.oh-guest-modal-x {
+  position: absolute;
+  top: 10px;
+  inset-inline-end: 12px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.oh-guest-modal-x:hover { color: #fff; background: rgba(255, 255, 255, 0.10); }
+
+.oh-guest-modal-lock {
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(227, 189, 108, 0.14);
+  border: 1px solid rgba(227, 189, 108, 0.4);
+  color: var(--accent, #e3bd6c);
+}
+.oh-guest-modal-lock svg { width: 20px; height: 20px; }
+
+.oh-guest-modal-title {
+  margin: 0 0 6px;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: #fff;
+}
+.oh-guest-modal-sub {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.66);
+}
+.oh-guest-modal-list {
+  list-style: none;
+  margin: 0 0 22px;
+  padding: 0;
+  text-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.oh-guest-modal-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.85);
+}
+.oh-guest-modal-check {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--accent, #e3bd6c);
+  display: inline-flex;
+}
+.oh-guest-modal-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 10px;
+  background: var(--accent, #e3bd6c);
+  color: #1f1700;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background .15s, transform .1s;
+}
+.oh-guest-modal-cta:hover { background: var(--accent-hover, #d4ab48); }
+.oh-guest-modal-cta:active { transform: translateY(1px); }
+.oh-guest-modal-later {
+  margin-top: 10px;
+  width: 100%;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.oh-guest-modal-later:hover { color: rgba(255, 255, 255, 0.85); text-decoration: underline; }
+
+/* RTL: the modal sets dir per language; flex + logical properties
+   handle mirroring. The banner inherits document dir the same way. */
+
+/* The dark theme's global anchor rule is a ~11-class :not() chain
+   (html[data-theme="dark"] a:not(.btn):not(.app-nav-item):not(...)),
+   which no sane component selector outranks — it turned this CTA
+   gold-on-gold. !important is the contained fix for the one anchor
+   that must read as a filled button. */
+.oh-guest-modal a.oh-guest-modal-cta,
+.oh-guest-modal a.oh-guest-modal-cta:link,
+.oh-guest-modal a.oh-guest-modal-cta:visited,
+.oh-guest-modal a.oh-guest-modal-cta:hover,
+.oh-guest-modal a.oh-guest-modal-cta:focus {
+  color: #1f1700 !important;
 }

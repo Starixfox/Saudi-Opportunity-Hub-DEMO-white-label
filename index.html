@@ -16,7 +16,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <!-- Session guard: redirect to login if not authenticated -->
 <!-- ─── Polish pass: head bootstrap externalised. Synchronous load so the auth-redirect still fires before render (see assets/auth-bootstrap.js header). ─── -->
-<script src="assets/auth-bootstrap.js?v=audit-fixes"></script>
+<script src="assets/auth-bootstrap.js?v=guest-1"></script>
 
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Saudi Opportunity Hub","url":"https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/","description":"Grants, accelerators, fellowships, R&D, financing, investment programs, and tenders across 20+ sectors in Saudi Arabia, the GCC, and internationally."}</script>
 
@@ -117,6 +117,14 @@
      onclick="…" attributes for CSP-tightening and audit hygiene. -->
 <script defer src="assets/polish-delegated-actions.js?v=audit-fixes"></script>
 
+<!-- Guest mode (sales-demo preview) — upgrade modal, preview banner,
+     capture-phase interceptors for member-only features, guest greeting
+     and sign-out. Inert unless auth-bootstrap.js flags window.__ohIsGuest
+     (sessionStorage 'oh_guest' + no Supabase session). Data restriction
+     itself is server-side: see supabase/migrations/
+     2026_06_11_guest_mode_restricted_read.sql. -->
+<script defer src="assets/guest-mode.js?v=guest-2"></script>
+
 <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4" crossorigin="anonymous"></script>
 <!-- Lucide: synchronous load, explicit UMD path. Icons are painted at the
      end of <body> via lucide.createIcons() so the DOM is fully built. -->
@@ -130,7 +138,7 @@
      Targets the home dashboard greeting + KPI tiles + quick-action chips
      + sidebar + opportunity cards. Uses var(--accent) so it adapts to
      whatever white-label theme is active. ─── -->
-<link rel="stylesheet" href="assets/polish-overrides.css?v=notif-opaque">
+<link rel="stylesheet" href="assets/polish-overrides.css?v=guest-1">
 
 <!-- ─── Shared dark-glass component library extracted from login.html.
      Loaded AFTER polish-overrides so .oh-* classes (and the gold-leaning
@@ -1927,12 +1935,18 @@
     var raw = (window.location.hash || '').replace(/^#/, '').toLowerCase();
     /* Non-admins land on home if they hit #admin directly */
     if (raw === 'admin' && !window.__ohIsAdmin) return DEFAULT_VIEW;
+    /* Guests land on home if they deep-link a member-only view.
+       (Clicking the nav items is intercepted earlier with the upgrade
+       modal — see assets/guest-mode.js; this guard covers raw #hash
+       entry and back/forward history.) */
+    if (window.__ohIsGuest && (raw === 'saved' || raw === 'workspace')) return DEFAULT_VIEW;
     return VIEWS.indexOf(raw) !== -1 ? raw : DEFAULT_VIEW;
   }
 
   function showView(view) {
     if (VIEWS.indexOf(view) === -1) view = DEFAULT_VIEW;
     if (view === 'admin' && !window.__ohIsAdmin) view = DEFAULT_VIEW;
+    if (window.__ohIsGuest && (view === 'saved' || view === 'workspace')) view = DEFAULT_VIEW;
     /* Expose the active view to CSS so chrome (footer, etc.) can react.
        Workspace + admin are full-page fixed overlays that would otherwise
        collide with the bottom-of-page footer. */
@@ -5039,17 +5053,41 @@
     return;
   }
 
+  // ── Wait for auth resolution (guest vs member) ─────────────
+  /* auth-bootstrap.js sets __ohAuthResolved once it knows whether this
+     visitor is a guest (sessionStorage flag, no session) or a member.
+     The loader must not pick its source before that: members read the
+     full opportunities table, guests read the column-restricted
+     opportunities_guest view. Timing out unresolved falls through to
+     the member path, where an unauthenticated request returns zero
+     rows (fail-closed) rather than leaking anything. */
+  for (let i = 0; i < 50 && window.__ohAuthResolved !== true; i++) {
+    await new Promise(r => setTimeout(r, 100));
+  }
+  const IS_GUEST = window.__ohIsGuest === true;
+
   showSkeleton();
 
   // ── Fetch with retry ──────────────────────────────────────
   const MAX_RETRIES = 3;
   const PAGE = 1000;
+  const TABLE = IS_GUEST ? 'opportunities_guest' : 'opportunities';
   /* "isNew" intentionally NOT fetched — the column is legacy. "New this
      week" is derived purely from last_verified via window.__isNewThisWeek. */
-  const COLS = 'id,title,title_ar,description_short,description_short_ar,type,sponsor_institution,country,' +
+  const FULL_COLS = 'id,title,title_ar,description_short,description_short_ar,type,sponsor_institution,country,' +
                'eligibility_region,eligibility_entities,funding_amount,funding_type,' +
                'application_link,deadline_date,status,language,notes,last_verified,' +
                'profiles,sectors,created_at';
+  /* Guest column set = breadth only (card fields, filter dims, chart
+     dims) + the has_* presence booleans the lock UI uses to stay
+     honest. The locked depth columns (description, funding amount,
+     eligibility, application link, notes) do not exist on the view,
+     so they can never reach a guest client — server-enforced, not CSS. */
+  const GUEST_COLS = 'id,title,title_ar,type,sponsor_institution,country,' +
+               'eligibility_region,funding_type,deadline_date,status,language,last_verified,' +
+               'profiles,sectors,created_at,' +
+               'has_description,has_funding_amount,has_eligibility,has_application_link';
+  const COLS = IS_GUEST ? GUEST_COLS : FULL_COLS;
 
   /* Exclude archived records at the loader so window.opportunitiesData
      only ever contains active rows. Cascades automatically to the main
@@ -5065,7 +5103,7 @@
      and works regardless of PostgREST or proxy configuration. */
   async function fetchPageAfter(lastId) {
     let q = window._supabase
-      .from('opportunities')
+      .from(TABLE)
       .select(COLS)
       .neq('status', 'archived')
       .order('id', { ascending: true })
@@ -5095,7 +5133,7 @@
   async function fetchTotalCount() {
     try {
       const { count, error } = await window._supabase
-        .from('opportunities')
+        .from(TABLE)
         .select('id', { count: 'exact', head: true })
         .neq('status', 'archived');
       if (error) throw error;
@@ -5779,6 +5817,9 @@
     'Add to comparison':   'أضف للمقارنة',
     'Select for comparison': 'اختر للمقارنة',
     'See details':         'عرض التفاصيل',
+    // Guest mode (lock affordances on cards + compare)
+    'Full details available to members': 'التفاصيل الكاملة متاحة للأعضاء',
+    'Members only':        'للأعضاء فقط',
     // Empty state
     'No matching opportunities found': 'لا توجد فرص مطابقة',
     'Try broadening your search criteria.': 'جرّب توسيع معايير البحث.',
@@ -6168,7 +6209,7 @@
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a2 2 0 0 1 2-2h16"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a2 2 0 0 1-2 2H3"/></svg>
                       ${t('Compare')}
                     </button>
-                    ${applyHref ? `<a class="occ-apply-btn" href="${applyHref}" ${applyAttrs} title="${t('Visit sponsor website')}">${t('Apply →')}</a>` : `<span class="occ-apply-btn occ-apply-btn--disabled" style="opacity:0.35;cursor:default;pointer-events:none;">${t('Apply →')}</span>`}
+                    ${applyHref ? `<a class="occ-apply-btn" href="${applyHref}" ${applyAttrs} title="${t('Visit sponsor website')}">${t('Apply →')}</a>` : (window.__ohIsGuest && item.has_application_link ? `<button type="button" class="occ-apply-btn occ-apply-btn--guest" data-action="guest-upgrade" title="${t('Full details available to members')}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> <span data-en="Apply →" data-ar="تقدّم ←">${t('Apply →')}</span></button>` : `<span class="occ-apply-btn occ-apply-btn--disabled" style="opacity:0.35;cursor:default;pointer-events:none;">${t('Apply →')}</span>`)}
                   </div>
                 </div>
 
@@ -6201,6 +6242,34 @@
       const deadlineLabel = t('Deadline');
       const verifiedLabel = t('Last verified');
       const newLabel      = t('New');
+      /* Guest mode: the depth fields (description, funding amount,
+         application link) never arrive from the server — the guest view
+         simply has no such columns. Render lock affordances instead,
+         but ONLY where the member dataset actually has the field (the
+         view's has_* presence booleans), so the lock never promises
+         content that doesn't exist. Every lock funnels into the same
+         upgrade modal via data-action="guest-upgrade" (guest-mode.js). */
+      const _g = window.__ohIsGuest === true;
+      const _lockSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+      /* Lock labels carry data-en/data-ar so the language toggle's
+         applyDataArElements pass swaps them in place — cards are NOT
+         re-rendered on toggle, so t() alone would freeze the
+         render-time language. */
+      const descHtml = _g
+        ? (item.has_description
+            ? `<p class="opp-card-desc opp-card-desc--guest"><button type="button" class="guest-lock-inline" data-action="guest-upgrade">${_lockSvg}<span data-en="Full details available to members" data-ar="التفاصيل الكاملة متاحة للأعضاء">${t('Full details available to members')}</span></button></p>`
+            : `<p class="opp-card-desc">${t('No description available.')}</p>`)
+        : `<p class="opp-card-desc">${highlightTerm(item.description_short || t('No description available.'), searchTerm)}</p>`;
+      const fundingValHtml = _g
+        ? (item.has_funding_amount
+            ? `<button type="button" class="guest-lock-inline guest-lock-inline--stat" data-action="guest-upgrade">${_lockSvg}<span data-en="Members only" data-ar="للأعضاء فقط">${t('Members only')}</span></button>`
+            : '—')
+        : (esc(item.funding_amount) || t('See details'));
+      const linkBtnHtml = (item.application_link && item.application_link.startsWith('http'))
+        ? `<a class="panel-link-btn opp-card-link" href="${esc(item.application_link)}" target="_blank" rel="noopener noreferrer" title="${t('Visit sponsor website')}">${t('Go to Website')}</a>`
+        : (_g && item.has_application_link
+            ? `<button type="button" class="panel-link-btn opp-card-link opp-card-link--guest" data-action="guest-upgrade">${_lockSvg} <span data-en="Go to Website" data-ar="الانتقال للموقع">${t('Go to Website')}</span></button>`
+            : '');
       return `
         <div class="opp-card-row opp-card-cell" data-id="${item.id || ''}">
             <article class="opp-card-noimg">
@@ -6216,11 +6285,11 @@
                     <span>${countryStr}</span>
                   </span>
                 </div>
-                <p class="opp-card-desc">${highlightTerm(item.description_short || t('No description available.'), searchTerm)}</p>
+                ${descHtml}
                 <div class="opp-card-chips">${chips.map(c => `<span class="opp-card-chip">${esc(c)}</span>`).join('')}</div>
                 <div class="opp-card-stats">
                   <div class="opp-card-stat">
-                    <div class="opp-card-value">${esc(item.funding_amount) || t('See details')}</div>
+                    <div class="opp-card-value">${fundingValHtml}</div>
                     <div class="opp-card-label">${fundingLabel}</div>
                   </div>
                   <div class="opp-card-stat">
@@ -6248,7 +6317,7 @@
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a2 2 0 0 1 2-2h16"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a2 2 0 0 1-2 2H3"/></svg>
                       ${t('Compare')}
                     </button>
-                    ${item.application_link && item.application_link.startsWith('http') ? `<a class="panel-link-btn opp-card-link" href="${esc(item.application_link)}" target="_blank" rel="noopener noreferrer" title="${t('Visit sponsor website')}">${t('Go to Website')}</a>` : ''}
+                    ${linkBtnHtml}
                   </div>
                 </div>
                 <div class="opp-card-sponsor">${item.sponsor_institution ? `<strong>${t('Sponsor:')}</strong> ${esc(item.sponsor_institution)}` : ''}</div>
@@ -6453,7 +6522,12 @@
     if (!el) return;
     if (!isFiltered()) {
       var openCount   = allData.filter(function(d){ return (d.status||'').toLowerCase().indexOf('open') !== -1; }).length;
-      var fundedCount = allData.filter(function(d){ var f=(d.funding_amount||'').toString().trim(); return f && !/not specified|tba|n\/a|varies|see details/i.test(f); }).length;
+      /* Guests have no funding_amount column — count via the view's
+         has_funding_amount presence flag instead (same definition: the
+         view's boolean mirrors this regex server-side). */
+      var fundedCount = window.__ohIsGuest
+        ? allData.filter(function(d){ return d.has_funding_amount === true; }).length
+        : allData.filter(function(d){ var f=(d.funding_amount||'').toString().trim(); return f && !/not specified|tba|n\/a|varies|see details/i.test(f); }).length;
       el.innerHTML = '<strong>' + allData.length.toLocaleString() + '</strong> ' + t('opportunities') + ' &nbsp;&middot;&nbsp; <span class="rc-open">' + openCount.toLocaleString() + ' ' + t('open') + '</span> &nbsp;&middot;&nbsp; <span class="rc-funded">' + fundedCount.toLocaleString() + ' ' + t('with funding') + '</span>';
     } else {
       var summary = buildFilterSummary();
@@ -13175,6 +13249,10 @@
 
   var _obModalListenersWired = false;
   function showWelcomeModal() {
+    /* Guests get the slim preview banner instead of the member
+       onboarding tour — the tour points at features (save, folders,
+       workspace) that are locked in guest mode. */
+    if (window.__ohIsGuest) return;
     var overlay = document.getElementById('obOverlay');
     if (!overlay) return;
     translateModal();
@@ -13721,6 +13799,14 @@
   }
 
   function renderCompareTable(container, items) {
+    /* Guest mode: compare stays available at CARD level (type, status,
+       region, sector, deadline, sponsor) — the depth rows (funding,
+       eligibility entities, apply link) render the shared lock
+       affordance instead, and only when the member dataset actually
+       has the field (has_* flags from the guest view). */
+    var _g = window.__ohIsGuest === true;
+    var _lockSvg = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+    var _lockCell = '<button type="button" class="guest-lock-inline" data-action="guest-upgrade">' + _lockSvg + '<span>' + T('Members only','للأعضاء فقط') + '</span></button>';
     var rows = [
       [T('Type','النوع'),               function (i) { return i.type ? esc(prettify(i.type)) : '—'; }],
       [T('Status','الحالة'),            function (i) { return i.status ? esc(window.__statusFormat ? window.__statusFormat(i.status).label : prettify(i.status)) : '—'; }],
@@ -13730,8 +13816,18 @@
         var u = urgencyLevel(daysUntil(i));
         return esc(i.deadline_date || '—') + (u ? ' <span style="color:' + u.color + ';font-size:11px;font-weight:600">(' + u.label + ')</span>' : '');
       }],
-      [T('Funding','التمويل'),          function (i) { return esc(i.funding_amount || '—'); }],
+      [T('Funding','التمويل'),          function (i) {
+        if (_g) return i.has_funding_amount ? _lockCell : '—';
+        return esc(i.funding_amount || '—');
+      }],
       [T('Eligibility','الأهلية'),      function (i) {
+        if (_g) {
+          /* Audience profiles are breadth (guest-visible); the
+             eligibility_entities text is depth → lock. */
+          var pp = [].concat(i.profiles||[]).filter(Boolean).slice(0,3).map(prettify).map(esc).join(', ');
+          if (i.has_eligibility) return pp ? (pp + ' · ' + _lockCell) : _lockCell;
+          return pp || '—';
+        }
         var ee = [].concat(i.profiles||[]).concat(i.eligibility_entities||[]);
         var seen2 = {};
         ee = ee.filter(function(x){ var k = String(x).toLowerCase(); if (seen2[k]) return false; seen2[k]=1; return !!x; }).slice(0,3);
@@ -13767,10 +13863,15 @@
     items.forEach(function (it, i) {
       var best = i === bestIdx ? ' oh-enh-ct-best' : '';
       var link = (it.application_link || '').indexOf('http') === 0 ? it.application_link : '';
-      html += '<td class="oh-enh-ct-cell oh-enh-ct-action' + best + '">' +
-        (link ? '<a class="oh-enh-ct-apply" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + T('Apply →','تقديم') + '</a>'
-              : '<span style="color:var(--text-muted);font-size:12px">—</span>') +
-      '</td>';
+      var actionHtml;
+      if (link) {
+        actionHtml = '<a class="oh-enh-ct-apply" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + T('Apply →','تقديم') + '</a>';
+      } else if (_g && it.has_application_link) {
+        actionHtml = '<button type="button" class="oh-enh-ct-apply oh-enh-ct-apply--guest" data-action="guest-upgrade">' + _lockSvg + ' ' + T('Apply →','تقديم') + '</button>';
+      } else {
+        actionHtml = '<span style="color:var(--text-muted);font-size:12px">—</span>';
+      }
+      html += '<td class="oh-enh-ct-cell oh-enh-ct-action' + best + '">' + actionHtml + '</td>';
     });
     html += '</tr></tbody></table></div>';
     html += '<div class="oh-enh-compare-actions">' +
@@ -15109,6 +15210,9 @@
   }
 
   function injectHomeChecklist() {
+    /* Guests: every checklist step (profile, sector prefs, watchlist,
+       compare-onboarding) is a member feature — skip the card entirely. */
+    if (window.__ohIsGuest) return;
     var view = document.getElementById('view-home');
     if (!view) { setTimeout(injectHomeChecklist, 800); return; }
     if (view.querySelector('.oh-enh3-checklist')) return;

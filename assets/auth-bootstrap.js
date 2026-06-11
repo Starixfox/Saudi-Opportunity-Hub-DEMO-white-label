@@ -32,6 +32,19 @@ function checkSuperAdmin(uid) {
   return window.__ohIsSuperAdmin;
 }
 
+/* ── Guest mode (sales-demo preview) ──────────────────────────────
+   A guest is a visitor with NO Supabase session who arrived through
+   the "Continue as Guest" button on login.html (sessionStorage flag
+   'oh_guest'). The flag is a UX convenience only — the security
+   boundary is the database: an unauthenticated client runs as the
+   `anon` Postgres role, which can read nothing except the
+   column-restricted opportunities_guest view (see supabase/
+   migrations/2026_06_11_guest_mode_restricted_read.sql).
+   __ohAuthResolved gates the data loader in index.html: it must not
+   pick a table until it knows whether this is a guest or a member. */
+window.__ohIsGuest = false;
+window.__ohAuthResolved = false;
+
 (function() {
   var SUPA_URL = 'https://dshrbbnjahjcwxzvzygh.supabase.co';
   var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzaHJiYm5qYWhqY3d4enZ6eWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE3OTgsImV4cCI6MjA5NDA1Nzc5OH0.OpUGgfL91m7STsZpE6fnX281KN_Ge8oytR-2lM-3qTo';
@@ -42,9 +55,29 @@ function checkSuperAdmin(uid) {
   _supabase.auth.getSession().then(function(result) {
     var session = result.data && result.data.session;
     if (!session) {
+      /* No session → either a guest preview or an unauthenticated hit.
+         Guests stay on the page with role flags pinned to the least
+         privilege; everyone else gets the usual login redirect. */
+      var isGuest = false;
+      try { isGuest = sessionStorage.getItem('oh_guest') === '1'; } catch (e) {}
+      if (isGuest) {
+        window.__ohIsGuest = true;
+        window.__ohIsAdmin = false;
+        window.__ohSession = null;
+        window.__ohAuthResolved = true;
+        /* CSS hook so stylesheets can scope guest-only treatments the
+           same way data-oh-theme scopes tenant styling. */
+        document.documentElement.setAttribute('data-oh-guest', '1');
+        try { window.dispatchEvent(new CustomEvent('oh:role-ready', { detail: { isAdmin: false, isSuperAdmin: false, isGuest: true } })); } catch (e) {}
+        return;
+      }
       window.location.href = 'login.html';
       return;
     }
+    /* A real session always wins over a stale guest flag (e.g. user
+       previewed as guest, then signed in from another tab). */
+    try { sessionStorage.removeItem('oh_guest'); } catch (e) {}
+    window.__ohAuthResolved = true;
     // ── Admin role check — drives the admin sidebar entry + #admin view
     window.__ohSession = session;
     /* Resolve super-admin flag immediately from the session UID. */
