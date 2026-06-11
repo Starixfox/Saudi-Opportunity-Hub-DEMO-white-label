@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; base-uri 'self';">
+  <!-- script-src 'self' (external files only, NO 'unsafe-inline') — the
+       language toggle lives in assets/oh-lang-toggle.js. Without an explicit
+       script-src, scripts fell back to default-src 'self', which silently
+       blocked the page's old inline <script> and left the toggle dead. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; base-uri 'self';">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Page not found — Saudi Opportunity Hub</title>
@@ -109,31 +113,10 @@
   </div>
 </main>
 
-<script>
-(function () {
-  /* Language toggle — same contract as login / contact: persisted under
-     'oh-login-lang', flips dir, lang, and swaps data-en/data-ar text. */
-  var stored = localStorage.getItem('oh-login-lang') || 'en';
-
-  function applyLang(lang) {
-    var isAr = lang === 'ar';
-    document.documentElement.setAttribute('dir',  isAr ? 'rtl' : 'ltr');
-    document.documentElement.setAttribute('lang', isAr ? 'ar'  : 'en');
-    document.getElementById('lang-label').textContent = isAr ? 'English' : 'العربية';
-    document.querySelectorAll('[data-en][data-ar]').forEach(function (el) {
-      el.textContent = isAr ? el.dataset.ar : el.dataset.en;
-    });
-    localStorage.setItem('oh-login-lang', lang);
-  }
-
-  document.getElementById('lang-toggle').addEventListener('click', function () {
-    var cur = document.documentElement.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
-    applyLang(cur === 'en' ? 'ar' : 'en');
-  });
-
-  if (stored === 'ar') applyLang('ar');
-})();
-</script>
+<!-- Language toggle — same contract as login / contact (persisted under
+     'oh-login-lang'). External file because this page's CSP allows no
+     inline scripts; see the header in assets/oh-lang-toggle.js. -->
+<script src="assets/oh-lang-toggle.js?v=1" defer></script>
 
 </body>
 </html>
