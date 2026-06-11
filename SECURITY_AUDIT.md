@@ -298,3 +298,23 @@ If you ever see real abuse landing in your inbox, the next step is hCaptcha or C
 | `contact.html` | Honeypot field + min-fill-time gate, both fail-soft into the existing success UI |
 | `supabase/migrations/2026_05_19_drop_profiles_role.sql` | NEW — applied live; drops `profiles.role` after `index.html` stopped reading it |
 | `SECURITY_AUDIT.md` | This §7 section |
+
+---
+
+## 8. Advisor sweep (2026-06-11) — all DB-side advisor findings cleared
+
+The Supabase security advisor showed four findings. The three database-side ones are fixed live (mirrored in `supabase/migrations/2026_06_11_advisor_security_sweep.sql`):
+
+| Finding | Level | Fix |
+|---|---|---|
+| `rls_disabled_in_public` on `opportunities_sectors_backup_20260604` | ERROR | RLS enabled with zero policies → deny-all for anon/authenticated. The 2,743-row June 4 sector backup stays intact for service-role/SQL restore. The advisor's follow-up INFO `rls_enabled_no_policy` on this table is the intended state. |
+| `extension_in_public` (`pg_trgm`) | WARN | `ALTER EXTENSION pg_trgm SET SCHEMA extensions`. Verified unused first: no trgm-opclass indexes, no functions/views reference it (the admin dedup similarity is client-side JS in `index.html`). |
+| `authenticated_security_definer_function_executable` (`is_admin()`) | WARN | Moved to a new locked-down `private` schema (`USAGE` granted to `authenticated` + `service_role` only). RLS policies bind the function by OID, so all 14 admin policies keep working unchanged; `/rest/v1/rpc/is_admin` is gone. The frontend never called it via RPC (`auth-bootstrap.js` reads `user_prefs.role` directly). |
+
+**Post-fix verification (live, 2026-06-11):**
+- Advisor re-run: only the intentional INFO (backup table) and the Auth-config WARN below remain.
+- Simulated `authenticated` with a random UID: `opportunities` SELECT works (4,338 rows), `opportunities_review` returns 0 rows with **no permission error** — proving policies still evaluate `private.is_admin()` — and a direct call returns `false`.
+- `POST /rest/v1/rpc/is_admin` with the anon key → `404 PGRST202` (function no longer in the API schema cache; before the move this returned a permission error, i.e. the endpoint existed).
+
+**One finding left — manual dashboard toggle (not reachable via SQL/MCP):**
+- `auth_leaked_password_protection` (WARN): enable in Dashboard → Authentication → **Attack Protection** → leaked-password protection (checks new/changed passwords against HaveIBeenPwned; if the toggle is plan-gated the dashboard will say so). Direct link: <https://supabase.com/dashboard/project/dshrbbnjahjcwxzvzygh/auth/protection>
