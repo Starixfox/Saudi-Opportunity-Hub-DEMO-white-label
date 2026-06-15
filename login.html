@@ -2524,13 +2524,14 @@
     btn.setAttribute('aria-label', currentLang === 'ar' ? titleAr : titleEn);
     btn.dataset.titleEn = titleEn;
     btn.dataset.titleAr = titleAr;
-    // Add a small "Not available" caption so the disabled state is
-    // visually obvious without depending on hover-only tooltip.
+    // Add a small "Coming soon" caption so the disabled state reads as
+    // "on the roadmap" rather than broken (data-en/data-ar so the main
+    // language toggle re-translates it in place).
     if (!btn.querySelector('.btn-sso-unavailable')) {
       var cap = document.createElement('span');
       cap.className = 'btn-sso-unavailable';
-      cap.dataset.en = 'Not available';
-      cap.dataset.ar = 'غير متاح';
+      cap.dataset.en = 'Coming soon';
+      cap.dataset.ar = 'قريباً';
       cap.textContent = currentLang === 'ar' ? cap.dataset.ar : cap.dataset.en;
       btn.appendChild(cap);
     }
