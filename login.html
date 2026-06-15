@@ -710,6 +710,25 @@
     }
     .auth-form-panel .auth-tab:hover:not(.is-active) { color: rgba(255, 255, 255, 0.85); }
 
+    /* Invitation-only note shown where the sign-in / sign-up tabs used
+       to be (account creation disabled 2026-06-12). Panel-scoped so it
+       reads on the dark glass form panel. */
+    .auth-form-panel .auth-access-note {
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0 0 26px;
+    }
+    .auth-form-panel .auth-access-note a {
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 600;
+      margin-inline-start: 6px;
+    }
+    .auth-form-panel .auth-access-note a:hover { text-decoration: underline; }
+    [dir="rtl"] .auth-form-panel .auth-access-note { font-family: var(--font-arabic); }
+
     .auth-form-panel .form-label {
       color: rgba(255, 255, 255, 0.85);
       font-weight: 500;
@@ -1406,29 +1425,19 @@
         <p id="auth-subtitle">Sign in to your Opportunity Hub account to continue.</p>
       </div>
 
-      <!-- Mode toggle tabs -->
-      <div class="auth-tabs" role="tablist">
-        <button
-          class="auth-tab is-active"
-          id="tab-signin"
-          role="tab"
-          aria-selected="true"
-          aria-controls="auth-form"
-          data-mode="signin"
-          data-en="Sign In"
-          data-ar="تسجيل الدخول"
-        >Sign In</button>
-        <button
-          class="auth-tab"
-          id="tab-signup"
-          role="tab"
-          aria-selected="false"
-          aria-controls="auth-form"
-          data-mode="signup"
-          data-en="Create Account"
-          data-ar="إنشاء حساب"
-        >Create Account</button>
-      </div>
+      <!-- Account creation is disabled — this is an invitation-only
+           platform. The "Create Account" tab and the entire sign-up
+           form path were removed on 2026-06-12; new users are
+           provisioned by an admin.
+           IMPORTANT: the authoritative lock is the server-side
+           "Allow new users to sign up" setting in Supabase Auth.
+           This UI removal keeps the page honest but is NOT, by itself,
+           a security control (the anon key can call signUp directly).
+           See the submit handler below for the client-side guard. -->
+      <p class="auth-access-note">
+        <span data-en="Access is invitation-only." data-ar="الوصول بالدعوة فقط.">Access is invitation-only.</span>
+        <a href="contact.html" data-en="Request access →" data-ar="اطلب حق الوصول ←">Request access →</a>
+      </p>
 
       <!-- ─────────────────────────────────────
            ERROR / SUCCESS MESSAGE
@@ -2216,40 +2225,41 @@
     authSubtitle.textContent = isSignUp ? S.subtitle_signup : S.subtitle_signin;
     submitLabel.textContent  = isSignUp ? S.submit_signup   : S.submit_signin;
 
-    // Tab labels
-    tabSignIn.textContent = isAr ? AR.submit_signin  : 'Sign In';
-    tabSignUp.textContent = isAr ? 'إنشاء حساب'     : 'Create Account';
+    // Tab labels — the sign-up tab (and now the sign-in tab) were
+    // removed when account creation was disabled; guard for null so a
+    // language switch doesn't throw on the missing elements.
+    if (tabSignIn) tabSignIn.textContent = isAr ? AR.submit_signin : 'Sign In';
+    if (tabSignUp) tabSignUp.textContent = isAr ? 'إنشاء حساب'      : 'Create Account';
   }
 
   /* ──────────────────────────────────────────────────────────────
      MODE SWITCH: Sign In ↔ Sign Up
   ────────────────────────────────────────────────────────────── */
   function switchMode(mode) {
-    currentMode = mode;
+    /* Account creation is disabled — this platform is invitation-only.
+       Sign-in is the ONLY mode: any request for 'signup' is coerced
+       back to 'signin' so there is no sign-up UI state to enter, even
+       if this function is reached via tampering. */
+    currentMode = 'signin';
     clearMessages();
 
-    const isSignUp = mode === 'signup';
-
-    // Tab states
-    tabSignIn.classList.toggle('is-active', !isSignUp);
-    tabSignUp.classList.toggle('is-active',  isSignUp);
-    tabSignIn.setAttribute('aria-selected', String(!isSignUp));
-    tabSignUp.setAttribute('aria-selected', String(isSignUp));
+    // Tab states — tabs removed from markup; guard for null.
+    if (tabSignIn) { tabSignIn.classList.add('is-active');    tabSignIn.setAttribute('aria-selected', 'true'); }
+    if (tabSignUp) { tabSignUp.classList.remove('is-active'); tabSignUp.setAttribute('aria-selected', 'false'); }
 
     // Header copy + button label (respects current language)
     refreshModeText();
 
-    // Show/hide sign-up-only fields
+    // Keep every sign-up-only field hidden.
     [nameRow, orgRow, confirmRow].forEach(function(el) {
-      el.classList.toggle('is-visible', isSignUp);
+      if (el) el.classList.remove('is-visible');
     });
-    termsText.classList.toggle('is-visible', isSignUp);
+    if (termsText) termsText.classList.remove('is-visible');
 
-    // Hide sign-in-only elements
-    signinExtras.style.display = isSignUp ? 'none' : '';
+    // Sign-in-only extras stay visible.
+    if (signinExtras) signinExtras.style.display = '';
 
-    // Update autocomplete on password field
-    passwordInput.setAttribute('autocomplete', isSignUp ? 'new-password' : 'current-password');
+    passwordInput.setAttribute('autocomplete', 'current-password');
 
     // Reset field validation states
     form.querySelectorAll('.form-input').forEach(function(el) {
@@ -2260,8 +2270,9 @@
     });
   }
 
-  tabSignIn.addEventListener('click', function() { switchMode('signin'); });
-  tabSignUp.addEventListener('click', function() { switchMode('signup'); });
+  /* Account creation disabled — the sign-up tab was removed from the
+     markup, so there are no mode-switch click listeners to wire.
+     Sign-in is the only mode (currentMode defaults to 'signin'). */
 
   /* ──────────────────────────────────────────────────────────────
      LANGUAGE TOGGLE BUTTON
@@ -2450,33 +2461,21 @@
         goToApp();
 
       } else {
-        // ── SUPABASE: Sign Up ────────────────────────────────────
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: 'https://starixfox.github.io/Saudi-Opportunity-Hub-DEMO-white-label/login.html',
-            data: {
-              first_name:   firstName,
-              last_name:    lastName,
-              organisation: organisation
-            }
-          }
-        });
-        if (signUpError) throw signUpError;
-        // Supabase sends a confirmation email; show a friendly message
-        const isConfirmRequired = signUpData.user && !signUpData.session;
-        if (isConfirmRequired) {
-          showMessage(
-            currentLang === 'ar'
-              ? 'تم إنشاء حسابك! تحقق من بريدك الإلكتروني لتأكيد حسابك ثم سجّل دخولك.'
-              : 'Account created! Check your email to confirm your address, then sign in.',
-            'success'
-          );
-        } else {
-          // Email confirmations disabled — log straight in
-          goToApp();
-        }
+        /* Account creation is disabled — this platform is invitation-only.
+           No code path on this page calls supabase.auth.signUp anymore;
+           this branch is reachable only if currentMode was forced to
+           'signup' via devtools, and it deliberately REFUSES rather than
+           registering. (The authoritative lock is the server-side
+           "Allow new users to sign up" setting in Supabase Auth — flip
+           that off so the /signup endpoint itself rejects the anon key.) */
+        showMessage(
+          currentLang === 'ar'
+            ? 'إنشاء الحسابات معطّل — هذه منصة بالدعوة فقط. تواصل مع الدعم لطلب الوصول.'
+            : 'Account creation is disabled — this platform is invitation-only. Contact support to request access.',
+          'error'
+        );
+        setLoading(false);
+        return;
       }
 
     } catch (err) {
