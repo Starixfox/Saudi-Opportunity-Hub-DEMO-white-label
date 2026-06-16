@@ -6756,7 +6756,10 @@
       .pagination { gap: 4px; margin-top: 14px; }
       .page-btn { min-width: 30px; height: 30px; padding: 0 8px; font-size: 12px; border-radius: 8px; }
       .page-ellipsis { color: var(--text-faint); font-size: 12px; padding: 0 2px; line-height: 30px; }
-      .page-info { font-size: 11px; margin-left: 8px; color: #1e2d40 !important; font-weight: 600; }
+      /* Dark-only app: the old #1e2d40 navy (a light-theme leftover) rendered
+         near-black on the dark surface — unreadable. Use a legible light value;
+         the chip background comes from the later .page-info rule. */
+      .page-info { font-size: 11px; margin-left: 8px; color: rgba(255,255,255,.82) !important; font-weight: 600; }
       @media (max-width: 900px) { .pagination { gap: 3px; } .page-btn { min-width: 28px; height: 28px; font-size: 11px; border-radius: 7px; } .page-info { width: 100%; margin-left: 0; text-align: center; margin-top: 4px; } }
       .opp-card-sponsor strong { color: rgba(255,255,255,.88); }
       /* Bookmark button anchored between content and image columns */
@@ -8307,7 +8310,15 @@
 
   /* When full dataset arrives, refresh cards + stats */
   document.addEventListener('oh:data-complete', function() {
-    if (typeof renderCards === 'function') renderCards();
+    /* Rebuild filteredData/sortedData from the now-COMPLETE dataset, not
+       just re-render. oh:data-ready fires after only the first 1000-row
+       page, so boot() built filteredData from that partial set and the
+       pager froze at "of 1000" / 100 pages. applyFilters() re-runs the
+       filter+sort pipeline against the full ~5k rows (respecting any
+       filters the user set during load), which unfreezes the page count.
+       Falls back to renderCards() if applyFilters isn't reachable. */
+    if (typeof applyFilters === 'function') applyFilters();
+    else if (typeof renderCards === 'function') renderCards();
     if (typeof populateDfp === 'function') populateDfp();
     /* Refresh new-this-week count in topbar with full dataset */
     if (window.WS && typeof window.WS.loadFromSupabase === 'function') {
