@@ -62,6 +62,8 @@ const CHECK_SCHEMA = {
             required: ['verdict', 'confidence'],
             properties: {
               verdict: { type: 'string', enum: ['live', 'dead', 'redirected_generic', 'blocked_or_unknown'] },
+              replacement_url: { type: 'string' },   // if the program moved: the new live URL (FIX, don't delete)
+              program_gone: { type: 'boolean' },      // true ONLY if corroborated discontinued/no live equivalent
               evidence: { type: 'string' }, source_url: { type: 'string' }, confidence: { type: 'number' },
             },
           },
@@ -144,6 +146,11 @@ You are a cheap, careful data-verification agent. PROJECT_ID=${PROJECT_ID}.
    WebFetch. Make TWO independent attempts before declaring a link "dead".
    IMPORTANT: if only WebFetch is available and the page won't load, the result
    is AMBIGUOUS — use verdict "blocked_or_unknown" (NOT "dead").
+   If the link looks dead/moved, do a WebSearch for the program + sponsor:
+     - found at a new live URL  -> set link.replacement_url (this is a FIX, not a delete)
+     - clearly discontinued, OR no live equivalent anywhere AND the domain is
+       truly dead (404/NXDOMAIN/parked) -> set link.program_gone=true
+     - otherwise (just blocked/uncertain) -> leave both unset; do NOT mark gone.
 
 3) Run the five checks (see master prompt): link liveness/404, deadline vs page,
    description accuracy, country (sponsor/program HOME country — not eligibility;
@@ -157,11 +164,15 @@ move on (do NOT guess). Set unchecked:true for any row whose page never loaded.
 Confidence 0..1. Return ONLY the schema object.`;
 
 const verifierPrompt = (flagsJson) => `
-You are an adversarial verifier. For each proposed change below, independently
-RE-VISIT the source_url (Bright Data MCP if available, else WebFetch) and TRY TO
-REFUTE the change. Set confirmed:true ONLY if you cannot refute it (the page
-clearly supports the change). Default to confirmed:false when uncertain or the
-page won't load. Quote your reason. Proposed changes:
+You are an adversarial verifier guarding an AUTONOMOUS run that will write to a
+production database. For each proposed change below, independently RE-VISIT the
+source_url (Bright Data MCP if available, else WebFetch; WebSearch to corroborate)
+and TRY TO REFUTE it. Set confirmed:true ONLY if you cannot refute it.
+Default confirmed:false when uncertain or the page won't load.
+EXTRA CAUTION for deletions (field "link" with a "gone" claim): confirm true ONLY
+if the program is genuinely discontinued / has no live equivalent anywhere — a
+mere bot-block, timeout, or a moved URL is NOT a deletion (it's keep-or-fix).
+Quote your reason. Proposed changes:
 ${flagsJson}
 Return ONLY the schema object.`;
 
@@ -240,23 +251,31 @@ if (collisions.length) {
 }
 log(`${collisions.length} key-collision groups -> ${clusters.length} confirmed duplicate clusters.`);
 
-// ── Phase: Apply / Queue ─────────────────────────────────────────────────────
+// ── Phase: Apply (autonomous — direct fixes + reversible archive-delete) ─────
 phase('Apply');
 
-// Build the queue set (everything content/status, plus dead links since Bright
-// Data may be absent) — only changes the verifier CONFIRMED.
-const queueItems = [];
+// AUTONOMOUS: build the direct-FIX set and the DELETE(=archive) set from rows
+// whose change the verifier CONFIRMED. Always prefer FIX over DELETE.
+const fixItems = [];    // {id, field, value, evidence, source_url}
+const deleteItems = []; // {id, reason, evidence, source_url}
 for (const r of allRows) {
   if (r.unchecked) continue;
-  const ev = (f) => ({ id: r.id, source_url: (r.link && r.link.source_url) || '' , ...f });
-  if (r.link && (r.link.verdict === 'dead' || r.link.verdict === 'redirected_generic') && confirmedSet.has(r.id + '|link'))
-    queueItems.push(ev({ field: 'link_status', reason: r.link.verdict, confidence: r.link.confidence, evidence: r.link.evidence }));
-  if (r.deadline && r.deadline.ok === false && confirmedSet.has(r.id + '|deadline'))
-    queueItems.push(ev({ field: 'deadline_date', suggested: r.deadline.suggested || r.deadline.suggested_status, confidence: r.deadline.confidence, evidence: r.deadline.evidence }));
-  if (r.description && r.description.ok === false && confirmedSet.has(r.id + '|description'))
-    queueItems.push(ev({ field: 'description_short', suggested: r.description.suggested, confidence: r.description.confidence, evidence: r.description.evidence }));
-  if (r.country && r.country.ok === false && confirmedSet.has(r.id + '|country'))
-    queueItems.push(ev({ field: 'country', suggested: r.country.suggested, confidence: r.country.confidence, evidence: r.country.evidence }));
+  const src = (r.link && r.link.source_url) || '';
+  // Link: moved -> fix the URL; confirmed gone -> delete(archive); else leave.
+  if (r.link && confirmedSet.has(r.id + '|link')) {
+    if (r.link.replacement_url)
+      fixItems.push({ id: r.id, field: 'application_link', value: r.link.replacement_url, evidence: r.link.evidence, source_url: src });
+    else if (r.link.program_gone === true && (r.link.verdict === 'dead' || r.link.verdict === 'redirected_generic'))
+      deleteItems.push({ id: r.id, reason: 'link ' + r.link.verdict + ' + program gone (corroborated)', evidence: r.link.evidence, source_url: src });
+  }
+  if (r.deadline && r.deadline.ok === false && confirmedSet.has(r.id + '|deadline')) {
+    if (r.deadline.suggested)             fixItems.push({ id: r.id, field: 'deadline_date', value: r.deadline.suggested, evidence: r.deadline.evidence, source_url: src });
+    else if (r.deadline.suggested_status) fixItems.push({ id: r.id, field: 'status', value: r.deadline.suggested_status, evidence: r.deadline.evidence, source_url: src });
+  }
+  if (r.description && r.description.ok === false && r.description.suggested && confirmedSet.has(r.id + '|description'))
+    fixItems.push({ id: r.id, field: 'description_short', value: r.description.suggested, evidence: r.description.evidence, source_url: src });
+  if (r.country && r.country.ok === false && r.country.suggested && confirmedSet.has(r.id + '|country'))
+    fixItems.push({ id: r.id, field: 'country', value: r.country.suggested, evidence: r.country.evidence, source_url: src });
 }
 
 // Writers (sonnet) — chunked so each agent does a bounded amount of SQL.
@@ -278,21 +297,36 @@ if (clusters.length) {
   archived = res.filter(Boolean).reduce((a, b) => a + (b.n || 0), 0);
 }
 
-// 5b. Queue all confirmed content/status fixes into opportunities_review (UPSERT).
-let queued = 0;
-if (queueItems.length) {
-  const res = await parallel(chunk(queueItems, 30).map((q, qi) => () => agent(
-    `Insert review proposals into public.opportunities_review (PROJECT_ID=${PROJECT_ID})
-     via execute_sql. For each item: copy the current row's columns from
-     public.opportunities WHERE id=item.id, then set review_reason='audit: '||field||
-     ' -> '||coalesce(suggested,reason), review_confidence=<confidence>,
-     source_url=<source_url>, candidate_origin='audit'. UPSERT on (id, review_reason)
-     so re-runs don't duplicate. Do NOT modify public.opportunities. Return {"n":<int>}.
+// 5b. Apply confirmed field fixes DIRECTLY to public.opportunities (UPDATE).
+const oneOf = "('application_link','deadline_date','status','description_short','country')";
+let fixed = 0;
+if (fixItems.length) {
+  const res = await parallel(chunk(fixItems, 30).map((q, qi) => () => agent(
+    `Autonomously apply field fixes to public.opportunities (PROJECT_ID=${PROJECT_ID}) via execute_sql.
+     For each item: UPDATE public.opportunities SET <field>=<value>, last_verified=current_date
+     WHERE id=<id>. Set ONLY the single named field (must be one of ${oneOf}). Never blank a
+     field, never change any other column. Idempotent. Return {"n":<rows updated>}.
      Items:\n${JSON.stringify(q)}`,
-    { label: `apply:queue:${qi}`, phase: 'Apply', model: 'sonnet',
+    { label: `apply:fix:${qi}`, phase: 'Apply', model: 'sonnet',
       schema: { type: 'object', additionalProperties: false, required: ['n'], properties: { n: { type: 'integer' } } } }
   )));
-  queued = res.filter(Boolean).reduce((a, b) => a + (b.n || 0), 0);
+  fixed = res.filter(Boolean).reduce((a, b) => a + (b.n || 0), 0);
+}
+
+// 5c. Delete (= archive, reversible) opportunities confirmed genuinely gone.
+let deleted = 0;
+if (deleteItems.length) {
+  const res = await parallel(chunk(deleteItems, 25).map((d, di) => () => agent(
+    `Autonomously remove genuinely-dead opportunities (PROJECT_ID=${PROJECT_ID}) via execute_sql.
+     DELETE_MODE=archive (reversible): for each id, INSERT its full current row into
+     public.opportunities_archive with review_reason=<reason>, then
+     UPDATE public.opportunities SET status='archived' WHERE id=<id>. Do NOT hard-delete.
+     Idempotent: skip ids already archived. Return {"n":<archived>}.
+     Items:\n${JSON.stringify(d)}`,
+    { label: `apply:delete:${di}`, phase: 'Apply', model: 'sonnet',
+      schema: { type: 'object', additionalProperties: false, required: ['n'], properties: { n: { type: 'integer' } } } }
+  )));
+  deleted = res.filter(Boolean).reduce((a, b) => a + (b.n || 0), 0);
 }
 
 // ── Phase: Report ────────────────────────────────────────────────────────────
@@ -302,21 +336,37 @@ const counts = {
   unchecked: uncheckedIds.length,
   failed_batches: failedBatches,
   duplicate_clusters: clusters.length,
-  archived_rows: archived,
-  queued_fixes: queued,
+  dedup_archived: archived,
+  fixed_fields: fixed,
+  deleted_archived: deleted,
   flagged_link: allRows.filter((r) => r.link && (r.link.verdict === 'dead' || r.link.verdict === 'redirected_generic')).length,
   flagged_deadline: allRows.filter((r) => r.deadline && r.deadline.ok === false).length,
   flagged_description: allRows.filter((r) => r.description && r.description.ok === false).length,
   flagged_country: allRows.filter((r) => r.country && r.country.ok === false).length,
 };
 
-// Synthesis agent writes the CSV/markdown audit files and returns only paths.
+// Synthesis agent writes the audit-trail CSVs + markdown and returns only paths.
+// (Audit log of everything the autonomous run changed/removed — the substitute
+// for a human review queue.) Capped to keep the prompt bounded; totals show any
+// truncation so nothing is silently hidden.
+const CAP = 1000;
+const reportPayload = {
+  counts,
+  fix_total: fixItems.length, fixes: fixItems.slice(0, CAP),
+  delete_total: deleteItems.length, deletes: deleteItems.slice(0, CAP),
+  dedup_total: clusters.length, dedup: clusters.slice(0, CAP),
+  unchecked_total: uncheckedIds.length, unchecked: uncheckedIds.slice(0, CAP),
+};
 const report = await agent(
-  `Write audit artifacts to the repo with the Write tool, then return their paths.
-   Summary counts: ${JSON.stringify(counts)}.
-   Create a concise markdown summary at audit_opportunity_run.md (totals, % auto vs
-   queued, the unchecked count and why, and 5-10 worked examples). Keep it tight.
-   Return {"files":[...], "summary":"<2-3 sentence recap>"}.`,
+  `Write the audit trail to the repo with the Write tool, then return the paths.
+   Use TODAY's date (YYYY-MM-DD) in each filename. From this payload:
+   ${JSON.stringify(reportPayload).slice(0, 200000)}
+   write: audit_fixed_<date>.csv (id,field,value,evidence,source_url),
+   audit_deleted_<date>.csv (id,reason,evidence,source_url),
+   audit_dedup_<date>.csv (canonical_id,archive_ids,reason),
+   audit_unchecked_<date>.csv (id), and audit_opportunity_run.md (totals from
+   counts, the unchecked count + why, note if any list was capped at ${CAP}, and
+   5-10 worked examples). Keep the markdown tight. Return {"files":[...],"summary":"..."}.`,
   { label: 'report:write', model: 'sonnet',
     schema: { type: 'object', additionalProperties: false, required: ['summary'], properties: { files: { type: 'array', items: { type: 'string' } }, summary: { type: 'string' } } } }
 );
