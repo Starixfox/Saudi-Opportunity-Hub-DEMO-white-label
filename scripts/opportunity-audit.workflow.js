@@ -38,8 +38,25 @@ export const meta = {
 const PROJECT_ID = 'dshrbbnjahjcwxzvzygh';
 const BATCH_SIZE = (args && args.batchSize) || 20;
 const SAMPLE_LIMIT = (args && args.sampleLimit) || null;   // e.g. 25 for a pilot
-const RECHECK_WINDOW_D = 14;
+const RECHECK_WINDOW_D = (args && args.recheckDays != null) ? args.recheckDays : 14;
+// Resumable loop support: process only rows not verified in the last
+// RECHECK_WINDOW_D days (oldest first), and optionally cap how many this run.
+// Each run stamps last_verified on EVERY checked row so the stale set shrinks
+// and repeated runs converge to "everything verified". Pass allRows:true to
+// re-check fresh rows too; perRunLimit:N to bound a single loop chunk.
+const ONLY_STALE = !(args && args.allRows);
+const PER_RUN_LIMIT = (args && args.perRunLimit) || null;   // e.g. 500 per loop pass
+const RUN_CAP = SAMPLE_LIMIT || PER_RUN_LIMIT || null;
+const STALE_CLAUSE = ONLY_STALE
+  ? `AND (last_verified IS NULL OR last_verified < current_date - ${RECHECK_WINDOW_D})`
+  : '';
+const ORDER = ONLY_STALE ? 'last_verified ASC NULLS FIRST, id' : 'id';
 const COLS = 'id,title,description_short,type,sponsor_institution,country,eligibility_region,funding_type,application_link,deadline_date,status,last_verified';
+// Web tool: pass args.noBrightData=true to force WebFetch/WebSearch only.
+const USE_BRIGHTDATA = !(args && args.noBrightData);
+const WEB = USE_BRIGHTDATA
+  ? 'Prefer Bright Data MCP (ToolSearch "brightdata scrape") for real HTTP status; fall back to WebFetch. Use WebSearch to corroborate.'
+  : 'Bright Data is DISABLED for this run. Use WebFetch to read pages and WebSearch to corroborate/relocate. Do NOT call any Bright Data tool.';
 
 // ── Schemas ─────────────────────────────────────────────────────────────────
 const CHECK_SCHEMA = {
@@ -127,25 +144,26 @@ const DEDUP_SCHEMA = {
   },
 };
 
-const SCOPE = SAMPLE_LIMIT
-  ? `status <> 'archived' (capped at ${SAMPLE_LIMIT} rows for a pilot)`
-  : `status <> 'archived'`;
+const SCOPE = [
+  `status <> 'archived'`,
+  ONLY_STALE ? `not verified in last ${RECHECK_WINDOW_D}d` : `all rows`,
+  RUN_CAP ? `capped at ${RUN_CAP} this run` : null,
+].filter(Boolean).join(', ');
 
 const checkerPrompt = (batchIndex) => `
 You are a cheap, careful data-verification agent. PROJECT_ID=${PROJECT_ID}.
 
 1) Load your slice. Use the Supabase MCP execute_sql (ToolSearch "supabase execute_sql"):
    SELECT ${COLS} FROM public.opportunities
-   WHERE status <> 'archived'
-   ORDER BY id
+   WHERE status <> 'archived' ${STALE_CLAUSE}
+   ORDER BY ${ORDER}
    LIMIT ${BATCH_SIZE} OFFSET ${batchIndex * BATCH_SIZE};
-   ${SAMPLE_LIMIT ? `(Pilot mode: if OFFSET >= ${SAMPLE_LIMIT}, return {"results":[]}.)` : ''}
+   ${RUN_CAP ? `(Capped run: if OFFSET >= ${RUN_CAP}, return {"results":[]}.)` : ''}
 
-2) For EACH row, visit application_link to verify. Prefer Bright Data MCP
-   (ToolSearch "brightdata scrape") for a real HTTP status; if unavailable use
-   WebFetch. Make TWO independent attempts before declaring a link "dead".
-   IMPORTANT: if only WebFetch is available and the page won't load, the result
-   is AMBIGUOUS — use verdict "blocked_or_unknown" (NOT "dead").
+2) For EACH row, visit application_link to verify. ${WEB}
+   Make TWO independent attempts before declaring a link "dead".
+   IMPORTANT: if the page won't load (block/timeout), the result is AMBIGUOUS —
+   use verdict "blocked_or_unknown" (NOT "dead").
    If the link looks dead/moved, do a WebSearch for the program + sponsor:
      - found at a new live URL  -> set link.replacement_url (this is a FIX, not a delete)
      - clearly discontinued, OR no live equivalent anywhere AND the domain is
@@ -166,8 +184,8 @@ Confidence 0..1. Return ONLY the schema object.`;
 const verifierPrompt = (flagsJson) => `
 You are an adversarial verifier guarding an AUTONOMOUS run that will write to a
 production database. For each proposed change below, independently RE-VISIT the
-source_url (Bright Data MCP if available, else WebFetch; WebSearch to corroborate)
-and TRY TO REFUTE it. Set confirmed:true ONLY if you cannot refute it.
+source_url and TRY TO REFUTE it. ${WEB}
+Set confirmed:true ONLY if you cannot refute it.
 Default confirmed:false when uncertain or the page won't load.
 EXTRA CAUTION for deletions (field "link" with a "gone" claim): confirm true ONLY
 if the program is genuinely discontinued / has no live equivalent anywhere — a
@@ -180,12 +198,14 @@ Return ONLY the schema object.`;
 phase('Discover');
 const disc = await agent(
   `Using Supabase MCP execute_sql (ToolSearch "supabase execute_sql"), run exactly:
-   SELECT count(*)::int AS n FROM public.opportunities WHERE status <> 'archived';
+   SELECT count(*)::int AS n FROM public.opportunities
+   WHERE status <> 'archived' ${STALE_CLAUSE};
    PROJECT_ID=${PROJECT_ID}. Return the count.`,
   { label: 'discover:count', model: 'sonnet',
     schema: { type: 'object', additionalProperties: false, required: ['n'], properties: { n: { type: 'integer' } } } }
 );
-const totalInScope = SAMPLE_LIMIT ? Math.min(SAMPLE_LIMIT, (disc && disc.n) || 0) : ((disc && disc.n) || 0);
+const remainingStale = (disc && disc.n) || 0;
+const totalInScope = RUN_CAP ? Math.min(RUN_CAP, remainingStale) : remainingStale;
 const N = Math.max(0, Math.ceil(totalInScope / BATCH_SIZE));
 log(`Auditing ${totalInScope} opportunities (${SCOPE}) in ${N} batches of ${BATCH_SIZE}.`);
 if (!N) return { error: 'No rows in scope (discover returned 0).' };
@@ -329,10 +349,31 @@ if (deleteItems.length) {
   deleted = res.filter(Boolean).reduce((a, b) => a + (b.n || 0), 0);
 }
 
+// 5d. Stamp last_verified=today on EVERY cleanly-checked row (not just the ones
+// we fixed) so the stale set shrinks and repeated loop runs converge to done.
+// Unchecked (blocked/won't-load) rows are intentionally NOT stamped — they stay
+// in scope so a later run with better web access can retry them.
+let stamped = 0;
+const checkedIds = allRows.filter((r) => !r.unchecked).map((r) => r.id);
+if (checkedIds.length) {
+  const res = await parallel(chunk(checkedIds, 200).map((ids, si) => () => agent(
+    `Stamp verification dates on Supabase (PROJECT_ID=${PROJECT_ID}) via execute_sql.
+     Run exactly ONE statement:
+       UPDATE public.opportunities SET last_verified = current_date
+       WHERE id IN (${ids.map((x) => `'${String(x).replace(/'/g, "''")}'`).join(',')});
+     Do NOT change any other column. Idempotent. Return {"n":<rows updated>}.`,
+    { label: `apply:stamp:${si}`, phase: 'Apply', model: 'haiku',
+      schema: { type: 'object', additionalProperties: false, required: ['n'], properties: { n: { type: 'integer' } } } }
+  )));
+  stamped = res.filter(Boolean).reduce((a, b) => a + (b.n || 0), 0);
+}
+
 // ── Phase: Report ────────────────────────────────────────────────────────────
 phase('Report');
 const counts = {
+  stale_before_run: remainingStale,
   audited: allRows.length,
+  stamped_verified: stamped,
   unchecked: uncheckedIds.length,
   failed_batches: failedBatches,
   duplicate_clusters: clusters.length,
@@ -371,4 +412,13 @@ const report = await agent(
     schema: { type: 'object', additionalProperties: false, required: ['summary'], properties: { files: { type: 'array', items: { type: 'string' } }, summary: { type: 'string' } } } }
 );
 
-return { counts, report: report || null, unchecked_sample: uncheckedIds.slice(0, 20) };
+// Convergence signal for a "keep going until finished" loop: how many stale
+// rows remain AFTER this run. ~= stale_before_run - stamped (unchecked stay).
+const remaining_after = Math.max(0, remainingStale - stamped);
+return {
+  counts,
+  remaining_stale_after: remaining_after,
+  done: remaining_after === 0,
+  report: report || null,
+  unchecked_sample: uncheckedIds.slice(0, 20),
+};
