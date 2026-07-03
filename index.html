@@ -9678,8 +9678,13 @@
 
     /* —— insight strip —— */
     var openPct  = filtered.length > 0 ? Math.round((filtered.filter(function(r){ return r.status==='open'; }).length / filtered.length)*100) : 0;
-    var topType  = typeEntries.length  > 0 ? typeEntries[0]  : null;
-    var topProf  = profKeys.length     > 0 ? { label: PNAMES[profKeys[0]]||profKeys[0], value: profileCounts[profKeys[0]] } : null;
+    /* Escape aggregate labels before they reach setInsight()'s innerHTML.
+       topType.label / topProf.label derive from opportunity type/profiles
+       values; every other render path in this file escapes DB-sourced text,
+       so this one must too (self-contained escaper — no ambient esc() in scope). */
+    var escI = function (s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+    var topType  = typeEntries.length  > 0 ? { label: escI(typeEntries[0].label), value: typeEntries[0].value } : null;
+    var topProf  = profKeys.length     > 0 ? { label: escI(PNAMES[profKeys[0]]||profKeys[0]), value: profileCounts[profKeys[0]] } : null;
 
     function setInsight(id, html) {
       var el = document.getElementById(id);
